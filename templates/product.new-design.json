@@ -243,19 +243,25 @@
         "col_1": {
           "type": "column",
           "settings": {
-            "icon": "feather"
+            "icon": "feather",
+            "heading": "Light & Breathable",
+            "text": "Soft cotton cambric keeps the piece comfortable through long days."
           }
         },
         "col_2": {
           "type": "column",
           "settings": {
-            "icon": "hand"
+            "icon": "hand",
+            "heading": "Made with Character",
+            "text": "Traditional handblock printing gives every piece subtle variations of its own."
           }
         },
         "col_3": {
           "type": "column",
           "settings": {
-            "icon": "weave"
+            "icon": "weave",
+            "heading": "Shape Without Stiffness",
+            "text": "Smocking adds definition while allowing the garment to move naturally with you."
           }
         }
       },
