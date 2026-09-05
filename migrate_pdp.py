@@ -284,6 +284,13 @@ def migrate(path):
             "media_size": "large",
             "media_position": "left",
             "image_zoom": "lightbox",
+            # The bottom half of the gap to the first section below the buy
+            # box. It has to match SECTION_PADDING or the first gap on the page
+            # is narrower than every other one. The top is the space under the
+            # header rather than a gap between sections, so it gets its own
+            # smaller value.
+            "padding_top": 36,
+            "padding_bottom": SECTION_PADDING,
         }
     )
 
@@ -404,6 +411,34 @@ def migrate(path):
 
     sections["pdp-info-columns"] = build_info_columns(columns)
 
+    # The reviews section is seeded with its settings but with NO review blocks,
+    # so it renders nothing at all until somebody types real reviews into it.
+    #
+    # That is the whole point. Every other piece of copy this script seeds is a
+    # brand statement - how we make things, what we believe - and repeating it
+    # across 21 templates is honest. A review is a factual claim about a named
+    # customer, and seeding placeholder ones across every product template is
+    # how invented reviews end up live on a real storefront without anyone
+    # deciding to publish them. The section is laid out and ready; filling it is
+    # a person's decision, made once per template.
+    #
+    # An existing section keeps whatever reviews it already has: upsert-style,
+    # like every other block this script touches.
+    if "pdp-reviews" not in sections:
+        sections["pdp-reviews"] = {
+            "type": "pdp-reviews",
+            "blocks": {},
+            "block_order": [],
+            "settings": {
+                "heading": "What people are saying",
+                "review_count": "",
+                "note": "Reviews are collected from customers after delivery.",
+                "color_scheme": "scheme-1",
+                "padding_top": SECTION_PADDING,
+                "padding_bottom": SECTION_PADDING,
+            },
+        }
+
     sections["pdp-band-tabi-way"] = {
         "type": "pdp-feature-band",
         "settings": {
@@ -499,12 +534,7 @@ def migrate(path):
         "pdp-band-batches",
         "pdp-info-columns",
     ]
-    # Reviews are not seeded: the copy is per product, and stamping the same
-    # six quotes across 21 templates would be worse than having none. A
-    # template that already has the section keeps it, in its place under the
-    # information accordions.
-    if "pdp-reviews" in sections:
-        order.append("pdp-reviews")
+    order.append("pdp-reviews")
     order += ["pdp-band-tabi-way", "pdp-approach"]
     if related:
         order.append("related-products")
