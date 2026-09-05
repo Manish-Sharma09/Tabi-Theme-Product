@@ -160,17 +160,6 @@
       <path d="M9 8.5c-.6.6-.6 1.9.4 3.2 1 1.3 2.3 2.1 3.1 2.3.6.1 1.3-.6 1.5-1l1.6.9c-.2.8-1.1 1.6-2.2 1.6-1.9 0-4-1.4-5.3-3.2C7 10.7 6.7 9 7.2 8c.3-.6 1.1-1 1.4-1z" fill="currentColor"/>
     </svg>
 
-  {%- comment -%}
-    Rating star. The only filled icon in the set: a hairline star at 1.4rem
-    reads as a smudge, and a rating row is judged on the block of colour it
-    makes rather than on its outline. The empty half of a rating is this same
-    icon at low opacity, drawn by .pdp-stars, so there is no second shape.
-  {%- endcomment -%}
-  {%- when 'star' -%}
-    <svg class="pdp-icon pdp-icon--star" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-      <path d="m12 3.5 2.6 5.6 6 .8-4.4 4.3 1.1 6.1-5.3-3-5.3 3 1.1-6.1L3.4 9.9l6-.8L12 3.5Z" fill="currentColor"/>
-    </svg>
-
   {%- comment -%} An arrow for inline "read more" links. {%- endcomment -%}
   {%- when 'arrow' -%}
     <svg class="pdp-icon pdp-icon--arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">

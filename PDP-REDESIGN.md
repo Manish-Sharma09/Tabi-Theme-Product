@@ -101,12 +101,6 @@ template) and set:
 
 **Approach section** → the "Discover how Tabi works" button link.
 
-**Reviews section** → the reviews shipped on the prototype template are real
-copy but they are placeholders for *your* reviews. Replace them before
-publishing, and set **Total review count** to your actual total if the section
-only shows a selection. The average under the stars is calculated from the
-blocks, so it can never disagree with what is printed below it.
-
 ---
 
 ## 4. What the code does
@@ -125,7 +119,6 @@ blocks, so it can never disagree with what is printed below it.
 | `sections/pdp-why-love.liquid` | Three product highlights. |
 | `sections/pdp-feature-band.liquid` | Image + text band, used twice. |
 | `sections/pdp-info-columns.liquid` | Product information accordions. |
-| `sections/pdp-reviews.liquid` | Customer reviews, typed in the theme editor. |
 | `sections/pdp-approach.liquid` | Three-part approach + CTA. |
 
 The pincode box has no file of its own. It used to live in
@@ -219,8 +212,6 @@ content — migrate from a clean checkout of the template if you need to redo it
       page, and a row with fewer products than columns
 - [ ] Sticky gallery on desktop: scroll a long product and a short one, and
       check a product with a single image
-- [ ] Reviews section with the blocks emptied out — it should disappear, not
-      leave a heading over nothing
 - [ ] Size Guide modal opens, closes, and traps focus
 - [ ] A product with **no** metafields filled in — the highlights section, the
       fit block and the metafield-driven accordions should vanish cleanly, not
@@ -262,9 +253,3 @@ metafields are filled. That is by design — an accordion pointed at an empty
 metafield hides itself rather than opening onto nothing — but it means a fresh
 product shows the four typed accordions and none of the per-product ones.
 
-**The reviews are placeholders.** `sections/pdp-reviews.liquid` stores reviews
-as theme content, typed per template. Nothing reads from a review app and
-nothing writes back. Replace the seeded copy with your own before publishing,
-and take the section out in one move if you install a real review app.
-`migrate_pdp.py` deliberately does not seed it on the other templates: stamping
-the same six quotes across 21 product pages would be worse than having none.

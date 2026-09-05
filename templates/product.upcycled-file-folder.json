@@ -391,19 +391,6 @@
         "padding_bottom": 48
       }
     },
-    "pdp-reviews": {
-      "type": "pdp-reviews",
-      "blocks": {},
-      "block_order": [],
-      "settings": {
-        "heading": "What people are saying",
-        "review_count": "",
-        "note": "Reviews are collected from customers after delivery.",
-        "color_scheme": "scheme-1",
-        "padding_top": 48,
-        "padding_bottom": 48
-      }
-    },
     "pdp-band-tabi-way": {
       "type": "pdp-feature-band",
       "settings": {
@@ -471,7 +458,6 @@
     "pdp-why-love",
     "pdp-band-batches",
     "pdp-info-columns",
-    "pdp-reviews",
     "pdp-band-tabi-way",
     "pdp-approach",
     "related-products"

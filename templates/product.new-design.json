@@ -441,93 +441,6 @@
         "padding_top": 48,
         "padding_bottom": 48
       }
-    },
-    "pdp-reviews": {
-      "type": "pdp-reviews",
-      "blocks": {
-        "review_1": {
-          "type": "review",
-          "settings": {
-            "rating": "5",
-            "title": "Exactly the everyday piece I was after",
-            "text": "The cotton is soft from the first wear - no stiffness to wash out. I have worn it through a Chennai summer and it still looks unbothered. The print has small irregularities which I love; you can tell it was blocked by hand.",
-            "author": "Ananya R.",
-            "meta": "Chennai · Size M",
-            "verified": true
-          }
-        },
-        "review_2": {
-          "type": "review",
-          "settings": {
-            "rating": "5",
-            "title": "Worth the wait",
-            "text": "Took about a week to reach me since it is made to order, and the finish shows it. Seams are clean, the smocking sits well, and it has kept its shape after four or five washes.",
-            "author": "Meera K.",
-            "meta": "Pune · Size L",
-            "verified": true
-          }
-        },
-        "review_3": {
-          "type": "review",
-          "settings": {
-            "rating": "4",
-            "title": "Lovely fabric, size up if you are between sizes",
-            "text": "Beautiful quality and the colour is true to the photographs. I am usually a small and went with it, but a medium would have given me the relaxed drape shown on the model. Exchange was handled without any fuss.",
-            "author": "Divya S.",
-            "meta": "Bengaluru · Size S",
-            "verified": true
-          }
-        },
-        "review_4": {
-          "type": "review",
-          "settings": {
-            "rating": "5",
-            "title": "Breathable in a way synthetics never are",
-            "text": "I bought this for daily wear to work and it has quietly become the thing I reach for. Light, cool, and it does not cling. Ordered a second one in another colour.",
-            "author": "Shruti M.",
-            "meta": "Hyderabad · Size M",
-            "verified": true
-          }
-        },
-        "review_5": {
-          "type": "review",
-          "settings": {
-            "rating": "5",
-            "title": "Gifted it and immediately regretted not keeping it",
-            "text": "The packaging is simple and plastic-free, which I appreciated. My sister has not taken it off since. Buying my own now.",
-            "author": "Rohan T.",
-            "meta": "Mumbai",
-            "verified": true
-          }
-        },
-        "review_6": {
-          "type": "review",
-          "settings": {
-            "rating": "4",
-            "title": "Great piece, colour is slightly deeper in person",
-            "text": "Slightly deeper than it looks on screen, which suited me fine. Fabric and stitching are both excellent for the price. Delivery to a smaller town took a couple of days longer than estimated.",
-            "author": "Kavya N.",
-            "meta": "Kochi · Size XL",
-            "verified": true
-          }
-        }
-      },
-      "block_order": [
-        "review_1",
-        "review_2",
-        "review_3",
-        "review_4",
-        "review_5",
-        "review_6"
-      ],
-      "settings": {
-        "heading": "What people are saying",
-        "review_count": "128",
-        "note": "Reviews are collected from customers after delivery.",
-        "color_scheme": "scheme-5",
-        "padding_top": 48,
-        "padding_bottom": 48
-      }
     }
   },
   "order": [
@@ -535,7 +448,6 @@
     "pdp-why-love",
     "pdp-band-batches",
     "pdp-info-columns",
-    "pdp-reviews",
     "pdp-band-tabi-way",
     "pdp-approach",
     "related-products"
