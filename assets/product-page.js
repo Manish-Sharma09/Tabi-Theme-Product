@@ -5,7 +5,11 @@
      A. <pdp-delivery-check>  pincode -> dispatch, delivery window, COD
      B. <pdp-carousel>        arrow buttons over a scroll-snap track
      C. <pdp-buy-now>         add to cart, then straight to checkout
-     D. <pdp-info-columns>    four columns on desktop, four accordions on mobile
+
+   The information accordions below the buy box used to be a fourth element
+   here, opening and closing an outer <details> layer at the 750px breakpoint.
+   That section is now a flat list of <details> laid out by grid, so the browser
+   handles it and there is nothing left to script.
 
    Loaded only by the product page's own sections, so it costs nothing on the
    rest of the store.
@@ -454,54 +458,6 @@
   };
 
   /* ====================================================================== */
-  /* D. INFO COLUMNS                                                         */
-  /* ====================================================================== */
-
-  /* The four information columns are one DOM that has to behave as two
-     different structures. On desktop each column heading is an always-open
-     label; on mobile it is the accordion itself and starts closed.
-
-     `open` is an HTML attribute, and a <details> that is closed hides its
-     content through UA behaviour that CSS cannot reliably override. So the
-     breakpoint is read here and the attribute is set to match.
-
-     Only the outer group layer is touched. The individual rows inside are left
-     entirely to the shopper at every width. */
-  var PDPInfoColumns = class extends HTMLElement {
-    connectedCallback() {
-      this.groups = Array.prototype.slice.call(this.querySelectorAll('[data-pdp-group]'));
-      if (!this.groups.length) return;
-
-      this.query = window.matchMedia('(min-width: 750px)');
-      this.apply = this.apply.bind(this);
-      this.apply();
-
-      /* Safari below 14 only has the deprecated addListener. */
-      if (this.query.addEventListener) {
-        this.query.addEventListener('change', this.apply);
-      } else if (this.query.addListener) {
-        this.query.addListener(this.apply);
-      }
-    }
-
-    disconnectedCallback() {
-      if (!this.query) return;
-      if (this.query.removeEventListener) {
-        this.query.removeEventListener('change', this.apply);
-      } else if (this.query.removeListener) {
-        this.query.removeListener(this.apply);
-      }
-    }
-
-    apply() {
-      var open = this.query.matches;
-      this.groups.forEach(function (group) {
-        group.open = open;
-      });
-    }
-  };
-
-  /* ====================================================================== */
   /* Registration                                                            */
   /* ====================================================================== */
 
@@ -516,8 +472,5 @@
   }
   if (!customElements.get('pdp-buy-now')) {
     customElements.define('pdp-buy-now', PDPBuyNow);
-  }
-  if (!customElements.get('pdp-info-columns')) {
-    customElements.define('pdp-info-columns', PDPInfoColumns);
   }
 })();

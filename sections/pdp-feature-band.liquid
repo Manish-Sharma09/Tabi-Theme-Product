@@ -43,10 +43,7 @@
 
 <div
   class="pdp-section color-{{ section.settings.color_scheme }}"
-  style="
-    padding-top: {{ section.settings.padding_top }}px;
-    padding-bottom: {{ section.settings.padding_bottom }}px;
-  "
+  style="--pdp-pad-top: {{ section.settings.padding_top }}px; --pdp-pad-bottom: {{ section.settings.padding_bottom }}px;"
 >
   <div class="pdp-section__inner">
     <div
@@ -216,7 +213,7 @@
       "step": 4,
       "unit": "px",
       "label": "t:sections.all.padding.padding_top",
-      "default": 12
+      "default": 48
     },
     {
       "type": "range",
@@ -226,7 +223,7 @@
       "step": 4,
       "unit": "px",
       "label": "t:sections.all.padding.padding_bottom",
-      "default": 12
+      "default": 48
     }
   ],
   "presets": [

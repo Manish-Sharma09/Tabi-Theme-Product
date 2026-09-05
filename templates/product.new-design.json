@@ -212,8 +212,9 @@
         "hide_variants": true,
         "enable_video_looping": false,
         "padding_top": 36,
-        "padding_bottom": 12,
-        "enable_new_layout": true
+        "padding_bottom": 48,
+        "enable_new_layout": true,
+        "enable_sticky_media": true
       }
     },
     "related-products": {
@@ -221,20 +222,20 @@
       "settings": {
         "heading": "You may also like",
         "heading_size": "h2",
-        "products_to_show": 10,
-        "columns_desktop": 5,
+        "products_to_show": 4,
+        "columns_desktop": 4,
         "color_scheme": "scheme-e27c4fd3-eda4-4cb7-8a7a-3aa3f64216e6",
-        "quick_add": "none",
-        "image_ratio": "portrait",
+        "quick_add": "standard",
+        "image_ratio": "square",
         "image_shape": "default",
         "show_secondary_image": true,
         "show_vendor": false,
         "show_rating": false,
-        "columns_mobile": "1",
-        "padding_top": 36,
-        "padding_bottom": 28,
-        "layout": "carousel",
-        "heading_style": "eyebrow"
+        "columns_mobile": "2",
+        "padding_top": 48,
+        "padding_bottom": 48,
+        "layout": "grid",
+        "heading_style": "heading"
       }
     },
     "pdp-why-love": {
@@ -274,7 +275,7 @@
         "heading": "Why you'll love it",
         "color_scheme": "scheme-5",
         "padding_top": 48,
-        "padding_bottom": 40
+        "padding_bottom": 48
       }
     },
     "pdp-band-batches": {
@@ -289,124 +290,95 @@
         "link_label": "",
         "decor_width": 9,
         "color_scheme": "scheme-5",
-        "padding_top": 12,
-        "padding_bottom": 12
+        "padding_top": 48,
+        "padding_bottom": 48
       }
     },
     "pdp-info-columns": {
       "type": "pdp-info-columns",
       "blocks": {
-        "row_detail_1": {
-          "type": "row",
+        "item_fabric": {
+          "type": "item",
           "settings": {
-            "column": "1",
-            "label": "Fabric",
-            "metafield_key": "fabric",
-            "content": ""
+            "heading": "Fabric & composition",
+            "content": "<p>100% cotton, chosen for softness, breathability and everyday durability.</p><p>We pay attention to more than fibre composition. Our fabrics, dyes and finishing processes are selected against stringent quality and chemical-safety requirements (REACH standards), so what sits against the skin is considered as carefully as how the piece looks.</p>",
+            "metafield_key": ""
           }
         },
-        "row_detail_2": {
-          "type": "row",
+        "item_craft": {
+          "type": "item",
           "settings": {
-            "column": "1",
-            "label": "Craft / technique",
-            "metafield_key": "craft_technique",
-            "content": ""
+            "heading": "Craft & technique",
+            "content": "",
+            "metafield_key": "craft_technique"
           }
         },
-        "row_detail_3": {
-          "type": "row",
+        "item_fit": {
+          "type": "item",
           "settings": {
-            "column": "1",
-            "label": "Construction",
-            "metafield_key": "construction",
-            "content": ""
+            "heading": "Fit & silhouette",
+            "content": "",
+            "metafield_key": "silhouette"
           }
         },
-        "row_detail_4": {
-          "type": "row",
+        "item_detailing": {
+          "type": "item",
           "settings": {
-            "column": "1",
-            "label": "Silhouette",
-            "metafield_key": "silhouette",
-            "content": ""
+            "heading": "Detailing",
+            "content": "",
+            "metafield_key": "product_detailing"
           }
         },
-        "row_detail_5": {
-          "type": "row",
+        "item_care": {
+          "type": "item",
           "settings": {
-            "column": "1",
-            "label": "Product-specific detailing",
-            "metafield_key": "product_detailing",
-            "content": ""
+            "heading": "Care instructions",
+            "content": "<p>These pieces are designed for repeated wear and frequent washing.</p><p>Pre-treat stains when needed. Gentle machine wash with similar colours using a mild detergent. Do not bleach. Tumble dry as permitted by the garment care label, or dry in shade. Warm iron on the front or reverse as needed.</p><p>A little care helps preserve colour, shape and detailing so the piece can stay in rotation for longer.</p>",
+            "metafield_key": ""
           }
         },
-        "row_material_1": {
-          "type": "row",
+        "item_madetoorder": {
+          "type": "item",
           "settings": {
-            "column": "2",
-            "label": "Fabric composition",
-            "metafield_key": "",
-            "content": "<p>100% cotton, chosen for softness, breathability and everyday durability.<br/><br/>We pay attention to more than fibre composition. Our fabrics, dyes and finishing processes are selected against stringent quality and chemical-safety requirements (REACH standards), so what sits against the skin is considered as carefully as how the piece looks.<br/><br/>Made for frequent wear, regular washing and a long life in the wardrobe.</p>"
+            "heading": "Made to order",
+            "content": "<p>Most pieces are cut and stitched only once you order them, in small batches, by a team we know by name.</p><p>It is why dispatch takes a few days longer than a warehouse would, and why very little of what we make goes unworn.</p>",
+            "metafield_key": ""
           }
         },
-        "row_material_2": {
-          "type": "row",
+        "item_shipping": {
+          "type": "item",
           "settings": {
-            "column": "2",
-            "label": "Care instructions",
-            "metafield_key": "",
-            "content": "<p>These pieces are designed for repeated wear and frequent washing.<br/><br/>Pre-treat stains when needed. Gentle machine wash with similar colours using a mild detergent. Do not bleach. Tumble dry as permitted by the garment care label, or dry in shade. Warm iron on the front or reverse as needed.<br/><br/>A little care helps preserve colour, shape and detailing so the piece can stay in rotation for longer.</p>"
+            "heading": "Shipping & delivery",
+            "content": "<p>Orders are dispatched within 2 to 5 working days. Delivery usually takes a further 3 to 7 working days depending on your pincode - use the pincode checker above for an estimate on this order.</p><p>Free shipping across India. Cash on delivery is available on most pincodes.</p><p>You will receive a tracking link by email and SMS as soon as your parcel leaves us.</p>",
+            "metafield_key": ""
           }
         },
-        "row_wash": {
-          "type": "row",
+        "item_returns": {
+          "type": "item",
           "settings": {
-            "column": "2",
-            "label": "Wash instructions",
-            "metafield_key": "wash_instructions",
-            "content": ""
-          }
-        },
-        "row_shipping_1": {
-          "type": "row",
-          "settings": {
-            "column": "3",
-            "label": "Shipping timelines",
-            "metafield_key": "",
-            "content": "<p>Our products are made to order and are shipped within 2 to 5 working days of receiving the order.</p>"
-          }
-        },
-        "row_returns_1": {
-          "type": "row",
-          "settings": {
-            "column": "4",
-            "label": "Returns and exchanges",
-            "metafield_key": "",
-            "content": "<p>If your Tabi piece does not work for you, you can request an exchange or return within 5 days of delivery, no questions asked.</p><p>Please refer to Shipping, Exchanges & Returns policy for more details.</p>"
+            "heading": "Exchanges & returns",
+            "content": "<p>If your Tabi piece does not work for you, you can request an exchange or return within 5 days of delivery, no questions asked.</p><p>Pieces should be unworn and unwashed, with their tags on. Reverse pickup is arranged for you wherever our courier partners reach.</p><p>Please refer to our Shipping, Exchanges &amp; Returns policy for full details.</p>",
+            "metafield_key": ""
           }
         }
       },
       "block_order": [
-        "row_detail_1",
-        "row_detail_2",
-        "row_detail_3",
-        "row_detail_4",
-        "row_detail_5",
-        "row_material_1",
-        "row_material_2",
-        "row_wash",
-        "row_shipping_1",
-        "row_returns_1"
+        "item_fabric",
+        "item_craft",
+        "item_fit",
+        "item_detailing",
+        "item_care",
+        "item_madetoorder",
+        "item_shipping",
+        "item_returns"
       ],
       "settings": {
-        "column_1_title": "Product details",
-        "column_2_title": "Material & care",
-        "column_3_title": "Shipping & delivery",
-        "column_4_title": "Exchanges & returns",
+        "heading": "Product information",
+        "columns": "2",
+        "open_first": true,
         "color_scheme": "scheme-5",
-        "padding_top": 24,
-        "padding_bottom": 24
+        "padding_top": 48,
+        "padding_bottom": 48
       }
     },
     "pdp-band-tabi-way": {
@@ -421,8 +393,8 @@
         "link_label": "Read more about us",
         "decor_width": 9,
         "color_scheme": "scheme-5",
-        "padding_top": 12,
-        "padding_bottom": 12
+        "padding_top": 48,
+        "padding_bottom": 48
       }
     },
     "pdp-approach": {
@@ -467,7 +439,94 @@
         "cta_label": "Discover how Tabi works",
         "color_scheme": "scheme-5",
         "padding_top": 48,
-        "padding_bottom": 40
+        "padding_bottom": 48
+      }
+    },
+    "pdp-reviews": {
+      "type": "pdp-reviews",
+      "blocks": {
+        "review_1": {
+          "type": "review",
+          "settings": {
+            "rating": "5",
+            "title": "Exactly the everyday piece I was after",
+            "text": "The cotton is soft from the first wear - no stiffness to wash out. I have worn it through a Chennai summer and it still looks unbothered. The print has small irregularities which I love; you can tell it was blocked by hand.",
+            "author": "Ananya R.",
+            "meta": "Chennai · Size M",
+            "verified": true
+          }
+        },
+        "review_2": {
+          "type": "review",
+          "settings": {
+            "rating": "5",
+            "title": "Worth the wait",
+            "text": "Took about a week to reach me since it is made to order, and the finish shows it. Seams are clean, the smocking sits well, and it has kept its shape after four or five washes.",
+            "author": "Meera K.",
+            "meta": "Pune · Size L",
+            "verified": true
+          }
+        },
+        "review_3": {
+          "type": "review",
+          "settings": {
+            "rating": "4",
+            "title": "Lovely fabric, size up if you are between sizes",
+            "text": "Beautiful quality and the colour is true to the photographs. I am usually a small and went with it, but a medium would have given me the relaxed drape shown on the model. Exchange was handled without any fuss.",
+            "author": "Divya S.",
+            "meta": "Bengaluru · Size S",
+            "verified": true
+          }
+        },
+        "review_4": {
+          "type": "review",
+          "settings": {
+            "rating": "5",
+            "title": "Breathable in a way synthetics never are",
+            "text": "I bought this for daily wear to work and it has quietly become the thing I reach for. Light, cool, and it does not cling. Ordered a second one in another colour.",
+            "author": "Shruti M.",
+            "meta": "Hyderabad · Size M",
+            "verified": true
+          }
+        },
+        "review_5": {
+          "type": "review",
+          "settings": {
+            "rating": "5",
+            "title": "Gifted it and immediately regretted not keeping it",
+            "text": "The packaging is simple and plastic-free, which I appreciated. My sister has not taken it off since. Buying my own now.",
+            "author": "Rohan T.",
+            "meta": "Mumbai",
+            "verified": true
+          }
+        },
+        "review_6": {
+          "type": "review",
+          "settings": {
+            "rating": "4",
+            "title": "Great piece, colour is slightly deeper in person",
+            "text": "Slightly deeper than it looks on screen, which suited me fine. Fabric and stitching are both excellent for the price. Delivery to a smaller town took a couple of days longer than estimated.",
+            "author": "Kavya N.",
+            "meta": "Kochi · Size XL",
+            "verified": true
+          }
+        }
+      },
+      "block_order": [
+        "review_1",
+        "review_2",
+        "review_3",
+        "review_4",
+        "review_5",
+        "review_6"
+      ],
+      "settings": {
+        "heading": "What people are saying",
+        "review_count": "128",
+        "note": "Reviews are collected from customers after delivery.",
+        "color_scheme": "scheme-5",
+        "padding_top": 48,
+        "padding_bottom": 48
       }
     }
   },
@@ -476,6 +535,7 @@
     "pdp-why-love",
     "pdp-band-batches",
     "pdp-info-columns",
+    "pdp-reviews",
     "pdp-band-tabi-way",
     "pdp-approach",
     "related-products"

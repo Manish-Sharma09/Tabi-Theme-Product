@@ -23,10 +23,12 @@
      7. Delivery (pincode) checker
      8. Section: why you'll love it
      9. Section: feature band (image + text)
-    10. Section: four-column info accordions
+    10. Section: information accordions
     11. Section: three-part approach
     12. Related products carousel
     13. Media gallery adjustments
+    14. Sticky media column
+    15. Section: customer reviews
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -135,9 +137,35 @@
 }
 
 /* Section shell. Each PDP section wraps its content in this so vertical rhythm
-   is set in one place instead of per section. */
+   is set in one place instead of per section.
+
+   Padding arrives as two custom properties rather than as literal `padding-top`
+   in the section's inline style, which is what makes the spacing between every
+   band on the page equal. Two things follow from doing it here:
+
+   - one mobile scale for all of them. Dawn's own sections quietly render
+     three-quarters of their configured padding below 750px; the PDP sections
+     used to apply the raw number at every width, so a run of sections set to
+     the same value in the theme editor still came out unevenly spaced against
+     the main product section and the related products row. The 0.75 below is
+     Dawn's, matched deliberately.
+   - a sane default. A section whose padding settings have never been touched
+     falls back to the same 4.8rem the rest use, instead of to zero.
+
+   Adjacent sections therefore contribute equal halves to the gap between them:
+   set every section to the same top and bottom padding and every gap on the
+   page is identical. */
 .pdp-section {
   color: var(--pdp-ink);
+  padding-top: calc(var(--pdp-pad-top, 4.8rem) * 0.75);
+  padding-bottom: calc(var(--pdp-pad-bottom, 4.8rem) * 0.75);
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-section {
+    padding-top: var(--pdp-pad-top, 4.8rem);
+    padding-bottom: var(--pdp-pad-bottom, 4.8rem);
+  }
 }
 
 .pdp-section__inner {
@@ -881,172 +909,102 @@
 }
 
 /* --------------------------------------------------------------------------
-   10. SECTION: FOUR-COLUMN INFO ACCORDIONS
+   10. SECTION: INFORMATION ACCORDIONS
 
-   Desktop: four open columns side by side, no container. Each is headed by an
-   eyebrow, and its rows are hairline-separated and collapsed. The rule sits on
-   top of every row, which is what draws the line under the eyebrow as well, so
-   the heading needs no border of its own.
+   A flat list of <details>, laid out in one or two columns by
+   grid-template-columns and nothing else. There is no second accordion layer
+   wrapping them and no script deciding which layer is live at which width - the
+   only difference between desktop and mobile is the column count.
 
-   Mobile: the four column headings become the accordions themselves and the
-   rows live inside, as bordered cards stacked flush against each other. That is
-   a genuine structural difference, not just a reflow - so the markup renders
-   both the group <details> and the row <details>, and CSS decides which layer
-   is interactive at each breakpoint. Doing it in CSS keeps one DOM, which means
-   no duplicated content for search engines and no JavaScript to keep the two in
-   sync.
+   Items flow across the grid in reading order, so opening one pushes the rest of
+   its row down. `align-items: start` keeps the closed items in that row at their
+   own height rather than stretching them to match the open one.
+
+   The rules are drawn with one border-top on the grid and a border-bottom on
+   every item, so a two-column layout gets a single unbroken line across the top
+   and the items below never double up their hairlines.
    -------------------------------------------------------------------------- */
 
-.pdp-infocols__grid {
+.pdp-info__label {
+  margin-bottom: 2rem;
+}
+
+.pdp-info__grid {
   display: grid;
   grid-template-columns: 1fr;
+  align-items: start;
+  column-gap: 5rem;
+  border-top: 0.1rem solid var(--pdp-line);
 }
 
 @media screen and (min-width: 750px) {
-  .pdp-infocols__grid {
-    grid-template-columns: repeat(var(--pdp-infocols-count, 4), 1fr);
-    column-gap: 4rem;
-    align-items: start;
+  .pdp-info__grid {
+    grid-template-columns: repeat(var(--pdp-info-columns, 2), 1fr);
   }
 }
 
-/* --- Mobile: stacked cards ------------------------------------------------ */
-
-@media screen and (max-width: 749px) {
-  .pdp-infocols__col {
-    border: 0.1rem solid var(--pdp-line);
-    border-bottom: 0;
-  }
-
-  .pdp-infocols__col:last-child {
-    border-bottom: 0.1rem solid var(--pdp-line);
-  }
+.pdp-info__item {
+  border-bottom: 0.1rem solid var(--pdp-line);
 }
 
-.pdp-infocols__group {
-  padding: 0;
-}
-
-/* --- The group heading ---------------------------------------------------- */
-
-.pdp-infocols__group > summary {
+.pdp-info__item > summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.6rem;
-  padding: 1.6rem 1.8rem;
+  padding: 1.8rem 0;
   cursor: pointer;
   list-style: none;
+  color: var(--pdp-ink);
+  transition: color 0.15s ease;
 }
 
-.pdp-infocols__group > summary::-webkit-details-marker {
+/* Safari draws its own disclosure triangle through a pseudo-element that
+   `list-style: none` alone does not remove. */
+.pdp-info__item > summary::-webkit-details-marker {
   display: none;
 }
 
-.pdp-infocols__title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 500;
-  letter-spacing: var(--pdp-eyebrow-tracking);
-  text-transform: uppercase;
-  color: var(--pdp-ink);
-}
-
-.pdp-infocols__group[open] > summary .pdp-icon--caret {
-  transform: rotate(180deg);
-}
-
-.pdp-infocols__rows {
-  padding: 0 1.8rem 1.2rem;
-}
-
-@media screen and (min-width: 750px) {
-  /* Desktop: the group is always open and its heading is inert - an eyebrow
-     above the column, with no padding of its own and no caret. */
-  .pdp-infocols__group > summary {
-    padding: 0 0 1rem;
-    cursor: default;
-    pointer-events: none;
-  }
-
-  .pdp-infocols__group > summary .pdp-icon--caret {
-    display: none;
-  }
-
-  .pdp-infocols__rows {
-    padding: 0;
-  }
-}
-
-/* --- The individual rows -------------------------------------------------- */
-
-.pdp-infocols__row {
-  border-top: 0.1rem solid var(--pdp-line);
-}
-
-@media screen and (max-width: 749px) {
-  /* Inside a card the eyebrow already has the card's own top border above it,
-     so the first row's rule would double up against the heading's padding. */
-  .pdp-infocols__row:first-child {
-    border-top: 0.1rem solid var(--pdp-line-soft);
-  }
-}
-
-.pdp-infocols__row > summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.2rem;
-  padding: 1.2rem 0;
-  font-size: 1.25rem;
-  color: var(--pdp-ink);
-  cursor: pointer;
-  list-style: none;
-}
-
-.pdp-infocols__row > summary::-webkit-details-marker {
-  display: none;
-}
-
-.pdp-infocols__row > summary:hover {
+.pdp-info__item > summary:hover {
   color: var(--pdp-accent);
 }
 
-.pdp-infocols__row[open] > summary .pdp-icon--caret {
+.pdp-info__item > summary:focus-visible {
+  outline: 0.2rem solid var(--pdp-accent);
+  outline-offset: 0.3rem;
+}
+
+.pdp-info__heading {
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pdp-info__item > summary .pdp-icon--caret {
+  color: var(--pdp-faint);
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.pdp-info__item[open] > summary .pdp-icon--caret {
   transform: rotate(180deg);
 }
 
-.pdp-infocols__row .pdp-icon--caret {
-  color: var(--pdp-faint);
-  width: 1.4rem;
-  height: 1.4rem;
-}
-
-.pdp-infocols__content {
-  padding: 0 0 1.4rem;
-  font-size: 1.25rem;
+.pdp-info__content {
+  padding: 0 0 2rem;
+  max-width: 62ch;
+  font-size: 1.3rem;
   line-height: 1.75;
   color: var(--pdp-muted);
 }
 
-.pdp-infocols__content > :first-child {
+.pdp-info__content > :first-child {
   margin-top: 0;
 }
 
-.pdp-infocols__content > :last-child {
+.pdp-info__content > :last-child {
   margin-bottom: 0;
-}
-
-/* A row with no expandable content is a statement, not a control: it renders as
-   plain text with no caret and no pointer. */
-.pdp-infocols__row--static > summary {
-  cursor: default;
-  pointer-events: none;
-  color: var(--pdp-muted);
-}
-
-.pdp-infocols__row--static > summary .pdp-icon--caret {
-  display: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -1383,4 +1341,228 @@
   bottom: 1.2rem;
   left: auto;
   right: 1.2rem;
+}
+
+
+/* --------------------------------------------------------------------------
+   14. STICKY MEDIA COLUMN
+
+   The gallery pins while the buy box scrolls past it. Applied from 990px up
+   only: below that the two halves are stacked, so there is no second column to
+   scroll against, and between 750px and 989px the media column is roughly half
+   of a tablet viewport and tall enough that pinning it would leave the buy box
+   scrolling against an image already taller than the screen.
+
+   Two details the browser needs before `position: sticky` does anything here:
+
+   - `.product` is one of Dawn's `.grid` containers, which is flex, not grid.
+     A flex item defaults to `align-self: stretch`, so the media column is
+     already as tall as the buy box beside it - and an element the full height
+     of its container has no room to move within it, which is the one case where
+     sticky silently does nothing. `align-self: flex-start` shrinks it back to
+     its content height and gives it the travel.
+   - the offset allows for a sticky header if the merchant turns one on. The
+     header sets --header-height from JavaScript only when it is sticky, so on
+     this store (sticky_header_type: none) the fallback 0px applies and the
+     gallery pins 2rem below the top of the viewport.
+
+   The buy box's own sticky option (`enable_sticky_info`) is the mirror image of
+   this one. Turning both on pins both columns, which leaves the page with
+   nothing that scrolls - hence the note on the setting in main-product.liquid.
+
+   One thing to know before debugging a gallery that will not pin: sticky is
+   resolved against the nearest ancestor that is a scroll container, and
+   custom-fixes.css section 7 puts `overflow-x: clip` on #MainContent. `clip` is
+   deliberately not a scroll container, so this works. Its `@supports not
+   (overflow: clip)` fallback is `overflow-x: hidden`, which is one - so on
+   browsers old enough to miss `overflow: clip` (Safari below 16, Chrome below
+   90) the gallery simply scrolls with the page. That is the intended
+   degradation, not a bug to chase: the alternative is dropping the scroll guard
+   that keeps the menu drawer working.
+   -------------------------------------------------------------------------- */
+
+@media screen and (min-width: 990px) {
+  .pdp .product__media-wrapper.pdp-media--sticky {
+    position: sticky;
+    top: calc(var(--header-height, 0px) + 2rem);
+    align-self: flex-start;
+    /* Above the buy box's own stacking context so a lightbox trigger or a
+       zoomed thumbnail is never clipped by the column scrolling past it. */
+    z-index: 2;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   15. SECTION: CUSTOMER REVIEWS
+
+   A summary block - big average, star row, count - above a grid of review
+   cards. Three across on desktop, one on a phone.
+
+   .pdp-stars draws a partial rating without half-star artwork: two identical
+   rows of five icons stacked, the lower one faint and the upper one clipped to
+   --pdp-stars-fill. The clip is `width` plus `overflow: hidden` rather than
+   `clip-path`, because the fill row has to keep its own intrinsic width for the
+   icons inside it to lay out - a percentage width on an absolutely positioned
+   box resolves against the container, so the icons stay put and only the window
+   over them narrows.
+   -------------------------------------------------------------------------- */
+
+.pdp-reviews__label {
+  margin-bottom: 2.4rem;
+}
+
+/* --- The star primitive --------------------------------------------------- */
+
+.pdp-stars {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  /* Reserve the row's height so the absolutely positioned fill layer has a box
+     to sit in; the track below supplies the width. */
+  white-space: nowrap;
+}
+
+.pdp-stars__track,
+.pdp-stars__fill {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.pdp-stars__track {
+  color: var(--pdp-line);
+}
+
+.pdp-stars__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--pdp-stars-fill, 0%);
+  overflow: hidden;
+  color: var(--pdp-clay);
+}
+
+.pdp-stars .pdp-icon--star {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.pdp-stars--large .pdp-icon--star {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* --- Summary -------------------------------------------------------------- */
+
+.pdp-reviews__summary {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding-bottom: 2.8rem;
+  margin-bottom: 3.2rem;
+  border-bottom: 0.1rem solid var(--pdp-line);
+}
+
+.pdp-reviews__average {
+  margin: 0;
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-size: 4.4rem;
+  line-height: 1;
+  color: var(--pdp-ink);
+}
+
+.pdp-reviews__summary-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.pdp-reviews__count {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--pdp-muted);
+}
+
+/* --- The cards ------------------------------------------------------------ */
+
+.pdp-reviews__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-reviews__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3.2rem;
+  }
+}
+
+.pdp-reviews__item {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 2.4rem;
+  border: 0.1rem solid var(--pdp-line);
+  background: #fff;
+}
+
+.pdp-reviews__title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--pdp-ink);
+}
+
+.pdp-reviews__text {
+  margin: 0;
+  /* Pushes the attribution to the bottom of the card so the names line up
+     across a row of reviews of different lengths. */
+  flex: 1 1 auto;
+  font-size: 1.3rem;
+  line-height: 1.75;
+  color: var(--pdp-muted);
+}
+
+.pdp-reviews__author {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin: 0.6rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--pdp-ink);
+}
+
+.pdp-reviews__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 400;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pdp-accent);
+}
+
+.pdp-reviews__verified .pdp-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.pdp-reviews__meta {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--pdp-faint);
+}
+
+.pdp-reviews__note {
+  margin: 2.8rem 0 0;
+  font-size: 1.2rem;
+  color: var(--pdp-faint);
 }

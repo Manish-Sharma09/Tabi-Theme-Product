@@ -60,6 +60,11 @@ TAB_ROUTING = {
 # Tabs that do not become info rows.
 TAB_SKIP = {"description", "size guide"}
 
+# Every section below the buy box gets the same top and bottom padding, so the
+# gap between any two of them is identical down the page. Change it here rather
+# than per section.
+SECTION_PADDING = 48
+
 # Rows in column 1 are per-product and read metafields, so they are seeded the
 # same way on every template and hide themselves until a product has data.
 PRODUCT_DETAIL_ROWS = [
@@ -175,50 +180,62 @@ def collect_tabs(main):
 
 
 def build_info_columns(columns):
-    """Build the pdp-info-columns section from the migrated tab content."""
+    """Build the pdp-info-columns section from the migrated tab content.
+
+    The section takes a flat list of accordions now - one block is one heading
+    and one body, and nothing says which column it belongs to. The four buckets
+    collect_tabs() fills are still used, but only to decide the reading order:
+    product details, then material and care, then shipping, then returns. Two
+    columns on desktop is a section setting, and the grid decides what lands
+    where.
+    """
     blocks, order = {}, []
 
-    def add(block_id, settings):
-        blocks[block_id] = {"type": "row", "settings": settings}
+    def add(block_id, heading, content="", metafield_key=""):
+        blocks[block_id] = {
+            "type": "item",
+            "settings": {
+                "heading": heading,
+                "content": content,
+                "metafield_key": metafield_key,
+            },
+        }
         order.append(block_id)
 
-    # Column 1: metafield-driven product details, then anything migrated.
+    # Per-product detail accordions. They read metafields and hide themselves
+    # until a product has data, so they are seeded the same way everywhere.
     for i, (label, key) in enumerate(PRODUCT_DETAIL_ROWS, start=1):
-        add("row_detail_%d" % i, {"column": "1", "label": label, "metafield_key": key, "content": ""})
+        add("item_detail_%d" % i, label, metafield_key=key)
 
+    # Anything migrated that could not be routed, under its own heading.
     for i, (label, content) in enumerate(columns["1"], start=1):
-        add("row_extra_%d" % i, {"column": "1", "label": label, "metafield_key": "", "content": content})
+        add("item_extra_%d" % i, label, content=content)
 
-    # Column 2: migrated material and care copy. A wash-instructions row is
-    # seeded as a metafield so per-product care can be added later without
-    # editing every template again.
+    # Material and care copy migrated out of the tabs, plus a wash-instructions
+    # accordion seeded as a metafield so per-product care can be added later
+    # without editing every template again.
     for i, (label, content) in enumerate(columns["2"], start=1):
-        add("row_material_%d" % i, {"column": "2", "label": label, "metafield_key": "", "content": content})
+        add("item_material_%d" % i, label, content=content)
 
-    add(
-        "row_wash",
-        {"column": "2", "label": "Wash instructions", "metafield_key": "wash_instructions", "content": ""},
-    )
+    add("item_wash", "Wash instructions", metafield_key="wash_instructions")
 
-    # Columns 3 and 4: migrated policy copy.
     for i, (label, content) in enumerate(columns["3"], start=1):
-        add("row_shipping_%d" % i, {"column": "3", "label": label, "metafield_key": "", "content": content})
+        add("item_shipping_%d" % i, label, content=content)
 
     for i, (label, content) in enumerate(columns["4"], start=1):
-        add("row_returns_%d" % i, {"column": "4", "label": label, "metafield_key": "", "content": content})
+        add("item_returns_%d" % i, label, content=content)
 
     return {
         "type": "pdp-info-columns",
         "blocks": blocks,
         "block_order": order,
         "settings": {
-            "column_1_title": "Product details",
-            "column_2_title": "Material & care",
-            "column_3_title": "Shipping & delivery",
-            "column_4_title": "Exchanges & returns",
+            "heading": "Product information",
+            "columns": "2",
+            "open_first": True,
             "color_scheme": "scheme-1",
-            "padding_top": 24,
-            "padding_bottom": 24,
+            "padding_top": SECTION_PADDING,
+            "padding_bottom": SECTION_PADDING,
         },
     }
 
@@ -258,6 +275,10 @@ def migrate(path):
     main["settings"].update(
         {
             "enable_new_layout": True,
+            # The gallery pins and the buy box scrolls past it. Pinning both
+            # would leave the page with nothing that moves.
+            "enable_sticky_media": True,
+            "enable_sticky_info": False,
             "gallery_layout": "thumbnail",
             "mobile_thumbnails": "show",
             "media_size": "large",
@@ -359,8 +380,8 @@ def migrate(path):
         "settings": {
             "heading": "Why you'll love it",
             "color_scheme": "scheme-1",
-            "padding_top": 48,
-            "padding_bottom": 40,
+            "padding_top": SECTION_PADDING,
+            "padding_bottom": SECTION_PADDING,
         },
     }
 
@@ -376,8 +397,8 @@ def migrate(path):
             "link_label": "",
             "decor_width": 9,
             "color_scheme": "scheme-1",
-            "padding_top": 12,
-            "padding_bottom": 12,
+            "padding_top": SECTION_PADDING,
+            "padding_bottom": SECTION_PADDING,
         },
     }
 
@@ -401,8 +422,8 @@ def migrate(path):
             "link_label": "Read more about us",
             "decor_width": 9,
             "color_scheme": "scheme-1",
-            "padding_top": 12,
-            "padding_bottom": 12,
+            "padding_top": SECTION_PADDING,
+            "padding_bottom": SECTION_PADDING,
         },
     }
 
@@ -443,22 +464,31 @@ def migrate(path):
             "intro": "Everything we make is viewed through three lenses.",
             "cta_label": "Discover how Tabi works",
             "color_scheme": "scheme-1",
-            "padding_top": 48,
-            "padding_bottom": 40,
+            "padding_top": SECTION_PADDING,
+            "padding_bottom": SECTION_PADDING,
         },
     }
 
     # --- related products --------------------------------------------------
+    # The row renders the theme's own product cards in the theme's own grid, so
+    # it matches the collection pages exactly. The section can still do a
+    # carousel and a small uppercase label - both are settings - but a product
+    # page that cards differently from every other page reads as a bug.
     related = sections.get("related-products")
     if related:
         related["settings"].update(
             {
-                "layout": "carousel",
-                "heading_style": "eyebrow",
+                "layout": "grid",
+                "heading_style": "heading",
                 "heading": "You may also like",
-                "products_to_show": 10,
-                "columns_desktop": 5,
-                "columns_mobile": "1",
+                "heading_size": "h2",
+                "products_to_show": 4,
+                "columns_desktop": 4,
+                "columns_mobile": "2",
+                "image_ratio": "square",
+                "quick_add": "standard",
+                "padding_top": SECTION_PADDING,
+                "padding_bottom": SECTION_PADDING,
             }
         )
 
@@ -468,9 +498,14 @@ def migrate(path):
         "pdp-why-love",
         "pdp-band-batches",
         "pdp-info-columns",
-        "pdp-band-tabi-way",
-        "pdp-approach",
     ]
+    # Reviews are not seeded: the copy is per product, and stamping the same
+    # six quotes across 21 templates would be worse than having none. A
+    # template that already has the section keeps it, in its place under the
+    # information accordions.
+    if "pdp-reviews" in sections:
+        order.append("pdp-reviews")
+    order += ["pdp-band-tabi-way", "pdp-approach"]
     if related:
         order.append("related-products")
     # Anything else the template already had keeps its place at the end.

@@ -3,7 +3,7 @@
 What changed, what you need to set up in Shopify admin, and how to roll it out
 to the remaining templates.
 
-Branch: `pdp-redesign`. Prototype template: `templates/product.new-clothing-collection.json`.
+Branch: `pdp-redesign`. Prototype template: `templates/product.new-design.json`.
 
 ---
 
@@ -52,7 +52,7 @@ create the definitions now and fill them in over time.
 The icons are **not** metafields — pick them per template on the section's
 column blocks in the theme editor.
 
-### Info columns — Product details
+### Product information accordions
 
 | Key | Type |
 |---|---|
@@ -61,17 +61,13 @@ column blocks in the theme editor.
 | `construction` | Multi-line text |
 | `silhouette` | Multi-line text |
 | `product_detailing` | Multi-line text |
-
-### Info columns — Material & care
-
-| Key | Type |
-|---|---|
 | `wash_instructions` | Multi-line text |
 
-`fabric_composition` and the care copy migrated over from your existing
-accordions as fixed text per template, so those columns already have content.
-Switch a row to a metafield later by filling in its **Metafield key** field in
-the theme editor.
+Fabric composition, care, shipping and returns copy migrated over from your
+existing accordions as fixed text per template, so those already have content.
+Point any accordion at a metafield later by filling in its **Metafield key**
+field in the theme editor — it then shows that metafield instead of the typed
+text, and hides itself on products where the metafield is empty.
 
 Rich text metafields work too — the theme renders their HTML rather than
 escaping it.
@@ -105,6 +101,12 @@ template) and set:
 
 **Approach section** → the "Discover how Tabi works" button link.
 
+**Reviews section** → the reviews shipped on the prototype template are real
+copy but they are placeholders for *your* reviews. Replace them before
+publishing, and set **Total review count** to your actual total if the section
+only shows a selection. The average under the stars is calculated from the
+blocks, so it can never disagree with what is printed below it.
+
 ---
 
 ## 4. What the code does
@@ -113,32 +115,62 @@ template) and set:
 
 | File | Purpose |
 |---|---|
-| `assets/product-page.css` | All redesign styling. Loaded only by the product page's own sections. |
+| `assets/product-page.css` | All redesign styling, including the shared section rhythm. Loaded only by the product page's own sections. |
 | `assets/product-page.js` | Delivery check, carousel, buy now, info-column breakpoint sync. |
 | `snippets/pdp-icon.liquid` | The line-icon set. |
 | `snippets/pdp-trust-icons.liquid` | Four-up reassurance strip. |
 | `snippets/pdp-fit-details.liquid` | Fit / model / recommendation rows. |
 | `snippets/pdp-size-help.liquid` | Instagram + WhatsApp prompt. |
 | `snippets/pdp-usp-line.liquid` | "Free Shipping • COD Available". |
-| `snippets/pdp-delivery-check.liquid` | Pincode box. |
 | `sections/pdp-why-love.liquid` | Three product highlights. |
 | `sections/pdp-feature-band.liquid` | Image + text band, used twice. |
-| `sections/pdp-info-columns.liquid` | Four-column accordion group. |
+| `sections/pdp-info-columns.liquid` | Product information accordions. |
+| `sections/pdp-reviews.liquid` | Customer reviews, typed in the theme editor. |
 | `sections/pdp-approach.liquid` | Three-part approach + CTA. |
+
+The pincode box has no file of its own. It used to live in
+`snippets/pdp-delivery-check.liquid`, and the store answered that render with
+`Could not find asset snippets/pdp-delivery-check.liquid` — the file was in the
+repository but never reached the theme, while its sibling `pdp-` snippets did.
+Its markup now sits inline in `sections/main-product.liquid` under the
+`pdp_delivery` block, so there is no separate file left to go missing. Settings
+and behaviour are unchanged.
+
+### Spacing
+
+Every section below the buy box passes its padding to `.pdp-section` as
+`--pdp-pad-top` / `--pdp-pad-bottom` rather than writing `padding-top` into its
+own inline style. Two things follow, and together they are what makes the gaps
+down the page even:
+
+- one mobile scale for all of them. Dawn's own sections quietly render
+  three-quarters of their configured padding below 750px. The PDP sections used
+  to apply the raw number at every width, so sections set to the same value in
+  the theme editor still came out unevenly spaced against the main product
+  section and the related products row.
+- adjacent sections contribute equal halves to the gap between them. Every
+  section on the prototype template is set to 48 / 48, so every gap is the same.
+  `migrate_pdp.py` uses a single `SECTION_PADDING` constant for the same reason
+  — change it there rather than section by section.
 
 ### Existing files touched
 
 All changes are additive and default to current behaviour:
 
 - `sections/main-product.liquid` — `pdp` root class behind `enable_new_layout`;
-  five new block types appended to the `case`; size guide modal; new schema
-  settings. Every existing branch is unchanged.
+  five new block types appended to the `case` (the last of which carries the
+  pincode box inline); the size guide modal; `enable_sticky_media`, which pins
+  the gallery on desktop while the buy box scrolls past it. Every existing
+  branch is unchanged.
 - `snippets/product-variant-picker.liquid` — optional "Size Guide" link and
   option label override. Without `size_guide_page` set, renders as before.
 - `snippets/buy-buttons.liquid` — optional custom BUY NOW. Defaults to
   `buy_now_style: dynamic`, i.e. today's behaviour.
 - `sections/related-products.liquid` — optional carousel layout and small
-  uppercase heading. Defaults to the grid and `<h2>`.
+  uppercase heading. Defaults to the grid and `<h2>`, and the migrated
+  templates use those defaults: the row renders the theme's own product cards
+  in the theme's own grid, so it matches the collection pages. The carousel is
+  still one setting away if you want it.
 
 **`assets/custom-fixes.css` was not touched.** It loads globally, so redesign
 rules deliberately live in a separate stylesheet that only the product page
@@ -182,12 +214,17 @@ content — migrate from a clean checkout of the template if you need to redo it
 - [ ] BUY NOW against **Razorpay Magic Checkout** — see the risk below
 - [ ] Pincode box: valid pincode, invalid pincode, blocked prefix, COD-excluded
       prefix
-- [ ] Info columns at 749px and 750px — four columns above, four accordions below
-- [ ] Related products carousel: arrows, touch swipe, keyboard, and a row with
-      fewer products than columns
+- [ ] Information accordions at 749px and 750px — two columns above, one below
+- [ ] Related products: same card, ratio and quick-add behaviour as a collection
+      page, and a row with fewer products than columns
+- [ ] Sticky gallery on desktop: scroll a long product and a short one, and
+      check a product with a single image
+- [ ] Reviews section with the blocks emptied out — it should disappear, not
+      leave a heading over nothing
 - [ ] Size Guide modal opens, closes, and traps focus
-- [ ] A product with **no** metafields filled in — the highlights section and
-      the fit block should vanish cleanly, not leave gaps
+- [ ] A product with **no** metafields filled in — the highlights section, the
+      fit block and the metafield-driven accordions should vanish cleanly, not
+      leave gaps
 - [ ] The 20 **un-migrated** templates still look exactly as before
 
 ---
@@ -220,6 +257,14 @@ buy box either way.
 `layout/theme.liquid`. The new carousel deliberately uses none of them. Worth a
 separate cleanup pass.
 
-**Column 1 of the info columns will be empty** until the product-detail
-metafields are filled, so it will not render at all at first. That is by design,
-but it means the prototype shows three columns rather than four until then.
+**The metafield-driven accordions stay hidden** until the product-detail
+metafields are filled. That is by design — an accordion pointed at an empty
+metafield hides itself rather than opening onto nothing — but it means a fresh
+product shows the four typed accordions and none of the per-product ones.
+
+**The reviews are placeholders.** `sections/pdp-reviews.liquid` stores reviews
+as theme content, typed per template. Nothing reads from a review app and
+nothing writes back. Replace the seeded copy with your own before publishing,
+and take the section out in one move if you install a real review app.
+`migrate_pdp.py` deliberately does not seed it on the other templates: stamping
+the same six quotes across 21 product pages would be worse than having none.

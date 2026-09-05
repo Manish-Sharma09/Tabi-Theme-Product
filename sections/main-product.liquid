@@ -144,7 +144,13 @@
       {% endif %}
     {% endif %}
     <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
-      <div class="grid__item product__media-wrapper">
+      {%- comment -%}
+        `pdp-media--sticky` pins the gallery while the buy box scrolls past it.
+        It is only added under the redesigned layout, and the rule behind it is
+        scoped to desktop widths in product-page.css - on a phone the two halves
+        are stacked, so pinning either one has nothing to pin against.
+      {%- endcomment -%}
+      <div class="grid__item product__media-wrapper{% if section.settings.enable_new_layout and section.settings.enable_sticky_media %} pdp-media--sticky{% endif %}">
         {% render 'product-media-gallery', variant_images: variant_images %}
       </div>
       <div class="product__info-wrapper grid__item{% if settings.page_width > 1400 and section.settings.media_size == "small" %} product__info-wrapper--extra-padding{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
@@ -782,7 +788,107 @@
               {%- when 'pdp_usp' -%}
                 {% render 'pdp-usp-line', block: block %}
               {%- when 'pdp_delivery' -%}
-                {% render 'pdp-delivery-check', block: block %}
+                {%- comment -%}
+                  Rendered inline rather than from a snippet.
+
+                  This markup used to live in snippets/pdp-delivery-check.liquid
+                  and the store kept answering that render tag with
+                  "Could not find asset snippets/pdp-delivery-check.liquid" - the
+                  file was in the repository but never made it onto the theme,
+                  while its sibling pdp- snippets did. Rather than keep a working
+                  page dependent on that one file arriving, the block owns its
+                  own markup: main-product.liquid is by definition present, since
+                  it is the file the error was reported against.
+
+                  Serviceability is answered from settings on this block, not
+                  from a courier API, so the estimate is dispatch time plus a
+                  transit band chosen by pincode prefix. Every label is a setting
+                  so the wording can be softened without a code change. When a
+                  real serviceability API arrives, only assets/product-page.js
+                  changes; this markup and its settings stay.
+
+                  The config is one JSON script tag rather than a spread of
+                  data- attributes because the zone rules are multi-line and
+                  would need escaping gymnastics as an attribute.
+
+                  The four result icons are cloned from the <template> below.
+                  Result rows are built in JavaScript and so cannot render a
+                  snippet; cloning keeps snippets/pdp-icon.liquid the only place
+                  these SVGs are defined.
+                {%- endcomment -%}
+                <pdp-delivery-check class="pdp-delivery" {{ block.shopify_attributes }}>
+                  {%- if block.settings.heading != blank -%}
+                    <p class="pdp-delivery__title">{{ block.settings.heading | escape }}</p>
+                  {%- endif -%}
+
+                  <form class="pdp-delivery__form" novalidate>
+                    <label class="visually-hidden" for="PdpPincode-{{ block.id }}">
+                      {{- block.settings.placeholder | default: 'Enter delivery pincode' | escape -}}
+                    </label>
+                    <input
+                      class="pdp-delivery__input"
+                      id="PdpPincode-{{ block.id }}"
+                      data-pdp-pincode
+                      type="text"
+                      inputmode="numeric"
+                      autocomplete="postal-code"
+                      maxlength="6"
+                      pattern="\d{6}"
+                      placeholder="{{ block.settings.placeholder | default: 'Enter delivery pincode' | escape }}"
+                    >
+                    <button class="pdp-delivery__submit" type="submit">
+                      {{- block.settings.button_label | default: 'Check' | escape -}}
+                    </button>
+                  </form>
+
+                  <p class="pdp-delivery__error" data-pdp-error hidden></p>
+                  <ul class="pdp-delivery__results" data-pdp-results hidden></ul>
+
+                  <template data-pdp-icons>
+                    <span data-icon="check-circle">{% render 'pdp-icon', icon: 'check-circle' %}</span>
+                    <span data-icon="clock">{% render 'pdp-icon', icon: 'clock' %}</span>
+                    <span data-icon="calendar">{% render 'pdp-icon', icon: 'calendar' %}</span>
+                    <span data-icon="check">{% render 'pdp-icon', icon: 'check' %}</span>
+                  </template>
+
+                  {%- liquid
+                    comment
+                      `default` replaces false as well as nil, so piping a
+                      checkbox through it would turn "COD off" back into "COD
+                      on". Resolve it with a conditional instead, and only fall
+                      back to true when the setting is genuinely absent - which
+                      is the case on a template saved before this block existed.
+                    endcomment
+                    assign cod_enabled = true
+                    if block.settings.cod_enabled == false
+                      assign cod_enabled = false
+                    endif
+                  -%}
+
+                  {%- capture delivery_config -%}
+                    {
+                      "dispatchMin": {{ block.settings.dispatch_min | default: 2 | json }},
+                      "dispatchMax": {{ block.settings.dispatch_max | default: 5 | json }},
+                      "transitMin": {{ block.settings.transit_min | default: 3 | json }},
+                      "transitMax": {{ block.settings.transit_max | default: 7 | json }},
+                      "zoneRules": {{ block.settings.zone_rules | default: '' | json }},
+                      "blockedPrefixes": {{ block.settings.blocked_prefixes | default: '' | json }},
+                      "codEnabled": {{ cod_enabled | json }},
+                      "codPrefixes": {{ block.settings.cod_prefixes | default: '' | json }},
+                      "locale": {{ request.locale.iso_code | default: 'en-IN' | json }},
+                      "labels": {
+                        "deliveringTo": {{ block.settings.label_delivering | default: 'Delivering to {pincode}' | json }},
+                        "dispatch": {{ block.settings.label_dispatch | default: 'Made to order in {min}-{max} working days' | json }},
+                        "estimated": {{ block.settings.label_estimated | default: 'Estimated delivery:' | json }},
+                        "codYes": {{ block.settings.label_cod_yes | default: 'COD available at this pincode' | json }},
+                        "codNo": {{ block.settings.label_cod_no | default: 'COD not available at this pincode' | json }},
+                        "invalid": {{ block.settings.label_invalid | default: 'Please enter a valid 6-digit pincode.' | json }},
+                        "unserviceable": {{ block.settings.label_unserviceable | default: 'Sorry, we do not deliver to {pincode} yet.' | json }}
+                      }
+                    }
+                  {%- endcapture -%}
+                  <script type="application/json" data-pdp-delivery-config>{{ delivery_config }}</script>
+                </pdp-delivery-check>
             {%- endcase -%}
           {%- endfor -%}
           <a href="{{ product.url }}" class="link product__view-details animate-arrow">
@@ -2571,6 +2677,13 @@
       "default": false,
       "label": "Use redesigned product layout",
       "info": "Applies the redesigned styling to this template. Turn it off to fall back to the previous layout without removing any blocks."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky_media",
+      "default": true,
+      "label": "Keep the images in place while scrolling",
+      "info": "Pins the image gallery on desktop so the product information scrolls past it. Needs the redesigned layout above. Leave \"Enable sticky product information\" off when this is on - pinning both columns leaves nothing to scroll."
     },
     {
       "type": "checkbox",
