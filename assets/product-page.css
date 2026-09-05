@@ -270,7 +270,7 @@
   font-size: 1.35rem;
   line-height: 1.7;
   color: var(--pdp-muted);
-  max-width: 48ch;
+  max-width: 100%;
 }
 
 .pdp .product__description p {
