@@ -275,10 +275,10 @@ def migrate(path):
     main["settings"].update(
         {
             "enable_new_layout": True,
-            # The gallery pins and the buy box scrolls past it. Pinning both
-            # would leave the page with nothing that moves.
-            "enable_sticky_media": True,
-            "enable_sticky_info": False,
+            # The gallery pins and the buy box scrolls past it; that now rides
+            # on enable_new_layout, because Shopify's sync strips template
+            # settings it cannot find in the schema it has loaded. Nothing to
+            # set here - enable_sticky_info is ignored under the redesign.
             "gallery_layout": "thumbnail",
             "mobile_thumbnails": "show",
             "media_size": "large",

@@ -146,17 +146,46 @@
     <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
       {%- comment -%}
         `pdp-media--sticky` pins the gallery while the buy box scrolls past it.
-        It is only added under the redesigned layout, and the rule behind it is
-        scoped to desktop widths in product-page.css - on a phone the two halves
-        are stacked, so pinning either one has nothing to pin against.
+        The rule behind it is scoped to desktop widths in product-page.css - on a
+        phone the two halves are stacked, so pinning either one has nothing to
+        pin against.
+
+        It hangs off `enable_new_layout` rather than off a sticky setting of its
+        own, and that is not a simplification for its own sake. It was a
+        separate `enable_sticky_media` checkbox, and Shopify's GitHub sync
+        stripped that setting out of all 22 templates the first time it wrote
+        them back - it drops template settings it does not recognise against the
+        section schema it has loaded, and a setting added in the same push as
+        the templates that use it loses that race. `enable_new_layout` has been
+        in the schema for several syncs and survives them, so the sticky
+        behaviour now rides on it instead of on a key that can vanish.
       {%- endcomment -%}
-      <div class="grid__item product__media-wrapper{% if section.settings.enable_new_layout and section.settings.enable_sticky_media %} pdp-media--sticky{% endif %}">
+      <div class="grid__item product__media-wrapper{% if section.settings.enable_new_layout %} pdp-media--sticky{% endif %}">
         {% render 'product-media-gallery', variant_images: variant_images %}
       </div>
       <div class="product__info-wrapper grid__item{% if settings.page_width > 1400 and section.settings.media_size == "small" %} product__info-wrapper--extra-padding{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        {%- comment -%}
+          Dawn's own sticky option pins this column. Under the redesign the
+          gallery is what pins, so the two would fight: pin both and the page
+          has nothing left that scrolls. `enable_new_layout` therefore wins
+          outright rather than being combined with it.
+
+          Deciding it here rather than trusting the setting is deliberate.
+          Shopify's sync reset `enable_sticky_info` to its schema default of
+          true on the prototype template while normalising it, which under the
+          old markup silently pinned the buy box - the exact opposite of the
+          intended behaviour, arrived at without anybody changing a setting.
+
+          `unless` rather than `== false`: on a template saved before
+          enable_new_layout existed the setting is nil, and Liquid says
+          `nil == false` is false. Comparing would therefore have stopped
+          pinning the buy box on exactly the un-migrated templates that still
+          want Dawn's behaviour. `unless` tests truthiness, so nil and false
+          both fall through to the old layout as they should.
+        {%- endcomment -%}
         <section
           id="ProductInfo-{{ section.id }}"
-          class="product__info-container{% if section.settings.enable_sticky_info %} product__column-sticky{% endif %}"
+          class="product__info-container{% if section.settings.enable_sticky_info %}{% unless section.settings.enable_new_layout %} product__column-sticky{% endunless %}{% endif %}"
         >
           {%- assign product_form_id = 'product-form-' | append: section.id -%}
 
@@ -2676,14 +2705,7 @@
       "id": "enable_new_layout",
       "default": false,
       "label": "Use redesigned product layout",
-      "info": "Applies the redesigned styling to this template. Turn it off to fall back to the previous layout without removing any blocks."
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_sticky_media",
-      "default": true,
-      "label": "Keep the images in place while scrolling",
-      "info": "Pins the image gallery on desktop so the product information scrolls past it. Needs the redesigned layout above. Leave \"Enable sticky product information\" off when this is on - pinning both columns leaves nothing to scroll."
+      "info": "Applies the redesigned styling to this template, including the sticky image gallery. Turn it off to fall back to the previous layout without removing any blocks."
     },
     {
       "type": "checkbox",

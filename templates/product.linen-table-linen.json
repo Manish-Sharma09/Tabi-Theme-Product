@@ -202,8 +202,7 @@
         "enable_video_looping": false,
         "padding_top": 36,
         "padding_bottom": 48,
-        "enable_new_layout": true,
-        "enable_sticky_media": true
+        "enable_new_layout": true
       }
     },
     "related-products": {
