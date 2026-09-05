@@ -1,0 +1,150 @@
+{% comment %}
+  The round TABI seal: a brand name held still in the middle while a ring of
+  text turns slowly around it.
+
+  Drawn rather than uploaded, so the wording stays a theme setting and the mark
+  stays sharp at any size. Reproducing the supplied logo needs three things:
+
+  - Two arcs, not one ring. Both halves of the artwork read left to right - the
+    top half with its letters' tops pointing up and out, the bottom half with
+    theirs pointing down and out. That is two arcs drawn in opposite directions
+    between the same two points (9 o'clock and 3 o'clock), not one continuous
+    circle, whose bottom half would run right to left instead.
+  - `textLength` on each arc. Each half is told to occupy exactly the same
+    span of arc, and the browser distributes the letter spacing to fill it. So
+    a merchant can retype either line and the ring stays evenly set instead of
+    drifting off centre or colliding with a star - which fixed tracking, sized
+    once for one particular string, cannot promise.
+  - The two four-pointed stars sitting on the seam between the arcs, at 9 and
+    3 o'clock, which is where the artwork puts them.
+
+  Everything is laid out in a 200x200 viewBox and scaled by CSS, so the numbers
+  below are proportions of the mark, not pixels.
+
+  Accepts:
+  - name:      {String} the still word in the middle
+  - text_top:  {String} the arc over it
+  - text_bot:  {String} the arc under it
+  - speed:     {Number} seconds for one full turn
+  - direction: {String} 'anticlockwise' turns it the other way
+  - uid:       {String} unique suffix for the arc ids - a page can hold more
+               than one band, and duplicate ids would point every seal's text
+               at the first seal's arcs
+
+  The mark is hidden from assistive tech: it repeats the brand name and the
+  band's own copy, so announcing it again is noise rather than information.
+
+  Usage:
+  {% render 'pdp-seal', name: 'Tabi', text_top: 'A place to belong', uid: section.id %}
+{% endcomment %}
+
+{%- liquid
+  assign seal_name = name | default: 'Tabi'
+  assign seal_top = text_top | default: ''
+  assign seal_bot = text_bot | default: ''
+  assign seal_speed = speed | default: 24
+  assign seal_uid = uid | default: 'pdp'
+
+  assign spin = 'normal'
+  if direction == 'anticlockwise'
+    assign spin = 'reverse'
+  endif
+
+  comment
+    Size the middle word to the space inside the ring.
+
+    A fixed size only works for a word the length of the one it was set for.
+    "TABI" at 30 sits comfortably inside; a six-letter name at 30 runs straight
+    through the ring text and out over the stars, which is what the artwork
+    does not survive.
+
+    The estimate: a capital in this face advances about 0.62 of the font size
+    and the tracking below adds 0.16 between letters, so n letters occupy
+    roughly `size * (0.78n - 0.16)`. Solving that against a target width gives
+    the largest size that still fits, and 30 remains the cap so short names
+    keep the drawn size rather than growing to fill the circle.
+
+    The target is 92, not the 129 units of clear space actually between the two
+    stars. 92 is what "TABI" occupies at the drawn size of 30, so every other
+    length is fitted to the same measure the artwork uses rather than to the
+    last pixel before a collision - at 129 a six-letter name technically fits
+    and visibly crowds the stars either side of it.
+
+    Arithmetic is scaled by 100 throughout, because Liquid divides integers.
+  endcomment
+  assign name_size = 30
+  if seal_name != blank
+    assign name_span = seal_name | size | times: 78 | minus: 16
+    assign name_fit = 9200 | divided_by: name_span
+    if name_fit < 30
+      assign name_size = name_fit
+    endif
+  endif
+-%}
+
+<svg
+  class="pdp-seal"
+  viewBox="0 0 200 200"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+  focusable="false"
+  style="--pdp-seal-speed: {{ seal_speed }}s; --pdp-seal-spin: {{ spin }}; --pdp-seal-name-size: {{ name_size }}px;"
+>
+  <defs>
+    {%- comment -%}
+      Same two endpoints, opposite sweep flags. Flag 1 arcs over the top and
+      flag 0 under the bottom, which is what lets both lines read left to
+      right. Radius 70 puts the baseline where the artwork has it.
+    {%- endcomment -%}
+    <path id="pdp-seal-top-{{ seal_uid }}" fill="none" d="M 30,100 A 70,70 0 0 1 170,100"/>
+    <path id="pdp-seal-bot-{{ seal_uid }}" fill="none" d="M 30,100 A 70,70 0 0 0 170,100"/>
+  </defs>
+
+  <g class="pdp-seal__ring">
+    {%- comment -%}
+      175 of the 220 units each half-arc runs, centred on it - so roughly 20
+      degrees of clear arc is left at each end for the stars to sit in.
+    {%- endcomment -%}
+    {%- if seal_top != blank -%}
+      <text class="pdp-seal__arc">
+        <textPath
+          href="#pdp-seal-top-{{ seal_uid }}"
+          startOffset="50%"
+          text-anchor="middle"
+          textLength="175"
+          lengthAdjust="spacing"
+        >{{ seal_top | escape }}</textPath>
+      </text>
+    {%- endif -%}
+
+    {%- if seal_bot != blank -%}
+      <text class="pdp-seal__arc">
+        <textPath
+          href="#pdp-seal-bot-{{ seal_uid }}"
+          startOffset="50%"
+          text-anchor="middle"
+          textLength="175"
+          lengthAdjust="spacing"
+        >{{ seal_bot | escape }}</textPath>
+      </text>
+    {%- endif -%}
+
+    {%- comment -%}
+      The four-pointed stars, on the seam at 9 and 3 o'clock. One path drawn
+      about its own origin and placed twice, so the two cannot drift apart.
+    {%- endcomment -%}
+    <path class="pdp-seal__star" transform="translate(30 100)" d="M 0,-5.4 Q 0.7,-0.7 5.4,0 Q 0.7,0.7 0,5.4 Q -0.7,0.7 -5.4,0 Q -0.7,-0.7 0,-5.4 Z"/>
+    <path class="pdp-seal__star" transform="translate(170 100)" d="M 0,-5.4 Q 0.7,-0.7 5.4,0 Q 0.7,0.7 0,5.4 Q -0.7,0.7 -5.4,0 Q -0.7,-0.7 0,-5.4 Z"/>
+  </g>
+
+  {%- comment -%}
+    Outside the turning group, so it stays upright while the ring moves.
+    `dy` rather than dominant-baseline: it centres cap-height text the same way
+    in every engine, where dominant-baseline still varies.
+  {%- endcomment -%}
+  {%- if seal_name != blank -%}
+    <text class="pdp-seal__name" x="100" y="100" dy="0.35em" text-anchor="middle">
+      {{- seal_name | escape -}}
+    </text>
+  {%- endif -%}
+</svg>

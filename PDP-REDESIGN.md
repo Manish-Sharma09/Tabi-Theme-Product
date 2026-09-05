@@ -268,6 +268,50 @@ is how a nested accordion gets confusing: the column heading is uppercase,
 tracked and near-black, while a row is sentence case, untracked, muted and sits
 on a hairline. Only rows carry body copy.
 
+### The turning seal
+
+The **Tabi way** band carries the round seal from the brand artwork: `TABI`
+held still in the middle while `A PLACE TO BELONG` turns slowly around it, and
+stops while a visitor hovers it.
+
+It is drawn in `snippets/pdp-seal.liquid` rather than uploaded as an image, so
+both lines of wording and the name stay theme settings, and the mark stays
+sharp at any size. Three things about how it is built:
+
+- **Two arcs, not one ring.** Both halves of the artwork read left to right —
+  the top with its letters' tops pointing up and out, the bottom with theirs
+  pointing down and out. That is two arcs drawn in opposite directions between
+  9 and 3 o'clock. One continuous circle would run the bottom half right to
+  left, which is a different mark.
+- **Each line fills its half.** `textLength` spaces every line to the same span
+  of arc, so retyping either one keeps the ring evenly set instead of drifting
+  off centre. Around 16–22 characters a line reads best; much shorter and the
+  letters spread very wide.
+- **The middle word is sized to fit.** A fixed size only works for a word the
+  length of the one it was set for — a six-letter name at the drawn size runs
+  straight through the ring and out over the stars. Liquid estimates the width
+  and picks the largest size that still occupies the measure `TABI` does, so
+  `TABI` is unchanged and longer names simply set smaller.
+
+Two settings on the band control the motion: **Seconds per turn** (higher is
+slower, 28 by default) and **Direction**. The ring holds still on hover, and
+does not turn at all for a visitor who has asked for reduced motion — a mark
+that turns forever is exactly the kind of motion that setting exists to stop,
+and held still it is simply a seal.
+
+**Where it sits.** Pinned to the bottom-right corner of the copy half from
+990px, and below that it leaves the corner and flows in centred after the copy
+— it is the piece of this band most worth seeing on a phone, and dropping it
+there would be the wrong half to lose. Taking it out of the flow on desktop
+frees the corner but does not reserve it, so the copy half also gives that
+corner back as bottom padding; without it, between about 990px and 1300px the
+paragraph runs long enough that its last lines print straight over the seal.
+
+**Choosing it.** The band's *Corner decoration* setting picks between the
+uploaded image (the botanical sprig, and the default), the seal, and none. It
+is nil on every band saved before the seal existed, which Liquid reads as "not
+the seal", so those keep rendering the image exactly as they did.
+
 ### The description: read more
 
 The description collapses to two lines with a **Read more** toggle underneath,
@@ -435,6 +479,15 @@ because reverting it is one field per template in the theme editor
 - [ ] Section headings centred — the info columns label, "Why you'll love it",
       the approach section, and "You may also like" — while the two feature
       bands stay ranged left
+- [ ] The turning seal: it turns, `TABI` stays upright in the middle, and it
+      stops while the pointer is over it and starts again when it leaves
+- [ ] The seal at 990px, 1100px and 1400px — the copy must never run over it —
+      and under 990px, where it should sit centred after the copy instead
+- [ ] The seal with reduced motion turned on (macOS: System Settings →
+      Accessibility → Display → Reduce motion) — it should render still, not
+      disappear
+- [ ] The "Made in small batches" band still shows its uploaded sprig, not a
+      seal
 - [ ] Buy box on a 390px phone: title on one or two lines, clear space between
       the trust row and "Select Size", size chips comfortable to tap, and the
       pincode field and button stacked

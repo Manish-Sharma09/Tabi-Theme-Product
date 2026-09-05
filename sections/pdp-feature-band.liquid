@@ -9,9 +9,17 @@
   The copy is brand level, identical on every product, so it lives in section
   settings rather than metafields. A merchant edits it once per template.
 
-  The decorative image (the botanical sprig, the round TABI seal) is presentation
-  only: it is hidden below 990px where it would crowd the text, and carries an
-  empty alt so screen readers skip it.
+  The corner decoration is one of two things, chosen per band:
+
+  - an uploaded image (the botanical sprig), presentation only - hidden below
+    990px where it would crowd the text, and carrying an empty alt so screen
+    readers skip it; or
+  - the drawn TABI seal, whose ring of text turns slowly around a still name
+    and stops when a visitor hovers it. Drawn rather than uploaded so both
+    lines of its wording stay theme settings - see snippets/pdp-seal.liquid.
+
+  The setting defaults to the image, so a band saved before the seal existed
+  keeps rendering exactly what it rendered then.
 {% endcomment %}
 
 {{ 'product-page.css' | asset_url | stylesheet_tag }}
@@ -59,7 +67,7 @@
 >
   <div class="pdp-section__inner">
     <div
-      class="pdp-band__inner{% if media_right %} pdp-band--media-right{% endif %}{% if section.settings.mobile_text_first %} pdp-band--mobile-text-first{% endif %}"
+      class="pdp-band__inner{% if media_right %} pdp-band--media-right{% endif %}{% if section.settings.mobile_text_first %} pdp-band--mobile-text-first{% endif %}{% if section.settings.decor_style == 'seal' %} pdp-band--has-seal{% endif %}"
       style="--pdp-band-split: {{ split }}; --pdp-decor-size: {{ section.settings.decor_width }}rem;"
     >
       {%- if section.settings.image != blank -%}
@@ -77,14 +85,6 @@
       {%- endif -%}
 
       <div class="pdp-band__content">
-        {%- if section.settings.decor_image != blank -%}
-          {{
-            section.settings.decor_image
-            | image_url: width: 400
-            | image_tag: loading: 'lazy', class: 'pdp-band__decor', alt: ''
-          }}
-        {%- endif -%}
-
         {%- if section.settings.eyebrow != blank -%}
           <p class="pdp-eyebrow">{{ section.settings.eyebrow | escape }}</p>
         {%- endif -%}
@@ -110,6 +110,36 @@
               {%- render 'pdp-icon', icon: 'arrow' -%}
             </a>
           </div>
+        {%- endif -%}
+
+        {%- comment -%}
+          The decoration comes last because on a phone the seal is the one
+          decoration that stays in the flow, and it belongs after the copy
+          rather than shouldering in above the eyebrow. The uploaded image is
+          out of flow at every width it is visible at - absolute from 990px,
+          hidden below - so sitting here changes nothing for that branch.
+
+          `decor_style` is nil on every band saved before the seal existed, and
+          Liquid reads nil as "not 'seal'", so those fall through to the image
+          branch and render exactly what they always did.
+        {%- endcomment -%}
+        {%- if section.settings.decor_style == 'seal' -%}
+          <div class="pdp-band__seal">
+            {%- render 'pdp-seal',
+              name: section.settings.seal_name,
+              text_top: section.settings.seal_text_top,
+              text_bot: section.settings.seal_text_bottom,
+              speed: section.settings.seal_speed,
+              direction: section.settings.seal_direction,
+              uid: section.id
+            -%}
+          </div>
+        {%- elsif section.settings.decor_style != 'none' and section.settings.decor_image != blank -%}
+          {{
+            section.settings.decor_image
+            | image_url: width: 400
+            | image_tag: loading: 'lazy', class: 'pdp-band__decor', alt: ''
+          }}
         {%- endif -%}
       </div>
     </div>
@@ -191,23 +221,81 @@
       "content": "Decoration"
     },
     {
-      "type": "paragraph",
-      "content": "Optional artwork pinned to the top corner of the text half - the botanical sprig or the round seal. Hidden on screens under 990px."
-    },
-    {
-      "type": "image_picker",
-      "id": "decor_image",
-      "label": "Decorative image"
+      "type": "select",
+      "id": "decor_style",
+      "label": "Corner decoration",
+      "default": "image",
+      "info": "The uploaded image is hidden on screens under 990px. The turning seal is not — it moves below the text there instead.",
+      "options": [
+        { "value": "image", "label": "Uploaded image" },
+        { "value": "seal", "label": "Turning TABI seal" },
+        { "value": "none", "label": "None" }
+      ]
     },
     {
       "type": "range",
       "id": "decor_width",
       "min": 4,
-      "max": 16,
+      "max": 22,
       "step": 1,
       "unit": "rem",
-      "label": "Decorative image width",
+      "label": "Decoration width",
       "default": 9
+    },
+    {
+      "type": "image_picker",
+      "id": "decor_image",
+      "label": "Decorative image",
+      "info": "Used when the decoration above is set to Uploaded image."
+    },
+    {
+      "type": "header",
+      "content": "Turning seal"
+    },
+    {
+      "type": "paragraph",
+      "content": "Each line is spaced to fill its half of the ring, so both stay evenly set whatever you type. Around 16 to 22 characters a line reads best; much shorter and the letters spread very wide."
+    },
+    {
+      "type": "text",
+      "id": "seal_name",
+      "label": "Name in the middle",
+      "default": "Tabi",
+      "info": "Stays still while the ring turns. Shown uppercase."
+    },
+    {
+      "type": "text",
+      "id": "seal_text_top",
+      "label": "Top line",
+      "default": "A place to belong",
+      "info": "Shown uppercase. Leave empty to hide this half of the ring."
+    },
+    {
+      "type": "text",
+      "id": "seal_text_bottom",
+      "label": "Bottom line",
+      "default": "A place to belong"
+    },
+    {
+      "type": "range",
+      "id": "seal_speed",
+      "min": 8,
+      "max": 60,
+      "step": 2,
+      "unit": "s",
+      "label": "Seconds per turn",
+      "default": 28,
+      "info": "Higher is slower. The ring stops while a visitor hovers it, and does not turn at all for visitors who ask for reduced motion."
+    },
+    {
+      "type": "select",
+      "id": "seal_direction",
+      "label": "Direction",
+      "default": "clockwise",
+      "options": [
+        { "value": "clockwise", "label": "Clockwise" },
+        { "value": "anticlockwise", "label": "Anticlockwise" }
+      ]
     },
     {
       "type": "header",

@@ -1141,6 +1141,128 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   }
 }
 
+/* --- the turning seal ---------------------------------------------------- */
+
+/* The alternative to an uploaded decorative image: the brand name held still
+   while a ring of text turns slowly around it.
+
+   Placed differently from the image above, on purpose. The image is pinned to
+   the corner from 990px and hidden below it, because a sprig behind the copy
+   is either decoration or clutter and there is no third state. The seal has
+   one: below 990px it stops being pinned and flows in after the copy, centred
+   on its own line. It is the piece of this band most worth seeing on a phone,
+   and dropping it there would be the wrong half to lose. */
+
+.pdp-band__seal {
+  display: block;
+  width: min(var(--pdp-decor-size, 9rem), 44vw);
+  margin: 3.2rem auto 0;
+}
+
+@media screen and (min-width: 990px) {
+  .pdp-band__seal {
+    position: absolute;
+    bottom: 3rem;
+    right: 3rem;
+    width: var(--pdp-decor-size, 9rem);
+    margin: 0;
+  }
+
+  /* Taking the seal out of the flow frees the corner but does not reserve it,
+     and the copy is happy to fill the space underneath. Between 990px and
+     roughly 1300px the copy half is narrow enough that the paragraph runs to
+     five or six lines and the last of them arrive exactly where the seal is -
+     the two printed straight over each other.
+
+     So the content half gives the corner back: enough bottom padding for the
+     seal, its 3rem offset and a little clear air. The band's height is set by
+     the photograph beside it, and the copy is centred in what is left, so on
+     the wide screens where there was never a conflict this costs nothing
+     visible - it just moves the copy up a fraction. On the narrow ones it is
+     what keeps the two apart.
+
+     Scoped to `--has-seal` so a band using an uploaded image, or none, keeps
+     the padding it always had. */
+  .pdp-band--has-seal .pdp-band__content {
+    padding-bottom: calc(var(--pdp-decor-size, 9rem) + 5.5rem);
+  }
+}
+
+.pdp-seal {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--pdp-ink);
+}
+
+/* Rotation is on the ring group and never on the <svg>: the name in the middle
+   is a sibling of that group, and it is what the ring turns around.
+
+   `transform-box: view-box` is stated rather than assumed. The percentage
+   origin below has to resolve against the 200x200 grid the mark is drawn on -
+   resolve it against the group's own tight bounding box instead and the ring
+   pivots about the middle of its glyphs rather than the middle of the seal,
+   which reads as a wobble. */
+.pdp-seal__ring {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: pdp-seal-turn var(--pdp-seal-speed, 24s) linear infinite;
+  animation-direction: var(--pdp-seal-spin, normal);
+}
+
+@keyframes pdp-seal-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hover holds it still.
+
+   The pause is triggered from the wrapper rather than the <svg> so the seal is
+   one solid target: hang it off the artwork itself and the ring stutters as
+   the pointer crosses the gaps between letters, because each gap is a mouseout.
+
+   `:focus-within` comes along for the keyboard. Nothing inside the seal is
+   focusable today, but if a link is ever wrapped round it, tabbing to it stops
+   the motion the same way hovering does. */
+.pdp-band__seal:hover .pdp-seal__ring,
+.pdp-band__seal:focus-within .pdp-seal__ring {
+  animation-play-state: paused;
+}
+
+.pdp-seal__arc {
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-size: 9px;
+  text-transform: uppercase;
+  fill: currentColor;
+}
+
+/* SVG adds letter-spacing after the last glyph as well as between, so a centred
+   string sits half a space to the left of true centre. Nudge it back by half. */
+.pdp-seal__name {
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-size: var(--pdp-seal-name-size, 30px);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  fill: currentColor;
+  transform: translateX(0.08em);
+}
+
+.pdp-seal__star {
+  fill: currentColor;
+}
+
+/* A mark that turns forever is the whole point of it, and exactly the kind of
+   motion this setting exists to stop. Held still it is simply a seal, which
+   the artwork reads as perfectly well. */
+@media (prefers-reduced-motion: reduce) {
+  .pdp-seal__ring {
+    animation: none;
+  }
+}
+
 /* --------------------------------------------------------------------------
    10. SECTION: INFORMATION ACCORDIONS
 
