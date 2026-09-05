@@ -221,8 +221,24 @@ still wanted.
 
 ### The information columns
 
-Two levels, as the design draws them: a column heading with a rule above and
-below it, and a stack of accordion rows underneath.
+Two levels, as the design draws them: a column heading and a stack of accordion
+rows underneath, all inside one bordered box.
+
+The box is drawn by the grid itself — one hairline round the outside, and the
+columns divided by hairlines rather than by a gap. The dividers are borders on
+the columns with padding inside them, not a gap with a rule sitting in it: a
+border on a grid item is drawn at that item's own edge, so with a gap the rule
+hugs one column and leaves a gap's width of white on the other side. The columns
+stretch to a common height, which is what runs a divider the full height of the
+box when one column holds two rows and its neighbour holds five.
+
+The column count follows the width: one on a phone (columns divided
+horizontally), **two between 750px and 989px**, and one per surviving column
+heading from 990px up. Four of them at tablet width came to about 120px of text
+each and every row heading wrapped to two or three lines.
+
+The column heading carries no rule of its own any more, and the last row in each
+column carries no bottom rule — the box and the dividers do that work now.
 
 Shopify section blocks are a flat list, so "rows inside a column" needs
 expressing some other way. A **Column heading** block starts a column and every
@@ -249,8 +265,62 @@ which is the right way round for copy a shopper came to read.
 
 The two levels are deliberately unalike, because a heading that looks like a row
 is how a nested accordion gets confusing: the column heading is uppercase,
-tracked, near-black and sits on the stronger hairline, while a row is sentence
-case, untracked and muted. Only rows carry body copy.
+tracked and near-black, while a row is sentence case, untracked, muted and sits
+on a hairline. Only rows carry body copy.
+
+### The description: read more
+
+The description collapses to two lines with a **Read more** toggle underneath,
+so the size chips and the buy buttons stay reachable without scrolling on a
+phone. Four settings on the *Description* block control it — whether to collapse
+at all, how many lines, and the two labels.
+
+The full description is always in the markup; only the clamp and the toggle are
+presentational. The clamp is scoped to `pdp-read-more:defined`, which is true
+only once `product-page.js` has registered the element, so with the script
+blocked or broken the description simply renders in full rather than stranding a
+shopper two lines in with no way to open it. The toggle ships `hidden` and the
+script reveals it only after measuring real overflow, so a one-line description
+gets no toggle at any width.
+
+### Centred section headings
+
+Section headings across the store are centred — the home page's rich text,
+collection feature and app rows all ship `alignment: center` — so the product
+page's own sections now match. "Why you'll love it" and the approach section
+already were; the rule in `product-page.css` catches the rest by targeting the
+heading as a *direct child* of the section shell.
+
+That scoping is deliberate: it deliberately misses the eyebrow and display
+heading inside a **feature band**, which sit in the copy half of a two-column
+band against a 46ch measure and belong ranged left with the paragraph beneath
+them.
+
+The related-products heading is the one that reaches further than this template
+— see the note in section 5.
+
+### Mobile
+
+Changes to the buy box below 750px, all in `product-page.css`:
+
+- the product title drops from 2.8rem to **2.2rem**, the size the theme already
+  sets for a product title elsewhere. At 2.8rem a two-line name pushed the
+  price, the chips and the buttons off the first screen.
+- the trust row's icons and labels step down so most labels hold one line, and
+  the element after the row gets a 2.8rem top margin — the shortest label used
+  to sit about ten pixels above "Select Size" and the two read as one block.
+- size chips grow to a **44px** touch target with padding, not a fixed height,
+  so a chip still centres its label whether that reads "S" or "3-4 Y".
+- the pincode panel gives some padding back to its contents, and its field and
+  button stack — **also between 750px and 989px**, where the buy box is half a
+  tablet viewport and the field was truncating its own placeholder.
+
+One bug fixed alongside them. Three elements on this page ship the `hidden`
+attribute and are revealed by script, and `hidden` is enforced by the UA
+stylesheet alone — so any `display` an author rule sets on the same element wins
+and the attribute quietly stops meaning anything. The pincode results list is
+`display: grid`, so while "hidden" it still contributed its top margin and left
+dead space under the CHECK button on every page load before a check.
 
 ### Three fixes found by auditing the full rollout
 
@@ -331,6 +401,21 @@ CLI only uploads the known theme directories, so it never reaches the store. It:
 Re-running after the tabs are already disabled will not re-migrate their
 content — migrate from a clean checkout of the template if you need to redo it.
 
+### One change that reaches every product template
+
+The centred-headings work added a **Heading alignment** setting to the
+*Related products* section, and it **defaults to Centre**. Every product
+template has that section and none of them carry the setting yet, so the
+default applies and the "You may also like" heading is now centred on all 22 —
+including the 21 that are otherwise untouched by the redesign.
+
+That is the intended behaviour: section headings are centred everywhere else on
+the store, and the heading was already centred on this section's small-label
+variant by an inline style. It is called out here because it is the single
+exception to "an un-migrated template renders exactly as it did before", and
+because reverting it is one field per template in the theme editor
+(*Related products → Heading alignment → Left*) rather than a code change.
+
 ---
 
 ## 6. QA list before publishing
@@ -340,8 +425,20 @@ content — migrate from a clean checkout of the template if you need to redo it
 - [ ] BUY NOW against **Razorpay Magic Checkout** — see the risk below
 - [ ] Pincode box: valid pincode, invalid pincode, blocked prefix, COD-excluded
       prefix
-- [ ] Information accordions at 749px and 750px — four columns above, stacked
-      below — and one column folded shut, then reopened
+- [ ] Information accordions at 749px, 750px and 990px — stacked, two columns,
+      then four — with the box border and the dividers correct at each, and one
+      column folded shut, then reopened
+- [ ] Description **Read more**: a long description collapses to two lines and
+      expands; a one-or-two line description shows **no** toggle at all; the
+      toggle reads "Read less" while open
+- [ ] Description with JavaScript disabled: the full text, no clamp, no toggle
+- [ ] Section headings centred — the info columns label, "Why you'll love it",
+      the approach section, and "You may also like" — while the two feature
+      bands stay ranged left
+- [ ] Buy box on a 390px phone: title on one or two lines, clear space between
+      the trust row and "Select Size", size chips comfortable to tap, and the
+      pincode field and button stacked
+- [ ] Pincode panel before any check: no dead space under the CHECK button
 - [ ] Information accordions with JavaScript disabled: every column should still
       be open and readable, only the folding gone
 - [ ] Related products: same card, ratio and quick-add behaviour as a collection
@@ -352,9 +449,10 @@ content — migrate from a clean checkout of the template if you need to redo it
 - [ ] A product with **no** metafields filled in — the highlights section, the
       fit block and the metafield-driven accordions should vanish cleanly, not
       leave gaps
-- [ ] The 21 **un-migrated** templates still look exactly as before — they
-      should be byte-identical to their pre-redesign state, and their pages
-      should not request `product-page.css` or `product-page.js` at all
+- [ ] The 21 **un-migrated** templates still look as before and still do not
+      request `product-page.css` or `product-page.js` at all. One deliberate
+      exception now: their "You may also like" heading is centred — see the
+      note at the end of section 5
 
 ---
 

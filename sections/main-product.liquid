@@ -319,9 +319,58 @@
                 </p>
               {%- when 'description' -%}
                 {%- if product.description != blank -%}
-                  <div class="product__description rte quick-add-hidden" {{ block.shopify_attributes }}>
-                    {{ product.description }}
-                  </div>
+                  {%- comment -%}
+                    The redesign collapses the description to two lines behind a
+                    "Read more" toggle, so the size chips and the buy buttons
+                    stay reachable without scrolling on a phone.
+
+                    The clamp is CSS and the full description is always in the
+                    markup, so search engines and a reader-mode view get the
+                    whole text either way. What needs the script is the toggle,
+                    and the clamp is scoped to `pdp-read-more:defined` in
+                    product-page.css - so if product-page.js never arrives the
+                    description renders in full rather than stranding a
+                    shopper two lines in with no way to open it.
+                  {%- endcomment -%}
+                  {%- if section.settings.enable_new_layout and block.settings.enable_read_more -%}
+                    <pdp-read-more
+                      class="pdp-readmore"
+                      style="--pdp-readmore-lines: {{ block.settings.read_more_lines | default: 2 }};"
+                      data-more="{{ block.settings.read_more_label | default: 'Read more' | escape }}"
+                      data-less="{{ block.settings.read_less_label | default: 'Read less' | escape }}"
+                      {{ block.shopify_attributes }}
+                    >
+                      <div
+                        id="ProductDescription-{{ section.id }}"
+                        class="product__description rte quick-add-hidden pdp-readmore__body"
+                        data-pdp-readmore-body
+                      >
+                        {{ product.description }}
+                      </div>
+                      {%- comment -%}
+                        Hidden until the script has measured that the text
+                        actually overflows two lines - a one-line description
+                        should not offer a toggle that reveals nothing.
+                      {%- endcomment -%}
+                      <button
+                        class="pdp-readmore__toggle"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="ProductDescription-{{ section.id }}"
+                        data-pdp-readmore-toggle
+                        hidden
+                      >
+                        <span data-pdp-readmore-label>
+                          {{- block.settings.read_more_label | default: 'Read more' | escape -}}
+                        </span>
+                        {%- render 'pdp-icon', icon: 'caret' -%}
+                      </button>
+                    </pdp-read-more>
+                  {%- else -%}
+                    <div class="product__description rte quick-add-hidden" {{ block.shopify_attributes }}>
+                      {{ product.description }}
+                    </div>
+                  {%- endif -%}
                 {%- endif -%}
               {%- when 'sku' -%}
                 <p
@@ -1261,7 +1310,41 @@
     {
       "type": "description",
       "name": "t:sections.main-product.blocks.description.name",
-      "limit": 1
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Only applies on templates using the redesigned layout."
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_read_more",
+          "label": "Collapse behind a Read more toggle",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "read_more_lines",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "unit": "ln",
+          "label": "Lines shown when collapsed",
+          "default": 2
+        },
+        {
+          "type": "text",
+          "id": "read_more_label",
+          "label": "Expand label",
+          "default": "Read more"
+        },
+        {
+          "type": "text",
+          "id": "read_less_label",
+          "label": "Collapse label",
+          "default": "Read less"
+        }
+      ]
     },
     {
       "type": "share",

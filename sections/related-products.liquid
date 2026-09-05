@@ -76,12 +76,20 @@
         endif
       -%}
 
+      {%- comment -%}
+        Alignment is a class rather than the inline `text-align: center` this
+        used to carry on the eyebrow variant only. Both variants are section
+        headings and both should follow the same rule, and an inline style
+        cannot be overridden from a stylesheet if a merchant ever wants one
+        template to differ.
+      {%- endcomment -%}
+      {%- assign heading_alignment = section.settings.heading_alignment | default: 'center' -%}
       {%- if section.settings.heading_style == 'eyebrow' -%}
-        <p class="pdp-eyebrow related-products__heading" style="text-align: center;">
+        <p class="pdp-eyebrow related-products__heading related-products__heading--{{ heading_alignment }}">
           {{ section.settings.heading }}
         </p>
       {%- else -%}
-        <h2 class="related-products__heading inline-richtext {{ section.settings.heading_size }}">
+        <h2 class="related-products__heading related-products__heading--{{ heading_alignment }} inline-richtext {{ section.settings.heading_size }}">
           {{ section.settings.heading }}
         </h2>
       {%- endif -%}
@@ -195,6 +203,16 @@
       "options": [
         { "value": "grid", "label": "Grid" },
         { "value": "carousel", "label": "Carousel" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "default": "center",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Centre" }
       ]
     },
     {

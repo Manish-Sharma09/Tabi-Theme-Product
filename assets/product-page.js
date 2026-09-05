@@ -6,6 +6,7 @@
      B. <pdp-carousel>        arrow buttons over a scroll-snap track
      C. <pdp-buy-now>         add to cart, then straight to checkout
      D. <pdp-info-group>      fold one information column away
+     E. <pdp-read-more>       clamp the description, reveal it on demand
 
    D is not the breakpoint script the first version of the information section
    had. That one opened and closed an outer <details> layer at 750px, because
@@ -535,6 +536,93 @@
   };
 
   /* ====================================================================== */
+  /* E. READ MORE                                                            */
+  /* ====================================================================== */
+
+  /* Clamps the product description to a couple of lines and reveals the rest
+     on demand.
+
+     The clamp itself is CSS, gated on `pdp-read-more:defined` - so it only
+     applies once this file has registered the element. That ordering is the
+     whole safety net: no script, no clamp, and the description renders in
+     full rather than stranding a shopper two lines in with a toggle that
+     never wired up.
+
+     The toggle ships `hidden` and is shown only after measuring that the text
+     really does overflow. A one-line description therefore gets no toggle at
+     all, on any breakpoint, without Liquid having to guess how long the copy
+     will render. */
+  var PDPReadMore = class extends HTMLElement {
+    connectedCallback() {
+      this.body = this.querySelector('[data-pdp-readmore-body]');
+      this.toggle = this.querySelector('[data-pdp-readmore-toggle]');
+      this.label = this.querySelector('[data-pdp-readmore-label]');
+      if (!this.body || !this.toggle) return;
+
+      this.onClick = this.onClick.bind(this);
+      this.onResize = this.onResize.bind(this);
+      this.toggle.addEventListener('click', this.onClick);
+
+      /* Web fonts land after this runs and a variant change can swap the copy
+         entirely, either of which changes how many lines the text occupies.
+         Observing the element covers both, and every later reflow. */
+      if (window.ResizeObserver) {
+        this.observer = new ResizeObserver(this.onResize);
+        this.observer.observe(this.body);
+      } else {
+        window.addEventListener('resize', this.onResize);
+      }
+
+      this.measure();
+    }
+
+    disconnectedCallback() {
+      if (this.toggle) this.toggle.removeEventListener('click', this.onClick);
+      if (this.observer) this.observer.disconnect();
+      window.removeEventListener('resize', this.onResize);
+      if (this.frame) cancelAnimationFrame(this.frame);
+    }
+
+    /* Deferred to the next frame so that showing or hiding the toggle - which
+       resizes the element the observer is watching - cannot land inside the
+       same delivery and trip the browser's ResizeObserver loop guard. */
+    onResize() {
+      if (this.frame) cancelAnimationFrame(this.frame);
+      this.frame = requestAnimationFrame(
+        function () {
+          this.frame = null;
+          this.measure();
+        }.bind(this)
+      );
+    }
+
+    /* Only meaningful while collapsed: expanded, the box is exactly as tall as
+       its content, so the overflow test would always say "fits" and quietly
+       remove the shopper's way back. */
+    measure() {
+      if (!this.body || !this.toggle) return;
+      if (this.classList.contains('is-open')) return;
+      /* A pixel of tolerance: fractional line heights otherwise report a few
+         hundredths of overflow on text that visibly fits. */
+      this.toggle.hidden = this.body.scrollHeight - this.body.clientHeight <= 1;
+    }
+
+    onClick() {
+      var open = !this.classList.contains('is-open');
+      this.classList.toggle('is-open', open);
+      this.toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+      if (this.label) {
+        this.label.textContent = open
+          ? this.getAttribute('data-less') || 'Read less'
+          : this.getAttribute('data-more') || 'Read more';
+      }
+
+      if (!open) this.measure();
+    }
+  };
+
+  /* ====================================================================== */
   /* Registration                                                            */
   /* ====================================================================== */
 
@@ -552,5 +640,8 @@
   }
   if (!customElements.get('pdp-info-group')) {
     customElements.define('pdp-info-group', PDPInfoGroup);
+  }
+  if (!customElements.get('pdp-read-more')) {
+    customElements.define('pdp-read-more', PDPReadMore);
   }
 })();

@@ -119,6 +119,26 @@
   transition: transform 0.2s ease;
 }
 
+/* Three elements on this page ship the `hidden` attribute and are revealed by
+   script: the delivery panel's error line and results list, and the
+   description's read-more toggle. `hidden` is enforced by the UA stylesheet
+   alone, so any `display` an author rule sets on the same element wins and the
+   attribute quietly stops meaning anything.
+
+   Two of them did exactly that. The results list is `display: grid`, so while
+   "hidden" it still contributed its 1.6rem top margin and left dead space
+   under the pincode button on every page load before a check. The toggle is
+   `display: inline-flex`, so it appeared under short descriptions that had
+   nothing left to reveal.
+
+   Listed rather than matched by a wildcard so it is clear which elements are
+   involved, and at a specificity that wins without !important. */
+.pdp-delivery__error[hidden],
+.pdp-delivery__results[hidden],
+.pdp-readmore__toggle[hidden] {
+  display: none;
+}
+
 /* Underlined text link with an optional trailing arrow. */
 .pdp-link {
   display: inline-flex;
@@ -181,6 +201,23 @@
   }
 }
 
+/* Section headings are centred, which is what the rest of the store does - the
+   home page's rich text, collection feature and app rows all ship
+   `alignment: center`. "Why you'll love it" and the approach section already
+   centred, because their whole column layout is centred; this puts the
+   remaining section labels on the same line without each section having to
+   restate it.
+
+   Scoped to direct children of the section shell on purpose. That reaches the
+   label at the top of a section and deliberately misses the eyebrow and
+   display heading inside a feature band: those sit in the copy half of a
+   two-column band, are set against a 46ch measure, and belong ranged left with
+   the paragraph beneath them rather than centred over half a row. */
+.pdp-section__inner > .pdp-eyebrow,
+.pdp-section__inner > .pdp-display {
+  text-align: center;
+}
+
 /* --------------------------------------------------------------------------
    2. BUY BOX: RHYTHM, TITLE, PRICE, DESCRIPTION
 
@@ -199,15 +236,28 @@
   margin-top: 0;
 }
 
+/* Mobile first, like the rest of this file. A 2.8rem serif title on a 390px
+   screen runs to two or three lines and pushes the price, the size chips and
+   the buttons off the first screen - which is the one thing the buy box cannot
+   afford. 2.2rem is the size the theme already sets for a product title
+   elsewhere, so the two agree rather than fighting over the same heading. */
 .pdp .product__title > h1,
 .pdp .product__title > a > h2 {
   font-family: var(--font-heading-family);
-  font-size: 2.8rem;
+  font-size: 2.2rem;
   font-weight: var(--font-heading-weight);
-  line-height: 1.25;
+  line-height: 1.3;
   letter-spacing: 0;
   margin: 0;
   color: var(--pdp-ink);
+}
+
+@media screen and (min-width: 750px) {
+  .pdp .product__title > h1,
+  .pdp .product__title > a > h2 {
+    font-size: 2.8rem;
+    line-height: 1.25;
+  }
 }
 
 /* main-product.liquid renders the title twice - an <h1> for the product page
@@ -287,6 +337,95 @@
   display: none;
 }
 
+/* --- description: read more --------------------------------------------- */
+
+/* The description is collapsed to two lines with a toggle underneath, so the
+   size chips and the buy buttons stay reachable without scrolling on a phone.
+
+   The clamp hangs off `:defined`, which is only true once product-page.js has
+   registered <pdp-read-more>. No script, no clamp: the description renders in
+   full rather than stranding a shopper two lines in beside a toggle that never
+   wired up. The toggle itself ships `hidden` and the script reveals it only
+   after measuring real overflow, so a one-line description gets no toggle.
+
+   Two mechanisms clip, deliberately:
+
+   - `-webkit-line-clamp`, which gives the ellipsis, and
+   - a `max-height` at the same computed height.
+
+   The clamp is the one that matters, but its behaviour across the several
+   <p> elements a rich-text description renders into is not uniform across
+   engines. The max-height is arithmetic - lines x line-height - so it lands on
+   the same boundary wherever the clamp is ignored. Both read the same two
+   custom properties, so changing either number keeps them in step. */
+
+.pdp-readmore {
+  display: block;
+  --pdp-readmore-line-height: 1.7;
+}
+
+.pdp-readmore__body {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--pdp-readmore-lines, 2);
+  overflow: hidden;
+  max-height: calc(var(--pdp-readmore-lines, 2) * var(--pdp-readmore-line-height) * 1em);
+}
+
+/* Matches the specificity of the `.pdp .product__description` rule above,
+   which would otherwise set the line-height the max-height is computed from
+   and let the two drift apart. */
+.pdp .product__description.pdp-readmore__body {
+  line-height: var(--pdp-readmore-line-height);
+}
+
+/* A trailing margin inside the clamped box counts toward its height and would
+   clip the last visible line. Only the collapsed state cares. */
+.pdp-readmore:not(.is-open) .pdp-readmore__body > :last-child {
+  margin-bottom: 0;
+}
+
+pdp-read-more:not(:defined) .pdp-readmore__body,
+.pdp-readmore.is-open .pdp-readmore__body {
+  display: block;
+  overflow: visible;
+  max-height: none;
+}
+
+.pdp-readmore__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  font-size: 1.2rem;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  color: var(--pdp-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.35rem;
+  text-decoration-thickness: 0.05rem;
+  cursor: pointer;
+}
+
+.pdp-readmore__toggle:focus-visible {
+  outline: 0.2rem solid var(--pdp-accent);
+  outline-offset: 0.3rem;
+}
+
+.pdp-readmore__toggle .pdp-icon--caret {
+  width: 1.4rem;
+  height: 1.4rem;
+  color: var(--pdp-faint);
+}
+
+.pdp-readmore.is-open .pdp-readmore__toggle .pdp-icon--caret {
+  transform: rotate(180deg);
+}
+
 /* --------------------------------------------------------------------------
    3. TRUST ICON ROW
 
@@ -307,6 +446,16 @@
 
 .pdp .product__info-container > .pdp-trust {
   margin-top: 2.4rem;
+}
+
+/* The row is a band, and a band needs air on both sides of it. Set on the
+   following element rather than as the row's own margin-bottom so the gap is
+   whatever this rule says regardless of how the two margins collapse - the
+   trust row's 0.4rem bottom margin collapses into this one and loses. Without
+   it the shortest label sat about ten pixels above "Select Size" and the two
+   read as one block. */
+.pdp .product__info-container > .pdp-trust + * {
+  margin-top: 2.8rem;
 }
 
 .pdp-trust__item {
@@ -331,6 +480,30 @@
   line-height: 1.4;
   color: var(--pdp-muted);
   /* max-width: 10ch; */
+}
+
+/* Four columns of a 390px screen is about 80px each - enough for the icon,
+   not always for the label. A step down in both below 750px holds most labels
+   to one line; the rest still wrap rather than dropping to a 2x2 grid, for the
+   reason in the section note above. */
+@media screen and (max-width: 749px) {
+  .pdp-trust {
+    gap: 0.6rem;
+  }
+
+  .pdp-trust__item {
+    gap: 0.6rem;
+  }
+
+  .pdp-trust__icon .pdp-icon {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+
+  .pdp-trust__label {
+    font-size: 1.05rem;
+    line-height: 1.35;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -412,6 +585,18 @@
    radius. Square it off so it traces the chip. */
 .pdp .product-form__input--pill input[type='radio'] + label:before {
   border-radius: 0;
+}
+
+/* The desktop chip stands about 32px tall, which is a fine mouse target and a
+   poor thumb one - 44px is the smallest that is comfortable. Grown with
+   padding rather than a fixed height so the chip still centres its label
+   whether that reads "S" or "3-4 Y". */
+@media screen and (max-width: 749px) {
+  .pdp .product-form__input--pill input[type='radio'] + label {
+    min-width: 5.2rem;
+    padding: 1.45rem 1.4rem;
+    margin: 0 0.6rem 0.6rem 0;
+  }
 }
 
 /* Sold-out sizes: struck through and dimmed, still focusable so screen readers
@@ -729,9 +914,28 @@
   color: var(--pdp-ink);
 }
 
-/* Narrow phones: the button's label plus its tracking stops the field getting
-   a usable width, so the row becomes two full-width controls. */
-@media screen and (max-width: 480px) {
+/* The panel is the widest thing in the buy box, so on a phone it is the one
+   that has to give some padding back to the content inside it. */
+@media screen and (max-width: 749px) {
+  .pdp-delivery {
+    padding: 2rem 1.8rem;
+  }
+
+  .pdp-delivery__title {
+    margin-bottom: 1.2rem;
+    font-size: 1.5rem;
+  }
+}
+
+/* The button's label plus its tracking stops the field getting a usable width
+   at two quite different sizes, so the row becomes two full-width controls at
+   both: on a narrow phone, and again between 750px and 989px, where the buy
+   box is half a tablet viewport and this panel ends up narrower than it is on
+   a 390px phone. Side by side there, the field truncated its own placeholder.
+
+   Two ranges rather than one open-ended query, because from 990px the column
+   is wide again and the row belongs on one line as the design draws it. */
+@media screen and (max-width: 480px), screen and (min-width: 750px) and (max-width: 989px) {
   .pdp-delivery__form {
     flex-wrap: wrap;
   }
@@ -963,32 +1167,93 @@
   margin-bottom: 2rem;
 }
 
+/* The grid is the bordered box the design draws: one hairline round the
+   outside, and the columns divided by hairlines rather than by a gap.
+
+   `column-gap: 0` with padding inside each column, rather than a gap with a
+   rule sitting in it. A border on a grid item is drawn at the item's own edge,
+   so with a gap the divider hugs one column and leaves a gap's width of white
+   on the other side of it. Padding inside the columns puts equal air either
+   side of every rule.
+
+   `align-items: stretch` is what runs those dividers the full height of the
+   box when one column holds two rows and its neighbour holds five. Only the
+   column box grows - the rows inside it still stack from the top - so a short
+   column still ends where its content ends. */
 .pdp-info__grid {
   display: grid;
   grid-template-columns: 1fr;
-  row-gap: 3.2rem;
+  row-gap: 0;
+  border: 0.1rem solid var(--pdp-line);
 }
 
 @media screen and (min-width: 750px) {
   .pdp-info__grid {
     grid-template-columns: repeat(var(--pdp-info-columns, 4), 1fr);
-    align-items: start;
-    column-gap: 4rem;
-    row-gap: 0;
-  }
-}
-
-@media screen and (min-width: 1200px) {
-  .pdp-info__grid {
-    column-gap: 5.6rem;
+    align-items: stretch;
+    column-gap: 0;
   }
 }
 
 /* --- column ------------------------------------------------------------- */
 
+/* Stacked on a phone, so the columns divide horizontally; from 750px they are
+   side by side and divide vertically. Same box either way. */
 .pdp-info__group {
   display: block;
+  padding: 0.6rem 1.6rem 1.4rem;
+}
+
+.pdp-info__group + .pdp-info__group {
   border-top: 0.1rem solid var(--pdp-line);
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-info__group {
+    padding: 1.2rem 2.4rem 2.4rem;
+  }
+
+  .pdp-info__group + .pdp-info__group {
+    border-top: 0;
+    border-left: 0.1rem solid var(--pdp-line);
+  }
+}
+
+/* Between 750px and 989px the section still spans the page, but four columns
+   of it are about 120px of text each - every row heading wrapped to two or
+   three lines and the column read as a list of fragments. Two columns there,
+   four only once there is room for them.
+
+   The dividers cannot be `+ .pdp-info__group` here: with two columns the grid
+   wraps, so "the previous sibling" is the column to the left for some items
+   and the column above for others. Position decides it instead - the right
+   column of each pair takes the vertical rule, everything from the second row
+   down takes the horizontal one. The count is fixed at two, so the nth-child
+   arithmetic is fixed with it. */
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .pdp-info__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pdp-info__group + .pdp-info__group {
+    border-top: 0;
+    border-left: 0;
+  }
+
+  .pdp-info__group:nth-child(2n) {
+    border-left: 0.1rem solid var(--pdp-line);
+  }
+
+  .pdp-info__group:nth-child(n + 3) {
+    border-top: 0.1rem solid var(--pdp-line);
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .pdp-info__group {
+    padding-left: 3.2rem;
+    padding-right: 3.2rem;
+  }
 }
 
 .pdp-info__grouprow {
@@ -1004,7 +1269,6 @@
   margin: 0;
   padding: 1.6rem 0;
   border: 0;
-  border-bottom: 0.1rem solid var(--pdp-line);
   border-radius: 0;
   background: none;
   font-family: inherit;
@@ -1058,6 +1322,12 @@
 
 .pdp-info__item {
   border-bottom: 0.1rem solid var(--pdp-line-soft);
+}
+
+/* The design ends each column on white, not on a rule sitting just inside the
+   box's own border. */
+.pdp-info__item:last-child {
+  border-bottom: 0;
 }
 
 .pdp-info__item > summary {

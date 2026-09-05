@@ -5,3 +5,14 @@
 .related-products__heading {
   margin: 0 0 3rem;
 }
+
+/* Alignment comes from the section's `heading_alignment` setting. It used to be
+   an inline `text-align: center` on the small-label variant only, which left the
+   two heading variants disagreeing and could not be overridden per template. */
+.related-products__heading--center {
+  text-align: center;
+}
+
+.related-products__heading--left {
+  text-align: left;
+}
