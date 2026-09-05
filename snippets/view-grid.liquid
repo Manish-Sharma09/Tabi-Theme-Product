@@ -1,0 +1,212 @@
+{%- comment -%}
+  Product grid column switcher.
+
+  Mobile  (<= 767px): 1 or 2 columns, DEFAULT 2
+  Desktop (>= 768px): 2, 3 or 4 columns, DEFAULT 4
+
+  The two breakpoints keep SEPARATE preferences in localStorage. The previous
+  version shared a single key and rewrote it on resize, so switching to a phone
+  overwrote the desktop choice — and a desktop choice of 4 was never clamped,
+  which is why phones rendered 4 columns.
+{%- endcomment -%}
+
+<div class="filter-buttons">
+  <button class="filter-btn mobile-only" data-cols="1" aria-label="One column">
+    <svg class="m-svg-icon--small" width="10px" height="10px" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12.5 2" aria-hidden="true">
+      <path d="M0,1h12.5" stroke-width="1"/>
+    </svg>
+  </button>
+
+  <button class="filter-btn" data-cols="2" aria-label="Two columns">
+    <svg class="m-svg-icon--small" width="10px" height="10px" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5.5 12.5" aria-hidden="true">
+      <path d="M.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 01.75 0z"/>
+      <path d="M4.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 014.75 0z"/>
+    </svg>
+  </button>
+
+  <button class="filter-btn desktop-only" data-cols="3" aria-label="Three columns">
+    <svg class="m-svg-icon--small" width="10px" height="10px" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9.5 12.5" aria-hidden="true">
+      <path d="M.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 01.75 0z"/>
+      <path d="M4.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 014.75 0z"/>
+      <path d="M8.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 018.75 0z"/>
+    </svg>
+  </button>
+
+  <button class="filter-btn desktop-only" data-cols="4" aria-label="Four columns">
+    <svg class="m-svg-icon--small" width="10px" height="10px" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13.5 12.5" aria-hidden="true">
+      <path d="M.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 01.75 0z"/>
+      <path d="M4.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 014.75 0z"/>
+      <path d="M8.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 018.75 0z"/>
+      <path d="M12.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11a.76.76 0 01.75-.75z"/>
+    </svg>
+  </button>
+</div>
+
+<script>
+  (function () {
+    'use strict';
+
+    var MOBILE_MQ = '(max-width: 767px)';
+    var KEY_DESKTOP = 'activeGridCols';
+    var KEY_MOBILE = 'activeGridColsMobile';
+    var DESKTOP_DEFAULT = '4';
+    var MOBILE_DEFAULT = '2';
+    var ALL = ['grid-cols-1', 'grid-cols-2', 'grid-cols-3', 'grid-cols-4'];
+
+    var mq = window.matchMedia(MOBILE_MQ);
+
+    function isMobile() {
+      return mq.matches;
+    }
+    function key() {
+      return isMobile() ? KEY_MOBILE : KEY_DESKTOP;
+    }
+    function allowed() {
+      return isMobile() ? ['1', '2'] : ['2', '3', '4'];
+    }
+    function fallback() {
+      return isMobile() ? MOBILE_DEFAULT : DESKTOP_DEFAULT;
+    }
+
+    function readPref() {
+      var value = null;
+      try {
+        value = localStorage.getItem(key());
+      } catch (e) {
+        /* private mode / storage disabled */
+      }
+      // A value that isn't valid for THIS breakpoint falls back to its default,
+      // so a stale "4" can never leak onto a phone.
+      return allowed().indexOf(value) === -1 ? fallback() : value;
+    }
+
+    function writePref(value) {
+      if (allowed().indexOf(value) === -1) return;
+      try {
+        localStorage.setItem(key(), value);
+      } catch (e) {
+        /* ignore */
+      }
+    }
+
+    function apply() {
+      var cols = readPref();
+      var grid = document.getElementById('product-grid');
+
+      if (grid) {
+        ALL.forEach(function (c) {
+          grid.classList.remove(c);
+        });
+        grid.classList.add('grid-cols-' + cols);
+      }
+
+      document.querySelectorAll('.filter-btn').forEach(function (btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-cols') === cols);
+        btn.setAttribute('aria-pressed', btn.getAttribute('data-cols') === cols ? 'true' : 'false');
+      });
+    }
+
+    function bind() {
+      document.querySelectorAll('.filter-btn').forEach(function (btn) {
+        if (btn.dataset.gridBound) return;
+        btn.dataset.gridBound = 'true';
+        btn.addEventListener('click', function () {
+          writePref(btn.getAttribute('data-cols'));
+          apply();
+        });
+      });
+    }
+
+    function init() {
+      apply();
+      bind();
+    }
+
+    // Crossing the breakpoint only re-reads the other preference — it never
+    // overwrites it, so the desktop choice survives a trip to mobile.
+    if (mq.addEventListener) {
+      mq.addEventListener('change', apply);
+    } else if (mq.addListener) {
+      mq.addListener(apply);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    document.addEventListener('shopify:section:load', init);
+  })();
+</script>
+
+<style>
+  .filter-buttons {
+    display: flex;
+    justify-content: end;
+    gap: 10px;
+  }
+
+  .filter-btn {
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    background: transparent;
+  }
+
+  .filter-btn.active {
+    background: #000;
+    color: #fff;
+  }
+
+  /* Column counts only. Gutters are owned by custom-fixes.css
+     (#product-grid.product-grid) so there is one source of truth. */
+  .grid-cols-1 {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .grid-cols-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-cols-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid-cols-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .mobile-only {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .mobile-only {
+      display: inline-block;
+    }
+
+    .desktop-only {
+      display: none;
+    }
+
+    /* Hard clamp. Even if a stale grid-cols-3/4 class survives — a cached page,
+       a theme-editor re-render, JS disabled — a phone can never render more
+       than 2 columns. */
+    .grid-cols-3,
+    .grid-cols-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .filter-btn.desktop-only {
+      display: inline-block;
+    }
+  }
+</style>

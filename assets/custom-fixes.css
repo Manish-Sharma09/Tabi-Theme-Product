@@ -1,0 +1,1126 @@
+/* ==========================================================================
+   custom-fixes.css
+   Loaded from layout/theme.liquid immediately after base.css.
+
+     1. Product card sizing / equal heights / title wrapping
+     2. Price on a single line
+     3. Whole-card link
+     4. ADD TO CART bar + inline size popup
+     5. Auto-sliding card image carousel
+     6. Header: search + cart on the right
+     7. Mobile horizontal ("diagonal") scroll guard
+     8. Text formatting consistency
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PRODUCT CARD SIZING
+   base.css had .grid__item fully commented out, which collapsed flex items to
+   min-content and stacked product titles one letter per line. base.css is
+   restored; these rules keep every card in a row the same height.
+   -------------------------------------------------------------------------- */
+
+#product-grid[class*='grid-cols-'] > .grid__item {
+  width: 100%;
+  max-width: 100%;
+}
+
+.product-grid .grid__item,
+.collection .grid__item {
+  min-width: 0;
+  display: flex;
+}
+
+.product-grid .grid__item > .card-wrapper,
+.collection .grid__item > .card-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-grid .grid__item .card,
+.collection .grid__item .card {
+  flex: 1 1 auto;
+}
+
+.product-grid .card__media .media img,
+.collection .card__media .media img {
+  object-fit: cover;
+}
+
+.card__heading,
+.card__heading a {
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+.product-grid .card__heading,
+.collection .card__heading {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.3;
+  min-height: 2.6em;
+  margin-bottom: 0.4rem;
+}
+
+.product-grid .card-information,
+.collection .card-information {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.product-grid .card-information .price,
+.collection .card-information .price {
+  margin-top: auto;
+  padding-top: 0.4rem;
+}
+
+/* `new-arrival` chip — the markup shipped with no CSS at all. */
+.sale-tags {
+  position: absolute;
+  z-index: 4;
+  top: 0.8rem;
+  left: 0.8rem;
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
+  background: rgb(var(--color-foreground));
+  color: rgb(var(--color-background));
+  border-radius: var(--badge-corner-radius, 0);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   2. PRICE ON A SINGLE LINE
+   Dawn sets `.price--on-sale .price__sale { display: initial }` — `initial`
+   resolves to `inline`, so the flex-direction/wrap declarations beside it do
+   nothing and the compare-at price drops to a second line in narrow cards.
+   -------------------------------------------------------------------------- */
+
+.price .price__container {
+  display: block;
+}
+
+.price__regular,
+.price--on-sale .price__sale {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  white-space: nowrap;
+}
+
+.price .price-item,
+.price .price-item--regular,
+.price .price-item--sale {
+  white-space: nowrap;
+  margin: 0;
+  display: inline-block;
+}
+
+.price s.price-item {
+  opacity: 0.6;
+}
+
+/* Long "From ₹x,xxx – ₹y,yyy" ranges shrink rather than wrap. */
+.product-grid .price,
+.collection .price {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media screen and (max-width: 480px) {
+  .product-grid .price,
+  .collection .price {
+    font-size: 1.3rem;
+  }
+
+  .product-grid .price__regular,
+  .product-grid .price--on-sale .price__sale {
+    gap: 0.4rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. WHOLE-CARD LINK
+   Dawn makes the entire card clickable via `.card__heading a::after` stretched
+   over the nearest positioned ancestor — which is `.card-wrapper`. Anything
+   that introduces a closer positioned ancestor (e.g. position:relative on
+   .card__content) silently shrinks that hit area to the text block, so we keep
+   .card-wrapper as the anchor and layer the interactive controls above it.
+   -------------------------------------------------------------------------- */
+
+.card-wrapper,
+.product-card-wrapper {
+  position: relative;
+}
+
+.card__heading a::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  content: '';
+}
+
+/* STACKING CONTAINMENT — this is why the ADD TO CART bars were painting on
+   top of the open menu drawer. `.section-header` is a stacking context at
+   z-index: 3; any positioned card element with z-index >= 3 sitting later in
+   the document therefore painted above it. Giving each grid item its own
+   stacking context at z-index: 0 traps every z-index inside the card, so no
+   card element can ever escape above the header again — whatever numbers are
+   used internally. */
+.product-grid .grid__item,
+.collection .grid__item {
+  position: relative;
+  z-index: 0;
+}
+
+/* Everything the shopper can actually interact with sits above the link
+   overlay (z-index: 1) but stays inside the card's own context. */
+.card-wrapper .quick-add,
+.card-wrapper .card__badge {
+  position: relative;
+  z-index: 2;
+}
+
+/* While a size popup is open its card is lifted above its neighbours — but
+   still far below the header. */
+.product-grid .grid__item.sizes-open,
+.collection .grid__item.sizes-open {
+  z-index: 5;
+}
+
+/* --------------------------------------------------------------------------
+   4. ADD TO CART BAR + INLINE SIZE POPUP
+   -------------------------------------------------------------------------- */
+
+.quick-add {
+  margin: 0.6rem 0 0;
+}
+
+.quick-add__submit--bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 3.6rem;
+  padding: 0.7rem 1rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.09rem;
+  text-transform: uppercase;
+  line-height: 1.2;
+  border-radius: var(--buttons-radius, 0);
+}
+
+.quick-add__label {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-add__submit--bar[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.quick-add__submit--bar .loading__spinner {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+/* Size popup, anchored over the bottom of the card. */
+.card-sizes {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+  padding: 1.2rem;
+  background: rgb(var(--color-background));
+  border: 0.1rem solid rgba(var(--color-foreground), 0.12);
+  border-radius: var(--product-card-corner-radius, 0);
+  box-shadow: 0 -2px 18px rgba(var(--color-shadow), 0.16);
+  animation: cardSizesIn 0.18s ease-out;
+}
+
+.card-sizes[hidden] {
+  display: none;
+}
+
+@keyframes cardSizesIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.8rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-sizes__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.card-sizes__title {
+  font-size: 1.15rem;
+  letter-spacing: 0.09rem;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.card-sizes__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: rgb(var(--color-foreground));
+}
+
+.card-sizes__close svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.card-sizes__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.card-sizes__option {
+  min-width: 3.8rem;
+  padding: 0.7rem 0.9rem;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: rgb(var(--color-foreground));
+  background: transparent;
+  border: 0.1rem solid rgba(var(--color-foreground), 0.35);
+  border-radius: var(--variant-pills-radius, 0);
+  transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.card-sizes__option:hover:not([disabled]) {
+  background: rgb(var(--color-foreground));
+  color: rgb(var(--color-background));
+  border-color: rgb(var(--color-foreground));
+}
+
+.card-sizes__option[disabled] {
+  opacity: 0.35;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.card-sizes__option.is-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.card-sizes__details {
+  display: inline-block;
+  margin-top: 0.9rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.05rem;
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+.card-sizes__status {
+  margin: 0.6rem 0 0;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  min-height: 0;
+}
+
+.card-sizes__status:empty {
+  display: none;
+}
+
+.card-sizes__status[data-state='error'] {
+  color: rgb(200, 40, 40);
+}
+
+/* --------------------------------------------------------------------------
+   5. AUTO-SLIDING CARD IMAGE CAROUSEL
+   Built by custom-fixes.js as an overlay inside .card__media so Dawn's own
+   markup and lazy-loading are left untouched.
+   -------------------------------------------------------------------------- */
+
+script.card-gallery-data {
+  display: none !important;
+}
+
+.card-slider {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* Above the card link overlay (z-index: 1) so the arrows are clickable.
+     `pointer-events: none` means image clicks still fall through to the link;
+     only .card-slider__nav opts back in. */
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Only the arrows are interactive; the rest of the slider stays click-through
+   so the whole-card link keeps working. */
+.card-slider__nav {
+  pointer-events: auto;
+}
+
+/* The track is one slide wider on each side than the real gallery — a clone of
+   the last image leads, a clone of the first trails. JS hops between them with
+   transitions off, which is what makes the loop endless instead of rewinding.
+
+   Easing is a gentle ease-in-out rather than the old ease-out: with autoplay
+   the slide should settle rather than arrive abruptly. */
+.card-slider__track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0.02, 0.2, 1);
+  will-change: transform;
+}
+
+.card-slider__slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+}
+
+.card-slider__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+/* A slide whose image 404s becomes transparent, letting the base product
+   image show through instead of flashing an empty box. */
+.card-slider__slide.is-broken {
+  visibility: hidden;
+}
+
+/* Mounted on the <li class="grid__item">, OUTSIDE .card-wrapper.
+
+   Dawn's whole-card link is `.card__heading a::after` stretched over
+   .card-wrapper at z-index 1. Placing the arrows anywhere inside the card
+   meant relying on stacking rules that kept not holding in practice —
+   .card__media opens its own stacking context (flex item + z-index: 0), and
+   even .card__inner did not reliably out-rank the overlay.
+
+   As a LATER SIBLING of .card-wrapper with a higher z-index, the arrows cannot
+   be painted under it. Height is mirrored from .card__inner by JS
+   (ResizeObserver) since they no longer sit inside the image box. */
+.card-slider__controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  z-index: 6;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.8rem;
+  pointer-events: none;
+}
+
+.card-slider__nav {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  background: rgba(var(--color-background), 0.9);
+  color: rgb(var(--color-foreground));
+  box-shadow: 0 1px 6px rgba(var(--color-shadow), 0.22);
+  opacity: 0;
+  transition: opacity 0.18s ease, background-color 0.18s ease;
+}
+
+.card-slider__nav svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  pointer-events: none;
+}
+
+/* Desktop = manual arrows, mobile = autoplay. Keyed to viewport width so it
+   matches the JS, which had been using `(hover: hover) and (pointer: fine)` —
+   that reports false on touchscreen laptops, so autoplay kept running. */
+@media screen and (min-width: 750px) {
+  /* .has-slider lives on a SIBLING now, so reveal is driven by a class JS puts
+     on the grid item — not :has(), which would be a support risk. */
+  .grid__item.has-card-slider .card-slider__controls {
+    display: flex;
+  }
+
+  .grid__item.has-card-slider:hover .card-slider__nav,
+  .grid__item.has-card-slider:focus-within .card-slider__nav {
+    opacity: 1;
+  }
+
+  .card-slider__nav:hover {
+    background: rgb(var(--color-background));
+  }
+
+  .card-slider__nav:focus-visible {
+    opacity: 1;
+    outline: 0.2rem solid rgb(var(--color-foreground));
+    outline-offset: 0.2rem;
+  }
+}
+
+.card-slider__dots {
+  position: absolute;
+  pointer-events: none;
+  left: 0;
+  right: 0;
+  bottom: 0.8rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* The active dot stretches into a pill instead of scaling up. A scaled circle
+   reads as a rendering artefact at this size; the pill reads as progress. */
+.card-slider__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(var(--color-background), 0.55);
+  box-shadow: 0 0 0 1px rgba(var(--color-foreground), 0.15);
+  transition: width 0.3s cubic-bezier(0.4, 0.02, 0.2, 1), background-color 0.3s ease;
+}
+
+.card-slider__dot.is-active {
+  width: 1.4rem;
+  background: rgb(var(--color-background));
+}
+
+/* Dawn's own first <img> stays visible underneath the slider as a safety net.
+   The slider's slides are opaque and cover it, but a slide whose image 404s
+   turns transparent (.is-broken) and this shows through — so the card can never
+   render blank. Dawn's secondary hover image is suppressed because the slider
+   now owns that job.
+
+   Note: slide 0 used to be left empty to lean on this image directly. That is
+   why the first picture never animated — it was not in the track at all. Every
+   slide carries its own <img> now; this is fallback only. */
+.card-wrapper.has-slider .card__media .media > img:not(:first-child) {
+  opacity: 0 !important;
+}
+
+.card-wrapper.has-slider:hover .card__media .media > img:first-child,
+.card-wrapper.has-slider .card__media .media > img:first-child {
+  opacity: 1 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-slider__track {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6z. MENU DRAWER — pinned, not scrolling away
+   Dawn positions .menu-drawer absolutely against the header, so a
+   non-sticky header carries the open drawer up and out of view. Pin it to the
+   viewport while it is open and let it own its own scrolling.
+   -------------------------------------------------------------------------- */
+
+/* The drawer fills the viewport from the very top.
+
+   It used to open BELOW the header, offset by a --drawer-top value measured in
+   JS, which left a strip of page above it and gave the panel its own short
+   scroll area inside a page that also scrolled. Worse, the header stayed on top
+   so its close X was visible at the same time as the drawer's own — three ways
+   to shut one panel.
+
+   Starting at 0 and covering the header solves all of it at once: no gap, one
+   scroll region, and the header's X is simply not on screen, so the only close
+   control is the single cross injected into the drawer by custom-fixes.js. */
+.section-header.menu-open .menu-drawer,
+.header-wrapper .menu-open .menu-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* Must out-rank .header, which paints at the section's default level. Dawn
+     ships .menu-drawer at z-index 3; that lost to the header rule that used to
+     sit here to keep the header's own X clickable. */
+  z-index: 10;
+  /* Width deliberately NOT set. menu_type_desktop is "drawer" on this store,
+     and Dawn sizes the panel to 40rem from 750px up (100% below that).
+     Forcing width: 100% here blew the desktop drawer across the whole screen. */
+  height: var(--viewport-height, 100vh);
+  max-height: var(--viewport-height, 100vh);
+  /* Long menus still have to move. Short ones now have nothing left to scroll,
+     because the panel already owns the whole screen. */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.section-header.menu-open menu-drawer > details[open] > summary::before,
+.section-header.menu-open header-drawer > details[open] > summary::before {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--viewport-height, 100vh);
+}
+
+/* Pinned so closing the drawer does not jump the page back to where it was.
+   The header sits UNDER the drawer now — see the z-index above. */
+.section-header.menu-open {
+  position: sticky;
+  top: 0;
+}
+
+/* Belt and braces for the "clicking anywhere re-opens the menu" bug.
+
+   base.css turns the hamburger into a full-page invisible layer whenever it
+   carries aria-expanded="true":
+
+     .header__icon--menu[aria-expanded='true']::before {
+       content: ''; width: 100%; height: calc(100vh - ...); position: absolute;
+     }
+
+   That layer is Dawn's click-outside-to-close scrim, and because it is a
+   ::before of the <summary>, clicking it toggles the <details> open. global.js
+   only clears aria-expanded on KeyboardEvent, so closing by mouse or touch used
+   to leave the layer sitting over the whole page.
+
+   custom-fixes.js now keeps the attribute honest, and this rule makes it
+   impossible for the layer to exist while the drawer is shut even if the
+   attribute ever goes stale again. .menu-open is present only while the drawer
+   is genuinely open, so the scrim still works for click-outside on desktop,
+   where the panel is 40rem rather than full width. */
+.section-header:not(.menu-open) .header__icon--menu::before {
+  display: none;
+}
+
+/* --- The drawer's ONE close control, injected by custom-fixes.js ----------
+   Icon only. It used to carry the word "Close" beside the cross, which read as
+   two separate controls sitting under the header's own X — three ways to shut
+   one panel. The label now lives on aria-label, so screen readers still get it.
+   Stays sticky so the cross is reachable however far the menu is scrolled. */
+.menu-drawer__dismiss {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 1.4rem 1.8rem;
+  border: 0;
+  border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.08);
+  background: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+  cursor: pointer;
+}
+
+.menu-drawer__dismiss:hover {
+  background: rgba(var(--color-foreground), 0.04);
+}
+
+.menu-drawer__dismiss .svg-wrapper,
+.menu-drawer__dismiss svg {
+  width: 1.7rem;
+  height: 1.7rem;
+  flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   6a. HEADER STACKING
+   Dawn ships the header section at z-index: 3, which is low enough for page
+   content to overlap the open menu drawer. Raised well clear; the cart drawer
+   lives outside the header at z-index: 1000 and still sits on top of both.
+   -------------------------------------------------------------------------- */
+
+.section-header.shopify-section-group-header-group {
+  z-index: 20;
+}
+
+.section-header {
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   6b. HEADER — SEARCH + CART ON THE RIGHT
+   Desktop already groups them inside .header__icons; this handles mobile,
+   where the search sat on the far left.
+   -------------------------------------------------------------------------- */
+
+.header__icons {
+  justify-self: end;
+}
+
+.header__icons .header__search,
+.search_desktop_icon {
+  order: 1;
+}
+
+.header__icons #cart-icon-bubble {
+  order: 2;
+}
+
+/* --------------------------------------------------------------------------
+   7. HORIZONTAL / "DIAGONAL" SCROLL GUARD
+
+   Scoped to #MainContent on purpose. Putting overflow-x on <html> stops
+   <html> being `overflow: visible`, which stops <body>'s overflow propagating
+   to the viewport — and Dawn's menu-drawer scroll lock is exactly that:
+   `body { overflow: hidden }`. That is why the drawer scrolled away with the
+   page. Clipping the main content instead leaves the propagation chain, and
+   therefore the scroll lock, completely intact.
+   -------------------------------------------------------------------------- */
+
+#MainContent,
+.shopify-section-group-footer-group {
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  #MainContent,
+  .shopify-section-group-footer-group {
+    overflow-x: hidden;
+  }
+}
+
+img,
+video,
+iframe,
+table {
+  max-width: 100%;
+}
+
+.shop-by-category,
+.collection-feature-slider,
+.slider--mobile,
+.slider--tablet {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.shop-by-category::-webkit-scrollbar,
+.collection-feature-slider::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* ==========================================================================
+   9. REFERENCE CARD LAYOUT
+      [ image ] / [ ADD TO BAG bar ] / [ FABRIC ] / title / price / sizes / swatches
+   ========================================================================== */
+
+/* Edge-to-edge grid with a hairline gutter, like the reference. */
+.collection.page-width {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+#product-grid.product-grid {
+  column-gap: 0.2rem;
+  row-gap: 14px;
+  margin-bottom: 0;
+}
+
+@media screen and (min-width: 990px) {
+  #product-grid.product-grid {
+    column-gap: 0.4rem;
+    row-gap: 4rem;
+  }
+}
+
+/* Full-bleed is the look, but uncapped on an ultrawide monitor each card
+   becomes enormous. Cap the container without reintroducing side gutters. */
+@media screen and (min-width: 1800px) {
+  .collection.page-width {
+    max-width: 1800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Card content stacks: bar first, then the text block. */
+.product-grid .card > .card__content {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+}
+
+.product-grid .card > .card__content > .quick-add {
+  order: 1;
+  margin: 0;
+}
+
+.product-grid .card > .card__content > .card__information {
+  order: 2;
+  padding: 1.2rem 1.2rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.product-grid .card > .card__content > .card__badge {
+  order: 3;
+}
+
+/* --- ADD TO BAG bar ------------------------------------------------------ */
+.product-grid .quick-add__submit--bar {
+  width: 100%;
+  min-height: 4.4rem;
+  padding: 1.2rem 1rem;
+  border: 0;
+  border-radius: 0;
+  background: rgba(var(--color-foreground), 0.045);
+  color: rgb(var(--color-foreground));
+  font-size: 1.2rem;
+  letter-spacing: 0.14rem;
+  text-transform: uppercase;
+  transition: background-color 0.16s ease;
+}
+
+.product-grid .quick-add__submit--bar::after,
+.product-grid .quick-add__submit--bar::before {
+  display: none;
+}
+
+.product-grid .quick-add__submit--bar .quick-add__label {
+  text-decoration: underline;
+  text-underline-offset: 0.4rem;
+  text-decoration-thickness: 0.06rem;
+}
+
+.product-grid .quick-add__submit--bar:hover:not([disabled]) {
+  background: rgba(var(--color-foreground), 0.09);
+}
+
+/* --- Fabric chip --------------------------------------------------------- */
+.card__fabric {
+  display: inline-block;
+  margin-bottom: 0.9rem;
+  padding: 0.45rem 0.9rem;
+  border: 0.1rem solid rgba(var(--color-foreground), 0.35);
+  font-size: 1rem;
+  line-height: 1.2;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Title: exactly one line, ellipsis ----------------------------------- */
+.product-grid .card__heading,
+.collection .card__heading {
+  display: block;
+  -webkit-line-clamp: none;
+  line-clamp: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  min-height: 0;
+  margin: 0 0 0.6rem;
+  font-size: 1.45rem;
+  line-height: 1.4;
+  letter-spacing: 0.02rem;
+}
+
+.product-grid .card__heading a,
+.collection .card__heading a {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-grid .card-information,
+.collection .card-information {
+  width: 100%;
+  align-items: flex-start;
+}
+
+.product-grid .card-information .price,
+.collection .card-information .price {
+  margin: 0 0 0.9rem;
+  padding: 0;
+  font-size: 1.45rem;
+  letter-spacing: 0.02rem;
+}
+
+/* --- Size row ------------------------------------------------------------ */
+/* MUST be positioned with a z-index above the card link overlay (z-index: 1),
+   otherwise the stretched <a>::after covers the chips and every click
+   navigates to the product page instead of adding the size to the bag. */
+/* DORMANT: card-product.liquid no longer renders .card__sizes. Kept so the
+   chips come back looking right if that block is ever restored.
+
+   Do not reach for a grid here. `repeat(auto-fit, minmax(...))` collapsed to a
+   single column inside a 2-up mobile card and stacked all eight sizes one per
+   line. Wrapped flex is the correct model for chips of varying width. */
+.card__sizes {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 0.9rem;
+}
+
+.card__sizes-status,
+.card__swatches {
+  position: relative;
+  z-index: 2;
+}
+
+.card__size {
+  display: inline-block;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 1.2rem;
+  line-height: 1.2;
+  letter-spacing: 0.04rem;
+  color: rgba(var(--color-foreground), 0.85);
+}
+
+.card__size--button {
+  cursor: pointer;
+  transition: color 0.12s ease, opacity 0.12s ease;
+  position: relative;
+  z-index: 1;
+  /* Comfortable tap target without changing the visual size. */
+  min-width: 2.4rem;
+  min-height: 2.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card__size--button.is-added {
+  color: rgb(var(--color-foreground));
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+}
+
+.card__size--button:hover:not([disabled]) {
+  color: rgb(var(--color-foreground));
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+}
+
+.card__size--button[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.card__size--button.is-loading {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.card__sizes-status {
+  margin: -0.4rem 0 0.8rem;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.card__sizes-status:empty {
+  display: none;
+}
+
+.card__sizes-status[data-state='error'] {
+  color: rgb(200, 40, 40);
+}
+
+/* --- Colour swatches ----------------------------------------------------- */
+.card__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.card__swatch {
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background-color: rgba(var(--color-foreground), 0.12);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 0 0.1rem rgba(var(--color-foreground), 0.28);
+}
+
+/* --- "New" chip ---------------------------------------------------------- */
+.sale-tags {
+  top: 1rem;
+  left: 1rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 1rem;
+  letter-spacing: 0.06rem;
+  text-transform: capitalize;
+  background: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+  border-radius: 0;
+}
+
+/* ==========================================================================
+   10. PRODUCT DETAIL PAGE — media sizing
+   The template ships `constrain_to_viewport: false`, which lets a tall product
+   photo render at full natural height on a phone. Constrain it and stop the
+   mobile gallery slider bleeding past the viewport.
+   ========================================================================== */
+
+.product__media-wrapper,
+.product__media-list,
+.product__media-item {
+  max-width: 100%;
+}
+
+.product__media img,
+.product__media .media img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media screen and (max-width: 749px) {
+  .product__media-wrapper {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .product__media-list {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .product--large .product__media-wrapper,
+  .product__media-wrapper .product-media-container {
+    max-height: 78vh;
+  }
+
+  .product__media-item .product-media-container .media {
+    max-height: 78vh;
+  }
+
+  .product__media-item img {
+    max-height: 78vh;
+    object-fit: contain;
+  }
+
+  /* Lightbox trigger sometimes rendered outside the media box. */
+  .product__modal-opener .product__media-zoom-lightbox,
+  .product__media-zoom-lightbox {
+    top: 1rem;
+    left: 1rem;
+    right: auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. TEXT FORMATTING CONSISTENCY
+   -------------------------------------------------------------------------- */
+
+/* Heading and price typography is owned by section 9 (reference layout). */
+.product-grid .card__heading,
+.collection .card__heading {
+  font-weight: var(--font-body-weight);
+  text-transform: none;
+}
+
+.product-grid .card-information > *,
+.collection .card-information > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.product-grid .card-information .rating,
+.collection .card-information .rating {
+  margin-bottom: 0.4rem;
+}
+
+.collection-hero__title,
+.collection-hero__description {
+  max-width: 80ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* --------------------------------------------------------------------------
+   FLUID IMAGES THAT CARRY width/height ATTRIBUTES
+
+   An <img> with width/height attributes gets them as CSS *presentational
+   hints* — including `height`, which becomes a pixel height. That hint loses
+   to any author CSS, but these custom sections only ever declare
+   `width: 100%` and never touch height, so nothing overrode it: the images
+   rendered 100% wide by their full natural pixel height, stretched tall.
+
+   This theme has no global `img { height: auto }` to fall back on, so the
+   images that carry the attributes opt in explicitly. The attributes still do
+   their real job — the browser derives an aspect ratio from them and reserves
+   the right box before the image loads, which is what stops layout shift.
+
+   A single class rather than a bare `img` selector keeps the blast radius at
+   exactly the images changed, and cannot out-specify rules like
+   `.card-slider__img { height: 100% }`.
+   -------------------------------------------------------------------------- */
+.cf-img-fluid {
+  height: auto;
+}
+
+/* A product-page-only rule that hid .card__sizes lived here. Redundant now that
+   card-product.liquid renders no size row on any page. The body[data-page-type]
+   hook it relied on is gone too — card autoplay is off everywhere via the
+   AUTOPLAY flag in custom-fixes.js, so nothing needs to branch per template. */
