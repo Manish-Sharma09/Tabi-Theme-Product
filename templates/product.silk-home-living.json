@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -39,68 +48,68 @@
         "buy_buttons": {
           "type": "buy_buttons",
           "settings": {
-            "show_dynamic_checkout": true,
-            "show_gift_card_recipient": true,
             "buy_now_style": "custom",
-            "buy_now_label": "Buy now"
+            "buy_now_label": "Buy now",
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true
           }
         },
         "collapsible_tab_qHw3YE": {
           "type": "collapsible_tab",
+          "disabled": true,
           "settings": {
             "heading": "Description",
             "icon": "none",
             "content": "{{ product.description }}",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "collapsible_tab_aCyR9r": {
           "type": "collapsible_tab",
+          "disabled": true,
           "settings": {
             "heading": "Material",
             "icon": "none",
             "content": "<p>100% Silk lined with soft cotton</p>",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "collapsible_tab_6KXWXr": {
           "type": "collapsible_tab",
+          "disabled": true,
           "settings": {
             "heading": "Care Instructions",
             "icon": "none",
             "content": "<p>Dryclean only</p>",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "collapsible_tab_86emMQ": {
           "type": "collapsible_tab",
+          "disabled": true,
           "settings": {
             "heading": "Additional Information",
             "icon": "none",
             "content": "<p>Tabi products are designed to address the impact of fast fashion on our environment. Each Tabi product is long lasting and sturdy, made with natural, biodegradable materials. No fabric is wasted, all leftovers are used in products made for our upcycle collection.  <br/></p>",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "collapsible_tab_aMyLaW": {
           "type": "collapsible_tab",
+          "disabled": true,
           "settings": {
             "heading": "Shipping & Returns",
             "icon": "none",
             "content": "<p>To reduce waste, we only produce once we receive your order. We ship within 4 to 10 days of receiving the order. Once shipped, orders in India should reach you within 2 to 7 working days. International orders should reach you within 5 to 15 working days.</p><p>Please refer to Shipping & Returns for our return and refund policy.</p>",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "share": {
           "type": "share",
+          "disabled": true,
           "settings": {
             "share_label": "Share"
-          },
-          "disabled": true
+          }
         },
         "description": {
           "type": "description",
@@ -189,6 +198,7 @@
         "share"
       ],
       "settings": {
+        "enable_new_layout": true,
         "enable_sticky_info": false,
         "color_scheme": "scheme-e27c4fd3-eda4-4cb7-8a7a-3aa3f64216e6",
         "media_size": "large",
@@ -201,19 +211,20 @@
         "hide_variants": true,
         "enable_video_looping": false,
         "padding_top": 36,
-        "padding_bottom": 48,
-        "enable_new_layout": true,
-        "enable_sticky_media": true
+        "padding_bottom": 48
       }
     },
     "related-products": {
       "type": "related-products",
       "settings": {
         "heading": "You may also like",
+        "layout": "grid",
+        "heading_style": "heading",
         "heading_size": "h2",
         "products_to_show": 4,
         "columns_desktop": 4,
         "color_scheme": "scheme-e27c4fd3-eda4-4cb7-8a7a-3aa3f64216e6",
+        "quick_add": "standard",
         "image_ratio": "square",
         "image_shape": "default",
         "show_secondary_image": true,
@@ -221,10 +232,7 @@
         "show_rating": false,
         "columns_mobile": "2",
         "padding_top": 48,
-        "padding_bottom": 48,
-        "layout": "grid",
-        "heading_style": "heading",
-        "quick_add": "standard"
+        "padding_bottom": 48
       }
     },
     "pdp-why-love": {
@@ -393,8 +401,6 @@
     },
     "pdp-reviews": {
       "type": "pdp-reviews",
-      "blocks": {},
-      "block_order": [],
       "settings": {
         "heading": "What people are saying",
         "review_count": "",

@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -39,51 +48,51 @@
         "buy_buttons": {
           "type": "buy_buttons",
           "settings": {
-            "show_dynamic_checkout": true,
-            "show_gift_card_recipient": true,
             "buy_now_style": "custom",
-            "buy_now_label": "Buy now"
+            "buy_now_label": "Buy now",
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true
           }
         },
         "collapsible_tab_qHw3YE": {
           "type": "collapsible_tab",
+          "disabled": true,
           "settings": {
             "heading": "Description",
             "icon": "none",
             "content": "{{ product.description }}",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "collapsible_tab_xLgaED": {
           "type": "collapsible_tab",
+          "disabled": true,
           "settings": {
             "heading": "Size Guide",
             "icon": "none",
             "content": "",
             "page": "size-guide"
-          },
-          "disabled": true
+          }
         },
         "collapsible_tab_aCyR9r": {
           "type": "collapsible_tab",
+          "disabled": true,
           "settings": {
             "heading": "Materials and Standards",
             "icon": "none",
             "content": "<p>100% cotton, chosen for softness, breathability and everyday durability.<br/><br/>We pay attention to more than fibre composition. Our fabrics, dyes and finishing processes are selected against stringent quality and chemical-safety requirements (REACH standards), so what sits against the skin is considered as carefully as how the piece looks.<br/><br/>Made for frequent wear, regular washing and a long life in the wardrobe.</p>",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "collapsible_tab_6KXWXr": {
           "type": "collapsible_tab",
+          "disabled": true,
           "settings": {
             "heading": "Easy Care Instructions",
             "icon": "none",
             "content": "<p>These pieces are designed for repeated wear and frequent washing.<br/><br/>Pre-treat stains when needed. Gentle machine wash with similar colours using a mild detergent. Do not bleach. Tumble dry as permitted by the garment care label, or dry in shade. Warm iron on the front or reverse as needed.<br/><br/>A little care helps preserve colour, shape and detailing so the piece can stay in rotation for longer.</p>",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "collapsible_tab_86emMQ": {
           "type": "collapsible_tab",
@@ -97,20 +106,20 @@
         },
         "collapsible_tab_aMyLaW": {
           "type": "collapsible_tab",
+          "disabled": true,
           "settings": {
             "heading": "Shipping & Returns",
             "icon": "none",
             "content": "<p>Our products are made to order and are shipped within 2 to 5 working days of receiving the order.<br/><br/>If your Tabi piece does not work for you, you can request an exchange or return within 5 days of delivery, no questions asked.<br/><br/>Please refer to Shipping, Exchanges & Returns policy for more details.</p>",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "share": {
           "type": "share",
+          "disabled": true,
           "settings": {
             "share_label": "Share"
-          },
-          "disabled": true
+          }
         },
         "description": {
           "type": "description",
@@ -200,6 +209,7 @@
         "share"
       ],
       "settings": {
+        "enable_new_layout": true,
         "enable_sticky_info": false,
         "color_scheme": "scheme-e27c4fd3-eda4-4cb7-8a7a-3aa3f64216e6",
         "media_size": "large",
@@ -212,15 +222,15 @@
         "hide_variants": true,
         "enable_video_looping": false,
         "padding_top": 36,
-        "padding_bottom": 48,
-        "enable_new_layout": true,
-        "enable_sticky_media": true
+        "padding_bottom": 48
       }
     },
     "related-products": {
       "type": "related-products",
       "settings": {
         "heading": "You may also like",
+        "layout": "grid",
+        "heading_style": "heading",
         "heading_size": "h2",
         "products_to_show": 4,
         "columns_desktop": 4,
@@ -233,9 +243,7 @@
         "show_rating": false,
         "columns_mobile": "2",
         "padding_top": 48,
-        "padding_bottom": 48,
-        "layout": "grid",
-        "heading_style": "heading"
+        "padding_bottom": 48
       }
     },
     "pdp-why-love": {
@@ -395,8 +403,6 @@
     },
     "pdp-reviews": {
       "type": "pdp-reviews",
-      "blocks": {},
-      "block_order": [],
       "settings": {
         "heading": "What people are saying",
         "review_count": "",
