@@ -211,7 +211,7 @@
         "mobile_thumbnails": "show",
         "hide_variants": true,
         "enable_video_looping": false,
-        "padding_top": 0,
+        "padding_top": 36,
         "padding_bottom": 12,
         "enable_new_layout": true
       }
@@ -224,8 +224,8 @@
         "products_to_show": 10,
         "columns_desktop": 5,
         "color_scheme": "scheme-e27c4fd3-eda4-4cb7-8a7a-3aa3f64216e6",
-        "quick_add": "standard",
-        "image_ratio": "square",
+        "quick_add": "none",
+        "image_ratio": "portrait",
         "image_shape": "default",
         "show_secondary_image": true,
         "show_vendor": false,
@@ -272,7 +272,7 @@
       ],
       "settings": {
         "heading": "Why you'll love it",
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme-5",
         "padding_top": 48,
         "padding_bottom": 40
       }
@@ -280,15 +280,15 @@
     "pdp-band-batches": {
       "type": "pdp-feature-band",
       "settings": {
-        "image_position": "left",
-        "split": "media_wide",
+        "image_position": "right",
+        "split": "even",
         "mobile_text_first": true,
         "eyebrow": "Made in small batches",
         "heading": "Made in small batches.",
         "body": "<p>Made thoughtfully, in limited runs and often to order.</p><p>Less excess. More intention.</p>",
         "link_label": "",
         "decor_width": 9,
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme-5",
         "padding_top": 12,
         "padding_bottom": 12
       }
@@ -404,7 +404,7 @@
         "column_2_title": "Material & care",
         "column_3_title": "Shipping & delivery",
         "column_4_title": "Exchanges & returns",
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme-5",
         "padding_top": 24,
         "padding_bottom": 24
       }
@@ -413,14 +413,14 @@
       "type": "pdp-feature-band",
       "settings": {
         "image_position": "left",
-        "split": "media_narrow",
-        "mobile_text_first": true,
+        "split": "even",
+        "mobile_text_first": false,
         "eyebrow": "The Tabi way",
         "heading": "A journey towards slower, mindful living.",
         "body": "<p>Tabi is a celebration of the everyday journey - yours and ours, together! It is built around the idea that the things we choose to live with can help us live a little more slowly and consciously. All Tabi products are built with love and care for the planet and the people using them, while blending the rich artisanal heritage of Indian handcrafts into everyday pieces.</p>",
         "link_label": "Read more about us",
         "decor_width": 9,
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme-5",
         "padding_top": 12,
         "padding_bottom": 12
       }
@@ -465,7 +465,7 @@
         "heading": "Our three-part approach",
         "intro": "Everything we make is viewed through three lenses.",
         "cta_label": "Discover how Tabi works",
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme-5",
         "padding_top": 48,
         "padding_bottom": 40
       }

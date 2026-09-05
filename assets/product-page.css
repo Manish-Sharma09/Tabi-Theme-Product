@@ -52,6 +52,7 @@
   --pdp-accent: #3f4a2e;
   --pdp-accent-ink: #ffffff;
   --pdp-tan: #b9a88f;
+  --pdp-clay: #b58f5c;
 
   /* One tracking value for every uppercase eyebrow on the page. */
   --pdp-eyebrow-tracking: 0.14em;
@@ -262,20 +263,18 @@
 /* --------------------------------------------------------------------------
    3. TRUST ICON ROW
 
-   Four equal columns, hairline rules above and below. On narrow phones the
-   labels are the constraint, not the icons, so the columns stay four across and
-   the label wraps to two lines rather than dropping to a 2x2 grid - the row is
-   a reassurance strip and reads better as one band.
+   Four equal columns, unruled - the icons carry the separation on their own. On
+   narrow phones the labels are the constraint, not the icons, so the columns
+   stay four across and the label wraps to two lines rather than dropping to a
+   2x2 grid - the row is a reassurance strip and reads better as one band.
    -------------------------------------------------------------------------- */
 
 .pdp-trust {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
-  margin: 2.4rem 0 0;
-  padding: 1.8rem 0;
-  border-top: 0.1rem solid var(--pdp-line);
-  border-bottom: 0.1rem solid var(--pdp-line);
+  margin: 2.4rem 0 0.4rem;
+  padding: 0;
   list-style: none;
 }
 
@@ -520,7 +519,13 @@
   cursor: not-allowed;
 }
 
-/* BUY NOW - outlined. */
+/* BUY NOW - outlined. The <pdp-buy-now> wrapper is a custom element, so it is
+   blockified today only because .product-form__buttons is a flex container.
+   State the display so the button keeps its full width regardless. */
+.pdp pdp-buy-now {
+  display: block;
+}
+
 .pdp .pdp-buy-now {
   display: flex;
   align-items: center;
@@ -573,10 +578,14 @@
    7. DELIVERY (PINCODE) CHECKER
    -------------------------------------------------------------------------- */
 
+/* <pdp-delivery-check> carries this class directly. Without an explicit
+   display it is an inline box, and the sand panel paints only around the line
+   fragments instead of behind the whole block. */
 .pdp-delivery {
+  display: block;
   margin-top: 2rem;
   padding: 1.8rem;
-  border: 0.1rem solid var(--pdp-line);
+  background: var(--pdp-band);
 }
 
 .pdp .product__info-container > .pdp-delivery {
@@ -623,18 +632,19 @@
   padding: 0 1.8rem;
   border: 0;
   border-radius: 0;
-  background: var(--pdp-tan);
+  background: var(--pdp-clay);
   color: #fff;
   font-family: inherit;
   font-size: 1.2rem;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .pdp-delivery__submit:hover {
-  background: #a8977e;
+  background: #a37e4c;
 }
 
 .pdp-delivery__error {
@@ -873,37 +883,43 @@
 /* --------------------------------------------------------------------------
    10. SECTION: FOUR-COLUMN INFO ACCORDIONS
 
-   Desktop: four columns inside one bordered box, each column headed by an
-   eyebrow with its rows listed below, collapsed.
+   Desktop: four open columns side by side, no container. Each is headed by an
+   eyebrow, and its rows are hairline-separated and collapsed. The rule sits on
+   top of every row, which is what draws the line under the eyebrow as well, so
+   the heading needs no border of its own.
 
    Mobile: the four column headings become the accordions themselves and the
-   rows live inside. That is a genuine structural difference, not just a
-   reflow - so the markup renders both the group <details> and the row
-   <details>, and CSS decides which layer is interactive at each breakpoint.
-   Doing it in CSS keeps one DOM, which means no duplicated content for search
-   engines and no JavaScript to keep the two in sync.
+   rows live inside, as bordered cards stacked flush against each other. That is
+   a genuine structural difference, not just a reflow - so the markup renders
+   both the group <details> and the row <details>, and CSS decides which layer
+   is interactive at each breakpoint. Doing it in CSS keeps one DOM, which means
+   no duplicated content for search engines and no JavaScript to keep the two in
+   sync.
    -------------------------------------------------------------------------- */
 
 .pdp-infocols__grid {
   display: grid;
   grid-template-columns: 1fr;
-  border: 0.1rem solid var(--pdp-line);
 }
 
 @media screen and (min-width: 750px) {
   .pdp-infocols__grid {
     grid-template-columns: repeat(var(--pdp-infocols-count, 4), 1fr);
+    column-gap: 4rem;
+    align-items: start;
   }
 }
 
-.pdp-infocols__col + .pdp-infocols__col {
-  border-top: 0.1rem solid var(--pdp-line);
-}
+/* --- Mobile: stacked cards ------------------------------------------------ */
 
-@media screen and (min-width: 750px) {
-  .pdp-infocols__col + .pdp-infocols__col {
-    border-top: 0;
-    border-left: 0.1rem solid var(--pdp-line);
+@media screen and (max-width: 749px) {
+  .pdp-infocols__col {
+    border: 0.1rem solid var(--pdp-line);
+    border-bottom: 0;
+  }
+
+  .pdp-infocols__col:last-child {
+    border-bottom: 0.1rem solid var(--pdp-line);
   }
 }
 
@@ -918,7 +934,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.6rem;
-  padding: 1.8rem 2rem;
+  padding: 1.6rem 1.8rem;
   cursor: pointer;
   list-style: none;
 }
@@ -941,15 +957,14 @@
 }
 
 .pdp-infocols__rows {
-  padding: 0 2rem 1.4rem;
+  padding: 0 1.8rem 1.2rem;
 }
 
 @media screen and (min-width: 750px) {
-  /* Desktop: the group is always open and its heading is inert. `display:
-     block` on the summary removes the flex row so the caret can be hidden
-     without leaving a gap. */
+  /* Desktop: the group is always open and its heading is inert - an eyebrow
+     above the column, with no padding of its own and no caret. */
   .pdp-infocols__group > summary {
-    padding-bottom: 0.6rem;
+    padding: 0 0 1rem;
     cursor: default;
     pointer-events: none;
   }
@@ -957,16 +972,24 @@
   .pdp-infocols__group > summary .pdp-icon--caret {
     display: none;
   }
+
+  .pdp-infocols__rows {
+    padding: 0;
+  }
 }
 
 /* --- The individual rows -------------------------------------------------- */
 
 .pdp-infocols__row {
-  border-bottom: 0.1rem solid var(--pdp-line-soft);
+  border-top: 0.1rem solid var(--pdp-line);
 }
 
-.pdp-infocols__row:last-child {
-  border-bottom: 0;
+@media screen and (max-width: 749px) {
+  /* Inside a card the eyebrow already has the card's own top border above it,
+     so the first row's rule would double up against the heading's padding. */
+  .pdp-infocols__row:first-child {
+    border-top: 0.1rem solid var(--pdp-line-soft);
+  }
 }
 
 .pdp-infocols__row > summary {
@@ -974,7 +997,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.2rem;
-  padding: 1.1rem 0;
+  padding: 1.2rem 0;
   font-size: 1.25rem;
   color: var(--pdp-ink);
   cursor: pointer;
@@ -995,12 +1018,14 @@
 
 .pdp-infocols__row .pdp-icon--caret {
   color: var(--pdp-faint);
+  width: 1.4rem;
+  height: 1.4rem;
 }
 
 .pdp-infocols__content {
-  padding: 0 0 1.2rem;
+  padding: 0 0 1.4rem;
   font-size: 1.25rem;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--pdp-muted);
 }
 
@@ -1131,7 +1156,12 @@
    and the arrows all move the same scroller and cannot fall out of sync.
    -------------------------------------------------------------------------- */
 
+/* A custom element has no default display, so it is an inline box until CSS
+   says otherwise - which would leave the positioned nav below resolving against
+   an inline fragment rather than against the rail. Every custom element the
+   redesign introduces states its own display for that reason. */
 .pdp-carousel {
+  display: block;
   position: relative;
 }
 
@@ -1144,7 +1174,11 @@
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  padding-bottom: 0.5rem;
+  /* The track is a <ul>, so it starts with the UA's 40px padding-inline-start.
+     Grid percentages resolve against the content box, so leaving it in place
+     sized five columns to a box 40px narrower than the rail and let a sixth
+     card show through on the right. Reset all four sides explicitly. */
+  padding: 0 0 0.5rem;
   margin: 0;
   list-style: none;
 }
@@ -1232,15 +1266,34 @@
 }
 
 /* --------------------------------------------------------------------------
-   13. MEDIA GALLERY ADJUSTMENTS
+   13. MEDIA GALLERY: VERTICAL THUMBNAIL RAIL
 
-   The redesign uses Dawn's `thumbnail` gallery layout, which is a settings
-   change rather than new markup. What it needs from CSS is a narrower thumbnail
-   rail than Dawn's default and square thumbnails.
+   The design puts the thumbnails in a narrow column to the left of the main
+   image. Dawn's `thumbnail` gallery layout lays them out underneath instead, as
+   a horizontal grid that widens with the media size - `repeat(6, 1fr)` at the
+   `product--large` setting this template uses.
+
+   Turning that into a rail is done here rather than by rewriting the gallery
+   markup, because <media-gallery> and its sibling <slider-component>s are
+   driven by Dawn's global-media.js: it reads the DOM order to move the active
+   slide and to sync `aria-current` on the thumbnails. Reordering the elements
+   visually with flexbox keeps that JS working untouched.
+
+   Two things to know about the markup this targets:
+
+   - <media-gallery> carries no class of its own, only an id, so the element
+     selector is the hook. (An earlier version of this file styled
+     `.product__media-gallery` and `.thumbnail-list--wide`; neither class exists
+     in this theme, so those rules never applied.)
+   - .thumbnail-list__item sizes itself with a ::before spacer, not
+     aspect-ratio, so the rail's thumbnails stay square by inheriting it. That
+     matches the square product photography; if the catalogue moves to 3:4,
+     change the spacer's padding-bottom below and nothing else.
 
    Note that assets/custom-fixes.css section 10 already caps .product__media at
-   78vh on phones. That cap is still wanted, and nothing here raises it - these
-   rules only touch the thumbnail rail and the desktop split.
+   78vh on phones. That cap is still wanted, and nothing here raises it - the
+   rail only exists from 750px up, and below that Dawn's horizontal thumbnail
+   slider is left exactly as it is.
    -------------------------------------------------------------------------- */
 
 .pdp .thumbnail-list {
@@ -1261,15 +1314,65 @@
   box-shadow: none;
 }
 
-@media screen and (min-width: 990px) {
-  /* Dawn's thumbnail layout gives the rail a fixed share of the media column.
-     The design's rail is narrower than the default, closer to a sixth. */
-  .pdp .product__media-gallery .thumbnail-list.thumbnail-list--wide {
-    flex: 0 0 auto;
+@media screen and (min-width: 750px) {
+  /* Rail beside the stage. <media-gallery> is a custom element and so has no
+     default display; it has to be given one before the children can be laid
+     out as a row. */
+  .pdp media-gallery {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--pdp-thumb-gap, 1.2rem);
   }
 
+  /* The viewer takes the remaining width. `min-width: 0` stops the media
+     column's intrinsic width from pushing the rail out of the row. */
+  .pdp media-gallery > slider-component:not(.thumbnail-slider) {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* `order` rather than `row-reverse`: it moves the rail to the left visually
+     while leaving the DOM order the gallery script walks untouched. */
+  .pdp .product--thumbnail .thumbnail-slider {
+    order: -1;
+    flex: 0 0 var(--pdp-thumb-rail, 7rem);
+    width: var(--pdp-thumb-rail, 7rem);
+    display: block;
+    padding: 0;
+  }
+
+  /* One column instead of Dawn's four-to-six. `max-width: none` clears the
+     media-size grids in section-main-product.css. */
   .pdp .product--thumbnail .thumbnail-list {
-    max-width: 9rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--pdp-thumb-gap, 1.2rem);
+    max-width: none;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+  }
+
+  .pdp .product--thumbnail .thumbnail-list__item {
+    width: 100%;
+  }
+
+  /* Dawn hides these outside its `thumbnail_slider` layout already; the rail
+     scrolls with the page rather than paging, so keep them out either way. */
+  .pdp .thumbnail-slider > .slider-button {
+    display: none;
+  }
+}
+
+/* Between 750px and 990px the product grid is two equal columns, so the media
+   column is roughly half of what it gets on a desktop and a 7rem rail would eat
+   a fifth of it. Narrow the rail there rather than dropping it, which is what
+   the design does at the same breakpoint. Below 750px Dawn's horizontal
+   thumbnail slider is left untouched. */
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .pdp {
+    --pdp-thumb-rail: 6rem;
+    --pdp-thumb-gap: 1rem;
   }
 }
 
