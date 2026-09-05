@@ -876,14 +876,32 @@
                       "codEnabled": {{ cod_enabled | json }},
                       "codPrefixes": {{ block.settings.cod_prefixes | default: '' | json }},
                       "locale": {{ request.locale.iso_code | default: 'en-IN' | json }},
+                      {%- comment -%}
+                        No `default:` fallbacks here, and specifically no
+                        placeholder tokens. A literal `{` inside a string
+                        literal in a {{ }} output tag stops Shopify's parser
+                        finding the closing braces, and it refuses to save the
+                        whole file: "Variable ... was not properly terminated
+                        with regexp: /\}\}/". That is what kept
+                        snippets/pdp-delivery-check.liquid off the theme, and
+                        then kept this file off it once the markup moved here -
+                        the store went on serving an older copy while every
+                        other file synced normally.
+
+                        The tokens live in two places that tolerate them: the
+                        schema defaults below, which is where a merchant's value
+                        comes from, and product-page.js, which already falls back
+                        for every one of these labels. An unset label serialises
+                        as null and the script supplies the wording.
+                      {%- endcomment -%}
                       "labels": {
-                        "deliveringTo": {{ block.settings.label_delivering | default: 'Delivering to {pincode}' | json }},
-                        "dispatch": {{ block.settings.label_dispatch | default: 'Made to order in {min}-{max} working days' | json }},
-                        "estimated": {{ block.settings.label_estimated | default: 'Estimated delivery:' | json }},
-                        "codYes": {{ block.settings.label_cod_yes | default: 'COD available at this pincode' | json }},
-                        "codNo": {{ block.settings.label_cod_no | default: 'COD not available at this pincode' | json }},
-                        "invalid": {{ block.settings.label_invalid | default: 'Please enter a valid 6-digit pincode.' | json }},
-                        "unserviceable": {{ block.settings.label_unserviceable | default: 'Sorry, we do not deliver to {pincode} yet.' | json }}
+                        "deliveringTo": {{ block.settings.label_delivering | json }},
+                        "dispatch": {{ block.settings.label_dispatch | json }},
+                        "estimated": {{ block.settings.label_estimated | json }},
+                        "codYes": {{ block.settings.label_cod_yes | json }},
+                        "codNo": {{ block.settings.label_cod_no | json }},
+                        "invalid": {{ block.settings.label_invalid | json }},
+                        "unserviceable": {{ block.settings.label_unserviceable | json }}
                       }
                     }
                   {%- endcapture -%}
