@@ -384,10 +384,53 @@
       if (!this.button) return;
       this.onClick = this.onClick.bind(this);
       this.button.addEventListener('click', this.onClick);
+      this.mirrorAddToCart();
     }
 
     disconnectedCallback() {
       if (this.button) this.button.removeEventListener('click', this.onClick);
+      if (this.availability) this.availability.disconnect();
+    }
+
+    /* Both buttons render their own disabled state from Liquid. That is right on
+       first paint and wrong from the first variant change onwards: choosing a
+       size re-renders the section server side, but product-info.js copies only
+       named regions back into the page - price, SKU, inventory - and hands the
+       add-to-cart button's disabled state to product-form.js, which owns that
+       one button and nothing else. No step in that path knows this element
+       exists, so BUY NOW kept whatever state the variant that happened to load
+       first had.
+
+       Selecting a sold-out size therefore left BUY NOW live beside a greyed-out
+       ADD TO CART. It failed safely - cart/add.js rejects the variant and the
+       shared error region says so - but only after offering a click that should
+       not have been on offer.
+
+       Mirroring the add-to-cart button rather than recomputing availability is
+       deliberate: that button is the one Dawn already keeps correct, for sold
+       out, for unavailable variants and for quantity rules alike. Watching it
+       keeps this right without a second copy of that logic here and without a
+       patch to product-form.js. */
+    mirrorAddToCart() {
+      var form = this.form || this.closest('form');
+      this.addToCart = form ? form.querySelector('[name="add"]') : null;
+      if (!this.addToCart || !window.MutationObserver) return;
+
+      this.syncDisabled = this.syncDisabled.bind(this);
+      this.availability = new MutationObserver(this.syncDisabled);
+      this.availability.observe(this.addToCart, {
+        attributes: true,
+        attributeFilter: ['disabled'],
+      });
+
+      /* Catch the case where the two disagree before any variant change - a
+         template that renders them from different conditions, say. */
+      this.syncDisabled();
+    }
+
+    syncDisabled() {
+      if (!this.button || !this.addToCart) return;
+      this.button.disabled = this.addToCart.hasAttribute('disabled');
     }
 
     get form() {

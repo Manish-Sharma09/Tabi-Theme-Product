@@ -101,6 +101,28 @@ template) and set:
 
 **Approach section** → the "Discover how Tabi works" button link.
 
+### What is still empty, as of the last audit
+
+All 22 templates are migrated and consistent, but these settings carry a label
+with nothing behind it. Each one is a theme-editor field, not a code change:
+
+| Setting | Templates affected | What renders today |
+|---|---|---|
+| Feature band → *Image* | 44 bands (2 per template) | Band collapses to a single full-width column |
+| Feature band → *Decorative image* | 44 bands | Nothing; the artwork is optional |
+| *The Tabi way* → *Link* (label is `Read more about us`) | 22 | Link hidden until the URL is set |
+| Approach → *Button link* (label is `Discover how Tabi works`) | 22 | Button hidden until the URL is set |
+| Size help → *WhatsApp number* | 22 | Only the Instagram row renders, though the subheading still says "Chat with us on Instagram or Whatsapp" |
+
+A label with no destination used to render `href="#"`, which looked live and
+jumped to the top of the page when clicked. Both sections now require the URL
+as well as the label, so an unfinished link is visibly absent rather than
+quietly broken — see section 4.
+
+`Size guide page` is deliberately set on the six clothing templates only
+(`size-guide`, and `kids-size-guide` for the kids template). The 16 home,
+table-linen and toy templates have no size guide and should not.
+
 ---
 
 ## 4. What the code does
@@ -169,6 +191,38 @@ All changes are additive and default to current behaviour:
 rules deliberately live in a separate stylesheet that only the product page
 requests. Its section 10 (mobile PDP media capped at 78vh) still applies and
 still wanted.
+
+### Three fixes after the first full-template audit
+
+**BUY NOW now follows ADD TO CART's availability.** Both buttons render their
+disabled state from Liquid, which is correct on first paint and wrong from the
+first variant change onwards: choosing a size re-renders the section server
+side, but `product-info.js` copies only named regions back into the page — price,
+SKU, inventory — and hands the add-to-cart button's disabled state to
+`product-form.js`, which owns that one button and nothing else. Nothing in that
+path knew `<pdp-buy-now>` existed, so selecting a sold-out size left BUY NOW live
+beside a greyed-out ADD TO CART. It failed safely — `cart/add.js` rejects the
+variant and the shared error region says so — but only after offering a click
+that should not have been on offer. `<pdp-buy-now>` now watches the add-to-cart
+button's `disabled` attribute rather than recomputing availability, because that
+button is the one Dawn already keeps correct for sold out, for unavailable
+variants and for quantity rules alike. The `[disabled]` styling it needs was
+already in `product-page.css`.
+
+**Links without a destination are hidden rather than rendered as `#`.** The
+approach CTA and the feature band link each fell back to `href="#"` when their
+URL was empty. Both carry a default label and neither carries a default URL, so
+every template shipped with exactly that combination: a button that looked live
+and jumped to the top of the page. Both now require label *and* URL.
+
+**A feature band with no image is a single column.** `.pdp-band__inner` applied
+`grid-template-columns` from the split setting regardless of whether an image
+existed, so a band without one seated its copy in the first track and left the
+second as an empty stretch of beige — 45% of the band on desktop, at every width
+above 750px. The split now collapses to `1fr` when the image is unset, which is
+the state all 44 bands are in today. The `case` on the split setting also gained
+an `else`, so a template saved before that setting existed no longer emits an
+empty custom property.
 
 ---
 

@@ -29,6 +29,8 @@
       assign split = '1.2fr 1fr'
     when 'media_narrow'
       assign split = '0.8fr 1fr'
+    else
+      assign split = '1fr 1fr'
   endcase
 
   comment
@@ -38,6 +40,16 @@
   endcomment
   if media_right
     assign split = split | split: ' ' | reverse | join: ' '
+  endif
+
+  comment
+    With no image there is one child to place, and a two-track grid seats the
+    copy in the first track and leaves the second as an empty stretch of beige -
+    45% of the band on desktop, at every width above 750px. Collapse to a single
+    column so the band reads as a plain text band until the photograph is set.
+  endcomment
+  if section.settings.image == blank
+    assign split = '1fr'
   endif
 -%}
 
@@ -85,9 +97,15 @@
           <div class="pdp-band__body rte">{{ section.settings.body }}</div>
         {%- endif -%}
 
-        {%- if section.settings.link_label != blank -%}
+        {%- comment -%}
+          Label and URL are both required - see the same note in
+          sections/pdp-approach.liquid. A link with only a label rendered as
+          href="#" and scrolled to the top of the page instead of going
+          anywhere.
+        {%- endcomment -%}
+        {%- if section.settings.link_label != blank and section.settings.link_url != blank -%}
           <div class="pdp-band__link">
-            <a class="pdp-link" href="{{ section.settings.link_url | default: '#' }}">
+            <a class="pdp-link" href="{{ section.settings.link_url }}">
               <span>{{ section.settings.link_label | escape }}</span>
               {%- render 'pdp-icon', icon: 'arrow' -%}
             </a>

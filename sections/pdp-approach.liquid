@@ -51,8 +51,16 @@
       </ul>
     {%- endif -%}
 
-    {%- if section.settings.cta_label != blank -%}
-      <a class="pdp-approach__cta" href="{{ section.settings.cta_url | default: '#' }}">
+    {%- comment -%}
+      Both halves are required. `default: '#'` used to stand in for a missing
+      link, which rendered a button that looked live and jumped to the top of
+      the page when clicked - and the label carries a default while the URL does
+      not, so every template shipped with exactly that combination. A button
+      that is absent until someone sets its destination is the failure you catch
+      in review.
+    {%- endcomment -%}
+    {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+      <a class="pdp-approach__cta" href="{{ section.settings.cta_url }}">
         <span>{{ section.settings.cta_label | escape }}</span>
         {%- render 'pdp-icon', icon: 'arrow' -%}
       </a>
