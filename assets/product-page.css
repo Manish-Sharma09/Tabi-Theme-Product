@@ -1035,6 +1035,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   .pdp-band__inner {
     grid-template-columns: var(--pdp-band-split, 1fr 1fr);
     align-items: stretch;
+            overflow: hidden;
   }
 }
 
@@ -1131,7 +1132,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   .pdp-band__decor {
     display: block;
     position: absolute;
-    top: 3rem;
+    bottom:0;
     right: 3rem;
     width: var(--pdp-decor-size, 9rem);
     height: auto;
