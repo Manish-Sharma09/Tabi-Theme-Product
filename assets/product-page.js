@@ -5,11 +5,15 @@
      A. <pdp-delivery-check>  pincode -> dispatch, delivery window, COD
      B. <pdp-carousel>        arrow buttons over a scroll-snap track
      C. <pdp-buy-now>         add to cart, then straight to checkout
+     D. <pdp-info-group>      fold one information column away
 
-   The information accordions below the buy box used to be a fourth element
-   here, opening and closing an outer <details> layer at the 750px breakpoint.
-   That section is now a flat list of <details> laid out by grid, so the browser
-   handles it and there is nothing left to script.
+   D is not the breakpoint script the first version of the information section
+   had. That one opened and closed an outer <details> layer at 750px, because
+   <details> decides for itself whether its content is rendered and CSS cannot
+   overrule that from a media query. The column is now a button and a div whose
+   visibility hangs off one class, so CSS owns it at every width and the script
+   is left with the click alone - no matchMedia, no resize listener, and no
+   state to keep in sync.
 
    Loaded only by the product page's own sections, so it costs nothing on the
    rest of the store.
@@ -501,6 +505,36 @@
   };
 
   /* ====================================================================== */
+  /* D. INFORMATION COLUMN                                                   */
+  /* ====================================================================== */
+
+  /* Folds one column of the information section away.
+
+     The column ships open - Liquid writes `is-open` and aria-expanded="true"
+     into the markup - so this element only ever removes state that was already
+     correct without it. If the script never arrives, every column stays
+     readable and only the folding is missing, which is the right way round for
+     content a shopper came to read. */
+  var PDPInfoGroup = class extends HTMLElement {
+    connectedCallback() {
+      this.toggle = this.querySelector('[data-pdp-group-toggle]');
+      if (!this.toggle) return;
+      this.onClick = this.onClick.bind(this);
+      this.toggle.addEventListener('click', this.onClick);
+    }
+
+    disconnectedCallback() {
+      if (this.toggle) this.toggle.removeEventListener('click', this.onClick);
+    }
+
+    onClick() {
+      var open = !this.classList.contains('is-open');
+      this.classList.toggle('is-open', open);
+      this.toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+  };
+
+  /* ====================================================================== */
   /* Registration                                                            */
   /* ====================================================================== */
 
@@ -515,5 +549,8 @@
   }
   if (!customElements.get('pdp-buy-now')) {
     customElements.define('pdp-buy-now', PDPBuyNow);
+  }
+  if (!customElements.get('pdp-info-group')) {
+    customElements.define('pdp-info-group', PDPInfoGroup);
   }
 })();

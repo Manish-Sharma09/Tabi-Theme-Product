@@ -939,18 +939,24 @@
 /* --------------------------------------------------------------------------
    10. SECTION: INFORMATION ACCORDIONS
 
-   A flat list of <details>, laid out in one or two columns by
-   grid-template-columns and nothing else. There is no second accordion layer
-   wrapping them and no script deciding which layer is live at which width - the
-   only difference between desktop and mobile is the column count.
+   Two levels, laid out as the design draws them: a column heading with a rule
+   above and below it, and a stack of accordion rows underneath.
 
-   Items flow across the grid in reading order, so opening one pushes the rest of
-   its row down. `align-items: start` keeps the closed items in that row at their
-   own height rather than stretching them to match the open one.
+   The outer level is a <button> and a <div>, not a second <details>. That is
+   the whole reason this needs no breakpoint script: a column's rows are shown
+   or hidden by the `is-open` class on the column, which CSS owns at every
+   width, rather than by the browser's own <details> machinery, which cannot be
+   overridden from a media query. Columns ship with `is-open` already set, so
+   they read correctly before - or without - product-page.js.
 
-   The rules are drawn with one border-top on the grid and a border-bottom on
-   every item, so a two-column layout gets a single unbroken line across the top
-   and the items below never double up their hairlines.
+   The two levels are deliberately unalike, because a heading that looks like a
+   row is how a nested accordion becomes confusing: the column heading is
+   uppercase, tracked, near-black and sits on the stronger hairline; a row is
+   sentence case, untracked and muted. Only the rows carry body copy.
+
+   Columns are independent: each draws its own rules, so a short column simply
+   ends rather than stretching to match its neighbour. `align-items: start`
+   keeps them top-aligned in the grid row.
    -------------------------------------------------------------------------- */
 
 .pdp-info__label {
@@ -960,19 +966,98 @@
 .pdp-info__grid {
   display: grid;
   grid-template-columns: 1fr;
-  align-items: start;
-  column-gap: 5rem;
-  border-top: 0.1rem solid var(--pdp-line);
+  row-gap: 3.2rem;
 }
 
 @media screen and (min-width: 750px) {
   .pdp-info__grid {
-    grid-template-columns: repeat(var(--pdp-info-columns, 2), 1fr);
+    grid-template-columns: repeat(var(--pdp-info-columns, 4), 1fr);
+    align-items: start;
+    column-gap: 4rem;
+    row-gap: 0;
   }
 }
 
-.pdp-info__item {
+@media screen and (min-width: 1200px) {
+  .pdp-info__grid {
+    column-gap: 5.6rem;
+  }
+}
+
+/* --- column ------------------------------------------------------------- */
+
+.pdp-info__group {
+  display: block;
+  border-top: 0.1rem solid var(--pdp-line);
+}
+
+.pdp-info__grouprow {
+  margin: 0;
+}
+
+.pdp-info__grouphead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem;
+  width: 100%;
+  margin: 0;
+  padding: 1.6rem 0;
+  border: 0;
   border-bottom: 0.1rem solid var(--pdp-line);
+  border-radius: 0;
+  background: none;
+  font-family: inherit;
+  color: var(--pdp-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.pdp-info__grouphead:hover {
+  color: var(--pdp-accent);
+}
+
+.pdp-info__grouphead:focus-visible {
+  outline: 0.2rem solid var(--pdp-accent);
+  outline-offset: 0.3rem;
+}
+
+.pdp-info__grouptitle {
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.pdp-info__grouphead .pdp-icon--caret {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--pdp-faint);
+  transition: transform 0.2s ease;
+}
+
+/* Caret up when the column is open, which is how the design draws it. */
+.pdp-info__group.is-open > .pdp-info__grouprow .pdp-icon--caret {
+  transform: rotate(180deg);
+}
+
+/* The class, not <details>, decides this - so a media query could pin it open
+   at any width without touching the script. */
+.pdp-info__rows {
+  display: none;
+}
+
+.pdp-info__group.is-open > .pdp-info__rows {
+  display: block;
+}
+
+/* --- row ---------------------------------------------------------------- */
+
+.pdp-info__item {
+  border-bottom: 0.1rem solid var(--pdp-line-soft);
 }
 
 .pdp-info__item > summary {
@@ -980,10 +1065,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.6rem;
-  padding: 1.8rem 0;
+  padding: 1.5rem 0;
   cursor: pointer;
   list-style: none;
-  color: var(--pdp-ink);
+  color: var(--pdp-muted);
   transition: color 0.15s ease;
 }
 
@@ -994,7 +1079,7 @@
 }
 
 .pdp-info__item > summary:hover {
-  color: var(--pdp-accent);
+  color: var(--pdp-ink);
 }
 
 .pdp-info__item > summary:focus-visible {
@@ -1003,16 +1088,19 @@
 }
 
 .pdp-info__heading {
-  font-size: 1.3rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .pdp-info__item > summary .pdp-icon--caret {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
   color: var(--pdp-faint);
-  width: 1.6rem;
-  height: 1.6rem;
+  transition: transform 0.2s ease;
 }
 
 .pdp-info__item[open] > summary .pdp-icon--caret {
@@ -1020,8 +1108,7 @@
 }
 
 .pdp-info__content {
-  padding: 0 0 2rem;
-  max-width: 62ch;
+  padding: 0 0 1.8rem;
   font-size: 1.3rem;
   line-height: 1.75;
   color: var(--pdp-muted);

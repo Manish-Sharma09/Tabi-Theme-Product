@@ -296,39 +296,75 @@
     "pdp-info-columns": {
       "type": "pdp-info-columns",
       "blocks": {
-        "item_fabric": {
-          "type": "item",
+        "g_details": {
+          "type": "group",
           "settings": {
-            "heading": "Fabric & composition",
-            "content": "<p>100% cotton, chosen for softness, breathability and everyday durability.</p><p>We pay attention to more than fibre composition. Our fabrics, dyes and finishing processes are selected against stringent quality and chemical-safety requirements (REACH standards), so what sits against the skin is considered as carefully as how the piece looks.</p>",
-            "metafield_key": ""
+            "heading": "Product details"
           }
         },
-        "item_craft": {
+        "i_fabric": {
           "type": "item",
           "settings": {
-            "heading": "Craft & technique",
+            "heading": "Fabric",
+            "content": "",
+            "metafield_key": "fabric"
+          }
+        },
+        "i_craft": {
+          "type": "item",
+          "settings": {
+            "heading": "Craft / technique",
             "content": "",
             "metafield_key": "craft_technique"
           }
         },
-        "item_fit": {
+        "i_construction": {
           "type": "item",
           "settings": {
-            "heading": "Fit & silhouette",
+            "heading": "Construction",
+            "content": "",
+            "metafield_key": "construction"
+          }
+        },
+        "i_silhouette": {
+          "type": "item",
+          "settings": {
+            "heading": "Silhouette",
             "content": "",
             "metafield_key": "silhouette"
           }
         },
-        "item_detailing": {
+        "i_detailing": {
           "type": "item",
           "settings": {
-            "heading": "Detailing",
+            "heading": "Product-specific detailing",
             "content": "",
             "metafield_key": "product_detailing"
           }
         },
-        "item_care": {
+        "g_material": {
+          "type": "group",
+          "settings": {
+            "heading": "Material & care"
+          }
+        },
+        "i_composition": {
+          "type": "item",
+          "settings": {
+            "heading": "Fabric composition",
+            "content": "<p>100% cotton, chosen for softness, breathability and everyday durability.</p><p>We pay attention to more than fibre composition. Our fabrics, dyes and finishing processes are selected against stringent quality and chemical-safety requirements (REACH standards), so what sits against the skin is considered as carefully as how the piece looks.</p>",
+            "metafield_key": ""
+          }
+        },
+        "i_wash": {
+          "type": "item",
+          "settings": {
+            "heading": "Wash instructions",
+            "content": "",
+            "metafield_key": "wash_instructions"
+          }
+        },
+        "i_care": {
           "type": "item",
           "settings": {
             "heading": "Care instructions",
@@ -336,45 +372,90 @@
             "metafield_key": ""
           }
         },
-        "item_madetoorder": {
+        "g_shipping": {
+          "type": "group",
+          "settings": {
+            "heading": "Shipping & delivery"
+          }
+        },
+        "i_madetoorder": {
           "type": "item",
           "settings": {
-            "heading": "Made to order",
-            "content": "<p>Most pieces are cut and stitched only once you order them, in small batches, by a team we know by name.</p><p>It is why dispatch takes a few days longer than a warehouse would, and why very little of what we make goes unworn.</p>",
+            "heading": "Made to order in 2–5 working days.",
+            "content": "<p>Most pieces are cut and stitched only once you order them, in small batches, by a team we know by name.</p><p>It is why dispatch takes a few days longer than a warehouse would, and why very little of what we make goes unworn.</p><p>Orders are dispatched within 2 to 5 working days. Delivery usually takes a further 3 to 7 working days depending on your pincode - use the pincode checker above for an estimate on this order.</p>",
             "metafield_key": ""
           }
         },
-        "item_shipping": {
+        "i_freeship": {
           "type": "item",
           "settings": {
-            "heading": "Shipping & delivery",
-            "content": "<p>Orders are dispatched within 2 to 5 working days. Delivery usually takes a further 3 to 7 working days depending on your pincode - use the pincode checker above for an estimate on this order.</p><p>Free shipping across India. Cash on delivery is available on most pincodes.</p><p>You will receive a tracking link by email and SMS as soon as your parcel leaves us.</p>",
+            "heading": "Free shipping across India.",
+            "content": "<p>Free shipping across India, on every order.</p><p>You will receive a tracking link by email and SMS as soon as your parcel leaves us.</p>",
             "metafield_key": ""
           }
         },
-        "item_returns": {
+        "i_cod": {
           "type": "item",
           "settings": {
-            "heading": "Exchanges & returns",
-            "content": "<p>If your Tabi piece does not work for you, you can request an exchange or return within 5 days of delivery, no questions asked.</p><p>Pieces should be unworn and unwashed, with their tags on. Reverse pickup is arranged for you wherever our courier partners reach.</p><p>Please refer to our Shipping, Exchanges &amp; Returns policy for full details.</p>",
+            "heading": "COD available on eligible pincodes.",
+            "content": "<p>Cash on delivery is available on most pincodes. Use the pincode checker above to confirm it for your address before you order.</p>",
+            "metafield_key": ""
+          }
+        },
+        "g_returns": {
+          "type": "group",
+          "settings": {
+            "heading": "Exchanges & returns"
+          }
+        },
+        "i_exchange": {
+          "type": "item",
+          "settings": {
+            "heading": "Easy exchanges within 5 days.",
+            "content": "<p>If your Tabi piece does not work for you, you can request an exchange or return within 5 days of delivery, no questions asked.</p><p>Reverse pickup is arranged for you wherever our courier partners reach.</p>",
+            "metafield_key": ""
+          }
+        },
+        "i_unused": {
+          "type": "item",
+          "settings": {
+            "heading": "Items must be unused with tags.",
+            "content": "<p>Pieces should be unworn and unwashed, with their tags still on.</p>",
+            "metafield_key": ""
+          }
+        },
+        "i_refund": {
+          "type": "item",
+          "settings": {
+            "heading": "Refunds via original payment method or store credit.",
+            "content": "<p>Please refer to our Shipping, Exchanges &amp; Returns policy for full details.</p>",
             "metafield_key": ""
           }
         }
       },
       "block_order": [
-        "item_fabric",
-        "item_craft",
-        "item_fit",
-        "item_detailing",
-        "item_care",
-        "item_madetoorder",
-        "item_shipping",
-        "item_returns"
+        "g_details",
+        "i_fabric",
+        "i_craft",
+        "i_construction",
+        "i_silhouette",
+        "i_detailing",
+        "g_material",
+        "i_composition",
+        "i_wash",
+        "i_care",
+        "g_shipping",
+        "i_madetoorder",
+        "i_freeship",
+        "i_cod",
+        "g_returns",
+        "i_exchange",
+        "i_unused",
+        "i_refund"
       ],
       "settings": {
-        "heading": "Product information",
-        "columns": "2",
-        "open_first": true,
+        "heading": "",
+        "open_first": false,
         "color_scheme": "scheme-5",
         "padding_top": 48,
         "padding_bottom": 48

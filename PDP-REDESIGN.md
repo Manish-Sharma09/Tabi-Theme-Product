@@ -129,6 +129,22 @@ jumped to the top of the page when clicked. Both sections now require the URL
 as well as the label, so an unfinished link is visibly absent rather than
 quietly broken — see section 4.
 
+### Two places the mockup and your existing copy disagree
+
+The information columns' *Shipping* and *Exchanges* rows use the mockup's
+sentences as their row headings. Two of them state a policy the store's own
+accordion copy states differently, so the mockup's wording was **not** taken as
+fact — decide these and set them in the theme editor:
+
+| Row | Mockup says | Your existing copy says | What is live now |
+|---|---|---|---|
+| Exchange window | "Easy exchanges within 7 days." | "within 5 days of delivery" | **5 days**, the store's own number |
+| Refund method | "Refunds via original payment method or store credit." | Does not say | The mockup's heading, with the body deferring to the policy page |
+
+The exchange window was left at 5 because a heading of 7 above a body of 5 is a
+customer-service problem, not a design decision. The refund row is the mockup's
+claim and needs confirming against the actual policy before publishing.
+
 `product.new-design` has `size_guide_page` set to `size-guide`. When you roll
 out, set it on clothing templates only — `migrate_pdp.py` picks it up from each
 template's own Size Guide tab, so home, table-linen and toy templates correctly
@@ -151,7 +167,7 @@ end up with none.
 | `snippets/pdp-usp-line.liquid` | "Free Shipping • COD Available". |
 | `sections/pdp-why-love.liquid` | Three product highlights. |
 | `sections/pdp-feature-band.liquid` | Image + text band, used twice. |
-| `sections/pdp-info-columns.liquid` | Product information accordions. |
+| `sections/pdp-info-columns.liquid` | Product information accordions, in the design's four columns. |
 | `sections/pdp-approach.liquid` | Three-part approach + CTA. |
 
 The pincode box has no file of its own. It used to live in
@@ -202,6 +218,39 @@ All changes are additive and default to current behaviour:
 rules deliberately live in a separate stylesheet that only the product page
 requests. Its section 10 (mobile PDP media capped at 78vh) still applies and
 still wanted.
+
+### The information columns
+
+Two levels, as the design draws them: a column heading with a rule above and
+below it, and a stack of accordion rows underneath.
+
+Shopify section blocks are a flat list, so "rows inside a column" needs
+expressing some other way. A **Column heading** block starts a column and every
+**Accordion** block after it belongs to that column until the next Column
+heading. Moving a row between columns in the theme editor is then exactly what
+it looks like — dragging it above or below a heading — and no row has to be told
+which column it lives in. The number of columns is however many headings
+survive, not a setting.
+
+The first version of this section *did* number every row's column, and wrapped a
+group `<details>` around a row `<details>` with a script opening and closing the
+outer layer at 750px. The column numbers are gone for good. The two levels are
+back because the design asks for them, but the outer one is a `<button>` and a
+`<div>`, which is what removes the breakpoint script: a column's rows are shown
+or hidden by an `is-open` class that CSS owns at every width, rather than by the
+browser's own `<details>` machinery, which a media query cannot overrule. So
+there is no accordion nested inside an accordion, and the columns behave the
+same way at every width.
+
+Columns ship open — `is-open` and `aria-expanded="true"` are in the markup — so
+`product-page.js` only ever *removes* correct state. With the script blocked or
+broken every column is still open and readable and only the folding is missing,
+which is the right way round for copy a shopper came to read.
+
+The two levels are deliberately unalike, because a heading that looks like a row
+is how a nested accordion gets confusing: the column heading is uppercase,
+tracked, near-black and sits on the stronger hairline, while a row is sentence
+case, untracked and muted. Only rows carry body copy.
 
 ### Three fixes found by auditing the full rollout
 
@@ -268,8 +317,10 @@ CLI only uploads the known theme directories, so it never reaches the store. It:
 - keeps every setting you have already changed in the theme editor (it merges,
   it does not overwrite)
 - migrates each template's accordion copy into the new info columns — Material
-  and Care into column 2, Shipping & Returns split across columns 3 and 4 by
-  looking for return/exchange/refund wording
+  and Care into *Material & care*, Shipping & Returns split across *Shipping &
+  delivery* and *Exchanges & returns* by looking for return/exchange/refund
+  wording, and anything it cannot route into *Product details* under its own
+  heading for a human to re-file
 - moves the Size Guide tab's page onto the variant picker so it becomes the
   modal link (`size-guide`, or `kids-size-guide` for the kids template)
 - disables the old accordion blocks rather than deleting them, so any template
@@ -289,7 +340,10 @@ content — migrate from a clean checkout of the template if you need to redo it
 - [ ] BUY NOW against **Razorpay Magic Checkout** — see the risk below
 - [ ] Pincode box: valid pincode, invalid pincode, blocked prefix, COD-excluded
       prefix
-- [ ] Information accordions at 749px and 750px — two columns above, one below
+- [ ] Information accordions at 749px and 750px — four columns above, stacked
+      below — and one column folded shut, then reopened
+- [ ] Information accordions with JavaScript disabled: every column should still
+      be open and readable, only the folding gone
 - [ ] Related products: same card, ratio and quick-add behaviour as a collection
       page, and a row with fewer products than columns
 - [ ] Sticky gallery on desktop: scroll a long product and a short one, and
@@ -339,5 +393,8 @@ separate cleanup pass.
 **The metafield-driven accordions stay hidden** until the product-detail
 metafields are filled. That is by design — an accordion pointed at an empty
 metafield hides itself rather than opening onto nothing — but it means a fresh
-product shows the four typed accordions and none of the per-product ones.
+product shows the typed accordions and none of the per-product ones. Every row
+in *Product details* is metafield-driven, so on a product with no metafields
+that whole column is absent and the section renders three columns at full
+width rather than three and a gap.
 

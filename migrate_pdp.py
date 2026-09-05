@@ -24,7 +24,8 @@ What it does, per template:
   new sections
     - pdp-why-love, the two feature bands, pdp-info-columns, pdp-approach
     - info columns are seeded with the copy migrated out of the tabs, so no
-      merchant text is retyped or lost
+      merchant text is retyped or lost, grouped into the design's four columns:
+      product details, material and care, shipping, exchanges and returns
 
   related-products
     - carousel layout, five across, small uppercase heading
@@ -182,16 +183,24 @@ def collect_tabs(main):
 def build_info_columns(columns):
     """Build the pdp-info-columns section from the migrated tab content.
 
-    The section takes a flat list of accordions now - one block is one heading
-    and one body, and nothing says which column it belongs to. The four buckets
-    collect_tabs() fills are still used, but only to decide the reading order:
-    product details, then material and care, then shipping, then returns. Two
-    columns on desktop is a section setting, and the grid decides what lands
-    where.
+    The section is two levels: a `group` block starts a column and every `item`
+    after it belongs to that column until the next `group`. So the four buckets
+    collect_tabs() fills map straight onto the four columns in the design -
+    product details, material and care, shipping, returns - and the order the
+    blocks are written in is the layout.
+
+    A bucket with nothing in it is skipped rather than written as an empty
+    column. Product details is the exception: its rows are metafield-driven and
+    are seeded on every template, because they hide themselves per product and
+    are meant to be filled in over time.
     """
     blocks, order = {}, []
 
-    def add(block_id, heading, content="", metafield_key=""):
+    def group(block_id, heading):
+        blocks[block_id] = {"type": "group", "settings": {"heading": heading}}
+        order.append(block_id)
+
+    def item(block_id, heading, content="", metafield_key=""):
         blocks[block_id] = {
             "type": "item",
             "settings": {
@@ -202,28 +211,34 @@ def build_info_columns(columns):
         }
         order.append(block_id)
 
-    # Per-product detail accordions. They read metafields and hide themselves
-    # until a product has data, so they are seeded the same way everywhere.
+    # --- column 1: per-product detail, all metafield driven ---------------
+    group("g_details", "Product details")
     for i, (label, key) in enumerate(PRODUCT_DETAIL_ROWS, start=1):
-        add("item_detail_%d" % i, label, metafield_key=key)
+        item("item_detail_%d" % i, label, metafield_key=key)
 
-    # Anything migrated that could not be routed, under its own heading.
+    # Anything migrated that could not be routed, under its own heading, for a
+    # human to re-file into one of the other three columns.
     for i, (label, content) in enumerate(columns["1"], start=1):
-        add("item_extra_%d" % i, label, content=content)
+        item("item_extra_%d" % i, label, content=content)
 
-    # Material and care copy migrated out of the tabs, plus a wash-instructions
-    # accordion seeded as a metafield so per-product care can be added later
-    # without editing every template again.
+    # --- column 2: material and care --------------------------------------
+    group("g_material", "Material & care")
     for i, (label, content) in enumerate(columns["2"], start=1):
-        add("item_material_%d" % i, label, content=content)
+        item("item_material_%d" % i, label, content=content)
+    # Seeded as a metafield so per-product care copy can be added later without
+    # editing every template again.
+    item("item_wash", "Wash instructions", metafield_key="wash_instructions")
 
-    add("item_wash", "Wash instructions", metafield_key="wash_instructions")
+    # --- columns 3 and 4: shipping, then exchanges and returns ------------
+    if columns["3"]:
+        group("g_shipping", "Shipping & delivery")
+        for i, (label, content) in enumerate(columns["3"], start=1):
+            item("item_shipping_%d" % i, label, content=content)
 
-    for i, (label, content) in enumerate(columns["3"], start=1):
-        add("item_shipping_%d" % i, label, content=content)
-
-    for i, (label, content) in enumerate(columns["4"], start=1):
-        add("item_returns_%d" % i, label, content=content)
+    if columns["4"]:
+        group("g_returns", "Exchanges & returns")
+        for i, (label, content) in enumerate(columns["4"], start=1):
+            item("item_returns_%d" % i, label, content=content)
 
     return {
         "type": "pdp-info-columns",
@@ -231,8 +246,8 @@ def build_info_columns(columns):
         "block_order": order,
         "settings": {
             "heading": "Product information",
-            "columns": "2",
-            "open_first": True,
+            # The column count is the number of groups above, not a setting.
+            "open_first": False,
             "color_scheme": "scheme-1",
             "padding_top": SECTION_PADDING,
             "padding_bottom": SECTION_PADDING,
