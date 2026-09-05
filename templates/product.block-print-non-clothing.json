@@ -18,18 +18,14 @@
         "price": {
           "type": "price",
           "settings": {
-            "shipping-tax": true
+            "shipping-tax": false
           }
         },
         "variant_picker": {
           "type": "variant_picker",
           "settings": {
             "picker_type": "button",
-            "swatch_shape": "circle",
-            "size_guide_page": "",
-            "size_guide_label": "Size Guide",
-            "size_guide_option": "Size",
-            "size_label": "Select Size"
+            "swatch_shape": "circle"
           }
         },
         "quantity_selector": {
@@ -40,9 +36,7 @@
           "type": "buy_buttons",
           "settings": {
             "show_dynamic_checkout": true,
-            "show_gift_card_recipient": true,
-            "buy_now_style": "custom",
-            "buy_now_label": "Buy now"
+            "show_gift_card_recipient": true
           }
         },
         "collapsible_tab_qHw3YE": {
@@ -52,8 +46,7 @@
             "icon": "none",
             "content": "{{ product.description }}",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "collapsible_tab_xLgaED": {
           "type": "collapsible_tab",
@@ -72,8 +65,7 @@
             "icon": "none",
             "content": "<p>100% Cotton</p>",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "collapsible_tab_6KXWXr": {
           "type": "collapsible_tab",
@@ -82,8 +74,7 @@
             "icon": "none",
             "content": "<p>Pre treat stains before washing.</p><p>Gentle machine wash with mild detergent with similar colours.</p><p>Do not bleach.</p><p>Do not tumble dry.</p><p>Dry in shade.</p><p>Warm iron on reverse.</p>",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "collapsible_tab_86emMQ": {
           "type": "collapsible_tab",
@@ -102,79 +93,12 @@
             "icon": "none",
             "content": "<p>Our products are made to order and are shipped within 2 to 5 working days of receiving the order.<br/><br/>If your Tabi piece does not work for you, you can request an exchange or return within 3 days of delivery, no questions asked.<br/><br/>Please refer to Shipping, Exchanges & Returns policy for more details</p>",
             "page": ""
-          },
-          "disabled": true
+          }
         },
         "share": {
           "type": "share",
           "settings": {
             "share_label": "Share"
-          },
-          "disabled": true
-        },
-        "description": {
-          "type": "description",
-          "settings": {}
-        },
-        "pdp_trust": {
-          "type": "pdp_trust",
-          "settings": {
-            "icon_1": "leaf",
-            "label_1": "Natural Fabrics",
-            "icon_2": "tag",
-            "label_2": "Made to Order",
-            "icon_3": "hand",
-            "label_3": "Gentle on Skin",
-            "icon_4": "exchange",
-            "label_4": "Easy Exchanges"
-          }
-        },
-        "pdp_fit": {
-          "type": "pdp_fit",
-          "settings": {
-            "fit_label": "Fit:",
-            "model_label": "Model Details:",
-            "recommendation_label": "Fit Recommendation:"
-          }
-        },
-        "pdp_size_help": {
-          "type": "pdp_size_help",
-          "settings": {
-            "heading": "Need help choosing your size?",
-            "subheading": "Chat with us on Instagram or Whatsapp",
-            "instagram_handle": "@mytabi.in",
-            "instagram_url": "https://www.instagram.com/mytabi.in/",
-            "whatsapp_display": "",
-            "whatsapp_number": ""
-          }
-        },
-        "pdp_usp": {
-          "type": "pdp_usp",
-          "settings": {
-            "items": "Free Shipping, COD Available"
-          }
-        },
-        "pdp_delivery": {
-          "type": "pdp_delivery",
-          "settings": {
-            "heading": "When will it reach you?",
-            "placeholder": "Enter delivery pincode",
-            "button_label": "Check",
-            "dispatch_min": 2,
-            "dispatch_max": 5,
-            "transit_min": 3,
-            "transit_max": 7,
-            "zone_rules": "",
-            "blocked_prefixes": "",
-            "cod_enabled": true,
-            "cod_prefixes": "",
-            "label_delivering": "Delivering to {pincode}",
-            "label_dispatch": "Made to order in {min}–{max} working days",
-            "label_estimated": "Estimated delivery:",
-            "label_cod_yes": "COD available at this pincode",
-            "label_cod_no": "COD not available at this pincode",
-            "label_invalid": "Please enter a valid 6-digit pincode.",
-            "label_unserviceable": "Sorry, we do not deliver to {pincode} yet."
           }
         }
       },
@@ -182,15 +106,9 @@
         "vendor",
         "title",
         "price",
-        "description",
-        "pdp_trust",
         "variant_picker",
-        "pdp_fit",
-        "pdp_size_help",
         "quantity_selector",
         "buy_buttons",
-        "pdp_usp",
-        "pdp_delivery",
         "collapsible_tab_qHw3YE",
         "collapsible_tab_xLgaED",
         "collapsible_tab_aCyR9r",
@@ -205,15 +123,14 @@
         "media_size": "large",
         "constrain_to_viewport": false,
         "media_fit": "contain",
-        "gallery_layout": "thumbnail",
+        "gallery_layout": "columns",
         "media_position": "left",
         "image_zoom": "lightbox",
-        "mobile_thumbnails": "show",
+        "mobile_thumbnails": "hide",
         "hide_variants": true,
         "enable_video_looping": false,
-        "padding_top": 36,
-        "padding_bottom": 48,
-        "enable_new_layout": true
+        "padding_top": 0,
+        "padding_bottom": 12
       }
     },
     "related-products": {
@@ -230,237 +147,13 @@
         "show_vendor": false,
         "show_rating": false,
         "columns_mobile": "2",
-        "padding_top": 48,
-        "padding_bottom": 48,
-        "layout": "grid",
-        "heading_style": "heading",
-        "quick_add": "standard"
-      }
-    },
-    "pdp-why-love": {
-      "type": "pdp-why-love",
-      "blocks": {
-        "col_1": {
-          "type": "column",
-          "settings": {
-            "icon": "feather"
-          }
-        },
-        "col_2": {
-          "type": "column",
-          "settings": {
-            "icon": "hand"
-          }
-        },
-        "col_3": {
-          "type": "column",
-          "settings": {
-            "icon": "weave"
-          }
-        }
-      },
-      "block_order": [
-        "col_1",
-        "col_2",
-        "col_3"
-      ],
-      "settings": {
-        "heading": "Why you'll love it",
-        "color_scheme": "scheme-1",
-        "padding_top": 48,
-        "padding_bottom": 48
-      }
-    },
-    "pdp-band-batches": {
-      "type": "pdp-feature-band",
-      "settings": {
-        "image_position": "left",
-        "split": "media_wide",
-        "mobile_text_first": true,
-        "eyebrow": "Made in small batches",
-        "heading": "Made in small batches.",
-        "body": "<p>Made thoughtfully, in limited runs and often to order.</p><p>Less excess. More intention.</p>",
-        "link_label": "",
-        "decor_width": 9,
-        "color_scheme": "scheme-1",
-        "padding_top": 48,
-        "padding_bottom": 48
-      }
-    },
-    "pdp-info-columns": {
-      "type": "pdp-info-columns",
-      "blocks": {
-        "item_detail_1": {
-          "type": "item",
-          "settings": {
-            "heading": "Fabric",
-            "content": "",
-            "metafield_key": "fabric"
-          }
-        },
-        "item_detail_2": {
-          "type": "item",
-          "settings": {
-            "heading": "Craft / technique",
-            "content": "",
-            "metafield_key": "craft_technique"
-          }
-        },
-        "item_detail_3": {
-          "type": "item",
-          "settings": {
-            "heading": "Construction",
-            "content": "",
-            "metafield_key": "construction"
-          }
-        },
-        "item_detail_4": {
-          "type": "item",
-          "settings": {
-            "heading": "Silhouette",
-            "content": "",
-            "metafield_key": "silhouette"
-          }
-        },
-        "item_detail_5": {
-          "type": "item",
-          "settings": {
-            "heading": "Product-specific detailing",
-            "content": "",
-            "metafield_key": "product_detailing"
-          }
-        },
-        "item_material_1": {
-          "type": "item",
-          "settings": {
-            "heading": "Fabric composition",
-            "content": "<p>100% Cotton</p>",
-            "metafield_key": ""
-          }
-        },
-        "item_material_2": {
-          "type": "item",
-          "settings": {
-            "heading": "Care instructions",
-            "content": "<p>Pre treat stains before washing.</p><p>Gentle machine wash with mild detergent with similar colours.</p><p>Do not bleach.</p><p>Do not tumble dry.</p><p>Dry in shade.</p><p>Warm iron on reverse.</p>",
-            "metafield_key": ""
-          }
-        },
-        "item_wash": {
-          "type": "item",
-          "settings": {
-            "heading": "Wash instructions",
-            "content": "",
-            "metafield_key": "wash_instructions"
-          }
-        },
-        "item_shipping_1": {
-          "type": "item",
-          "settings": {
-            "heading": "Shipping timelines",
-            "content": "<p>Our products are made to order and are shipped within 2 to 5 working days of receiving the order.</p>",
-            "metafield_key": ""
-          }
-        },
-        "item_returns_1": {
-          "type": "item",
-          "settings": {
-            "heading": "Returns and exchanges",
-            "content": "<p>If your Tabi piece does not work for you, you can request an exchange or return within 3 days of delivery, no questions asked.</p><p>Please refer to Shipping, Exchanges & Returns policy for more details</p>",
-            "metafield_key": ""
-          }
-        }
-      },
-      "block_order": [
-        "item_detail_1",
-        "item_detail_2",
-        "item_detail_3",
-        "item_detail_4",
-        "item_detail_5",
-        "item_material_1",
-        "item_material_2",
-        "item_wash",
-        "item_shipping_1",
-        "item_returns_1"
-      ],
-      "settings": {
-        "heading": "Product information",
-        "columns": "2",
-        "open_first": true,
-        "color_scheme": "scheme-1",
-        "padding_top": 48,
-        "padding_bottom": 48
-      }
-    },
-    "pdp-band-tabi-way": {
-      "type": "pdp-feature-band",
-      "settings": {
-        "image_position": "left",
-        "split": "media_narrow",
-        "mobile_text_first": true,
-        "eyebrow": "The Tabi way",
-        "heading": "A journey towards slower, mindful living.",
-        "body": "<p>Tabi is a celebration of the everyday journey - yours and ours, together! It is built around the idea that the things we choose to live with can help us live a little more slowly and consciously. All Tabi products are built with love and care for the planet and the people using them, while blending the rich artisanal heritage of Indian handcrafts into everyday pieces.</p>",
-        "link_label": "Read more about us",
-        "decor_width": 9,
-        "color_scheme": "scheme-1",
-        "padding_top": 48,
-        "padding_bottom": 48
-      }
-    },
-    "pdp-approach": {
-      "type": "pdp-approach",
-      "blocks": {
-        "pillar_1": {
-          "type": "pillar",
-          "settings": {
-            "icon": "garment",
-            "heading": "Product",
-            "lead": "Made to be valued, worn often and kept.",
-            "text": "Natural fabrics, thoughtful design, comfort, craft and quality that make you want to reach for a piece again and again."
-          }
-        },
-        "pillar_2": {
-          "type": "pillar",
-          "settings": {
-            "icon": "process",
-            "heading": "Process",
-            "lead": "Make closer to demand.",
-            "text": "Small batches and made-to-order production help us create more intentionally and reduce unnecessary excess."
-          }
-        },
-        "pillar_3": {
-          "type": "pillar",
-          "settings": {
-            "icon": "person",
-            "heading": "People",
-            "lead": "Every garment carries somebody's work.",
-            "text": "We value the skill, time and hands behind every piece we make. This ensures the person behind the product is never the cheapest component."
-          }
-        }
-      },
-      "block_order": [
-        "pillar_1",
-        "pillar_2",
-        "pillar_3"
-      ],
-      "settings": {
-        "heading": "Our three-part approach",
-        "intro": "Everything we make is viewed through three lenses.",
-        "cta_label": "Discover how Tabi works",
-        "color_scheme": "scheme-1",
-        "padding_top": 48,
-        "padding_bottom": 48
+        "padding_top": 36,
+        "padding_bottom": 28
       }
     }
   },
   "order": [
     "main",
-    "pdp-why-love",
-    "pdp-band-batches",
-    "pdp-info-columns",
-    "pdp-band-tabi-way",
-    "pdp-approach",
     "related-products"
   ]
 }

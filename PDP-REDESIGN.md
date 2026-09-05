@@ -3,7 +3,12 @@
 What changed, what you need to set up in Shopify admin, and how to roll it out
 to the remaining templates.
 
-Branch: `pdp-redesign`. Prototype template: `templates/product.new-design.json`.
+**The redesign is live on one template only: `templates/product.new-design.json`.**
+The other 21 product templates are back to exactly their pre-redesign state and
+render as they always did — they do not even request `product-page.css` or
+`product-page.js`, because that pair is loaded from inside the
+`enable_new_layout` branch. Rolling out to the rest is section 5, and it is a
+deliberate step, not something that happens by leaving this branch merged.
 
 ---
 
@@ -18,7 +23,11 @@ Work on a **duplicate theme**, not the live one:
 
 Nothing in this branch changes a template you have not migrated. The redesign is
 gated behind a section setting (`enable_new_layout`), so an un-migrated template
-renders exactly as it does today even with all the new code present.
+renders exactly as it does today even with all the new code present. That gate
+is what makes the current split safe: 21 templates carry none of the redesign's
+settings, so every new branch in the shared snippets evaluates to the old
+behaviour — `buy_now_style` falls back to `dynamic`, `related-products` to the
+grid and an `<h2>`, and the variant picker to Dawn's plain legend.
 
 ---
 
@@ -101,27 +110,29 @@ template) and set:
 
 **Approach section** → the "Discover how Tabi works" button link.
 
-### What is still empty, as of the last audit
+### What is still empty on `product.new-design`
 
-All 22 templates are migrated and consistent, but these settings carry a label
-with nothing behind it. Each one is a theme-editor field, not a code change:
+These settings carry a label with nothing behind it. Each is a theme-editor
+field, not a code change, and each will need filling again for every template
+you later roll out to:
 
-| Setting | Templates affected | What renders today |
+| Setting | Count | What renders today |
 |---|---|---|
-| Feature band → *Image* | 44 bands (2 per template) | Band collapses to a single full-width column |
-| Feature band → *Decorative image* | 44 bands | Nothing; the artwork is optional |
-| *The Tabi way* → *Link* (label is `Read more about us`) | 22 | Link hidden until the URL is set |
-| Approach → *Button link* (label is `Discover how Tabi works`) | 22 | Button hidden until the URL is set |
-| Size help → *WhatsApp number* | 22 | Only the Instagram row renders, though the subheading still says "Chat with us on Instagram or Whatsapp" |
+| Feature band → *Image* | 2 bands | Band collapses to a single full-width column |
+| Feature band → *Decorative image* | 2 bands | Nothing; the artwork is optional |
+| *The Tabi way* → *Link* (label is `Read more about us`) | 1 | Link hidden until the URL is set |
+| Approach → *Button link* (label is `Discover how Tabi works`) | 1 | Button hidden until the URL is set |
+| Size help → *WhatsApp number* | 1 | Only the Instagram row renders, though the subheading still says "Chat with us on Instagram or Whatsapp" |
 
 A label with no destination used to render `href="#"`, which looked live and
 jumped to the top of the page when clicked. Both sections now require the URL
 as well as the label, so an unfinished link is visibly absent rather than
 quietly broken — see section 4.
 
-`Size guide page` is deliberately set on the six clothing templates only
-(`size-guide`, and `kids-size-guide` for the kids template). The 16 home,
-table-linen and toy templates have no size guide and should not.
+`product.new-design` has `size_guide_page` set to `size-guide`. When you roll
+out, set it on clothing templates only — `migrate_pdp.py` picks it up from each
+template's own Size Guide tab, so home, table-linen and toy templates correctly
+end up with none.
 
 ---
 
@@ -192,7 +203,12 @@ rules deliberately live in a separate stylesheet that only the product page
 requests. Its section 10 (mobile PDP media capped at 78vh) still applies and
 still wanted.
 
-### Three fixes after the first full-template audit
+### Three fixes found by auditing the full rollout
+
+These were found while all 22 templates carried the redesign. They live in the
+shared section and snippet code, so they still apply now that only
+`product.new-design` uses it — and they are already right for whatever you roll
+out to next.
 
 **BUY NOW now follows ADD TO CART's availability.** Both buttons render their
 disabled state from Liquid, which is correct on first paint and wrong from the
@@ -212,27 +228,39 @@ already in `product-page.css`.
 **Links without a destination are hidden rather than rendered as `#`.** The
 approach CTA and the feature band link each fell back to `href="#"` when their
 URL was empty. Both carry a default label and neither carries a default URL, so
-every template shipped with exactly that combination: a button that looked live
-and jumped to the top of the page. Both now require label *and* URL.
+every template that had been migrated shipped with exactly that combination: a
+button that looked live and jumped to the top of the page. Both now require
+label *and* URL.
 
 **A feature band with no image is a single column.** `.pdp-band__inner` applied
 `grid-template-columns` from the split setting regardless of whether an image
 existed, so a band without one seated its copy in the first track and left the
 second as an empty stretch of beige — 45% of the band on desktop, at every width
 above 750px. The split now collapses to `1fr` when the image is unset, which is
-the state all 44 bands are in today. The `case` on the split setting also gained
-an `else`, so a template saved before that setting existed no longer emits an
-empty custom property.
+the state both of `product.new-design`'s bands are in today. The `case` on the
+split setting also gained an `else`, so a template saved before that setting
+existed no longer emits an empty custom property.
 
 ---
 
-## 5. Rolling out to the other 20 templates
+## 5. Rolling out to the other 21 templates
+
+Not done, and deliberately so — the redesign is on `product.new-design` alone.
+It was rolled out to all 22 once and then reverted, so if you are reading an
+older copy of this file that says otherwise, this section is the current truth.
 
 Once the prototype is signed off:
 
 ```bash
+# one template first, reviewed on a preview theme
+python3 migrate_pdp.py templates/product.new-clothing-collection.json
+
+# then the rest, when that one is right
 python3 migrate_pdp.py templates/product.*.json
 ```
+
+Note the glob includes `product.new-design.json`; re-running against it is
+harmless because the script is idempotent.
 
 `migrate_pdp.py` sits at the repo root. It is tooling, not theme code — Shopify
 CLI only uploads the known theme directories, so it never reaches the store. It:
@@ -270,7 +298,9 @@ content — migrate from a clean checkout of the template if you need to redo it
 - [ ] A product with **no** metafields filled in — the highlights section, the
       fit block and the metafield-driven accordions should vanish cleanly, not
       leave gaps
-- [ ] The 20 **un-migrated** templates still look exactly as before
+- [ ] The 21 **un-migrated** templates still look exactly as before — they
+      should be byte-identical to their pre-redesign state, and their pages
+      should not request `product-page.css` or `product-page.js` at all
 
 ---
 
@@ -281,6 +311,10 @@ redirects to `/cart/checkout`. Razorpay Magic Checkout intercepts checkout, and
 whether it intercepts this redirect has not been tested. Test it on the preview
 theme before publishing. If it misbehaves, set the buy buttons block's *Second
 button* back to **Shopify dynamic checkout** — one setting, no code change.
+
+The exposure is now one template. The other 21 never set `buy_now_style`, and
+the snippet falls back to `dynamic`, so they are still on Shopify's own button
+and this risk does not reach them.
 
 **Buy now carries the whole cart.** Like Shopify's own dynamic checkout, it does
 not clear existing cart items first.
