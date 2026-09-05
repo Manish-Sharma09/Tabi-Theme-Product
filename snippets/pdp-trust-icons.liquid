@@ -1,0 +1,57 @@
+{% comment %}
+  Renders the four-up reassurance strip that sits under the product
+  description - Natural Fabrics / Made to Order / Gentle on Skin / Easy
+  Exchanges in the design.
+
+  The four slots come from block settings rather than metafields: these claims
+  are true of the whole catalogue, and putting them on each product would mean
+  filling the same four values several hundred times.
+
+  An empty label hides its slot, and the grid tracks the number that survive, so
+  a merchant who only wants three does not get a gap where the fourth was.
+
+  Accepts:
+  - block: {Object} the main-product block carrying the settings.
+
+  Usage:
+  {% render 'pdp-trust-icons', block: block %}
+{% endcomment %}
+
+{%- liquid
+  assign labels = ''
+  assign icons = ''
+
+  for i in (1..4)
+    assign label_key = 'label_' | append: i
+    assign icon_key = 'icon_' | append: i
+    assign label = block.settings[label_key]
+
+    if label != blank
+      assign labels = labels | append: label | append: '~|~'
+      assign icons = icons | append: block.settings[icon_key] | append: '~|~'
+    endif
+  endfor
+
+  assign label_list = labels | split: '~|~'
+  assign icon_list = icons | split: '~|~'
+-%}
+
+{%- if label_list.size > 0 -%}
+  <ul
+    class="pdp-trust"
+    style="grid-template-columns: repeat({{ label_list.size }}, 1fr);"
+    {{ block.shopify_attributes }}
+  >
+    {%- for label in label_list -%}
+      <li class="pdp-trust__item">
+        {%- assign icon_name = icon_list[forloop.index0] -%}
+        {%- if icon_name != blank and icon_name != 'none' -%}
+          <span class="pdp-trust__icon">
+            {%- render 'pdp-icon', icon: icon_name -%}
+          </span>
+        {%- endif -%}
+        <span class="pdp-trust__label">{{ label | escape }}</span>
+      </li>
+    {%- endfor -%}
+  </ul>
+{%- endif -%}

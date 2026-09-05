@@ -1,0 +1,97 @@
+{% comment %}
+  Renders the "When will it reach you?" pincode box.
+
+  Serviceability is answered from rules stored in the theme, not from a courier
+  API. The estimate is dispatch time plus a transit band chosen by pincode
+  prefix, so it is an approximation - the copy says "estimated" and the labels
+  are settings, so the wording can be softened without a code change. When a
+  real serviceability API is available later, only assets/product-page.js needs
+  to change; this markup and its settings stay as they are.
+
+  Everything the script needs is serialised into one JSON script tag rather than
+  spread across data- attributes, because the zone rules are multi-line and
+  would need escaping gymnastics as an attribute.
+
+  The four result icons are cloned from the <template> below. Result rows are
+  built in JavaScript and so cannot call {% render %}; cloning keeps
+  snippets/pdp-icon.liquid the only place these SVGs are defined.
+
+  Accepts:
+  - block: {Object} the main-product block carrying the settings.
+
+  Usage:
+  {% render 'pdp-delivery-check', block: block %}
+{% endcomment %}
+
+<pdp-delivery-check class="pdp-delivery" {{ block.shopify_attributes }}>
+  {%- if block.settings.heading != blank -%}
+    <p class="pdp-delivery__title">{{ block.settings.heading | escape }}</p>
+  {%- endif -%}
+
+  <form class="pdp-delivery__form" novalidate>
+    <label class="visually-hidden" for="PdpPincode-{{ block.id }}">
+      {{- block.settings.placeholder | default: 'Enter delivery pincode' | escape -}}
+    </label>
+    <input
+      class="pdp-delivery__input"
+      id="PdpPincode-{{ block.id }}"
+      data-pdp-pincode
+      type="text"
+      inputmode="numeric"
+      autocomplete="postal-code"
+      maxlength="6"
+      pattern="\d{6}"
+      placeholder="{{ block.settings.placeholder | default: 'Enter delivery pincode' | escape }}"
+    >
+    <button class="pdp-delivery__submit" type="submit">
+      {{- block.settings.button_label | default: 'Check' | escape -}}
+    </button>
+  </form>
+
+  <p class="pdp-delivery__error" data-pdp-error hidden></p>
+  <ul class="pdp-delivery__results" data-pdp-results hidden></ul>
+
+  <template data-pdp-icons>
+    <span data-icon="check-circle">{% render 'pdp-icon', icon: 'check-circle' %}</span>
+    <span data-icon="clock">{% render 'pdp-icon', icon: 'clock' %}</span>
+    <span data-icon="calendar">{% render 'pdp-icon', icon: 'calendar' %}</span>
+    <span data-icon="check">{% render 'pdp-icon', icon: 'check' %}</span>
+  </template>
+
+  {%- liquid
+    comment
+      `default` replaces false as well as nil, so piping a checkbox through it
+      would turn "COD off" back into "COD on". Resolve it with a conditional
+      instead, and only fall back to true when the setting is genuinely absent -
+      which is the case on a template saved before this block existed.
+    endcomment
+    assign cod_enabled = true
+    if block.settings.cod_enabled == false
+      assign cod_enabled = false
+    endif
+  -%}
+
+  {%- capture delivery_config -%}
+    {
+      "dispatchMin": {{ block.settings.dispatch_min | default: 2 | json }},
+      "dispatchMax": {{ block.settings.dispatch_max | default: 5 | json }},
+      "transitMin": {{ block.settings.transit_min | default: 3 | json }},
+      "transitMax": {{ block.settings.transit_max | default: 7 | json }},
+      "zoneRules": {{ block.settings.zone_rules | default: '' | json }},
+      "blockedPrefixes": {{ block.settings.blocked_prefixes | default: '' | json }},
+      "codEnabled": {{ cod_enabled | json }},
+      "codPrefixes": {{ block.settings.cod_prefixes | default: '' | json }},
+      "locale": {{ request.locale.iso_code | default: 'en-IN' | json }},
+      "labels": {
+        "deliveringTo": {{ block.settings.label_delivering | default: 'Delivering to {pincode}' | json }},
+        "dispatch": {{ block.settings.label_dispatch | default: 'Made to order in {min}–{max} working days' | json }},
+        "estimated": {{ block.settings.label_estimated | default: 'Estimated delivery:' | json }},
+        "codYes": {{ block.settings.label_cod_yes | default: 'COD available at this pincode' | json }},
+        "codNo": {{ block.settings.label_cod_no | default: 'COD not available at this pincode' | json }},
+        "invalid": {{ block.settings.label_invalid | default: 'Please enter a valid 6-digit pincode.' | json }},
+        "unserviceable": {{ block.settings.label_unserviceable | default: 'Sorry, we do not deliver to {pincode} yet.' | json }}
+      }
+    }
+  {%- endcapture -%}
+  <script type="application/json" data-pdp-delivery-config>{{ delivery_config }}</script>
+</pdp-delivery-check>

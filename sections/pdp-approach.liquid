@@ -1,0 +1,215 @@
+{% comment %}
+  "OUR THREE-PART APPROACH" - a centred intro, three icon-and-text columns, and
+  a single call to action.
+
+  Brand-level copy, identical on every product, so it lives in section settings.
+  Blocks are used for the columns rather than nine numbered settings so the
+  count can change and the order can be dragged.
+
+  Each column carries a short lead line and a longer paragraph, because the
+  design sets them at different weights - the lead is the claim, the paragraph
+  is the reasoning.
+{% endcomment %}
+
+{{ 'product-page.css' | asset_url | stylesheet_tag }}
+
+<div
+  class="pdp-section pdp-approach color-{{ section.settings.color_scheme }}"
+  style="
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="pdp-section__inner">
+    {%- if section.settings.heading != blank -%}
+      <p class="pdp-eyebrow">{{ section.settings.heading | escape }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.intro != blank -%}
+      <p class="pdp-approach__intro">{{ section.settings.intro | escape }}</p>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <ul class="pdp-approach__grid" style="--pdp-approach-columns: {{ section.blocks.size }};">
+        {%- for block in section.blocks -%}
+          <li class="pdp-approach__item" {{ block.shopify_attributes }}>
+            <span class="pdp-approach__icon">
+              {%- if block.settings.icon != blank and block.settings.icon != 'none' -%}
+                {%- render 'pdp-icon', icon: block.settings.icon -%}
+              {%- endif -%}
+            </span>
+            <div>
+              {%- if block.settings.heading != blank -%}
+                <h3 class="pdp-approach__heading">{{ block.settings.heading | escape }}</h3>
+              {%- endif -%}
+              {%- if block.settings.lead != blank -%}
+                <p class="pdp-approach__lead">{{ block.settings.lead | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <p class="pdp-approach__text">{{ block.settings.text | escape | newline_to_br }}</p>
+              {%- endif -%}
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if section.settings.cta_label != blank -%}
+      <a class="pdp-approach__cta" href="{{ section.settings.cta_url | default: '#' }}">
+        <span>{{ section.settings.cta_label | escape }}</span>
+        {%- render 'pdp-icon', icon: 'arrow' -%}
+      </a>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "PDP: Approach",
+  "tag": "section",
+  "class": "pdp-section-wrapper",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section label",
+      "default": "Our three-part approach"
+    },
+    {
+      "type": "text",
+      "id": "intro",
+      "label": "Intro line",
+      "default": "Everything we make is viewed through three lenses."
+    },
+    {
+      "type": "header",
+      "content": "Call to action"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button label",
+      "default": "Discover how Tabi works"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "pillar",
+      "name": "Pillar",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "default": "garment",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "garment", "label": "Garment" },
+            { "value": "process", "label": "Process" },
+            { "value": "person", "label": "Person" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "hand", "label": "Hand" },
+            { "value": "weave", "label": "Weave" },
+            { "value": "block-print", "label": "Block print" },
+            { "value": "feather", "label": "Feather" },
+            { "value": "tag", "label": "Tag" },
+            { "value": "exchange", "label": "Exchange" }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Product"
+        },
+        {
+          "type": "text",
+          "id": "lead",
+          "label": "Lead line",
+          "default": "Made to be valued, worn often and kept."
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Natural fabrics, thoughtful design, comfort, craft and quality that make you want to reach for a piece again and again."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "PDP: Approach",
+      "blocks": [
+        {
+          "type": "pillar",
+          "settings": {
+            "icon": "garment",
+            "heading": "Product",
+            "lead": "Made to be valued, worn often and kept.",
+            "text": "Natural fabrics, thoughtful design, comfort, craft and quality that make you want to reach for a piece again and again."
+          }
+        },
+        {
+          "type": "pillar",
+          "settings": {
+            "icon": "process",
+            "heading": "Process",
+            "lead": "Make closer to demand.",
+            "text": "Small batches and made-to-order production help us create more intentionally and reduce unnecessary excess."
+          }
+        },
+        {
+          "type": "pillar",
+          "settings": {
+            "icon": "person",
+            "heading": "People",
+            "lead": "Every garment carries somebody's work.",
+            "text": "We value the skill, time and hands behind every piece we make. This ensures the person behind the product is never the cheapest component."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

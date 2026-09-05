@@ -1,0 +1,1283 @@
+/* ==========================================================================
+   product-page.css
+   The redesigned product detail page.
+
+   Loaded from sections/main-product.liquid and from the PDP-only sections, so
+   it never reaches the home page, collection pages or the cart. That is
+   deliberate: assets/custom-fixes.css is loaded globally from theme.liquid, and
+   putting these rules there would have let every card, band and accordion rule
+   leak onto pages this redesign was never reviewed against.
+
+   Everything below is namespaced `pdp-`. The two exceptions are the size-chip
+   and buy-button rules in section 4, which have to reach Dawn's own
+   .product-form__input markup - those are fenced behind `.pdp` on the section
+   root so they cannot apply anywhere else, including the featured-product
+   section that renders the same snippet.
+
+     1. Tokens and shared primitives
+     2. Buy box: layout rhythm, title, price, description
+     3. Trust icon row
+     4. Size selector + size guide link
+     5. Fit details, size help
+     6. Buy buttons + USP line
+     7. Delivery (pincode) checker
+     8. Section: why you'll love it
+     9. Section: feature band (image + text)
+    10. Section: four-column info accordions
+    11. Section: three-part approach
+    12. Related products carousel
+    13. Media gallery adjustments
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. TOKENS AND SHARED PRIMITIVES
+
+   Declared on .pdp and on each PDP section root rather than on :root, so the
+   names cannot collide with anything the rest of the theme defines. Colours are
+   literal here rather than derived from the active colour scheme: the redesign
+   specifies a warm neutral palette with one olive accent, and deriving it from
+   `--color-foreground` would have made every band shift if a merchant changed a
+   scheme for an unrelated reason.
+   -------------------------------------------------------------------------- */
+
+.pdp,
+.pdp-section {
+  --pdp-ink: #2c2c28;
+  --pdp-muted: #6f6f66;
+  --pdp-faint: #8d8d84;
+  --pdp-line: #e0dcd3;
+  --pdp-line-soft: #ebe7df;
+  --pdp-band: #f3f0ea;
+  --pdp-band-deep: #ece7dd;
+  --pdp-accent: #3f4a2e;
+  --pdp-accent-ink: #ffffff;
+  --pdp-tan: #b9a88f;
+
+  /* One tracking value for every uppercase eyebrow on the page. */
+  --pdp-eyebrow-tracking: 0.14em;
+
+  /* The page-width gutter the bands need to line up with the buy box. */
+  --pdp-gutter: 1.5rem;
+}
+
+/* Uppercase label used above every section and above each accordion column. */
+.pdp-eyebrow {
+  margin: 0 0 1.2rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: var(--pdp-eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--pdp-muted);
+}
+
+/* Serif display heading. Inherits the theme heading family so a font change in
+   theme settings still carries, but sets its own size and leading. */
+.pdp-display {
+  margin: 0 0 1.2rem;
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-weight: var(--font-heading-weight);
+  font-size: 2.6rem;
+  line-height: 1.25;
+  letter-spacing: 0;
+  color: var(--pdp-ink);
+}
+
+.pdp-body {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+  line-height: 1.7;
+  color: var(--pdp-muted);
+}
+
+.pdp-body:last-child {
+  margin-bottom: 0;
+}
+
+.pdp-icon {
+  display: block;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: 0 0 auto;
+  color: currentColor;
+}
+
+.pdp-icon--arrow {
+  width: 1.6rem;
+  height: 1.6rem;
+  display: inline-block;
+  vertical-align: -0.25em;
+  transition: transform 0.2s ease;
+}
+
+.pdp-icon--caret {
+  width: 1.8rem;
+  height: 1.8rem;
+  transition: transform 0.2s ease;
+}
+
+/* Underlined text link with an optional trailing arrow. */
+.pdp-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.35rem;
+  color: var(--pdp-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.4rem;
+  text-decoration-thickness: 0.05rem;
+}
+
+.pdp-link:hover .pdp-icon--arrow {
+  transform: translateX(0.3rem);
+}
+
+/* Section shell. Each PDP section wraps its content in this so vertical rhythm
+   is set in one place instead of per section. */
+.pdp-section {
+  color: var(--pdp-ink);
+}
+
+.pdp-section__inner {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding-left: var(--pdp-gutter);
+  padding-right: var(--pdp-gutter);
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-section__inner {
+    padding-left: 5rem;
+    padding-right: 5rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. BUY BOX: RHYTHM, TITLE, PRICE, DESCRIPTION
+
+   Dawn spaces the info column with per-block margins that vary by block type.
+   The redesign wants one consistent rhythm, so the container owns the spacing
+   and the direct children are reset. Anything that has to break the rhythm
+   (the trust row's rules, the delivery box) sets its own margin afterwards.
+   -------------------------------------------------------------------------- */
+
+.pdp .product__info-container > * {
+  margin-top: 1.6rem;
+  margin-bottom: 0;
+}
+
+.pdp .product__info-container > *:first-child {
+  margin-top: 0;
+}
+
+.pdp .product__title > h1,
+.pdp .product__title > a > h2 {
+  font-family: var(--font-heading-family);
+  font-size: 2.8rem;
+  font-weight: var(--font-heading-weight);
+  line-height: 1.25;
+  letter-spacing: 0;
+  margin: 0;
+  color: var(--pdp-ink);
+}
+
+/* main-product.liquid renders the title twice - an <h1> for the product page
+   and an <a><h2> that only the quick-add drawer uses. Dawn hides one of them
+   through .quick-add-hidden elsewhere; on the PDP the anchor is simply never
+   wanted, and hiding it here keeps the duplicate out of the visual flow without
+   touching the shared markup. */
+.pdp .product__title > a {
+  display: none;
+}
+
+/* Price and the tax note share one line, baseline aligned. */
+.pdp .product__info-container > [id^='price-'] {
+  display: inline-block;
+  vertical-align: baseline;
+}
+
+.pdp .price {
+  font-size: 1.8rem;
+  color: var(--pdp-ink);
+}
+
+.pdp .price--large {
+  font-size: 1.8rem;
+}
+
+.pdp .price__container {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.8rem;
+}
+
+.pdp .product__tax {
+  display: inline;
+  margin: 0 0 0 0.8rem;
+  font-size: 1.2rem;
+  color: var(--pdp-faint);
+}
+
+.pdp .product__tax p {
+  display: inline;
+  margin: 0;
+}
+
+/* The price block and the tax note are separate children of the info
+   container, which would stack them. Pull the tax note back onto the price
+   line. */
+.pdp .product__info-container > .product__tax {
+  margin-top: 0;
+}
+
+.pdp .pdp-price-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.pdp .product__description {
+  font-size: 1.35rem;
+  line-height: 1.7;
+  color: var(--pdp-muted);
+  max-width: 48ch;
+}
+
+.pdp .product__description p {
+  margin: 0 0 0.8rem;
+}
+
+.pdp .product__description p:last-child {
+  margin-bottom: 0;
+}
+
+/* Dawn's "View full details" link belongs to the quick-add drawer, not the
+   product page. */
+.pdp .product__view-details {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   3. TRUST ICON ROW
+
+   Four equal columns, hairline rules above and below. On narrow phones the
+   labels are the constraint, not the icons, so the columns stay four across and
+   the label wraps to two lines rather than dropping to a 2x2 grid - the row is
+   a reassurance strip and reads better as one band.
+   -------------------------------------------------------------------------- */
+
+.pdp-trust {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 2.4rem 0 0;
+  padding: 1.8rem 0;
+  border-top: 0.1rem solid var(--pdp-line);
+  border-bottom: 0.1rem solid var(--pdp-line);
+  list-style: none;
+}
+
+.pdp .product__info-container > .pdp-trust {
+  margin-top: 2.4rem;
+}
+
+.pdp-trust__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  text-align: center;
+}
+
+.pdp-trust__icon {
+  color: var(--pdp-ink);
+}
+
+.pdp-trust__icon .pdp-icon {
+  width: 2.6rem;
+  height: 2.6rem;
+}
+
+.pdp-trust__label {
+  font-size: 1.1rem;
+  line-height: 1.4;
+  color: var(--pdp-muted);
+  max-width: 10ch;
+}
+
+/* --------------------------------------------------------------------------
+   4. SIZE SELECTOR + SIZE GUIDE LINK
+
+   Dawn ships the option name as a bare <legend>. The redesign puts a "Size
+   Guide" link on the same baseline, so product-variant-picker.liquid wraps the
+   legend and the link in .pdp-option-head.
+
+   The chip rules below override component-product-variant-picker.css. They are
+   more specific than Dawn's (.pdp ancestor + the same selector), so they win
+   without !important - which matters, because main-product.liquid already
+   injects `border-radius: unset !important` inline and a second !important
+   layer here would make the cascade unreadable.
+   -------------------------------------------------------------------------- */
+
+.pdp-option-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.pdp .product-form__input .form__label,
+.pdp-option-head .form__label {
+  margin: 0;
+  padding: 0;
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--pdp-ink);
+}
+
+.pdp-option-head__guide {
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 1.25rem;
+  font-family: inherit;
+  color: var(--pdp-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+  text-decoration-thickness: 0.05rem;
+  cursor: pointer;
+}
+
+.pdp .product-form__input--pill {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pdp .product-form__input--pill input[type='radio'] + label {
+  min-width: 4.8rem;
+  margin: 0 0.8rem 0.8rem 0;
+  padding: 0.9rem 1.2rem;
+  border: 0.1rem solid var(--pdp-line);
+  border-radius: 0;
+  background-color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--pdp-ink);
+  text-align: center;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.pdp .product-form__input--pill input[type='radio'] + label:hover {
+  border-color: var(--pdp-accent);
+}
+
+.pdp .product-form__input--pill input[type='radio']:checked + label {
+  border-color: var(--pdp-accent);
+  background-color: var(--pdp-accent);
+  color: var(--pdp-accent-ink);
+}
+
+/* Dawn draws the focus ring with a :before overlay that inherits the pill
+   radius. Square it off so it traces the chip. */
+.pdp .product-form__input--pill input[type='radio'] + label:before {
+  border-radius: 0;
+}
+
+/* Sold-out sizes: struck through and dimmed, still focusable so screen readers
+   can reach them and hear the unavailable label Dawn renders. */
+.pdp .product-form__input--pill input[type='radio']:disabled + label,
+.pdp .product-form__input--pill input[type='radio'].disabled + label {
+  border-color: var(--pdp-line-soft);
+  color: var(--pdp-faint);
+  text-decoration: line-through;
+  text-decoration-thickness: 0.05rem;
+}
+
+/* The quantity selector is not in the redesign, but templates still carry the
+   block. Hidden rather than removed so that removing it stays the merchant's
+   decision in the theme editor, and so no template needs rewriting for it. */
+.pdp .product-form__quantity {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   5. FIT DETAILS, SIZE HELP
+   -------------------------------------------------------------------------- */
+
+.pdp-fit {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.75;
+  color: var(--pdp-muted);
+}
+
+.pdp-fit__row {
+  margin: 0;
+}
+
+.pdp-fit__label {
+  color: var(--pdp-ink);
+  font-weight: 500;
+}
+
+.pdp-help__title {
+  margin: 0 0 0.3rem;
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--pdp-ink);
+}
+
+.pdp-help__text {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  color: var(--pdp-muted);
+}
+
+.pdp-help__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 2.4rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pdp-help__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.25rem;
+  color: var(--pdp-ink);
+  text-decoration: none;
+}
+
+.pdp-help__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+}
+
+.pdp-help__link .pdp-icon {
+  width: 1.9rem;
+  height: 1.9rem;
+  color: var(--pdp-muted);
+}
+
+/* --------------------------------------------------------------------------
+   6. BUY BUTTONS + USP LINE
+
+   ADD TO BAG is Dawn's submit button restyled; BUY NOW is rendered by
+   snippets/buy-buttons.liquid as a sibling. Both are full width and share a
+   height so they read as one stack.
+   -------------------------------------------------------------------------- */
+
+.pdp .product-form__buttons {
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pdp .product-form__submit,
+.pdp .pdp-buy-now {
+  min-height: 4.8rem;
+  margin: 0;
+  border-radius: 0;
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: none;
+}
+
+.pdp .product-form__submit::after,
+.pdp .pdp-buy-now::after {
+  box-shadow: none;
+}
+
+/* ADD TO BAG - filled olive. Dawn gives the submit button `button--secondary`
+   when dynamic checkout is on; the redesign always wants it filled, so the
+   colours are set here rather than by swapping the class in the snippet. */
+.pdp .product-form__submit {
+  border: 0.1rem solid var(--pdp-accent);
+  background: var(--pdp-accent);
+  color: var(--pdp-accent-ink);
+}
+
+.pdp .product-form__submit:not([disabled]):hover {
+  background: #354027;
+  border-color: #354027;
+}
+
+.pdp .product-form__submit[disabled] {
+  background: var(--pdp-line);
+  border-color: var(--pdp-line);
+  color: var(--pdp-faint);
+  cursor: not-allowed;
+}
+
+/* BUY NOW - outlined. */
+.pdp .pdp-buy-now {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 1.2rem 2rem;
+  border: 0.1rem solid var(--pdp-ink);
+  background: #fff;
+  color: var(--pdp-ink);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.pdp .pdp-buy-now:hover {
+  background: var(--pdp-ink);
+  color: #fff;
+}
+
+.pdp .pdp-buy-now[disabled] {
+  border-color: var(--pdp-line);
+  color: var(--pdp-faint);
+  cursor: not-allowed;
+}
+
+.pdp .pdp-buy-now[disabled]:hover {
+  background: #fff;
+  color: var(--pdp-faint);
+}
+
+/* While the request is in flight the label is swapped for a dimmed state. */
+.pdp .pdp-buy-now.is-loading {
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.pdp-usp {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--pdp-muted);
+  text-align: center;
+}
+
+.pdp-usp__sep {
+  margin: 0 0.8rem;
+  color: var(--pdp-line);
+}
+
+/* --------------------------------------------------------------------------
+   7. DELIVERY (PINCODE) CHECKER
+   -------------------------------------------------------------------------- */
+
+.pdp-delivery {
+  margin-top: 2rem;
+  padding: 1.8rem;
+  border: 0.1rem solid var(--pdp-line);
+}
+
+.pdp .product__info-container > .pdp-delivery {
+  margin-top: 2rem;
+}
+
+.pdp-delivery__title {
+  margin: 0 0 1.2rem;
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--pdp-ink);
+}
+
+.pdp-delivery__form {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.pdp-delivery__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 4rem;
+  padding: 0 1.2rem;
+  border: 0.1rem solid var(--pdp-line);
+  border-radius: 0;
+  background: #fff;
+  font-family: inherit;
+  font-size: 1.3rem;
+  color: var(--pdp-ink);
+}
+
+.pdp-delivery__input::placeholder {
+  color: var(--pdp-faint);
+}
+
+.pdp-delivery__input:focus {
+  outline: none;
+  border-color: var(--pdp-accent);
+}
+
+.pdp-delivery__submit {
+  flex: 0 0 auto;
+  height: 4rem;
+  padding: 0 1.8rem;
+  border: 0;
+  border-radius: 0;
+  background: var(--pdp-tan);
+  color: #fff;
+  font-family: inherit;
+  font-size: 1.2rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.pdp-delivery__submit:hover {
+  background: #a8977e;
+}
+
+.pdp-delivery__error {
+  margin: 1rem 0 0;
+  font-size: 1.2rem;
+  color: #9a3c30;
+}
+
+.pdp-delivery__results {
+  margin: 1.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.pdp-delivery__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: var(--pdp-muted);
+}
+
+.pdp-delivery__row .pdp-icon {
+  width: 1.7rem;
+  height: 1.7rem;
+  margin-top: 0.1rem;
+  color: var(--pdp-faint);
+}
+
+.pdp-delivery__row--ok .pdp-icon {
+  color: var(--pdp-accent);
+}
+
+.pdp-delivery__row strong {
+  font-weight: 500;
+  color: var(--pdp-ink);
+}
+
+/* --------------------------------------------------------------------------
+   8. SECTION: WHY YOU'LL LOVE IT
+
+   Three columns divided by hairlines. The dividers are borders on the items
+   rather than a background gradient, so a column count of two (a product with
+   only two points filled in) still divides correctly.
+   -------------------------------------------------------------------------- */
+
+.pdp-why {
+  text-align: center;
+}
+
+.pdp-why__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3.2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-why__grid {
+    grid-template-columns: repeat(var(--pdp-why-columns, 3), 1fr);
+    gap: 0;
+  }
+
+  .pdp-why__item + .pdp-why__item {
+    border-left: 0.1rem solid var(--pdp-line);
+  }
+
+  .pdp-why__item {
+    padding: 0 3rem;
+  }
+}
+
+.pdp-why__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pdp-why__icon {
+  color: var(--pdp-ink);
+}
+
+.pdp-why__icon .pdp-icon {
+  width: 3rem;
+  height: 3rem;
+}
+
+.pdp-why__heading {
+  margin: 0;
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-size: 1.6rem;
+  line-height: 1.4;
+  color: var(--pdp-ink);
+}
+
+.pdp-why__text {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 1.25rem;
+  line-height: 1.65;
+  color: var(--pdp-muted);
+}
+
+/* --------------------------------------------------------------------------
+   9. SECTION: FEATURE BAND (IMAGE + TEXT)
+
+   Used twice - "Made in small batches" and "The Tabi Way" - with the image on
+   either side. On mobile the band always stacks; which half comes first is a
+   section setting, because the two instances in the design differ (the batches
+   band leads with copy, the Tabi Way band leads with copy too, but a future
+   band may not).
+   -------------------------------------------------------------------------- */
+
+.pdp-band__inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--pdp-band);
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-band__inner {
+    grid-template-columns: var(--pdp-band-split, 1fr 1fr);
+    align-items: stretch;
+  }
+}
+
+.pdp-band__media {
+  position: relative;
+  overflow: hidden;
+  min-height: 22rem;
+}
+
+.pdp-band__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pdp-band__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 2.4rem;
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-band__content {
+    padding: 4.5rem 5rem;
+  }
+}
+
+/* Image on the right: reorder on desktop only, so the mobile order stays
+   whatever the stacking rules below decide. */
+@media screen and (min-width: 750px) {
+  .pdp-band--media-right .pdp-band__media {
+    order: 2;
+  }
+
+  .pdp-band--media-right .pdp-band__content {
+    order: 1;
+  }
+}
+
+/* Mobile stacking order. */
+.pdp-band--mobile-text-first .pdp-band__content {
+  order: 1;
+}
+
+.pdp-band--mobile-text-first .pdp-band__media {
+  order: 2;
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-band--mobile-text-first .pdp-band__content,
+  .pdp-band--mobile-text-first .pdp-band__media {
+    order: initial;
+  }
+
+  .pdp-band--media-right.pdp-band--mobile-text-first .pdp-band__media {
+    order: 2;
+  }
+
+  .pdp-band--media-right.pdp-band--mobile-text-first .pdp-band__content {
+    order: 1;
+  }
+}
+
+.pdp-band__body {
+  max-width: 46ch;
+}
+
+.pdp-band__body p {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+  line-height: 1.75;
+  color: var(--pdp-muted);
+}
+
+.pdp-band__body p:last-child {
+  margin-bottom: 0;
+}
+
+.pdp-band__link {
+  margin-top: 1.6rem;
+}
+
+/* Decorative artwork pinned to a corner of the text half - the botanical sprig
+   and the round seal in the design. Hidden from assistive tech and from narrow
+   screens, where it would crowd the copy. */
+.pdp-band__decor {
+  display: none;
+}
+
+@media screen and (min-width: 990px) {
+  .pdp-band__decor {
+    display: block;
+    position: absolute;
+    top: 3rem;
+    right: 3rem;
+    width: var(--pdp-decor-size, 9rem);
+    height: auto;
+    pointer-events: none;
+    opacity: 0.9;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   10. SECTION: FOUR-COLUMN INFO ACCORDIONS
+
+   Desktop: four columns inside one bordered box, each column headed by an
+   eyebrow with its rows listed below, collapsed.
+
+   Mobile: the four column headings become the accordions themselves and the
+   rows live inside. That is a genuine structural difference, not just a
+   reflow - so the markup renders both the group <details> and the row
+   <details>, and CSS decides which layer is interactive at each breakpoint.
+   Doing it in CSS keeps one DOM, which means no duplicated content for search
+   engines and no JavaScript to keep the two in sync.
+   -------------------------------------------------------------------------- */
+
+.pdp-infocols__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  border: 0.1rem solid var(--pdp-line);
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-infocols__grid {
+    grid-template-columns: repeat(var(--pdp-infocols-count, 4), 1fr);
+  }
+}
+
+.pdp-infocols__col + .pdp-infocols__col {
+  border-top: 0.1rem solid var(--pdp-line);
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-infocols__col + .pdp-infocols__col {
+    border-top: 0;
+    border-left: 0.1rem solid var(--pdp-line);
+  }
+}
+
+.pdp-infocols__group {
+  padding: 0;
+}
+
+/* --- The group heading ---------------------------------------------------- */
+
+.pdp-infocols__group > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem;
+  padding: 1.8rem 2rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.pdp-infocols__group > summary::-webkit-details-marker {
+  display: none;
+}
+
+.pdp-infocols__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: var(--pdp-eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--pdp-ink);
+}
+
+.pdp-infocols__group[open] > summary .pdp-icon--caret {
+  transform: rotate(180deg);
+}
+
+.pdp-infocols__rows {
+  padding: 0 2rem 1.4rem;
+}
+
+@media screen and (min-width: 750px) {
+  /* Desktop: the group is always open and its heading is inert. `display:
+     block` on the summary removes the flex row so the caret can be hidden
+     without leaving a gap. */
+  .pdp-infocols__group > summary {
+    padding-bottom: 0.6rem;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .pdp-infocols__group > summary .pdp-icon--caret {
+    display: none;
+  }
+}
+
+/* --- The individual rows -------------------------------------------------- */
+
+.pdp-infocols__row {
+  border-bottom: 0.1rem solid var(--pdp-line-soft);
+}
+
+.pdp-infocols__row:last-child {
+  border-bottom: 0;
+}
+
+.pdp-infocols__row > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding: 1.1rem 0;
+  font-size: 1.25rem;
+  color: var(--pdp-ink);
+  cursor: pointer;
+  list-style: none;
+}
+
+.pdp-infocols__row > summary::-webkit-details-marker {
+  display: none;
+}
+
+.pdp-infocols__row > summary:hover {
+  color: var(--pdp-accent);
+}
+
+.pdp-infocols__row[open] > summary .pdp-icon--caret {
+  transform: rotate(180deg);
+}
+
+.pdp-infocols__row .pdp-icon--caret {
+  color: var(--pdp-faint);
+}
+
+.pdp-infocols__content {
+  padding: 0 0 1.2rem;
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: var(--pdp-muted);
+}
+
+.pdp-infocols__content > :first-child {
+  margin-top: 0;
+}
+
+.pdp-infocols__content > :last-child {
+  margin-bottom: 0;
+}
+
+/* A row with no expandable content is a statement, not a control: it renders as
+   plain text with no caret and no pointer. */
+.pdp-infocols__row--static > summary {
+  cursor: default;
+  pointer-events: none;
+  color: var(--pdp-muted);
+}
+
+.pdp-infocols__row--static > summary .pdp-icon--caret {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   11. SECTION: THREE-PART APPROACH
+   -------------------------------------------------------------------------- */
+
+.pdp-approach {
+  text-align: center;
+}
+
+.pdp-approach__intro {
+  margin: 0 auto 3rem;
+  max-width: 52ch;
+  font-size: 1.3rem;
+  line-height: 1.7;
+  color: var(--pdp-muted);
+}
+
+.pdp-approach__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.8rem;
+  margin: 0 0 3rem;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-approach__grid {
+    grid-template-columns: repeat(var(--pdp-approach-columns, 3), 1fr);
+    gap: 3.5rem;
+  }
+}
+
+.pdp-approach__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.4rem;
+  align-items: start;
+}
+
+.pdp-approach__icon {
+  color: var(--pdp-ink);
+}
+
+.pdp-approach__icon .pdp-icon {
+  width: 3rem;
+  height: 3rem;
+}
+
+.pdp-approach__heading {
+  margin: 0 0 0.4rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: var(--pdp-eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--pdp-ink);
+}
+
+.pdp-approach__lead {
+  margin: 0 0 0.8rem;
+  font-size: 1.3rem;
+  line-height: 1.6;
+  color: var(--pdp-ink);
+}
+
+.pdp-approach__text {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.65;
+  color: var(--pdp-muted);
+}
+
+.pdp-approach__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.2rem 2.4rem;
+  border: 0.1rem solid var(--pdp-ink);
+  background: transparent;
+  font-size: 1.3rem;
+  color: var(--pdp-ink);
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.pdp-approach__cta:hover {
+  background: var(--pdp-ink);
+  color: #fff;
+}
+
+.pdp-approach__cta:hover .pdp-icon--arrow {
+  transform: translateX(0.3rem);
+}
+
+/* --------------------------------------------------------------------------
+   12. RELATED PRODUCTS CAROUSEL
+
+   Built on scroll-snap and the browser's own overflow scrolling. The theme
+   already loads jQuery, Slick and Swiper globally from theme.liquid; adding a
+   fourth carousel dependency for a row of five cards would be the wrong trade,
+   and reaching for one of the existing three would tie this section to a
+   library the rest of the redesign does not use.
+
+   The arrows drive it with element.scrollBy, so touch swipe, trackpad, keyboard
+   and the arrows all move the same scroller and cannot fall out of sync.
+   -------------------------------------------------------------------------- */
+
+.pdp-carousel {
+  position: relative;
+}
+
+.pdp-carousel__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - var(--pdp-carousel-gap, 1.6rem)) / var(--pdp-carousel-peek, 1.15));
+  gap: var(--pdp-carousel-gap, 1.6rem);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding-bottom: 0.5rem;
+  margin: 0;
+  list-style: none;
+}
+
+.pdp-carousel__track::-webkit-scrollbar {
+  display: none;
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-carousel__track {
+    grid-auto-columns: calc(
+      (100% - (var(--pdp-carousel-columns, 5) - 1) * var(--pdp-carousel-gap, 1.6rem)) /
+        var(--pdp-carousel-columns, 5)
+    );
+  }
+}
+
+.pdp-carousel__slide {
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+.pdp-carousel__nav {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-top: 2rem;
+}
+
+.pdp-carousel__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  padding: 0;
+  border: 0.1rem solid var(--pdp-line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--pdp-ink);
+  cursor: pointer;
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.pdp-carousel__btn:hover:not([disabled]) {
+  border-color: var(--pdp-ink);
+}
+
+.pdp-carousel__btn[disabled] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pdp-carousel__btn .pdp-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+.pdp-carousel__btn--prev .pdp-icon {
+  transform: rotate(180deg);
+}
+
+/* On wide screens the arrows sit outside the track, vertically centred on the
+   card images rather than on the whole slide (which includes the title and
+   price and would push them too low). */
+@media screen and (min-width: 1200px) {
+  .pdp-carousel__nav {
+    position: absolute;
+    top: var(--pdp-carousel-arrow-top, 38%);
+    left: 0;
+    right: 0;
+    margin: 0;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .pdp-carousel__btn {
+    pointer-events: auto;
+    transform: translateX(var(--pdp-carousel-arrow-offset, -5rem));
+  }
+
+  .pdp-carousel__btn--next {
+    transform: translateX(calc(var(--pdp-carousel-arrow-offset, -5rem) * -1));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   13. MEDIA GALLERY ADJUSTMENTS
+
+   The redesign uses Dawn's `thumbnail` gallery layout, which is a settings
+   change rather than new markup. What it needs from CSS is a narrower thumbnail
+   rail than Dawn's default and square thumbnails.
+
+   Note that assets/custom-fixes.css section 10 already caps .product__media at
+   78vh on phones. That cap is still wanted, and nothing here raises it - these
+   rules only touch the thumbnail rail and the desktop split.
+   -------------------------------------------------------------------------- */
+
+.pdp .thumbnail-list {
+  gap: 0.8rem;
+}
+
+.pdp .thumbnail-list__item {
+  border-radius: 0;
+}
+
+.pdp .thumbnail {
+  border-radius: 0;
+  border-color: var(--pdp-line);
+}
+
+.pdp .thumbnail[aria-current='true'] {
+  border-color: var(--pdp-ink);
+  box-shadow: none;
+}
+
+@media screen and (min-width: 990px) {
+  /* Dawn's thumbnail layout gives the rail a fixed share of the media column.
+     The design's rail is narrower than the default, closer to a sixth. */
+  .pdp .product__media-gallery .thumbnail-list.thumbnail-list--wide {
+    flex: 0 0 auto;
+  }
+
+  .pdp .product--thumbnail .thumbnail-list {
+    max-width: 9rem;
+  }
+}
+
+/* The lightbox trigger overlaps the top-left thumbnail in the redesign's
+   layout; move it to the bottom-right of the main image. */
+.pdp .product__media-zoom-lightbox {
+  top: auto;
+  bottom: 1.2rem;
+  left: auto;
+  right: 1.2rem;
+}

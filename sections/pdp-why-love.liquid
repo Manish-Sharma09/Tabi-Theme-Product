@@ -1,0 +1,170 @@
+{% comment %}
+  "WHY YOU'LL LOVE IT" - up to three icon + heading + body columns.
+
+  The copy is per product and comes from metafields; the icons are per template
+  and come from block settings. Which metafield a column reads is decided by its
+  position, so the first block reads custom.usp_1_heading / custom.usp_1_text,
+  the second reads usp_2_*, and so on. Reordering the blocks in the theme editor
+  reorders which metafield shows where, which is the behaviour a merchant
+  dragging a column expects.
+
+  A column with no heading in its metafield is skipped, and the section renders
+  nothing at all when no column survives. That is what makes this safe to roll
+  out across all 21 product templates before the metafields are filled in: an
+  unfilled product shows no empty band, it shows nothing.
+
+  Metafields read:
+  - custom.usp_1_heading .. custom.usp_3_heading  (single line text)
+  - custom.usp_1_text    .. custom.usp_3_text     (multi-line text)
+{% endcomment %}
+
+{{ 'product-page.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign rendered = 0
+  assign headings = ''
+  assign bodies = ''
+  assign icons = ''
+
+  for block in section.blocks
+    assign heading_key = 'usp_' | append: forloop.index | append: '_heading'
+    assign text_key = 'usp_' | append: forloop.index | append: '_text'
+
+    assign heading = product.metafields.custom[heading_key].value | default: product.metafields.custom[heading_key]
+    assign body = product.metafields.custom[text_key].value | default: product.metafields.custom[text_key]
+
+    if heading != blank
+      assign rendered = rendered | plus: 1
+      assign headings = headings | append: heading | append: '~|~'
+      assign bodies = bodies | append: body | append: '~|~'
+      assign icons = icons | append: block.settings.icon | append: '~|~'
+    endif
+  endfor
+
+  assign heading_list = headings | split: '~|~'
+  assign body_list = bodies | split: '~|~'
+  assign icon_list = icons | split: '~|~'
+-%}
+
+{%- if rendered > 0 -%}
+  <div
+    class="pdp-section pdp-why color-{{ section.settings.color_scheme }} gradient"
+    style="
+      --pdp-why-columns: {{ rendered }};
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    "
+  >
+    <div class="pdp-section__inner">
+      {%- if section.settings.heading != blank -%}
+        <p class="pdp-eyebrow">{{ section.settings.heading | escape }}</p>
+      {%- endif -%}
+
+      <ul class="pdp-why__grid">
+        {%- for heading in heading_list -%}
+          <li class="pdp-why__item">
+            {%- assign icon_name = icon_list[forloop.index0] -%}
+            {%- if icon_name != blank and icon_name != 'none' -%}
+              <span class="pdp-why__icon">
+                {%- render 'pdp-icon', icon: icon_name -%}
+              </span>
+            {%- endif -%}
+            <h3 class="pdp-why__heading">{{ heading | escape }}</h3>
+            {%- assign body = body_list[forloop.index0] -%}
+            {%- if body != blank -%}
+              <p class="pdp-why__text">{{ body | escape | newline_to_br }}</p>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "PDP: Why you'll love it",
+  "tag": "section",
+  "class": "pdp-section-wrapper",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Column copy comes from product metafields: custom.usp_1_heading and custom.usp_1_text for the first column, usp_2_* for the second, usp_3_* for the third. Choose the matching icon on each column block below. The whole section is hidden on products that have no highlights filled in."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section label",
+      "default": "Why you'll love it"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Column",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "default": "feather",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "feather", "label": "Feather" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "hand", "label": "Hand" },
+            { "value": "weave", "label": "Weave" },
+            { "value": "block-print", "label": "Block print" },
+            { "value": "garment", "label": "Garment" },
+            { "value": "tag", "label": "Tag" },
+            { "value": "exchange", "label": "Exchange" },
+            { "value": "process", "label": "Process" },
+            { "value": "person", "label": "Person" }
+          ]
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "PDP: Why you'll love it",
+      "blocks": [
+        { "type": "column", "settings": { "icon": "feather" } },
+        { "type": "column", "settings": { "icon": "hand" } },
+        { "type": "column", "settings": { "icon": "weave" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

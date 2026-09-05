@@ -22,6 +22,31 @@
       if block.settings.show_dynamic_checkout and gift_card_recipient_feature_active == false
         assign show_dynamic_checkout = true
       endif
+
+      comment
+        The redesign asks for a plain outlined BUY NOW, which Shopify's dynamic
+        checkout button cannot become - `form | payment_button` renders wallet
+        buttons whose markup Shopify owns. Setting buy_now_style to 'custom'
+        swaps in a button that adds to cart and then redirects to checkout.
+
+        The two are mutually exclusive on purpose: showing both would give the
+        shopper two "skip the cart" controls that behave differently.
+
+        Gift cards keep the native button either way. A custom buy-now bypasses
+        the recipient form, which would send a gift card with no recipient.
+
+        Default is 'dynamic', so any template that has not opted in behaves
+        exactly as it does today.
+      endcomment
+      assign buy_now_style = block.settings.buy_now_style | default: 'dynamic'
+      assign show_custom_buy_now = false
+
+      if buy_now_style == 'custom' and gift_card_recipient_feature_active == false and product.gift_card? != true
+        assign show_custom_buy_now = true
+        assign show_dynamic_checkout = false
+      elsif buy_now_style == 'none'
+        assign show_dynamic_checkout = false
+      endif
     -%}
 
     <product-form
@@ -93,6 +118,26 @@
             </span>
             {%- render 'loading-spinner' -%}
           </button>
+          {%- if show_custom_buy_now -%}
+            <pdp-buy-now
+              data-form-id="{{ product_form_id }}"
+              data-checkout-url="{{ routes.cart_url }}/checkout"
+              data-error="{{ 'sections.cart.cart_error' | t | escape }}"
+            >
+              <button
+                class="pdp-buy-now"
+                type="button"
+                {% if product.selected_or_first_available_variant.available == false
+                  or quantity_rule_soldout
+                  or product.selected_or_first_available_variant == null
+                %}
+                  disabled
+                {% endif %}
+              >
+                {{- block.settings.buy_now_label | default: 'Buy now' | escape -}}
+              </button>
+            </pdp-buy-now>
+          {%- endif -%}
           {%- if show_dynamic_checkout -%}
             {%- unless product.selected_or_first_available_variant.available -%}
                     <style>

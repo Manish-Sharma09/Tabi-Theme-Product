@@ -1,0 +1,78 @@
+{% comment %}
+  Renders the "Need help choosing your size?" prompt with an Instagram handle
+  and a WhatsApp number.
+
+  The WhatsApp href is built from a separate digits-only setting rather than
+  parsed out of the display number, so the number can be shown as
+  "+91 98765 43210" while the link carries "919876543210". wa.me rejects
+  spaces, plus signs and dashes, and guessing at stripping them from the display
+  string breaks the moment someone formats it differently.
+
+  Accepts:
+  - block: {Object} the main-product block carrying the settings.
+
+  Usage:
+  {% render 'pdp-size-help', block: block %}
+{% endcomment %}
+
+{%- liquid
+  assign instagram_handle = block.settings.instagram_handle | strip
+  assign whatsapp_display = block.settings.whatsapp_display | strip
+  assign whatsapp_number = block.settings.whatsapp_number | remove: ' ' | remove: '+' | remove: '-' | strip
+
+  assign has_contact = false
+  if instagram_handle != blank or whatsapp_display != blank
+    assign has_contact = true
+  endif
+-%}
+
+{%- if block.settings.heading != blank or has_contact -%}
+  <div class="pdp-help" {{ block.shopify_attributes }}>
+    {%- if block.settings.heading != blank -%}
+      <p class="pdp-help__title">{{ block.settings.heading | escape }}</p>
+    {%- endif -%}
+
+    {%- if block.settings.subheading != blank -%}
+      <p class="pdp-help__text">{{ block.settings.subheading | escape }}</p>
+    {%- endif -%}
+
+    {%- if has_contact -%}
+      <ul class="pdp-help__links">
+        {%- if instagram_handle != blank -%}
+          <li>
+            <a
+              class="pdp-help__link"
+              href="{{ block.settings.instagram_url | default: 'https://instagram.com/' }}"
+              target="_blank"
+              rel="noopener"
+            >
+              {%- render 'pdp-icon', icon: 'instagram' -%}
+              <span>{{ instagram_handle }}</span>
+            </a>
+          </li>
+        {%- endif -%}
+
+        {%- if whatsapp_display != blank -%}
+          <li>
+            {%- if whatsapp_number != blank -%}
+              <a
+                class="pdp-help__link"
+                href="https://wa.me/{{ whatsapp_number }}"
+                target="_blank"
+                rel="noopener"
+              >
+                {%- render 'pdp-icon', icon: 'whatsapp' -%}
+                <span>{{ whatsapp_display }}</span>
+              </a>
+            {%- else -%}
+              <span class="pdp-help__link">
+                {%- render 'pdp-icon', icon: 'whatsapp' -%}
+                <span>{{ whatsapp_display }}</span>
+              </span>
+            {%- endif -%}
+          </li>
+        {%- endif -%}
+      </ul>
+    {%- endif -%}
+  </div>
+{%- endif -%}

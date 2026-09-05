@@ -1,0 +1,283 @@
+{% comment %}
+  The four-column information block: Product Details / Material & Care /
+  Shipping & Delivery / Exchanges & Returns, each a stack of expandable rows.
+
+  Desktop and mobile are genuinely different structures, not one reflowed. On
+  desktop the four column headings are always-open labels with their rows listed
+  underneath; on mobile the headings themselves become the accordions and the
+  rows sit inside. Rather than render the content twice, the markup nests
+  <details> inside <details> and <pdp-info-columns> in product-page.js opens or
+  closes the outer layer at the breakpoint. One DOM means no duplicate content
+  for search engines and nothing to keep in sync.
+
+  Rows are flat blocks that each name their column rather than nested blocks,
+  because nested blocks are not available to a section in a Dawn 15 theme. The
+  column headings are section settings; an empty heading removes that column,
+  and the grid tracks how many survive.
+
+  A row can take its content from a product metafield (`Metafield key` set) or
+  from static text typed into the block. Metafield rows disappear on products
+  that have no value, which is what lets one template serve a catalogue where
+  only some products have, say, a documented craft technique.
+{% endcomment %}
+
+{{ 'product-page.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product-page.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  comment
+    Pass one: work out which columns have at least one row with content, so an
+    unused column does not render as an empty grid cell with a heading.
+  endcomment
+  assign live_columns = ''
+
+  for i in (1..4)
+    assign index = i | append: ''
+    assign title_key = 'column_' | append: index | append: '_title'
+    assign title = section.settings[title_key]
+
+    if title == blank
+      continue
+    endif
+
+    assign column_has_row = false
+
+    for block in section.blocks
+      if block.settings.column != index
+        continue
+      endif
+      if block.settings.label == blank
+        continue
+      endif
+
+      assign key = block.settings.metafield_key | strip
+      if key != blank
+        if product.metafields.custom[key] != blank
+          assign column_has_row = true
+          break
+        endif
+      elsif block.settings.content != blank
+        assign column_has_row = true
+        break
+      endif
+    endfor
+
+    if column_has_row
+      assign live_columns = live_columns | append: index | append: ','
+    endif
+  endfor
+
+  assign live_column_list = live_columns | split: ','
+-%}
+
+{%- if live_column_list.size > 0 -%}
+  <div
+    class="pdp-section color-{{ section.settings.color_scheme }}"
+    style="
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    "
+  >
+    <div class="pdp-section__inner">
+      <pdp-info-columns
+        class="pdp-infocols__grid"
+        style="--pdp-infocols-count: {{ live_column_list.size }};"
+      >
+        {%- for index in live_column_list -%}
+          {%- assign title_key = 'column_' | append: index | append: '_title' -%}
+          <div class="pdp-infocols__col">
+            {%- comment -%}
+              Rendered open, and closed again by JavaScript at mobile widths.
+              The other way round reads more naturally but fails badly: on
+              desktop the heading is pointer-events: none, so if the script
+              never loads the groups would be both closed and unclickable, and
+              every column's content would be unreachable. Starting open means
+              the worst case is an expanded accordion, not a lost one.
+            {%- endcomment -%}
+            <details class="pdp-infocols__group" data-pdp-group open>
+              <summary>
+                <h3 class="pdp-infocols__title">{{ section.settings[title_key] | escape }}</h3>
+                {%- render 'pdp-icon', icon: 'caret' -%}
+              </summary>
+
+              <div class="pdp-infocols__rows">
+                {%- for block in section.blocks -%}
+                  {%- if block.settings.column != index or block.settings.label == blank -%}
+                    {%- continue -%}
+                  {%- endif -%}
+
+                  {%- liquid
+                    assign key = block.settings.metafield_key | strip
+                    assign use_metafield = false
+                    assign has_content = false
+
+                    if key != blank
+                      assign use_metafield = true
+                      if product.metafields.custom[key] != blank
+                        assign has_content = true
+                      endif
+                    elsif block.settings.content != blank
+                      assign has_content = true
+                    endif
+                  -%}
+
+                  {%- if has_content -%}
+                    <details class="pdp-infocols__row" {{ block.shopify_attributes }}>
+                      <summary>
+                        <span>{{ block.settings.label | escape }}</span>
+                        {%- render 'pdp-icon', icon: 'caret' -%}
+                      </summary>
+                      <div class="pdp-infocols__content rte">
+                        {%- if use_metafield -%}
+                          {%- comment -%}
+                            A rich text metafield renders its own HTML when
+                            output directly. Every other type is a plain string,
+                            which has to be escaped, and needs its line breaks
+                            turned into markup to survive in an HTML context.
+                          {%- endcomment -%}
+                          {%- assign field = product.metafields.custom[key] -%}
+                          {%- if field.type == 'rich_text_field' -%}
+                            {{ field }}
+                          {%- else -%}
+                            <p>{{ field.value | default: field | escape | newline_to_br }}</p>
+                          {%- endif -%}
+                        {%- else -%}
+                          {{ block.settings.content }}
+                        {%- endif -%}
+                      </div>
+                    </details>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </details>
+          </div>
+        {%- endfor -%}
+      </pdp-info-columns>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "PDP: Info columns",
+  "tag": "section",
+  "class": "pdp-section-wrapper",
+  "max_blocks": 24,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Name up to four columns here, then add a row block for each line and choose which column it belongs to. Clearing a column name removes that column."
+    },
+    {
+      "type": "text",
+      "id": "column_1_title",
+      "label": "Column 1 heading",
+      "default": "Product details"
+    },
+    {
+      "type": "text",
+      "id": "column_2_title",
+      "label": "Column 2 heading",
+      "default": "Material & care"
+    },
+    {
+      "type": "text",
+      "id": "column_3_title",
+      "label": "Column 3 heading",
+      "default": "Shipping & delivery"
+    },
+    {
+      "type": "text",
+      "id": "column_4_title",
+      "label": "Column 4 heading",
+      "default": "Exchanges & returns"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 24
+    }
+  ],
+  "blocks": [
+    {
+      "type": "row",
+      "name": "Row",
+      "settings": [
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "default": "1",
+          "options": [
+            { "value": "1", "label": "Column 1" },
+            { "value": "2", "label": "Column 2" },
+            { "value": "3", "label": "Column 3" },
+            { "value": "4", "label": "Column 4" }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Row label",
+          "default": "Fabric"
+        },
+        {
+          "type": "text",
+          "id": "metafield_key",
+          "label": "Metafield key",
+          "info": "Key inside the `custom` namespace, e.g. `craft_technique`. When set, the row shows that product metafield and is hidden on products where it is empty. Leave blank to use the fixed text below."
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Text",
+          "info": "Used only when no metafield key is set."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "PDP: Info columns",
+      "blocks": [
+        { "type": "row", "settings": { "column": "1", "label": "Fabric", "metafield_key": "fabric" } },
+        { "type": "row", "settings": { "column": "1", "label": "Craft / technique", "metafield_key": "craft_technique" } },
+        { "type": "row", "settings": { "column": "1", "label": "Construction", "metafield_key": "construction" } },
+        { "type": "row", "settings": { "column": "1", "label": "Silhouette", "metafield_key": "silhouette" } },
+        { "type": "row", "settings": { "column": "2", "label": "Fabric composition", "metafield_key": "fabric_composition" } },
+        { "type": "row", "settings": { "column": "2", "label": "Wash instructions", "metafield_key": "wash_instructions" } },
+        { "type": "row", "settings": { "column": "2", "label": "Care instructions", "metafield_key": "care_instructions" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

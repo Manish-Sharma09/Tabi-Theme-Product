@@ -1,0 +1,32 @@
+{% comment %}
+  Renders the single reassurance line under the buy buttons -
+  "Free Shipping  •  COD Available".
+
+  Items come from one comma-separated setting rather than three numbered ones:
+  the separators are drawn between items, so the count has to be able to change
+  without leaving a dangling bullet, and a list is the honest shape for that.
+
+  Accepts:
+  - block: {Object} the main-product block carrying the settings.
+
+  Usage:
+  {% render 'pdp-usp-line', block: block %}
+{% endcomment %}
+
+{%- liquid
+  assign items = block.settings.items | default: '' | split: ','
+-%}
+
+{%- if items.size > 0 -%}
+  <p class="pdp-usp" {{ block.shopify_attributes }}>
+    {%- for item in items -%}
+      {%- assign label = item | strip -%}
+      {%- if label != blank -%}
+        {%- unless forloop.first -%}
+          <span class="pdp-usp__sep" aria-hidden="true">&bull;</span>
+        {%- endunless -%}
+        <span>{{ label | escape }}</span>
+      {%- endif -%}
+    {%- endfor -%}
+  </p>
+{%- endif -%}

@@ -43,8 +43,52 @@
           %}
         </fieldset>
       {%- elsif picker_type == 'button' -%}
+        {%- comment -%}
+          The redesigned product page puts a "Size Guide" link on the same
+          baseline as the option name, and calls the option "Select Size"
+          rather than "Size".
+
+          Both are opt-in. Without block.settings.size_guide_page this renders
+          the legend exactly as Dawn does, so the featured-product section and
+          any template that has not been migrated are untouched.
+
+          The link is matched against one named option rather than shown on
+          every pill group, otherwise a product with Size and Colour would
+          offer a size guide beside its colours too.
+        {%- endcomment -%}
+        {%- liquid
+          assign guide_option = block.settings.size_guide_option | default: 'Size'
+          assign show_guide = false
+          if block.settings.size_guide_page != blank
+            assign option_name_down = option.name | downcase | strip
+            assign guide_option_down = guide_option | downcase | strip
+            if option_name_down == guide_option_down
+              assign show_guide = true
+            endif
+          endif
+
+          assign legend_label = option.name
+          if show_guide and block.settings.size_label != blank
+            assign legend_label = block.settings.size_label
+          endif
+        -%}
         <fieldset class="js product-form__input product-form__input--pill">
-          <legend class="form__label">{{ option.name }}</legend>
+          {%- if show_guide -%}
+            <div class="pdp-option-head">
+              <legend class="form__label">{{ legend_label }}</legend>
+              <modal-opener data-modal="#PdpSizeGuide-{{ section.id }}">
+                <button
+                  class="pdp-option-head__guide"
+                  type="button"
+                  aria-haspopup="dialog"
+                >
+                  {{- block.settings.size_guide_label | default: 'Size Guide' | escape -}}
+                </button>
+              </modal-opener>
+            </div>
+          {%- else -%}
+            <legend class="form__label">{{ legend_label }}</legend>
+          {%- endif -%}
           {% render 'product-variant-options',
             product: product,
             option: option,

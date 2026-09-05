@@ -1,0 +1,238 @@
+{% comment %}
+  A full-width band: one image half, one copy half on a warm ground.
+
+  Used twice on the product page - "Made in small batches" and "The Tabi Way" -
+  which is why it is one configurable section rather than two hardcoded ones.
+  The two differ in image side, split ratio, whether there is a link, and which
+  decorative artwork sits in the corner, and all four are settings.
+
+  The copy is brand level, identical on every product, so it lives in section
+  settings rather than metafields. A merchant edits it once per template.
+
+  The decorative image (the botanical sprig, the round TABI seal) is presentation
+  only: it is hidden below 990px where it would crowd the text, and carries an
+  empty alt so screen readers skip it.
+{% endcomment %}
+
+{{ 'product-page.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign media_right = false
+  if section.settings.image_position == 'right'
+    assign media_right = true
+  endif
+
+  case section.settings.split
+    when 'even'
+      assign split = '1fr 1fr'
+    when 'media_wide'
+      assign split = '1.2fr 1fr'
+    when 'media_narrow'
+      assign split = '0.8fr 1fr'
+  endcase
+
+  comment
+    The grid columns are written media-first. When the image is on the right the
+    CSS reorders the two halves rather than flipping the track list, so this
+    ratio always describes "image column, then text column".
+  endcomment
+  if media_right
+    assign split = split | split: ' ' | reverse | join: ' '
+  endif
+-%}
+
+<div
+  class="pdp-section color-{{ section.settings.color_scheme }}"
+  style="
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="pdp-section__inner">
+    <div
+      class="pdp-band__inner{% if media_right %} pdp-band--media-right{% endif %}{% if section.settings.mobile_text_first %} pdp-band--mobile-text-first{% endif %}"
+      style="--pdp-band-split: {{ split }}; --pdp-decor-size: {{ section.settings.decor_width }}rem;"
+    >
+      {%- if section.settings.image != blank -%}
+        <div class="pdp-band__media">
+          {{
+            section.settings.image
+            | image_url: width: 1400
+            | image_tag:
+              loading: 'lazy',
+              sizes: '(min-width: 750px) 50vw, 100vw',
+              widths: '400, 600, 800, 1000, 1200, 1400',
+              alt: section.settings.image.alt
+          }}
+        </div>
+      {%- endif -%}
+
+      <div class="pdp-band__content">
+        {%- if section.settings.decor_image != blank -%}
+          {{
+            section.settings.decor_image
+            | image_url: width: 400
+            | image_tag: loading: 'lazy', class: 'pdp-band__decor', alt: ''
+          }}
+        {%- endif -%}
+
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="pdp-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.heading != blank -%}
+          <h2 class="pdp-display">{{ section.settings.heading | escape }}</h2>
+        {%- endif -%}
+
+        {%- if section.settings.body != blank -%}
+          <div class="pdp-band__body rte">{{ section.settings.body }}</div>
+        {%- endif -%}
+
+        {%- if section.settings.link_label != blank -%}
+          <div class="pdp-band__link">
+            <a class="pdp-link" href="{{ section.settings.link_url | default: '#' }}">
+              <span>{{ section.settings.link_label | escape }}</span>
+              {%- render 'pdp-icon', icon: 'arrow' -%}
+            </a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "PDP: Feature band",
+  "tag": "section",
+  "class": "pdp-section-wrapper",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position",
+      "default": "left",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "split",
+      "label": "Image width",
+      "default": "even",
+      "options": [
+        { "value": "media_narrow", "label": "Narrow" },
+        { "value": "even", "label": "Half" },
+        { "value": "media_wide", "label": "Wide" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_text_first",
+      "label": "Show text before image on mobile",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Small label",
+      "default": "Made in small batches"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Made in small batches."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Text",
+      "default": "<p>Made thoughtfully, in limited runs and often to order.</p><p>Less excess. More intention.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Link"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link label"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Decoration"
+    },
+    {
+      "type": "paragraph",
+      "content": "Optional artwork pinned to the top corner of the text half - the botanical sprig or the round seal. Hidden on screens under 990px."
+    },
+    {
+      "type": "image_picker",
+      "id": "decor_image",
+      "label": "Decorative image"
+    },
+    {
+      "type": "range",
+      "id": "decor_width",
+      "min": 4,
+      "max": 16,
+      "step": 1,
+      "unit": "rem",
+      "label": "Decorative image width",
+      "default": 9
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 12
+    }
+  ],
+  "presets": [
+    {
+      "name": "PDP: Feature band"
+    }
+  ]
+}
+{% endschema %}

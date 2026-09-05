@@ -1,0 +1,61 @@
+{% comment %}
+  Renders the fit notes under the size selector:
+
+    Fit: Relaxed
+    Model Details: Model is 5'9 and is wearing size M
+    Fit Recommendation: If you are between sizes, we recommend sizing up.
+
+  The values are product metafields, because every one of them is specific to
+  the garment. The labels are block settings, so they stay editable and
+  translatable without touching code.
+
+  Each row is independent - a product with a fit but no model shot renders one
+  row, and the whole block disappears when none of the three metafields is set.
+  That matters during rollout: the block can go live across all templates before
+  the metafields are filled in, and nothing renders until a product has data.
+
+  Metafields read (all single line text unless noted):
+  - custom.fit
+  - custom.model_details
+  - custom.fit_recommendation  (multi-line text)
+
+  Accepts:
+  - block: {Object} the main-product block carrying the labels.
+  - product: {Object} product object.
+
+  Usage:
+  {% render 'pdp-fit-details', block: block, product: product %}
+{% endcomment %}
+
+{%- liquid
+  assign fit = product.metafields.custom.fit.value | default: product.metafields.custom.fit
+  assign model = product.metafields.custom.model_details.value | default: product.metafields.custom.model_details
+  assign recommendation = product.metafields.custom.fit_recommendation.value | default: product.metafields.custom.fit_recommendation
+-%}
+
+{%- if fit != blank or model != blank or recommendation != blank -%}
+  <div class="pdp-fit" {{ block.shopify_attributes }}>
+    {%- if fit != blank -%}
+      <p class="pdp-fit__row">
+        <span class="pdp-fit__label">{{ block.settings.fit_label | default: 'Fit:' | escape }}</span>
+        {{ fit }}
+      </p>
+    {%- endif -%}
+
+    {%- if model != blank -%}
+      <p class="pdp-fit__row">
+        <span class="pdp-fit__label">{{ block.settings.model_label | default: 'Model Details:' | escape }}</span>
+        {{ model }}
+      </p>
+    {%- endif -%}
+
+    {%- if recommendation != blank -%}
+      <p class="pdp-fit__row">
+        <span class="pdp-fit__label">
+          {{- block.settings.recommendation_label | default: 'Fit Recommendation:' | escape -}}
+        </span>
+        {{ recommendation }}
+      </p>
+    {%- endif -%}
+  </div>
+{%- endif -%}

@@ -7,6 +7,18 @@
 {%- endif -%}
 
 {%- comment -%}
+  The carousel and the small uppercase heading both live in product-page.css, so
+  it is pulled in whenever either is switched on. On a template still using the
+  grid and the <h2>, nothing extra is requested.
+{%- endcomment -%}
+{%- if section.settings.layout == 'carousel' or section.settings.heading_style == 'eyebrow' -%}
+  {{ 'product-page.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+{%- if section.settings.layout == 'carousel' -%}
+  <script src="{{ 'product-page.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- comment -%}
   Quick add ("Add to bag") assets — mirrors main-collection-product-grid so the
   related-products cards behave identically to the collection page.
 {%- endcomment -%}
@@ -48,37 +60,110 @@
     data-product-id="{{ product.id }}"
   >
     {% if recommendations.performed and recommendations.products_count > 0 %}
-      <h2 class="related-products__heading inline-richtext {{ section.settings.heading_size }}">
-        {{ section.settings.heading }}
-      </h2>
-      <ul
-        class="
-          grid product-grid
-          grid--{{ section.settings.columns_desktop }}-col-desktop
-          grid--{{ section.settings.columns_mobile }}-col-tablet-down
-          {% if section.settings.quick_add == 'bulk' %} collection-quick-add-bulk{% endif %}
-        "
-        role="list"
-      >
-        {% assign skip_card_product_styles = false %}
-        {% for recommendation in recommendations.products %}
-          <li class="grid__item product-item">
-            {% render 'card-product',
-              card_product: recommendation,
-              media_aspect_ratio: section.settings.image_ratio,
-              image_shape: section.settings.image_shape,
-              show_secondary_image: section.settings.show_secondary_image,
-              show_vendor: section.settings.show_vendor,
-              show_rating: section.settings.show_rating,
-              lazy_load: true,
-              skip_styles: skip_card_product_styles,
-              quick_add: section.settings.quick_add,
-              section_id: section.id
-            %}
-          </li>
-          {%- assign skip_card_product_styles = true -%}
-        {% endfor %}
-      </ul>
+      {%- comment -%}
+        The redesign shows this row as a carousel with arrows and a small
+        uppercase label. Both are opt-in settings, so every template that has
+        not been migrated still renders the original grid and <h2>.
+
+        The carousel is scroll-snap plus two buttons rather than one of the three
+        carousel libraries theme.liquid already loads globally - see the note in
+        product-page.css section 12.
+      {%- endcomment -%}
+      {%- liquid
+        assign is_carousel = false
+        if section.settings.layout == 'carousel'
+          assign is_carousel = true
+        endif
+      -%}
+
+      {%- if section.settings.heading_style == 'eyebrow' -%}
+        <p class="pdp-eyebrow related-products__heading" style="text-align: center;">
+          {{ section.settings.heading }}
+        </p>
+      {%- else -%}
+        <h2 class="related-products__heading inline-richtext {{ section.settings.heading_size }}">
+          {{ section.settings.heading }}
+        </h2>
+      {%- endif -%}
+
+      {%- if is_carousel -%}
+        <pdp-carousel
+          class="pdp-carousel"
+          style="
+            --pdp-carousel-columns: {{ section.settings.columns_desktop }};
+            --pdp-carousel-peek: {% if section.settings.columns_mobile == '1' %}1.05{% else %}2.15{% endif %};
+          "
+        >
+          <ul class="pdp-carousel__track" data-pdp-track role="list">
+            {% assign skip_card_product_styles = false %}
+            {% for recommendation in recommendations.products %}
+              <li class="pdp-carousel__slide product-item">
+                {% render 'card-product',
+                  card_product: recommendation,
+                  media_aspect_ratio: section.settings.image_ratio,
+                  image_shape: section.settings.image_shape,
+                  show_secondary_image: section.settings.show_secondary_image,
+                  show_vendor: section.settings.show_vendor,
+                  show_rating: section.settings.show_rating,
+                  lazy_load: true,
+                  skip_styles: skip_card_product_styles,
+                  quick_add: section.settings.quick_add,
+                  section_id: section.id
+                %}
+              </li>
+              {%- assign skip_card_product_styles = true -%}
+            {% endfor %}
+          </ul>
+
+          <div class="pdp-carousel__nav">
+            <button
+              class="pdp-carousel__btn pdp-carousel__btn--prev"
+              type="button"
+              data-pdp-prev
+              aria-label="{{ 'general.slider.previous_slide' | t }}"
+            >
+              {%- render 'pdp-icon', icon: 'arrow' -%}
+            </button>
+            <button
+              class="pdp-carousel__btn pdp-carousel__btn--next"
+              type="button"
+              data-pdp-next
+              aria-label="{{ 'general.slider.next_slide' | t }}"
+            >
+              {%- render 'pdp-icon', icon: 'arrow' -%}
+            </button>
+          </div>
+        </pdp-carousel>
+      {%- else -%}
+        <ul
+          class="
+            grid product-grid
+            grid--{{ section.settings.columns_desktop }}-col-desktop
+            grid--{{ section.settings.columns_mobile }}-col-tablet-down
+            {% if section.settings.quick_add == 'bulk' %} collection-quick-add-bulk{% endif %}
+          "
+          role="list"
+        >
+          {% assign skip_card_product_styles = false %}
+          {% for recommendation in recommendations.products %}
+            <li class="grid__item product-item">
+              {% render 'card-product',
+                card_product: recommendation,
+                media_aspect_ratio: section.settings.image_ratio,
+                image_shape: section.settings.image_shape,
+                show_secondary_image: section.settings.show_secondary_image,
+                show_vendor: section.settings.show_vendor,
+                show_rating: section.settings.show_rating,
+                lazy_load: true,
+                skip_styles: skip_card_product_styles,
+                quick_add: section.settings.quick_add,
+                section_id: section.id
+              %}
+            </li>
+            {%- assign skip_card_product_styles = true -%}
+          {% endfor %}
+        </ul>
+      {%- endif -%}
     {% endif %}
   </product-recommendations>
   {% if section.settings.image_shape == 'arch' %}
@@ -101,6 +186,27 @@
       "id": "heading",
       "default": "t:sections.related-products.settings.paragraph__1.default",
       "label": "t:sections.related-products.settings.heading.label"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "grid",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "carousel", "label": "Carousel" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "heading_style",
+      "label": "Heading style",
+      "default": "heading",
+      "info": "'Small label' renders the heading as the uppercase tracked label used elsewhere on the redesigned product page.",
+      "options": [
+        { "value": "heading", "label": "Heading" },
+        { "value": "eyebrow", "label": "Small label" }
+      ]
     },
     {
       "type": "select",
