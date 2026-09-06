@@ -22,10 +22,11 @@
   or blocked product-page.js costs the shopper the ability to fold a column
   away, not the ability to read it.
 
-  A row can take its text from a product metafield instead of typing it, by
-  putting the key in `Metafield key`. Those rows hide themselves on products
-  where the metafield is empty, which is what lets one template serve a
-  catalogue where only some products document, say, their craft technique.
+  A row can take its text from a product metafield as well as typing it, by
+  putting the key in `Metafield key`. The metafield wins on products that have
+  one and the typed text stands in on products that do not, so one template can
+  serve a catalogue where only some products document, say, their craft
+  technique, without the rest of them showing an empty row or none at all.
   Rows with neither a metafield value nor typed text are skipped, a column with
   no surviving rows is skipped, and the section disappears when nothing
   survives at all.
@@ -52,11 +53,24 @@
       assign live = false
       if block.settings.heading != blank
         assign key = block.settings.metafield_key | strip
+        assign field = ''
         if key != blank
-          if product.metafields.custom[key] != blank
-            assign live = true
-          endif
-        elsif block.settings.content != blank
+          assign field = product.metafields.custom[key]
+        endif
+        comment
+          Typed text is a fallback, not an alternative. A row pointed at a
+          metafield used to ignore whatever was typed on it and hide itself
+          wherever that metafield was empty, so the only way to give a row
+          default copy was to give up per-product copy for it entirely.
+
+          Now the metafield wins where a product has one and the typed text
+          stands in where it does not, which is the same order
+          sections/pdp-why-love.liquid already resolves its columns in. A row
+          with neither is still skipped, so "hide what this product has nothing
+          to say about" survives - it just means both sources empty rather than
+          one.
+        endcomment
+        if field != blank or block.settings.content != blank
           assign live = true
         endif
       endif
@@ -198,7 +212,7 @@
                     {%- render 'pdp-icon', icon: 'caret' -%}
                   </summary>
                   <div class="pdp-info__content rte">
-                    {%- if key != blank -%}
+                    {%- if field != blank -%}
                       {%- comment -%}
                         A rich text metafield renders its own HTML when output
                         directly. Every other type is a plain string, which has
@@ -320,7 +334,7 @@
           "type": "text",
           "id": "metafield_key",
           "label": "Metafield key",
-          "info": "Key inside the `custom` namespace, e.g. `craft_technique`. When set, this accordion shows that product metafield instead of the text above, and hides itself on products where the metafield is empty."
+          "info": "Key inside the `custom` namespace, e.g. `craft_technique`. Products that have this metafield show it instead of the text above; products that do not fall back to the text above. Leave both empty to hide this row."
         }
       ]
     }

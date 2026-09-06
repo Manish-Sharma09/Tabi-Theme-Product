@@ -313,7 +313,7 @@
           "type": "item",
           "settings": {
             "heading": "Fabric",
-            "content": "",
+            "content": "<p>Cotton silk blend (70% cotton, 30% silk). Lightweight, breathable, with a soft natural sheen.</p>",
             "metafield_key": "fabric"
           }
         },
@@ -321,7 +321,7 @@
           "type": "item",
           "settings": {
             "heading": "Craft / technique",
-            "content": "",
+            "content": "<p>Hand block printed in Bagru, Rajasthan, using carved wooden blocks and natural dyes.</p>",
             "metafield_key": "craft_technique"
           }
         },
@@ -329,7 +329,7 @@
           "type": "item",
           "settings": {
             "heading": "Construction",
-            "content": "",
+            "content": "<p>Mandarin collar, front placket, gathered shoulder yoke and bishop sleeves with smocked cuffs.</p>",
             "metafield_key": "construction"
           }
         },
@@ -337,7 +337,7 @@
           "type": "item",
           "settings": {
             "heading": "Silhouette",
-            "content": "",
+            "content": "<p>Relaxed, hip-length top. Falls straight from the yoke with ease through the body.</p>",
             "metafield_key": "silhouette"
           }
         },
@@ -345,7 +345,7 @@
           "type": "item",
           "settings": {
             "heading": "Product-specific detailing",
-            "content": "",
+            "content": "<p>Because each piece is hand printed, small variations in print placement are natural and expected.</p>",
             "metafield_key": "product_detailing"
           }
         },
@@ -359,7 +359,7 @@
           "type": "item",
           "settings": {
             "heading": "Fabric composition",
-            "content": "<p>100% cotton, chosen for softness, breathability and everyday durability.</p><p>We pay attention to more than fibre composition. Our fabrics, dyes and finishing processes are selected against stringent quality and chemical-safety requirements (REACH standards), so what sits against the skin is considered as carefully as how the piece looks.</p>",
+            "content": "<p>70% cotton, 30% mulberry silk.</p>",
             "metafield_key": ""
           }
         },
@@ -367,7 +367,7 @@
           "type": "item",
           "settings": {
             "heading": "Wash instructions",
-            "content": "",
+            "content": "<p>Gentle hand wash or dry clean. Wash separately in cold water for the first two washes.</p>",
             "metafield_key": "wash_instructions"
           }
         },
@@ -375,7 +375,7 @@
           "type": "item",
           "settings": {
             "heading": "Care instructions",
-            "content": "<p>These pieces are designed for repeated wear and frequent washing.</p><p>Pre-treat stains when needed. Gentle machine wash with similar colours using a mild detergent. Do not bleach. Tumble dry as permitted by the garment care label, or dry in shade. Warm iron on the front or reverse as needed.</p><p>A little care helps preserve colour, shape and detailing so the piece can stay in rotation for longer.</p>",
+            "content": "<p>Dry in shade, iron on medium heat, store folded away from direct sunlight.</p>",
             "metafield_key": ""
           }
         },
@@ -389,7 +389,7 @@
           "type": "item",
           "settings": {
             "heading": "Made to order in 2–5 working days.",
-            "content": "<p>Most pieces are cut and stitched only once you order them, in small batches, by a team we know by name.</p><p>It is why dispatch takes a few days longer than a warehouse would, and why very little of what we make goes unworn.</p><p>Orders are dispatched within 2 to 5 working days. Delivery usually takes a further 3 to 7 working days depending on your pincode - use the pincode checker above for an estimate on this order.</p>",
+            "content": "<p>Your piece is printed and stitched after you order, so it takes a few days before dispatch.</p>",
             "metafield_key": ""
           }
         },
@@ -397,7 +397,7 @@
           "type": "item",
           "settings": {
             "heading": "Free shipping across India.",
-            "content": "<p>Free shipping across India, on every order.</p><p>You will receive a tracking link by email and SMS as soon as your parcel leaves us.</p>",
+            "content": "<p>No minimum order value. Delivery typically takes 3–7 days after dispatch.</p>",
             "metafield_key": ""
           }
         },
@@ -405,7 +405,7 @@
           "type": "item",
           "settings": {
             "heading": "COD available on eligible pincodes.",
-            "content": "<p>Cash on delivery is available on most pincodes. Use the pincode checker above to confirm it for your address before you order.</p>",
+            "content": "<p>Check your pincode above to confirm cash on delivery availability.</p>",
             "metafield_key": ""
           }
         },
@@ -418,8 +418,8 @@
         "i_exchange": {
           "type": "item",
           "settings": {
-            "heading": "Easy exchanges within 5 days.",
-            "content": "<p>If your Tabi piece does not work for you, you can request an exchange or return within 5 days of delivery, no questions asked.</p><p>Reverse pickup is arranged for you wherever our courier partners reach.</p>",
+            "heading": "Easy exchanges within 7 days.",
+            "content": "<p>Request an exchange from your account within 7 days of delivery.</p>",
             "metafield_key": ""
           }
         },
@@ -427,7 +427,7 @@
           "type": "item",
           "settings": {
             "heading": "Items must be unused with tags.",
-            "content": "<p>Pieces should be unworn and unwashed, with their tags still on.</p>",
+            "content": "<p>Unwashed, unworn, with all tags attached and original packaging.</p>",
             "metafield_key": ""
           }
         },
@@ -435,7 +435,7 @@
           "type": "item",
           "settings": {
             "heading": "Refunds via original payment method or store credit.",
-            "content": "<p>Please refer to our Shipping, Exchanges &amp; Returns policy for full details.</p>",
+            "content": "<p>Refunds are processed within 5–7 working days after we receive the item.</p>",
             "metafield_key": ""
           }
         }
