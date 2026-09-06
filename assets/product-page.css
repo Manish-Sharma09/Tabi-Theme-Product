@@ -1148,43 +1148,37 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 
    Placed differently from the image above, on purpose. The image is pinned to
    the corner from 990px and hidden below it, because a sprig behind the copy
-   is either decoration or clutter and there is no third state. The seal has
-   one: below 990px it stops being pinned and flows in after the copy, centred
-   on its own line. It is the piece of this band most worth seeing on a phone,
-   and dropping it there would be the wrong half to lose. */
+   is either decoration or clutter and there is no third state. The seal is
+   neither: it stays in the flow at every width, closing the copy rather than
+   sitting behind it - centred on a phone, ranged right from 990px, which is
+   the corner the artwork wants without leaving the flow to get there.
+
+   It was pinned with `position: absolute` at first, and that is what made this
+   band too tall. Out of the flow it could print over the last lines of the
+   paragraph, so the content half reserved a fixed strip of padding for it -
+   the seal's width plus its offset, nearly 200px on this band. But the copy
+   half is what sets the band's height here (the photograph beside it is
+   `height: 100%`, so it stretches to whatever the row is rather than driving
+   it), and that reservation was added to the height whether the corner needed
+   defending or not. The result was a band with a hole in the middle of it.
+
+   In the flow, the seal asks for exactly its own height and one margin, the
+   band is only as tall as what is in it, and the overlap it was defending
+   against cannot happen at all. */
 
 .pdp-band__seal {
   display: block;
   width: min(var(--pdp-decor-size, 9rem), 44vw);
-  margin: 3.2rem auto 0;
+  margin: 2.8rem auto 0;
 }
 
 @media screen and (min-width: 990px) {
   .pdp-band__seal {
-    position: absolute;
-    bottom: 3rem;
-    right: 3rem;
+    /* The content half is a flex column, so the cross axis is the horizontal
+       one and this ranges the seal right. */
+    align-self: flex-end;
     width: var(--pdp-decor-size, 9rem);
-    margin: 0;
-  }
-
-  /* Taking the seal out of the flow frees the corner but does not reserve it,
-     and the copy is happy to fill the space underneath. Between 990px and
-     roughly 1300px the copy half is narrow enough that the paragraph runs to
-     five or six lines and the last of them arrive exactly where the seal is -
-     the two printed straight over each other.
-
-     So the content half gives the corner back: enough bottom padding for the
-     seal, its 3rem offset and a little clear air. The band's height is set by
-     the photograph beside it, and the copy is centred in what is left, so on
-     the wide screens where there was never a conflict this costs nothing
-     visible - it just moves the copy up a fraction. On the narrow ones it is
-     what keeps the two apart.
-
-     Scoped to `--has-seal` so a band using an uploaded image, or none, keeps
-     the padding it always had. */
-  .pdp-band--has-seal .pdp-band__content {
-    padding-bottom: calc(var(--pdp-decor-size, 9rem) + 5.5rem);
+    margin: 2.4rem 0 0;
   }
 }
 
