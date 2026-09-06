@@ -41,7 +41,7 @@
           "settings": {
             "show_dynamic_checkout": true,
             "show_gift_card_recipient": true,
-            "buy_now_style": "custom",
+            "buy_now_style": "none",
             "buy_now_label": "Buy now"
           }
         },

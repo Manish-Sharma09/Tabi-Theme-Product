@@ -543,15 +543,30 @@ because reverting it is one field per template in the theme editor
 
 ## 7. Known risks
 
-**BUY NOW vs Razorpay Magic Checkout.** The custom button adds to cart, then
-redirects to `/cart/checkout`. Razorpay Magic Checkout intercepts checkout, and
-whether it intercepts this redirect has not been tested. Test it on the preview
-theme before publishing. If it misbehaves, set the buy buttons block's *Second
-button* back to **Shopify dynamic checkout** — one setting, no code change.
+**BUY NOW vs Razorpay Magic Checkout — settled for now by turning BUY NOW off.**
 
-The exposure is now one template. The other 21 never set `buy_now_style`, and
-the snippet falls back to `dynamic`, so they are still on Shopify's own button
-and this risk does not reach them.
+Razorpay Magic Checkout is rendered site-wide from `layout/theme.liquid`, and it
+injects a checkout button of its own onto the product page. Alongside the
+theme's own second button that gave the shopper *two* ways to skip the cart,
+sitting next to each other and behaving differently.
+
+So `product.new-design` now sets the buy buttons block's *Second button* to
+**None**. The theme renders ADD TO BAG and nothing else, and Razorpay's button
+is the only checkout control on the page. The custom button's label is left in
+the setting, so switching *Second button* back to **Custom Buy now button**
+restores it exactly as it was — one field, no code change.
+
+That also retires the untested question this section used to raise: the custom
+button added to cart and then redirected to `/cart/checkout`, and whether
+Razorpay intercepted that redirect was never established. It no longer renders,
+so it no longer matters.
+
+**The other 21 templates still show two.** They never set `buy_now_style`, so
+the snippet falls back to `dynamic` and they render Shopify's own
+`payment_button` — which is a second checkout control beside Razorpay's in
+exactly the same way. That is the live state and predates this redesign, so it
+has been left alone rather than changed unasked. Fixing it is the same one
+setting per template, or a `migrate_pdp.py` pass.
 
 **Buy now carries the whole cart.** Like Shopify's own dynamic checkout, it does
 not clear existing cart items first.
