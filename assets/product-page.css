@@ -64,8 +64,8 @@
 
 /* Uppercase label used above every section and above each accordion column. */
 .pdp-eyebrow {
-  margin: 0 0 1.2rem;
-  font-size: 1.1rem;
+  margin: 0 0 20px;
+  font-size: 16px;
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: var(--pdp-eyebrow-tracking);
@@ -102,7 +102,7 @@
   width: 2.4rem;
   height: 2.4rem;
   flex: 0 0 auto;
-  color: currentColor;
+  color: rgb(181 143 91);
 }
 
 .pdp-icon--arrow {
@@ -1096,7 +1096,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
    top, there is one deliberate space and the seal is sitting in it. */
 .pdp-band--has-seal .pdp-band__content {
   justify-content: flex-start;
-  padding-bottom: calc(var(--pdp-seal-room, 9rem) + 4rem);
+  /* padding-bottom: calc(var(--pdp-seal-room, 9rem) + 4rem); */
 }
 
 @media screen and (min-width: 750px) {
@@ -1223,6 +1223,13 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   bottom: 2rem;
   width: var(--pdp-seal-room);
   margin: 0;
+}
+@media screen and (max-width: 800px) {
+  .pdp-band__seal {
+  position: inherit;
+       right: inherit; 
+    bottom: inherit;
+}
 }
 
 @media screen and (min-width: 990px) {
@@ -1614,7 +1621,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   font-weight: 500;
   letter-spacing: var(--pdp-eyebrow-tracking);
   text-transform: uppercase;
-  color: var(--pdp-ink);
+  color: rgb(181 143 91);
 }
 
 .pdp-approach__lead {
@@ -1942,11 +1949,4 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
        zoomed thumbnail is never clipped by the column scrolling past it. */
     z-index: 2;
   }
-}
-
-div#ProductDescription-template--20779636752580__main {
-    margin-bottom: 0;
-}
-product-info#MainProduct-template--20779636752580__main {
-    border-bottom: .1rem solid var(--pdp-line);
 }

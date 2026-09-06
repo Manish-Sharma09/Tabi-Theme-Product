@@ -1046,7 +1046,19 @@ table {
     margin-right: 0;
   }
 
-  .product--large .product__media-wrapper,
+  /* The cap belongs on the photograph, never on the wrapper.
+
+     .product__media-wrapper holds the gallery viewer *and* the row of
+     thumbnails under it. Capping the wrapper at 78vh does not shrink either of
+     them - it just makes the wrapper's box shorter than the content inside it,
+     and the box does not clip, so the thumbnails spill out and paint over the
+     title and price of the buy box below.
+
+     It bit hardest exactly where the gallery is tallest: 749x900, an ordinary
+     tablet portrait, overflowed by 56px, and a short window like 502x500 by
+     86px. The photograph stays constrained by the three rules below - its
+     container, its .media box and the img itself - plus Dawn's own
+     `constrain-height`, so nothing here lets a tall photo run away. */
   .product__media-wrapper .product-media-container {
     max-height: 78vh;
   }
