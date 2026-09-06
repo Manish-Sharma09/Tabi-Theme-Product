@@ -1943,3 +1943,10 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
     z-index: 2;
   }
 }
+
+div#ProductDescription-template--20779636752580__main {
+    margin-bottom: 0;
+}
+product-info#MainProduct-template--20779636752580__main {
+    border-bottom: .1rem solid var(--pdp-line);
+}
