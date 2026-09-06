@@ -1052,12 +1052,51 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   object-fit: cover;
 }
 
+/* On a seal band from 750px up, the photograph stops dictating how tall the
+   band is.
+
+   Laid out normally the image is sized by its own aspect ratio - a 1200x972
+   photo in a 640px column asks for 519px of height - and the grid row obliges,
+   whatever the copy beside it actually needs. Here the copy needs about 300px,
+   so the band came out 200px taller than its content, with the surplus split
+   as blank beige above and below the paragraph. That, and not the seal, was
+   the "too much spacing".
+
+   Out of the flow the image contributes no height: the row is sized by the
+   copy, and `object-fit: cover` crops the photograph to fill whatever that
+   comes to. The trade is a wider crop of the photo, which is what the design's
+   own proportions show.
+
+   Two things it is deliberately NOT applied to:
+
+   - bands without a seal. Their copy can be two short paragraphs, and sized by
+     that alone the band would collapse towards its 22rem floor with the
+     photograph cropped to a strip. They keep the behaviour they have today.
+   - anything below 750px, where the two halves are stacked rather than side by
+     side. There is no row to share, and taking the image out of the flow left
+     it at that same 22rem floor - a full-width photo squashed to 220px. */
+@media screen and (min-width: 750px) {
+  .pdp-band--has-seal .pdp-band__media img {
+    position: absolute;
+    inset: 0;
+  }
+}
+
 .pdp-band__content {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 3rem 2.4rem;
+}
+
+/* A band carrying the seal ranges its copy to the top instead of centring it,
+   and reserves the bottom for the seal. Centred, the leftover height is split
+   above and below the paragraph and neither gap belongs to anything; ranged
+   top, there is one deliberate space and the seal is sitting in it. */
+.pdp-band--has-seal .pdp-band__content {
+  justify-content: flex-start;
+  padding-bottom: calc(var(--pdp-seal-room, 9rem) + 4rem);
 }
 
 @media screen and (min-width: 750px) {
@@ -1166,19 +1205,30 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
    band is only as tall as what is in it, and the overlap it was defending
    against cannot happen at all. */
 
+/* One value drives both the seal's size and the room the copy leaves for it, so
+   the two cannot drift apart: change the width and the reservation follows. */
+.pdp-band__inner {
+  --pdp-seal-room: min(var(--pdp-decor-size, 9rem), 30vw);
+}
+
+@media screen and (min-width: 990px) {
+  .pdp-band__inner {
+    --pdp-seal-room: var(--pdp-decor-size, 9rem);
+  }
+}
+
 .pdp-band__seal {
-  display: block;
-  width: min(var(--pdp-decor-size, 9rem), 44vw);
-  margin: 2.8rem auto 0;
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
+  width: var(--pdp-seal-room);
+  margin: 0;
 }
 
 @media screen and (min-width: 990px) {
   .pdp-band__seal {
-    /* The content half is a flex column, so the cross axis is the horizontal
-       one and this ranges the seal right. */
-    align-self: flex-end;
-    width: var(--pdp-decor-size, 9rem);
-    margin: 2.4rem 0 0;
+    right: 3rem;
+    bottom: 3rem;
   }
 }
 

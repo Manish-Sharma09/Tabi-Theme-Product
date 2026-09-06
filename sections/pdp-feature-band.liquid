@@ -67,7 +67,7 @@
 >
   <div class="pdp-section__inner">
     <div
-      class="pdp-band__inner{% if media_right %} pdp-band--media-right{% endif %}{% if section.settings.mobile_text_first %} pdp-band--mobile-text-first{% endif %}"
+      class="pdp-band__inner{% if media_right %} pdp-band--media-right{% endif %}{% if section.settings.mobile_text_first %} pdp-band--mobile-text-first{% endif %}{% if section.settings.decor_style == 'seal' %} pdp-band--has-seal{% endif %}"
       style="--pdp-band-split: {{ split }}; --pdp-decor-size: {{ section.settings.decor_width }}rem;"
     >
       {%- if section.settings.image != blank -%}

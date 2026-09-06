@@ -299,23 +299,40 @@ does not turn at all for a visitor who has asked for reduced motion — a mark
 that turns forever is exactly the kind of motion that setting exists to stop,
 and held still it is simply a seal.
 
-**Where it sits.** In the flow at every width, closing the copy rather than
-sitting behind it — centred on a phone, ranged right from 990px, which is the
-corner the artwork wants without leaving the flow to get there.
+**Where it sits.** Absolutely positioned in the bottom-right corner of the copy
+half, at every width, so it never adds to the band's height. The copy leaves it
+room through one bottom padding, and both the seal's width and that reservation
+read the same custom property, so they cannot drift apart.
 
-It was pinned with `position: absolute` at first, and that is what made the
-band too tall. Out of the flow it could print over the last lines of the
-paragraph between about 990px and 1300px, so the copy half reserved a fixed
-strip of bottom padding for it — the seal's width plus its offset, nearly 200px
-on this band. But the copy half is what sets the band's height (the photograph
-beside it is `height: 100%`, so it stretches to whatever the row is rather than
-driving it), and that reservation was added to the height whether the corner
-needed defending or not. The band came out with a hole in the middle of it.
+Getting the spacing right on this band took three goes, and the reason is worth
+recording: **the seal was never what made it too tall — the photograph was.**
 
-In the flow the seal asks for its own height and one margin, the band is only
-as tall as what is in it, and the overlap the reservation was defending against
-cannot happen at all. The gap between the copy and the seal went from 61px to
-24px, and the band lost 150px of padding it was not using.
+Laid out normally, an image is sized by its own aspect ratio. A 1200×972 photo
+in a 640px column asks for 519px of height and the grid row obliges, whatever
+the copy beside it needs. The copy here needs about 300px, so the band came out
+200px taller than its content, with the surplus split as blank beige above and
+below the paragraph.
+
+So on a seal band from 750px up, the photograph is taken out of the flow
+(`position: absolute; inset: 0`) and contributes no height at all. The row is
+sized by the copy, and `object-fit: cover` crops the photo to fill it. Two
+places that is deliberately not applied:
+
+- **bands without a seal** — their copy can be two short paragraphs, and sized
+  by that alone the band would collapse towards its 22rem floor with the
+  photograph cropped to a strip. They keep today's behaviour exactly.
+- **below 750px**, where the halves are stacked rather than side by side. There
+  is no row to share, and taking the image out of the flow left a full-width
+  photograph squashed to that same 220px floor.
+
+The copy is also ranged to the top on a seal band rather than centred. Centred,
+the leftover height is split above and below the paragraph and neither gap
+belongs to anything; ranged top, there is one deliberate space and the seal is
+sitting in it.
+
+Measured on this band at 1382px: height 519px → **439px**, blank above the copy
+154px → **46px**, and no text line is touched by the seal at any width from
+390px to 1600px.
 
 **Choosing it.** The band's *Corner decoration* setting picks between the
 uploaded image (the botanical sprig, and the default), the seal, and none. It
@@ -491,9 +508,13 @@ because reverting it is one field per template in the theme editor
       bands stay ranged left
 - [ ] The turning seal: it turns, `TABI` stays upright in the middle, and it
       stops while the pointer is over it and starts again when it leaves
-- [ ] The seal at 990px, 1100px and 1400px — ranged right, closing the copy,
-      with no gaping space between the two — and under 990px, where it should
-      sit centred after the copy instead
+- [ ] The seal at 750px, 990px, 1100px and 1400px — in the bottom-right corner
+      of the copy half, never touching the text, and never leaving a band of
+      empty beige above the copy
+- [ ] The seal band's photograph: cropped to the copy's height on desktop, full
+      height on a phone (it must not be squashed to a strip when stacked)
+- [ ] The "Made in small batches" band unchanged — its photograph still sets
+      that band's height
 - [ ] The seal with reduced motion turned on (macOS: System Settings →
       Accessibility → Display → Reduce motion) — it should render still, not
       disappear
