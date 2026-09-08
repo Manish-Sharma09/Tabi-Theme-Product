@@ -112,6 +112,12 @@
   width: 2.4rem;
   height: 2.4rem;
   flex: 0 0 auto;
+  /* NOTE: this matches the <svg> itself, so it beats any colour inherited from
+     a wrapper no matter how specific that wrapper's rule is - an inherited
+     value loses to every declaration that matches the element directly. Every
+     rule below that recolours an icon therefore targets `.pdp-icon`, not the
+     span around it. Two of them used to set it on the span and silently had no
+     effect. */
   color: rgb(181 143 91);
 }
 
@@ -476,13 +482,10 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   text-align: center;
 }
 
-.pdp-trust__icon {
-  color: var(--pdp-green);
-}
-
 .pdp-trust__icon .pdp-icon {
   width: 3.5rem;
   height: 3.5rem;
+  color: var(--pdp-green);
 }
 
 .pdp-trust__label {
@@ -1038,13 +1041,10 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   grid-column: 2;
 }
 
-.pdp-why__icon {
-  color: var(--pdp-green);
-}
-
 .pdp-why__icon .pdp-icon {
   width: 2.8rem;
   height: 2.8rem;
+  color: var(--pdp-green);
 }
 
 .pdp-why__heading {
@@ -1078,7 +1078,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   border-top: 0;
 }
 
-.pdp-why__row--highlight .pdp-why__icon,
+.pdp-why__row--highlight .pdp-why__icon .pdp-icon,
 .pdp-why__row--highlight .pdp-why__heading {
   color: #fff;
 }
