@@ -18,6 +18,13 @@ A second review (`Product Page Analysis`, with a reference mockup) reordered the
 page and changed several of the pieces described further down. **Where sections
 1–7 and this section disagree, this section is current.** What changed:
 
+This round was rebased onto `Update from Shopify for theme Tabi - Theme
+(Testing Version)`, a sync of theme-editor work done in parallel. Everything
+that sync brought down is kept: both bands' images and decorative images, the
+approach section's `cta_url`, the two `custom_css` blocks, the related-products
+colour scheme, and `buy_now_style: custom`. Disabling a section does not throw
+its settings away — the images on *Made in small batches* are still on it.
+
 **Page sequence** is now `main → Product details → You may also like → Why
 you'll love it → A Tabi journey`. Two sections were dropped from the sequence
 and are `"disabled": true` in `templates/product.new-design.json` rather than
@@ -54,6 +61,12 @@ it" with `decor_style: none` — the turning TABI seal is off, because the logo 
 already in the header. The seal code is untouched and section 4's description of
 it still holds for any band that switches it back on.
 
+**The closing photograph** on the "Why you'll love it" card is the image that
+was uploaded to the *Made in small batches* band in the theme editor. The
+band's content became the highlighted row, so its photograph came with it —
+swap it in the section's *Closing image* field if the mockup means a different
+photo.
+
 **Craft & technique** shows only on products that have `custom.craft_technique`.
 Accordion rows now carry a *Hide this row when the metafield is empty* checkbox,
 which turns the typed fallback off; it is on for that row only.
@@ -62,7 +75,6 @@ which turns the typed fallback off; it is on for that row only.
 
 | Where | What | What renders today |
 |---|---|---|
-| Why you'll love it → *Closing image* | The block-printing photograph from the mockup | Card ends on the green "Made in Small Batches" row |
 | Products → `custom.fit`, `custom.model_details`, `custom.fit_recommendation` | Fit and model details | The *Specification* accordion is hidden — it has no typed fallback |
 | Products → `custom.craft_technique` | Hand-block printing, embroidery, quilting, smocking | The *Craft & technique* accordion is hidden, by design |
 
@@ -336,6 +348,14 @@ so the gate also blocks `submit` — with `stopImmediatePropagation`, because
 submit fires with the form as its target, where capture and bubble listeners
 run in the order they were added and a deferred `product-form.js` always adds
 its own after this one.
+
+The custom BUY NOW button needs no separate gate. `PDPBuyNow` already watches
+the add-to-cart button's `disabled` attribute through a `MutationObserver` and
+mirrors it, for the sold-out reason described in `assets/product-page.js`, so
+disabling one disables the other and releasing one releases the other. That
+matters now that `buy_now_style` is `custom` on this template. With
+`product-page.js` missing the button is inert anyway — it is `type="button"`
+and every line that makes it do anything lives in that file.
 
 A product with a single size still asks for the click. That is the instruction
 applied uniformly; if it reads as friction on one-size products, the gate is a
