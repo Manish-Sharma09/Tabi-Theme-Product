@@ -43,13 +43,13 @@
           "type": "pdp_trust",
           "settings": {
             "icon_1": "leaf",
-            "label_1": "Natural Fabrics",
-            "icon_2": "tag",
-            "label_2": "Made to Order",
-            "icon_3": "hand",
-            "label_3": "Gentle on Skin",
+            "label_1": "Natural Fabric",
+            "icon_2": "hand",
+            "label_2": "Handcrafted",
+            "icon_3": "tag",
+            "label_3": "Made to Order",
             "icon_4": "exchange",
-            "label_4": "Easy Exchanges"
+            "label_4": "Easy Exchanges & Returns"
           }
         },
         "variant_picker": {
@@ -60,7 +60,9 @@
             "size_guide_page": "size-guide",
             "size_guide_label": "Size Guide",
             "size_guide_option": "Size",
-            "size_label": "Select Size"
+            "size_label": "Select Size",
+            "require_size_selection": true,
+            "size_required_label": "Select a size"
           }
         },
         "pdp_fit": {
@@ -69,7 +71,8 @@
             "fit_label": "Fit:",
             "model_label": "Model Details:",
             "recommendation_label": "Fit Recommendation:"
-          }
+          },
+          "disabled": true
         },
         "pdp_size_help": {
           "type": "pdp_size_help",
@@ -78,8 +81,8 @@
             "subheading": "Chat with us on Instagram or Whatsapp",
             "instagram_handle": "@mytabi.in",
             "instagram_url": "https://www.instagram.com/mytabi.in/",
-            "whatsapp_display": "",
-            "whatsapp_number": ""
+            "whatsapp_display": "+91 93197 50031",
+            "whatsapp_number": "919319750031"
           }
         },
         "quantity_selector": {
@@ -236,41 +239,66 @@
     "pdp-why-love": {
       "type": "pdp-why-love",
       "blocks": {
-        "col_1": {
+        "row_1": {
           "type": "column",
           "settings": {
-            "icon": "feather",
-            "heading": "Light & Breathable",
-            "text": "Soft cotton cambric keeps the piece comfortable through long days."
+            "icon": "leaf",
+            "heading": "Relaxed, Comfortable Fit",
+            "text": "An easy silhouette designed to let your little one move comfortably.",
+            "highlight": false
           }
         },
-        "col_2": {
+        "row_2": {
           "type": "column",
           "settings": {
-            "icon": "hand",
-            "heading": "Made with Character",
-            "text": "Traditional handblock printing gives every piece subtle variations of its own."
+            "icon": "flower",
+            "heading": "Vintage-Inspired Details",
+            "text": "Nostalgic details thoughtfully reimagined for everyday wear.",
+            "highlight": false
           }
         },
-        "col_3": {
+        "row_3": {
           "type": "column",
           "settings": {
-            "icon": "weave",
-            "heading": "Shape Without Stiffness",
-            "text": "Smocking adds definition while allowing the garment to move naturally with you."
+            "icon": "needle",
+            "heading": "Crafted with Care",
+            "text": "Finished with thoughtful details such as smocking, hand embroidery or hand-block printing.",
+            "highlight": false
+          }
+        },
+        "row_4": {
+          "type": "column",
+          "settings": {
+            "icon": "shield",
+            "heading": "Tested for Harmful Substances",
+            "text": "The fabric has been independently tested according to REACH standards.",
+            "highlight": false
+          }
+        },
+        "row_5": {
+          "type": "column",
+          "settings": {
+            "icon": "box",
+            "heading": "Made in Small Batches",
+            "text": "Thoughtfully produced in limited runs and often made to order, helping us avoid unnecessary overproduction.",
+            "highlight": true
           }
         }
       },
       "block_order": [
-        "col_1",
-        "col_2",
-        "col_3"
+        "row_1",
+        "row_2",
+        "row_3",
+        "row_4",
+        "row_5"
       ],
       "settings": {
         "heading": "Why you'll love it",
         "color_scheme": "scheme-5",
         "padding_top": 48,
-        "padding_bottom": 48
+        "padding_bottom": 48,
+        "lede": "Clothes with character, made for comfort.",
+        "image": "shopify://shop_images/ChatGPT_Image_Sep_5_2026_11_41_10_PM.png"
       }
     },
     "pdp-band-batches": {
@@ -296,170 +324,68 @@
         "color_scheme": "scheme-5",
         "padding_top": 48,
         "padding_bottom": 48
-      }
+      },
+      "disabled": true
     },
     "pdp-info-columns": {
       "type": "pdp-info-columns",
       "blocks": {
-        "g_details": {
-          "type": "group",
+        "i_spec": {
+          "type": "spec",
           "settings": {
-            "heading": "Product details"
+            "heading": "Specification",
+            "fit_label": "Fit",
+            "model_label": "Model",
+            "recommendation_label": "Fit tip",
+            "content": ""
           }
         },
         "i_fabric": {
           "type": "item",
           "settings": {
             "heading": "Fabric",
-            "content": "<p>Cotton silk blend (70% cotton, 30% silk). Lightweight, breathable, with a soft natural sheen.</p>",
-            "metafield_key": "fabric"
+            "content": "<p>100% cotton, chosen for softness, breathability and everyday durability.</p>",
+            "metafield_key": "fabric",
+            "metafield_only": false
           }
         },
         "i_craft": {
           "type": "item",
           "settings": {
-            "heading": "Craft / technique",
-            "content": "<p>Hand block printed in Bagru, Rajasthan, using carved wooden blocks and natural dyes.</p>",
-            "metafield_key": "craft_technique"
-          }
-        },
-        "i_construction": {
-          "type": "item",
-          "settings": {
-            "heading": "Construction",
-            "content": "<p>Mandarin collar, front placket, gathered shoulder yoke and bishop sleeves with smocked cuffs.</p>",
-            "metafield_key": "construction"
-          }
-        },
-        "i_silhouette": {
-          "type": "item",
-          "settings": {
-            "heading": "Silhouette",
-            "content": "<p>Relaxed, hip-length top. Falls straight from the yoke with ease through the body.</p>",
-            "metafield_key": "silhouette"
-          }
-        },
-        "i_detailing": {
-          "type": "item",
-          "settings": {
-            "heading": "Product-specific detailing",
-            "content": "<p>Because each piece is hand printed, small variations in print placement are natural and expected.</p>",
-            "metafield_key": "product_detailing"
-          }
-        },
-        "g_material": {
-          "type": "group",
-          "settings": {
-            "heading": "Material & care"
-          }
-        },
-        "i_composition": {
-          "type": "item",
-          "settings": {
-            "heading": "Fabric composition",
-            "content": "<p>70% cotton, 30% mulberry silk.</p>",
-            "metafield_key": ""
-          }
-        },
-        "i_wash": {
-          "type": "item",
-          "settings": {
-            "heading": "Wash instructions",
-            "content": "<p>Gentle hand wash or dry clean. Wash separately in cold water for the first two washes.</p>",
-            "metafield_key": "wash_instructions"
-          }
-        },
-        "i_care": {
-          "type": "item",
-          "settings": {
-            "heading": "Care instructions",
-            "content": "<p>Dry in shade, iron on medium heat, store folded away from direct sunlight.</p>",
-            "metafield_key": ""
-          }
-        },
-        "g_shipping": {
-          "type": "group",
-          "settings": {
-            "heading": "Shipping & delivery"
-          }
-        },
-        "i_madetoorder": {
-          "type": "item",
-          "settings": {
-            "heading": "Made to order in 2–5 working days.",
-            "content": "<p>Your piece is printed and stitched after you order, so it takes a few days before dispatch.</p>",
-            "metafield_key": ""
-          }
-        },
-        "i_freeship": {
-          "type": "item",
-          "settings": {
-            "heading": "Free shipping across India.",
-            "content": "<p>No minimum order value. Delivery typically takes 3–7 days after dispatch.</p>",
-            "metafield_key": ""
-          }
-        },
-        "i_cod": {
-          "type": "item",
-          "settings": {
-            "heading": "COD available on eligible pincodes.",
-            "content": "<p>Check your pincode above to confirm cash on delivery availability.</p>",
-            "metafield_key": ""
-          }
-        },
-        "g_returns": {
-          "type": "group",
-          "settings": {
-            "heading": "Exchanges & returns"
+            "heading": "Craft & technique",
+            "content": "",
+            "metafield_key": "craft_technique",
+            "metafield_only": true
           }
         },
         "i_exchange": {
           "type": "item",
           "settings": {
-            "heading": "Easy exchanges within 7 days.",
-            "content": "<p>Request an exchange from your account within 7 days of delivery.</p>",
-            "metafield_key": ""
+            "heading": "Exchange & Return",
+            "content": "<p>If your Tabi piece does not work for you, you can request an exchange or return within 5 days of delivery, no questions asked.</p><p>Items must be unused and unwashed, with all tags attached and the original packaging.</p><p>Please refer to our Shipping, Exchanges & Returns policy for more details.</p>",
+            "metafield_key": "",
+            "metafield_only": false
           }
         },
-        "i_unused": {
+        "i_material": {
           "type": "item",
           "settings": {
-            "heading": "Items must be unused with tags.",
-            "content": "<p>Unwashed, unworn, with all tags attached and original packaging.</p>",
-            "metafield_key": ""
-          }
-        },
-        "i_refund": {
-          "type": "item",
-          "settings": {
-            "heading": "Refunds via original payment method or store credit.",
-            "content": "<p>Refunds are processed within 5–7 working days after we receive the item.</p>",
-            "metafield_key": ""
+            "heading": "Material and care",
+            "content": "<p>Our fabrics, dyes and finishing processes are selected against stringent quality and chemical-safety requirements (REACH standards), so what sits against the skin is considered as carefully as how the piece looks.</p><p>Pre-treat stains when needed. Gentle machine wash with similar colours using a mild detergent. Do not bleach. Tumble dry as permitted by the garment care label, or dry in shade. Warm iron on the front or reverse as needed.</p>",
+            "metafield_key": "",
+            "metafield_only": false
           }
         }
       },
       "block_order": [
-        "g_details",
+        "i_spec",
         "i_fabric",
         "i_craft",
-        "i_construction",
-        "i_silhouette",
-        "i_detailing",
-        "g_material",
-        "i_composition",
-        "i_wash",
-        "i_care",
-        "g_shipping",
-        "i_madetoorder",
-        "i_freeship",
-        "i_cod",
-        "g_returns",
         "i_exchange",
-        "i_unused",
-        "i_refund"
+        "i_material"
       ],
       "settings": {
-        "heading": "",
+        "heading": "Product details",
         "open_first": false,
         "color_scheme": "scheme-5",
         "padding_top": 48,
@@ -478,7 +404,7 @@
         "body": "<p>Tabi is a celebration of the everyday journey - yours and ours, together! It is built around the idea that the things we choose to live with can help us live a little more slowly and consciously. All Tabi products are built with love and care for the planet and the people using them, while blending the rich artisanal heritage of Indian handcrafts into everyday pieces.</p>",
         "link_label": "Read more about us",
         "link_url": "",
-        "decor_style": "seal",
+        "decor_style": "none",
         "decor_width": 14,
         "seal_name": "Tabi",
         "seal_text_top": "A place to belong",
@@ -534,7 +460,8 @@
         "color_scheme": "scheme-5",
         "padding_top": 48,
         "padding_bottom": 32
-      }
+      },
+      "disabled": true
     },
     "related-products": {
       "type": "related-products",
@@ -564,11 +491,11 @@
   },
   "order": [
     "main",
-    "pdp-why-love",
-    "pdp-band-batches",
     "pdp-info-columns",
+    "related-products",
+    "pdp-why-love",
     "pdp-band-tabi-way",
-    "pdp-approach",
-    "related-products"
+    "pdp-band-batches",
+    "pdp-approach"
   ]
 }

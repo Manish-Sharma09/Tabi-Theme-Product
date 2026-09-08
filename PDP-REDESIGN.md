@@ -12,6 +12,67 @@ deliberate step, not something that happens by leaving this branch merged.
 
 ---
 
+## 0. Second round: the Product Page Analysis changes
+
+A second review (`Product Page Analysis`, with a reference mockup) reordered the
+page and changed several of the pieces described further down. **Where sections
+1–7 and this section disagree, this section is current.** What changed:
+
+**Page sequence** is now `main → Product details → You may also like → Why
+you'll love it → A Tabi journey`. Two sections were dropped from the sequence
+and are `"disabled": true` in `templates/product.new-design.json` rather than
+deleted — every setting survives and the theme editor's show/hide eye brings
+either one back:
+
+- *Made in small batches* (feature band). Its content is now the highlighted
+  fifth row inside "Why you'll love it".
+- *Our three-part approach*. Not in the reviewed sequence.
+
+**Benefit icons** are the site green (`#253c30`, the token `--pdp-green`) and
+read `Natural Fabric · Handcrafted · Made to Order · Easy Exchanges & Returns`.
+"Gentle on Skin" is gone; the open-palm icon carries "Handcrafted" and the tag
+icon "Made to Order".
+
+**No size arrives pre-selected.** The variant picker has a *Do not pre-select a
+size* checkbox, on for `product.new-design`. Add to cart is disabled and reads
+"Select a size" until the shopper picks one. See section 4.
+
+**Fit notes moved out of the buy box** into a *Specification* accordion in the
+Product details section. The `pdp_fit` block is disabled, not deleted.
+
+**The pincode box** is drawn on `#efede9` (`--pdp-sand`) with a `#253c30` CHECK
+button matching Add to cart, a 1px black field border, and its heading in the
+product title's serif at the product title's weight rather than bold body text.
+
+**"Why you'll love it"** is no longer three columns. It is a centred sand card:
+a label, one serif line, and up to six rows of icon + heading + body, one of
+which can be inverted to the brand green and bled to the card's edges. It takes
+a closing photograph at the foot of the card.
+
+**"A Tabi journey"** (the *Tabi way* band) sits directly after "Why you'll love
+it" with `decor_style: none` — the turning TABI seal is off, because the logo is
+already in the header. The seal code is untouched and section 4's description of
+it still holds for any band that switches it back on.
+
+**Craft & technique** shows only on products that have `custom.craft_technique`.
+Accordion rows now carry a *Hide this row when the metafield is empty* checkbox,
+which turns the typed fallback off; it is on for that row only.
+
+### Still to fill in after this round
+
+| Where | What | What renders today |
+|---|---|---|
+| Why you'll love it → *Closing image* | The block-printing photograph from the mockup | Card ends on the green "Made in Small Batches" row |
+| Products → `custom.fit`, `custom.model_details`, `custom.fit_recommendation` | Fit and model details | The *Specification* accordion is hidden — it has no typed fallback |
+| Products → `custom.craft_technique` | Hand-block printing, embroidery, quilting, smocking | The *Craft & technique* accordion is hidden, by design |
+
+"Tested for Harmful Substances" is live and cites **REACH standards**, which is
+the standard the store's own Materials copy already names. If a different
+certification is what the fabric is actually tested against, that row's text is
+a theme-editor field.
+
+---
+
 ## 1. Before anything goes live
 
 Work on a **duplicate theme**, not the live one:
@@ -47,19 +108,32 @@ create the definitions now and fill them in over time.
 | `model_details` | Single line text | `Model is 5'9 and is wearing size M` |
 | `fit_recommendation` | Multi-line text | `If you are between sizes, we recommend sizing up.` |
 
-### "Why you'll love it" — three highlights
+### "Why you'll love it" — up to six rows
+
+One heading and one text metafield per row, numbered by the row's position in
+the theme editor. The template ships five rows, so `usp_1_*` through `usp_5_*`
+are the ones worth creating; the section reads up to `usp_6_*`.
 
 | Key | Type | Example |
 |---|---|---|
-| `usp_1_heading` | Single line text | `Light & Breathable` |
-| `usp_1_text` | Multi-line text | `Soft cotton cambric keeps the piece comfortable through long days.` |
-| `usp_2_heading` | Single line text | `Made with Character` |
-| `usp_2_text` | Multi-line text | `Traditional handblock printing gives every piece subtle variations of its own.` |
-| `usp_3_heading` | Single line text | `Shape Without Stiffness` |
-| `usp_3_text` | Multi-line text | `Smocking adds definition while allowing the garment to move naturally with you.` |
+| `usp_1_heading` | Single line text | `Relaxed, Comfortable Fit` |
+| `usp_1_text` | Multi-line text | `An easy silhouette designed to let your little one move comfortably.` |
+| `usp_2_heading` | Single line text | `Vintage-Inspired Details` |
+| `usp_2_text` | Multi-line text | `Nostalgic details thoughtfully reimagined for everyday wear.` |
+| `usp_3_heading` | Single line text | `Crafted with Care` |
+| `usp_3_text` | Multi-line text | `Finished with thoughtful details such as smocking, hand embroidery or hand-block printing.` |
+| `usp_4_heading` | Single line text | `Tested for Harmful Substances` |
+| `usp_4_text` | Multi-line text | `The fabric has been independently tested according to REACH standards.` |
+| `usp_5_heading` | Single line text | `Made in Small Batches` |
+| `usp_5_text` | Multi-line text | `Thoughtfully produced in limited runs and often made to order.` |
 
-The icons are **not** metafields — pick them per template on the section's
-column blocks in the theme editor.
+Row 5 is the highlighted one. Every row falls back to the text typed on its own
+block, so filling these in is optional and per product — leave them empty and
+the collection-level copy on the template stands.
+
+The icons are **not** metafields — pick them per template on the section's row
+blocks in the theme editor. The mockup's five are `leaf`, `flower`, `needle`,
+`shield` and `box`.
 
 ### Product information accordions
 
@@ -122,7 +196,7 @@ you later roll out to:
 | Feature band → *Decorative image* | 2 bands | Nothing; the artwork is optional |
 | *The Tabi way* → *Link* (label is `Read more about us`) | 1 | Link hidden until the URL is set |
 | Approach → *Button link* (label is `Discover how Tabi works`) | 1 | Button hidden until the URL is set |
-| Size help → *WhatsApp number* | 1 | Only the Instagram row renders, though the subheading still says "Chat with us on Instagram or Whatsapp" |
+| ~~Size help → *WhatsApp number*~~ | — | Filled: `+91 93197 50031`, the number in the footer's *Connect with us* block |
 
 A label with no destination used to render `href="#"`, which looked live and
 jumped to the top of the page when clicked. Both sections now require the URL
@@ -165,7 +239,7 @@ end up with none.
 | `snippets/pdp-fit-details.liquid` | Fit / model / recommendation rows. |
 | `snippets/pdp-size-help.liquid` | Instagram + WhatsApp prompt. |
 | `snippets/pdp-usp-line.liquid` | "Free Shipping • COD Available". |
-| `sections/pdp-why-love.liquid` | Three product highlights. |
+| `sections/pdp-why-love.liquid` | The product highlights card — rows on sand, one optionally highlighted, with a closing image. |
 | `sections/pdp-feature-band.liquid` | Image + text band, used twice. |
 | `sections/pdp-info-columns.liquid` | Product information accordions, in the design's four columns. |
 | `sections/pdp-approach.liquid` | Three-part approach + CTA. |
@@ -205,7 +279,9 @@ All changes are additive and default to current behaviour:
   the gallery on desktop while the buy box scrolls past it. Every existing
   branch is unchanged.
 - `snippets/product-variant-picker.liquid` — optional "Size Guide" link and
-  option label override. Without `size_guide_page` set, renders as before.
+  option label override, plus the `data-pdp-size-gate` marker on the size
+  fieldset. Without `size_guide_page` and `require_size_selection` set, renders
+  as before.
 - `snippets/buy-buttons.liquid` — optional custom BUY NOW. Defaults to
   `buy_now_style: dynamic`, i.e. today's behaviour.
 - `sections/related-products.liquid` — optional carousel layout and small
@@ -218,6 +294,52 @@ All changes are additive and default to current behaviour:
 rules deliberately live in a separate stylesheet that only the product page
 requests. Its section 10 (mobile PDP media capped at 78vh) still applies and
 still wanted.
+
+### No pre-selected size
+
+Shopify picks the first available variant, so the buy box arrived with a size
+already chosen — a shopper who never touched the size row could add 18M to the
+cart by accident. With *Do not pre-select a size* on, the page loads with no
+chip selected, Add to cart disabled, and its label replaced by "Select a size";
+the first click on any size releases all three.
+
+Three decisions worth knowing, because each one had an obvious alternative:
+
+**It is done in the browser, not in Liquid.** Suppressing `checked`
+server-side needs a "did the URL choose a variant" signal, and the only one
+available — `product.selected_variant` — is documented against `?variant=`.
+Dawn re-renders the picker through `?option_values=`, so a gate built on
+`selected_variant` risks leaving Add to cart disabled *after* the shopper has
+in fact chosen a size, which is a broken store rather than a cosmetic bug.
+Clearing the pre-selection in the browser needs no such guarantee: the markup
+Shopify renders, and every re-render after it, stays Dawn's own. A shopper with
+JavaScript off gets today's behaviour — a pre-selected size and a working
+button — rather than a page that cannot add to cart.
+
+**The script is inline in `sections/main-product.liquid`, not in
+`product-page.js`.** It runs while the parser is still inside the section, so
+the chip is cleared before the row can paint; out of a deferred file the
+selected chip could flash first. And a gate that disables Add to cart has to
+own the code that re-enables it — split across a deferred file, a script that
+failed to load would leave the button disabled with no way back.
+
+**Only the named size option is gated**, not every option group. Clearing all
+of them would mean a Size + Colour product re-selecting a size the moment the
+shopper picked a colour: the section is re-rendered with whatever option values
+are set, and a colour on its own resolves to the first available variant, size
+included.
+
+Two smaller notes. The gate is skipped when the URL already carries `variant`
+or `option_values`, so a shared link to a chosen size still arrives chosen. And
+Enter inside the quantity field submits the form even with the button disabled,
+so the gate also blocks `submit` — with `stopImmediatePropagation`, because
+submit fires with the form as its target, where capture and bubble listeners
+run in the order they were added and a deferred `product-form.js` always adds
+its own after this one.
+
+A product with a single size still asks for the click. That is the instruction
+applied uniformly; if it reads as friction on one-size products, the gate is a
+checkbox and can be turned off per template.
 
 ### The information columns
 

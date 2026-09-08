@@ -58,21 +58,46 @@
         {%- endcomment -%}
         {%- liquid
           assign guide_option = block.settings.size_guide_option | default: 'Size'
+          assign option_name_down = option.name | downcase | strip
+          assign guide_option_down = guide_option | downcase | strip
+
+          assign is_guide_option = false
+          if option_name_down == guide_option_down
+            assign is_guide_option = true
+          endif
+
           assign show_guide = false
-          if block.settings.size_guide_page != blank
-            assign option_name_down = option.name | downcase | strip
-            assign guide_option_down = guide_option | downcase | strip
-            if option_name_down == guide_option_down
-              assign show_guide = true
-            endif
+          if block.settings.size_guide_page != blank and is_guide_option
+            assign show_guide = true
           endif
 
           assign legend_label = option.name
           if show_guide and block.settings.size_label != blank
             assign legend_label = block.settings.size_label
           endif
+
+          comment
+            Marks the size fieldset for <pdp-size-gate>, which clears its
+            pre-selection on a fresh page load so nobody can add a size they
+            did not choose. Marked here rather than found by the script,
+            because "which option is the size" is already settled in this
+            snippet for the size-guide link and should not be guessed twice.
+
+            Only the named option is marked. Clearing every option group
+            instead would mean a Size + Colour product re-selected a size the
+            moment the shopper picked a colour: the section is re-rendered
+            with whatever option values are set, and a colour on its own
+            resolves to the first available variant, size included.
+          endcomment
+          assign gate_size = false
+          if block.settings.require_size_selection and is_guide_option
+            assign gate_size = true
+          endif
         -%}
-        <fieldset class="js product-form__input product-form__input--pill">
+        <fieldset
+          class="js product-form__input product-form__input--pill"
+          {% if gate_size %}data-pdp-size-gate{% endif %}
+        >
           {%- if show_guide -%}
             <div class="pdp-option-head">
               <legend class="form__label">{{ legend_label }}</legend>

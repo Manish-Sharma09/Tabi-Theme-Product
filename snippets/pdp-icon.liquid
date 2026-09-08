@@ -71,6 +71,49 @@
       <path d="M8.5 5v14M12 5v14M15.5 5v14" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
     </svg>
 
+  {%- comment -%}
+    Vintage-inspired details - a five-petal blossom. Petals are circles rather
+    than rotated ellipses so the shape stays symmetrical at 24px, where a
+    transform-based flower loses a petal to rounding.
+  {%- endcomment -%}
+  {%- when 'flower' -%}
+    <svg class="pdp-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="6.6" r="2.6" stroke="currentColor" stroke-width="1.25"/>
+      <circle cx="17.1" cy="10.3" r="2.6" stroke="currentColor" stroke-width="1.25"/>
+      <circle cx="15.2" cy="16.3" r="2.6" stroke="currentColor" stroke-width="1.25"/>
+      <circle cx="8.8" cy="16.3" r="2.6" stroke="currentColor" stroke-width="1.25"/>
+      <circle cx="6.9" cy="10.3" r="2.6" stroke="currentColor" stroke-width="1.25"/>
+      <circle cx="12" cy="12" r="1.5" stroke="currentColor" stroke-width="1.25"/>
+    </svg>
+
+  {%- comment -%} Crafted with care - a threaded needle. {%- endcomment -%}
+  {%- when 'needle' -%}
+    <svg class="pdp-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+      <path d="M4.5 19.5 15.9 8.1" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+      <circle cx="17.6" cy="6.4" r="1.9" stroke="currentColor" stroke-width="1.25"/>
+      <path d="M15.7 5.3c-2.3-.5-4.5.6-5.1 2.5-.6 2 1 3.5 2.9 3.2" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+    </svg>
+
+  {%- comment -%}
+    Tested for harmful substances - a leaf inside a shield. The leaf is the
+    'leaf' path at half scale, so the two icons stay recognisably the same
+    drawing where a product page shows both.
+  {%- endcomment -%}
+  {%- when 'shield' -%}
+    <svg class="pdp-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+      <path d="M12 3.2 4.8 5.8v6.1c0 4 2.9 7.4 7.2 8.9 4.3-1.5 7.2-4.9 7.2-8.9V5.8L12 3.2Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
+      <path d="M9.2 15.6c0-3.3 2-5.8 5.5-6.3-.25 3.5-2.25 5.5-5.5 6.3Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
+      <path d="M9.2 15.6c1.25-2 2.75-3.25 4.5-4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+    </svg>
+
+  {%- comment -%} Made in small batches - a parcel drawn as a cube. {%- endcomment -%}
+  {%- when 'box' -%}
+    <svg class="pdp-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+      <path d="M12 3.2 3.8 7.2v9.6L12 20.8l8.2-4V7.2L12 3.2Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
+      <path d="M3.8 7.2 12 11.2l8.2-4" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
+      <path d="M12 11.2v9.6" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
+    </svg>
+
   {%- comment -%} Handblock printing - a stamp pressed onto cloth. {%- endcomment -%}
   {%- when 'block-print' -%}
     <svg class="pdp-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">

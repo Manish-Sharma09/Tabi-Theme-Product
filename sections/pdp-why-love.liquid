@@ -1,25 +1,31 @@
 {% comment %}
-  "WHY YOU'LL LOVE IT" - up to three icon + heading + body columns.
+  "WHY YOU'LL LOVE IT" - a small uppercase label, one serif line, and a stack
+  of icon + heading + body rows on a sand card, closed by a full-bleed image.
 
   The copy is per product and comes from metafields; the icons are per template
-  and come from block settings. Which metafield a column reads is decided by its
+  and come from block settings. Which metafield a row reads is decided by its
   position, so the first block reads custom.usp_1_heading / custom.usp_1_text,
-  the second reads usp_2_*, and so on. Reordering the blocks in the theme editor
-  reorders which metafield shows where, which is the behaviour a merchant
-  dragging a column expects.
+  the second reads usp_2_*, and so on up to usp_6_*. Reordering the blocks in
+  the theme editor reorders which metafield shows where, which is the behaviour
+  a merchant dragging a row expects.
 
-  Each column falls back to text typed on its own block when the metafield is
+  Each row falls back to text typed on its own block when the metafield is
   empty, so the section is visible and editable before any metafield exists.
   Filling the metafield on a product overrides the fallback for that product
   only - which is the point: the fallback is the collection-level claim, the
   metafield is the one true of this specific garment.
 
-  A column with neither is skipped, and the section renders nothing at all when
-  no column survives, so clearing all the fallbacks is how you turn it off.
+  A row with neither is skipped, and the section renders nothing at all when
+  no row survives, so clearing all the fallbacks is how you turn it off.
+
+  One row can be marked "Highlight", which inverts it to the brand green and
+  bleeds it to the card's edges - the design uses it for "Made in small
+  batches", which used to be a full-width band of its own. Marking two rows
+  works, but the design intends one.
 
   Metafields read:
-  - custom.usp_1_heading .. custom.usp_3_heading  (single line text)
-  - custom.usp_1_text    .. custom.usp_3_text     (multi-line text)
+  - custom.usp_1_heading .. custom.usp_6_heading  (single line text)
+  - custom.usp_1_text    .. custom.usp_6_text     (multi-line text)
 {% endcomment %}
 
 {{ 'product-page.css' | asset_url | stylesheet_tag }}
@@ -29,6 +35,7 @@
   assign headings = ''
   assign bodies = ''
   assign icons = ''
+  assign highlights = ''
 
   for block in section.blocks
     assign heading_key = 'usp_' | append: forloop.index | append: '_heading'
@@ -38,7 +45,7 @@
     assign body = product.metafields.custom[text_key].value | default: product.metafields.custom[text_key]
 
     comment
-      Fall back per field rather than per column: a product that has a heading
+      Fall back per field rather than per row: a product that has a heading
       metafield but no body should keep the block's body, not lose it.
     endcomment
     if heading == blank
@@ -53,41 +60,84 @@
       assign headings = headings | append: heading | append: '~|~'
       assign bodies = bodies | append: body | append: '~|~'
       assign icons = icons | append: block.settings.icon | append: '~|~'
+      comment
+        Flags carry a value for every surviving row so this list stays the same
+        length as the other three and can be read by the same index. A bare
+        boolean appended to a string is '' when false, which would collapse two
+        entries into one.
+      endcomment
+      if block.settings.highlight
+        assign highlights = highlights | append: '1' | append: '~|~'
+      else
+        assign highlights = highlights | append: '0' | append: '~|~'
+      endif
     endif
   endfor
 
   assign heading_list = headings | split: '~|~'
   assign body_list = bodies | split: '~|~'
   assign icon_list = icons | split: '~|~'
+  assign highlight_list = highlights | split: '~|~'
 -%}
 
 {%- if rendered > 0 -%}
   <div
     class="pdp-section pdp-why color-{{ section.settings.color_scheme }} gradient"
-    style="--pdp-why-columns: {{ rendered }}; --pdp-pad-top: {{ section.settings.padding_top }}px; --pdp-pad-bottom: {{ section.settings.padding_bottom }}px;"
+    style="--pdp-pad-top: {{ section.settings.padding_top }}px; --pdp-pad-bottom: {{ section.settings.padding_bottom }}px;"
   >
     <div class="pdp-section__inner">
-      {%- if section.settings.heading != blank -%}
-        <p class="pdp-eyebrow">{{ section.settings.heading | escape }}</p>
-      {%- endif -%}
+      <div class="pdp-why__card">
+        {%- if section.settings.heading != blank -%}
+          <p class="pdp-eyebrow pdp-why__label">{{ section.settings.heading | escape }}</p>
+        {%- endif -%}
 
-      <ul class="pdp-why__grid">
-        {%- for heading in heading_list -%}
-          <li class="pdp-why__item">
-            {%- assign icon_name = icon_list[forloop.index0] -%}
-            {%- if icon_name != blank and icon_name != 'none' -%}
-              <span class="pdp-why__icon">
-                {%- render 'pdp-icon', icon: icon_name -%}
-              </span>
+        {%- if section.settings.lede != blank -%}
+          <p class="pdp-why__lede">{{ section.settings.lede | escape }}</p>
+        {%- endif -%}
+
+        <ul class="pdp-why__list">
+          {%- for heading in heading_list -%}
+            {%- assign is_highlight = false -%}
+            {%- if highlight_list[forloop.index0] == '1' -%}
+              {%- assign is_highlight = true -%}
             {%- endif -%}
-            <h3 class="pdp-why__heading">{{ heading | escape }}</h3>
-            {%- assign body = body_list[forloop.index0] -%}
-            {%- if body != blank -%}
-              <p class="pdp-why__text">{{ body | escape | newline_to_br }}</p>
-            {%- endif -%}
-          </li>
-        {%- endfor -%}
-      </ul>
+            <li class="pdp-why__row{% if is_highlight %} pdp-why__row--highlight{% endif %}">
+              {%- assign icon_name = icon_list[forloop.index0] -%}
+              {%- if icon_name != blank and icon_name != 'none' -%}
+                <span class="pdp-why__icon">
+                  {%- render 'pdp-icon', icon: icon_name -%}
+                </span>
+              {%- endif -%}
+              <div class="pdp-why__body">
+                <h3 class="pdp-why__heading">{{ heading | escape }}</h3>
+                {%- assign body = body_list[forloop.index0] -%}
+                {%- if body != blank -%}
+                  <p class="pdp-why__text">{{ body | escape | newline_to_br }}</p>
+                {%- endif -%}
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {%- comment -%}
+          The closing photograph. It bleeds to the card's edges, so it is a
+          child of the card rather than of the list - a full-bleed <li> would
+          have to opt out of the row grid as well as the padding.
+        {%- endcomment -%}
+        {%- if section.settings.image != blank -%}
+          <div class="pdp-why__media">
+            {{
+              section.settings.image
+              | image_url: width: 1200
+              | image_tag:
+                loading: 'lazy',
+                sizes: '(min-width: 750px) 720px, 100vw',
+                widths: '400, 600, 800, 1000, 1200',
+                alt: section.settings.image.alt
+            }}
+          </div>
+        {%- endif -%}
+      </div>
     </div>
   </div>
 {%- endif -%}
@@ -100,13 +150,27 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Each column shows the product metafield when it is set — custom.usp_1_heading and custom.usp_1_text for column one, usp_2_* for column two, usp_3_* for column three — and the text typed on the block otherwise. Clear both and that column is hidden."
+      "content": "Each row shows the product metafield when it is set — custom.usp_1_heading and custom.usp_1_text for row one, usp_2_* for row two, and so on — and the text typed on the block otherwise. Clear both and that row is hidden."
     },
     {
       "type": "text",
       "id": "heading",
       "label": "Section label",
-      "default": "Why you'll love it"
+      "default": "Why you'll love it",
+      "info": "The small uppercase line above the card."
+    },
+    {
+      "type": "text",
+      "id": "lede",
+      "label": "Opening line",
+      "default": "Clothes with character, made for comfort.",
+      "info": "One serif line under the label. Leave empty to hide it."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Closing image",
+      "info": "Sits at the foot of the card, full width. Leave empty to hide it."
     },
     {
       "type": "color_scheme",
@@ -142,18 +206,22 @@
   "blocks": [
     {
       "type": "column",
-      "name": "Column",
-      "limit": 3,
+      "name": "Row",
+      "limit": 6,
       "settings": [
         {
           "type": "select",
           "id": "icon",
           "label": "Icon",
-          "default": "feather",
+          "default": "leaf",
           "options": [
             { "value": "none", "label": "None" },
-            { "value": "feather", "label": "Feather" },
             { "value": "leaf", "label": "Leaf" },
+            { "value": "flower", "label": "Flower" },
+            { "value": "needle", "label": "Needle and thread" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "box", "label": "Parcel" },
+            { "value": "feather", "label": "Feather" },
             { "value": "hand", "label": "Hand" },
             { "value": "weave", "label": "Weave" },
             { "value": "block-print", "label": "Block print" },
@@ -168,13 +236,20 @@
           "type": "text",
           "id": "heading",
           "label": "Heading",
-          "info": "Used when this column's metafield is empty."
+          "info": "Used when this row's metafield is empty."
         },
         {
           "type": "textarea",
           "id": "text",
           "label": "Text",
-          "info": "Used when this column's metafield is empty."
+          "info": "Used when this row's metafield is empty."
+        },
+        {
+          "type": "checkbox",
+          "id": "highlight",
+          "label": "Highlight this row",
+          "default": false,
+          "info": "Inverts the row to the brand green and bleeds it to the card's edges. The design uses this on one row only."
         }
       ]
     }
@@ -183,9 +258,11 @@
     {
       "name": "PDP: Why you'll love it",
       "blocks": [
-        { "type": "column", "settings": { "icon": "feather" } },
-        { "type": "column", "settings": { "icon": "hand" } },
-        { "type": "column", "settings": { "icon": "weave" } }
+        { "type": "column", "settings": { "icon": "leaf" } },
+        { "type": "column", "settings": { "icon": "flower" } },
+        { "type": "column", "settings": { "icon": "needle" } },
+        { "type": "column", "settings": { "icon": "shield" } },
+        { "type": "column", "settings": { "icon": "box", "highlight": true } }
       ]
     }
   ]

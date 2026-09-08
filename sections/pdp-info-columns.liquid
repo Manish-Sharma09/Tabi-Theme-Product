@@ -37,6 +37,19 @@
 
 {%- liquid
   comment
+    The Specification row is built from three fit metafields rather than one
+    key, so resolve them up front - the liveness pass and the render loop then
+    read the same values instead of asking twice and risking disagreement.
+  endcomment
+  assign spec_fit = product.metafields.custom.fit.value | default: product.metafields.custom.fit
+  assign spec_model = product.metafields.custom.model_details.value | default: product.metafields.custom.model_details
+  assign spec_reco = product.metafields.custom.fit_recommendation.value | default: product.metafields.custom.fit_recommendation
+  assign has_spec = false
+  if spec_fit != blank or spec_model != blank or spec_reco != blank
+    assign has_spec = true
+  endif
+
+  comment
     Pass 1. One flag per block, in block order:
       'g' a group heading
       '1' an item with something to show
@@ -49,6 +62,18 @@
   for block in section.blocks
     if block.type == 'group'
       assign flags = flags | append: 'g,'
+    elsif block.type == 'spec'
+      assign live = false
+      if block.settings.heading != blank
+        if has_spec or block.settings.content != blank
+          assign live = true
+        endif
+      endif
+      if live
+        assign flags = flags | append: '1,'
+      else
+        assign flags = flags | append: '0,'
+      endif
     else
       assign live = false
       if block.settings.heading != blank
@@ -70,7 +95,22 @@
           to say about" survives - it just means both sources empty rather than
           one.
         endcomment
-        if field != blank or block.settings.content != blank
+        comment
+          "Metafield only" turns the fallback off for rows the design asks to
+          appear only when there is something particular to say - the craft
+          technique row, which should be absent on a product with no
+          hand-block printing, embroidery, quilting or smocking rather than
+          carrying a generic paragraph. It is ignored when no key is set,
+          since that would leave the row permanently unreachable.
+        endcomment
+        assign allow_fallback = true
+        if key != blank and block.settings.metafield_only
+          assign allow_fallback = false
+        endif
+
+        if field != blank
+          assign live = true
+        elsif allow_fallback and block.settings.content != blank
           assign live = true
         endif
       endif
@@ -150,7 +190,10 @@
         entirely metafield-driven and empty on this product gets three, at full
         width, rather than three columns and a gap.
       {%- endcomment -%}
-      <div class="pdp-info__grid" style="--pdp-info-columns: {{ live_start_list.size }};">
+      <div
+        class="pdp-info__grid{% if live_start_list.size == 1 %} pdp-info__grid--single{% endif %}"
+        style="--pdp-info-columns: {{ live_start_list.size }};"
+      >
         {%- for start in live_start_list -%}
           {%- liquid
             assign gi = start | plus: 0
@@ -212,7 +255,38 @@
                     {%- render 'pdp-icon', icon: 'caret' -%}
                   </summary>
                   <div class="pdp-info__content rte">
-                    {%- if field != blank -%}
+                    {%- if block.type == 'spec' -%}
+                      {%- if has_spec -%}
+                        <ul class="pdp-info__spec">
+                          {%- if spec_fit != blank -%}
+                            <li>
+                              <span class="pdp-info__specterm">
+                                {{- block.settings.fit_label | default: 'Fit' | escape -}}
+                              </span>
+                              <span>{{ spec_fit | escape | newline_to_br }}</span>
+                            </li>
+                          {%- endif -%}
+                          {%- if spec_model != blank -%}
+                            <li>
+                              <span class="pdp-info__specterm">
+                                {{- block.settings.model_label | default: 'Model' | escape -}}
+                              </span>
+                              <span>{{ spec_model | escape | newline_to_br }}</span>
+                            </li>
+                          {%- endif -%}
+                          {%- if spec_reco != blank -%}
+                            <li>
+                              <span class="pdp-info__specterm">
+                                {{- block.settings.recommendation_label | default: 'Fit tip' | escape -}}
+                              </span>
+                              <span>{{ spec_reco | escape | newline_to_br }}</span>
+                            </li>
+                          {%- endif -%}
+                        </ul>
+                      {%- else -%}
+                        {{ block.settings.content }}
+                      {%- endif -%}
+                    {%- elsif field != blank -%}
                       {%- comment -%}
                         A rich text metafield renders its own HTML when output
                         directly. Every other type is a plain string, which has
@@ -335,6 +409,54 @@
           "id": "metafield_key",
           "label": "Metafield key",
           "info": "Key inside the `custom` namespace, e.g. `craft_technique`. Products that have this metafield show it instead of the text above; products that do not fall back to the text above. Leave both empty to hide this row."
+        },
+        {
+          "type": "checkbox",
+          "id": "metafield_only",
+          "label": "Hide this row when the metafield is empty",
+          "default": false,
+          "info": "Turns the fallback text off, so the row appears only on products that have the metafield. Use it for rows that should be absent rather than generic — the craft technique, for instance."
+        }
+      ]
+    },
+    {
+      "type": "spec",
+      "name": "Specification",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Built from three product metafields — custom.fit, custom.model_details and custom.fit_recommendation. The row hides itself on products where all three are empty, unless you type fallback text below."
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Specification"
+        },
+        {
+          "type": "text",
+          "id": "fit_label",
+          "label": "Label for custom.fit",
+          "default": "Fit"
+        },
+        {
+          "type": "text",
+          "id": "model_label",
+          "label": "Label for custom.model_details",
+          "default": "Model"
+        },
+        {
+          "type": "text",
+          "id": "recommendation_label",
+          "label": "Label for custom.fit_recommendation",
+          "default": "Fit tip"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Fallback text",
+          "info": "Shown only on products where all three metafields are empty. Leave empty to hide the row there instead."
         }
       ]
     }

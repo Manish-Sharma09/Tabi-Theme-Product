@@ -52,6 +52,16 @@
   --pdp-band-deep: #ece7dd;
   --pdp-accent: #3f4a2e;
   --pdp-accent-ink: #ffffff;
+
+  /* The site's own green. The design asks for the benefit icons, the CHECK
+     button and the highlighted "Made in small batches" row to be this exact
+     value rather than --pdp-accent, so that they match the header and the
+     Add to cart button instead of sitting a shade off them. */
+  --pdp-green: #253c30;
+
+  /* The pincode panel's ground. A step warmer and lighter than --pdp-band,
+     which the full-width sections keep using. */
+  --pdp-sand: #efede9;
   --pdp-tan: #b9a88f;
   --pdp-clay: #b58f5c;
 
@@ -467,7 +477,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 }
 
 .pdp-trust__icon {
-  color: var(--pdp-ink);
+  color: var(--pdp-green);
 }
 
 .pdp-trust__icon .pdp-icon {
@@ -810,19 +820,23 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   display: block;
   margin-top: 2rem;
   padding: 2.4rem;
-  background: var(--pdp-band);
+  background: var(--pdp-sand);
 }
 
 .pdp .product__info-container > .pdp-delivery {
   margin-top: 2rem;
 }
 
+/* The heading is the product title's font at the product title's weight, not
+   a bolded body line - it reads as a label on the panel rather than as a
+   second headline competing with the product name. */
 .pdp-delivery__title {
   margin: 0 0 1.6rem;
-  font-size: 1.6rem;
-  font-weight: 600;
+  font-family: var(--font-heading-family);
+  font-size: 1.7rem;
+  font-weight: var(--font-heading-weight);
   line-height: 1.3;
-  color: var(--pdp-ink);
+  color: #000;
 }
 
 .pdp-delivery__form {
@@ -835,7 +849,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   min-width: 0;
   height: 4.8rem;
   padding: 0 1.4rem;
-  border: 1px solid var(--pdp-ink);
+  border: 1px solid #000;
   border-radius: 0;
   background: #fff;
   font-family: inherit;
@@ -860,19 +874,20 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   padding: 0 2.6rem;
   border: 0;
   border-radius: 0;
-  background: var(--pdp-clay);
+  background: var(--pdp-green);
   color: #fff;
   font-family: inherit;
   font-size: 1.35rem;
   font-weight: 500;
   letter-spacing: 0.16em;
+  text-align: center;
   text-transform: uppercase;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .pdp-delivery__submit:hover {
-  background: #a37e4c;
+  background: #1b2c23;
 }
 
 .pdp-delivery__error {
@@ -949,70 +964,159 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 /* --------------------------------------------------------------------------
    8. SECTION: WHY YOU'LL LOVE IT
 
-   Three columns divided by hairlines. The dividers are borders on the items
-   rather than a background gradient, so a column count of two (a product with
-   only two points filled in) still divides correctly.
+   A centred sand card: a small label, one serif line, a stack of rows divided
+   by hairlines, and a full-bleed photograph at the foot.
+
+   The rows are a list rather than columns because the design now carries five
+   of them - at five columns the headings wrapped to three lines each and the
+   icons stopped reading as a set. One row can be inverted to the brand green
+   and bled to the card's edges, which is where the "Made in small batches"
+   band went when it stopped being a section of its own.
    -------------------------------------------------------------------------- */
 
-.pdp-why {
+.pdp-why__card {
+  /* One padding value, because three things measure against it: the two
+     full-bleed children cancel it, and the highlighted row pays it back. */
+  --pdp-why-pad: 3.2rem;
+
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--pdp-why-pad);
+  background: var(--pdp-sand);
+}
+
+.pdp-why__label,
+.pdp-why__lede {
   text-align: center;
 }
 
-.pdp-why__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 3.2rem;
+.pdp-why__label {
+  margin-bottom: 1rem;
+}
+
+.pdp-why__lede {
+  margin: 0 0 2.4rem;
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-size: 2.2rem;
+  line-height: 1.35;
+  color: var(--pdp-ink);
+}
+
+.pdp-why__list {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-@media screen and (min-width: 750px) {
-  .pdp-why__grid {
-    grid-template-columns: repeat(var(--pdp-why-columns, 3), 1fr);
-    gap: 0;
-  }
-
-  .pdp-why__item + .pdp-why__item {
-    border-left: 0.1rem solid var(--pdp-line);
-  }
-
-  .pdp-why__item {
-    padding: 0 3rem;
-  }
+.pdp-why__row {
+  display: grid;
+  grid-template-columns: 2.8rem 1fr;
+  align-items: start;
+  gap: 1.6rem;
+  padding: 1.8rem 0;
+  border-top: 0.1rem solid var(--pdp-line);
 }
 
-.pdp-why__item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+.pdp-why__row:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* A row whose icon is set to None keeps its text on the same left edge as the
+   rows that have one, so the headings stay in a single column. */
+.pdp-why__row > .pdp-why__body:first-child {
+  grid-column: 2;
 }
 
 .pdp-why__icon {
-  color: var(--pdp-ink);
+  color: var(--pdp-green);
 }
 
 .pdp-why__icon .pdp-icon {
-  width: 3rem;
-  height: 3rem;
+  width: 2.8rem;
+  height: 2.8rem;
 }
 
 .pdp-why__heading {
   margin: 0;
   font-family: var(--font-heading-family);
   font-weight: var(--font-heading-weight);
-  font-size: 1.6rem;
+  font-size: 1.55rem;
   line-height: 1.4;
   color: var(--pdp-ink);
 }
 
 .pdp-why__text {
-  margin: 0;
-  max-width: 34ch;
+  margin: 0.4rem 0 0;
   font-size: 1.25rem;
-  line-height: 1.65;
+  line-height: 1.6;
   color: var(--pdp-muted);
+}
+
+/* The highlighted row runs the full width of the card, which means cancelling
+   the card's padding on both sides and paying it back as its own. It draws no
+   divider, and neither does whatever follows it - the colour change is the
+   separation. */
+.pdp-why__row--highlight {
+  margin: 0 calc(-1 * var(--pdp-why-pad));
+  padding: 1.8rem var(--pdp-why-pad);
+  border-top: 0;
+  background: var(--pdp-green);
+}
+
+.pdp-why__row--highlight + .pdp-why__row {
+  border-top: 0;
+}
+
+.pdp-why__row--highlight .pdp-why__icon,
+.pdp-why__row--highlight .pdp-why__heading {
+  color: #fff;
+}
+
+.pdp-why__row--highlight .pdp-why__text {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* When the card ends on the highlighted row - no closing image - the green
+   runs to the foot of the card instead of leaving a band of sand under it.
+   Scoped to a list that is the card's last child so it cannot fire when an
+   image follows and would be pulled up over the row. */
+.pdp-why__card > .pdp-why__list:last-child > .pdp-why__row--highlight:last-child {
+  margin-bottom: calc(-1 * var(--pdp-why-pad));
+}
+
+/* Bleeds to the card's edges on three sides. No top margin: after a plain row
+   the row's own padding is the gap, and after the highlighted row the design
+   wants the photograph flush against the green. */
+.pdp-why__media {
+  margin: 0 calc(-1 * var(--pdp-why-pad)) calc(-1 * var(--pdp-why-pad));
+}
+
+.pdp-why__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media screen and (max-width: 749px) {
+  .pdp-why__card {
+    --pdp-why-pad: 2rem;
+  }
+
+  .pdp-why__lede {
+    font-size: 1.9rem;
+  }
+
+  .pdp-why__row {
+    grid-template-columns: 2.4rem 1fr;
+    gap: 1.2rem;
+  }
+
+  .pdp-why__icon .pdp-icon {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -1369,6 +1473,14 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   }
 }
 
+/* One column - the design's Product details list. Left at page width the
+   caret sits a foot away from its heading, so a single column is held to the
+   width of the copy instead. */
+.pdp-info__grid--single {
+  max-width: 88rem;
+  margin-inline: auto;
+}
+
 /* --- column ------------------------------------------------------------- */
 
 /* Stacked on a phone, so the columns divide horizontally; from 750px they are
@@ -1564,6 +1676,54 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 
 .pdp-info__content > :last-child {
   margin-bottom: 0;
+}
+
+/* The Specification row is a term-and-value list, not prose. Two columns so
+   the values line up under each other, and `max-content` on the term so the
+   column is as wide as the longest label rather than a guessed width.
+
+   Qualified by the accordion body rather than written as a bare class,
+   because that body carries `rte` and base.css styles `.rte ul` and `.rte li`
+   at a specificity a single class cannot beat - unqualified, the list kept
+   base.css's 2rem indent and its bullets. */
+.pdp-info__content .pdp-info__spec {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.6rem 1.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pdp-info__content .pdp-info__spec > li {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  margin: 0;
+  list-style: none;
+}
+
+.pdp-info__specterm {
+  color: var(--pdp-ink);
+}
+
+/* subgrid is not everywhere yet. Without it each <li> is its own two-column
+   grid, so the values no longer align across rows - which is a softer result
+   than the terms and values running together, and needs no second layout. */
+@supports not (grid-template-columns: subgrid) {
+  .pdp-info__content .pdp-info__spec {
+    display: block;
+  }
+
+  .pdp-info__content .pdp-info__spec > li {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.6rem 1.6rem;
+  }
+
+  .pdp-info__content .pdp-info__spec > li + li {
+    margin-top: 0.6rem;
+  }
 }
 
 /* --------------------------------------------------------------------------
