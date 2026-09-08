@@ -964,25 +964,32 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 /* --------------------------------------------------------------------------
    8. SECTION: WHY YOU'LL LOVE IT
 
-   A centred sand card: a small label, one serif line, a stack of rows divided
-   by hairlines, and a full-bleed photograph at the foot.
-
-   The rows are a list rather than columns because the design now carries five
-   of them - at five columns the headings wrapped to three lines each and the
-   icons stopped reading as a set. One row can be inverted to the brand green
-   and bled to the card's edges, which is where the "Made in small batches"
+   A sand card: a small label, one serif line, a stack of rows divided by
+   hairlines, and a photograph. One row can be inverted to the brand green and
+   bled to the content's edges, which is where the "Made in small batches"
    band went when it stopped being a section of its own.
+
+   The reviewed design is a phone layout, so the card has two shapes. Up to
+   990px it is that layout, held to the width of the copy and centred: rows,
+   then the photograph beneath them. From 990px - the width at which the buy
+   box above also goes side by side - the card takes the full page width and
+   splits, copy in one half and the photograph filling the other. Left as one
+   narrow column, a 1500px page rendered it as a phone screenshot stranded in
+   the middle of the section.
    -------------------------------------------------------------------------- */
 
 .pdp-why__card {
-  /* One padding value, because three things measure against it: the two
-     full-bleed children cancel it, and the highlighted row pays it back. */
+  /* One padding value, because two things measure against it: the content
+     column pays it, and the highlighted row cancels and repays it. */
   --pdp-why-pad: 3.2rem;
 
   max-width: 72rem;
   margin: 0 auto;
-  padding: var(--pdp-why-pad);
   background: var(--pdp-sand);
+}
+
+.pdp-why__content {
+  padding: var(--pdp-why-pad);
 }
 
 .pdp-why__label,
@@ -1009,6 +1016,10 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   list-style: none;
 }
 
+/* A fixed icon track, so a row whose icon is set to None keeps its heading on
+   the same left edge as every other row. An `auto` track collapses to zero on
+   that row - each <li> is its own grid - and the heading slid left by the
+   icon's width. */
 .pdp-why__row {
   display: grid;
   grid-template-columns: 2.8rem 1fr;
@@ -1023,8 +1034,6 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   border-top: 0;
 }
 
-/* A row whose icon is set to None keeps its text on the same left edge as the
-   rows that have one, so the headings stay in a single column. */
 .pdp-why__row > .pdp-why__body:first-child {
   grid-column: 2;
 }
@@ -1054,9 +1063,9 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   color: var(--pdp-muted);
 }
 
-/* The highlighted row runs the full width of the card, which means cancelling
-   the card's padding on both sides and paying it back as its own. It draws no
-   divider, and neither does whatever follows it - the colour change is the
+/* The highlighted row runs the full width of the content column, which means
+   cancelling its padding on both sides and paying it back as its own. It draws
+   no divider, and neither does whatever follows it - the colour change is the
    separation. */
 .pdp-why__row--highlight {
   margin: 0 calc(-1 * var(--pdp-why-pad));
@@ -1078,25 +1087,83 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   color: rgba(255, 255, 255, 0.82);
 }
 
-/* When the card ends on the highlighted row - no closing image - the green
-   runs to the foot of the card instead of leaving a band of sand under it.
-   Scoped to a list that is the card's last child so it cannot fire when an
-   image follows and would be pulled up over the row. */
-.pdp-why__card > .pdp-why__list:last-child > .pdp-why__row--highlight:last-child {
+/* A highlighted row that ends the list reaches the foot of the content column
+   rather than leaving a band of sand under it - against the photograph where
+   there is one, against the card's own edge where there is not. */
+.pdp-why__content > .pdp-why__list:last-child > .pdp-why__row--highlight:last-child {
   margin-bottom: calc(-1 * var(--pdp-why-pad));
-}
-
-/* Bleeds to the card's edges on three sides. No top margin: after a plain row
-   the row's own padding is the gap, and after the highlighted row the design
-   wants the photograph flush against the green. */
-.pdp-why__media {
-  margin: 0 calc(-1 * var(--pdp-why-pad)) calc(-1 * var(--pdp-why-pad));
 }
 
 .pdp-why__media img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+/* --- from 990px: two columns ------------------------------------------- */
+
+.pdp-why__card--split {
+  /* Stated outside the media query as well, so the rule below has one place
+     to change the padding and one place to change the split. */
+  --pdp-why-split: 1fr 1fr;
+}
+
+@media screen and (min-width: 990px) {
+  .pdp-why__card--split {
+    /* Held back from the 4.5rem below until there is width to spend on it. At
+       990px each half is about 445px, and 4.5rem of padding on both sides of
+       the copy left the longest body line wrapping to four. */
+    --pdp-why-pad: 3.6rem;
+
+    max-width: none;
+    display: grid;
+    grid-template-columns: var(--pdp-why-split);
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  /* Centred rather than ranged top: the copy is what sizes the row, so this
+     only does anything on a card cut down to two or three rows, where the
+     photograph beside it would otherwise be taller than the text it belongs
+     to. */
+  .pdp-why__card--split .pdp-why__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Same device as the seal band in section 9, for the same reason. Laid out
+     normally the photograph is sized by its own aspect ratio and the grid row
+     obliges, whichever half needs it - so a landscape photo in a 700px column
+     asked for 570px of height and the copy, which needs more, was not the one
+     deciding. Out of the flow the image contributes no height: the row is
+     sized by the rows of copy, and `object-fit: cover` crops the photograph to
+     whatever that comes to.
+
+     The floor is for the opposite case - a card trimmed to two rows, where the
+     row would otherwise be short enough to crop the photograph to a strip. */
+  .pdp-why__card--split .pdp-why__media {
+    position: relative;
+    min-height: 42rem;
+    overflow: hidden;
+  }
+
+  .pdp-why__card--split .pdp-why__media img {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .pdp-why__card--split .pdp-why__lede {
+    font-size: 2.4rem;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .pdp-why__card--split {
+    --pdp-why-pad: 4.5rem;
+  }
 }
 
 @media screen and (max-width: 749px) {

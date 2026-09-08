@@ -51,10 +51,22 @@ Product details section. The `pdp_fit` block is disabled, not deleted.
 button matching Add to cart, a 1px black field border, and its heading in the
 product title's serif at the product title's weight rather than bold body text.
 
-**"Why you'll love it"** is no longer three columns. It is a centred sand card:
-a label, one serif line, and up to six rows of icon + heading + body, one of
-which can be inverted to the brand green and bled to the card's edges. It takes
-a closing photograph at the foot of the card.
+**"Why you'll love it"** is no longer three columns. It is a sand card: a
+label, one serif line, and up to six rows of icon + heading + body, one of
+which can be inverted to the brand green and bled to the content's edges, plus
+a photograph.
+
+The reviewed design for it is a phone layout, so the card has two shapes. Up to
+990px it is that layout — held to 72rem and centred, photograph beneath the
+rows. From 990px, the width at which the buy box above also goes side by side,
+the card takes the full page width and splits: copy in one half, the photograph
+filling the other. Left as one narrow column it rendered on a 1500px page as a
+phone screenshot stranded in the middle of the section. The photograph is taken
+out of the flow above 990px so the rows of copy size the card and
+`object-fit: cover` crops the photo to fit — the same device, for the same
+reason, as the seal band in section 4. Without an image the card stays the
+single centred column at every width, because there would be no second column
+to fill.
 
 **"A Tabi journey"** (the *Tabi way* band) sits directly after "Why you'll love
 it" with `decor_style: none` — the turning TABI seal is off, because the logo is

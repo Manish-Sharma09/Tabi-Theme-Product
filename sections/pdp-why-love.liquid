@@ -86,53 +86,61 @@
     style="--pdp-pad-top: {{ section.settings.padding_top }}px; --pdp-pad-bottom: {{ section.settings.padding_bottom }}px;"
   >
     <div class="pdp-section__inner">
-      <div class="pdp-why__card">
-        {%- if section.settings.heading != blank -%}
-          <p class="pdp-eyebrow pdp-why__label">{{ section.settings.heading | escape }}</p>
-        {%- endif -%}
+      {%- comment -%}
+        `--split` rather than `:has(.pdp-why__media)`, so the two-column rule
+        keys off something Liquid knows for certain. Without an image there is
+        no second column to fill, and a card that went to two columns anyway
+        would put half a page of empty sand beside the rows.
+      {%- endcomment -%}
+      <div class="pdp-why__card{% if section.settings.image != blank %} pdp-why__card--split{% endif %}">
+        <div class="pdp-why__content">
+          {%- if section.settings.heading != blank -%}
+            <p class="pdp-eyebrow pdp-why__label">{{ section.settings.heading | escape }}</p>
+          {%- endif -%}
 
-        {%- if section.settings.lede != blank -%}
-          <p class="pdp-why__lede">{{ section.settings.lede | escape }}</p>
-        {%- endif -%}
+          {%- if section.settings.lede != blank -%}
+            <p class="pdp-why__lede">{{ section.settings.lede | escape }}</p>
+          {%- endif -%}
 
-        <ul class="pdp-why__list">
-          {%- for heading in heading_list -%}
-            {%- assign is_highlight = false -%}
-            {%- if highlight_list[forloop.index0] == '1' -%}
-              {%- assign is_highlight = true -%}
-            {%- endif -%}
-            <li class="pdp-why__row{% if is_highlight %} pdp-why__row--highlight{% endif %}">
-              {%- assign icon_name = icon_list[forloop.index0] -%}
-              {%- if icon_name != blank and icon_name != 'none' -%}
-                <span class="pdp-why__icon">
-                  {%- render 'pdp-icon', icon: icon_name -%}
-                </span>
+          <ul class="pdp-why__list">
+            {%- for heading in heading_list -%}
+              {%- assign is_highlight = false -%}
+              {%- if highlight_list[forloop.index0] == '1' -%}
+                {%- assign is_highlight = true -%}
               {%- endif -%}
-              <div class="pdp-why__body">
-                <h3 class="pdp-why__heading">{{ heading | escape }}</h3>
-                {%- assign body = body_list[forloop.index0] -%}
-                {%- if body != blank -%}
-                  <p class="pdp-why__text">{{ body | escape | newline_to_br }}</p>
+              <li class="pdp-why__row{% if is_highlight %} pdp-why__row--highlight{% endif %}">
+                {%- assign icon_name = icon_list[forloop.index0] -%}
+                {%- if icon_name != blank and icon_name != 'none' -%}
+                  <span class="pdp-why__icon">
+                    {%- render 'pdp-icon', icon: icon_name -%}
+                  </span>
                 {%- endif -%}
-              </div>
-            </li>
-          {%- endfor -%}
-        </ul>
+                <div class="pdp-why__body">
+                  <h3 class="pdp-why__heading">{{ heading | escape }}</h3>
+                  {%- assign body = body_list[forloop.index0] -%}
+                  {%- if body != blank -%}
+                    <p class="pdp-why__text">{{ body | escape | newline_to_br }}</p>
+                  {%- endif -%}
+                </div>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
 
         {%- comment -%}
-          The closing photograph. It bleeds to the card's edges, so it is a
-          child of the card rather than of the list - a full-bleed <li> would
-          have to opt out of the row grid as well as the padding.
+          The photograph. Outside .pdp-why__content, so it reaches the card's
+          edges without cancelling the content's padding: below the rows on a
+          phone, beside them from 990px.
         {%- endcomment -%}
         {%- if section.settings.image != blank -%}
           <div class="pdp-why__media">
             {{
               section.settings.image
-              | image_url: width: 1200
+              | image_url: width: 1400
               | image_tag:
                 loading: 'lazy',
-                sizes: '(min-width: 750px) 720px, 100vw',
-                widths: '400, 600, 800, 1000, 1200',
+                sizes: '(min-width: 990px) 50vw, 100vw',
+                widths: '400, 600, 800, 1000, 1200, 1400',
                 alt: section.settings.image.alt
             }}
           </div>
