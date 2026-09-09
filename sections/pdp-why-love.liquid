@@ -92,7 +92,34 @@
         no second column to fill, and a card that went to two columns anyway
         would put half a page of empty sand beside the rows.
       {%- endcomment -%}
-      <div class="pdp-why__card{% if section.settings.image != blank %} pdp-why__card--split{% endif %}">
+      {%- liquid
+        comment
+          One "is there media" answer for the class, the ratio and the render,
+          rather than three conditions that can disagree. A Shopify-hosted video
+          wins over an external URL, and either wins over the image - so a
+          merchant who adds a video to a card that already had a photo gets the
+          video, and can go back by clearing it.
+        endcomment
+        assign has_video = false
+        if section.settings.video != blank or section.settings.video_url != blank
+          assign has_video = true
+        endif
+        assign has_media = false
+        if has_video or section.settings.image != blank
+          assign has_media = true
+        endif
+
+        assign split = '1fr 1fr'
+        if section.settings.desktop_split == 'copy'
+          assign split = '1.25fr 0.75fr'
+        elsif section.settings.desktop_split == 'media'
+          assign split = '0.75fr 1.25fr'
+        endif
+      -%}
+      <div
+        class="pdp-why__card{% if has_media %} pdp-why__card--split{% endif %}{% if section.settings.mobile_media_first %} pdp-why__card--media-first{% endif %}"
+        style="--pdp-why-split: {{ split }};{% if section.settings.media_ratio != 'adapt' %} --pdp-why-ratio: {{ section.settings.media_ratio }};{% endif %}"
+      >
         <div class="pdp-why__content">
           {%- if section.settings.heading != blank -%}
             <p class="pdp-eyebrow pdp-why__label">{{ section.settings.heading | escape }}</p>
@@ -128,21 +155,80 @@
         </div>
 
         {%- comment -%}
-          The photograph. Outside .pdp-why__content, so it reaches the card's
-          edges without cancelling the content's padding: below the rows on a
-          phone, beside them from 990px.
+          The media. Outside .pdp-why__content, so it reaches the card's edges
+          without cancelling the content's padding: from 990px it is the card's
+          second column, below that it stacks - above the rows by default,
+          because that is where the reviewed mobile design puts it.
         {%- endcomment -%}
-        {%- if section.settings.image != blank -%}
-          <div class="pdp-why__media">
-            {{
-              section.settings.image
-              | image_url: width: 1400
-              | image_tag:
-                loading: 'lazy',
-                sizes: '(min-width: 990px) 50vw, 100vw',
-                widths: '400, 600, 800, 1000, 1200, 1400',
-                alt: section.settings.image.alt
-            }}
+        {%- if has_media -%}
+          <div class="pdp-why__media{% if has_video %} pdp-why__media--video{% endif %}{% if section.settings.media_ratio != 'adapt' %} pdp-why__media--ratio{% endif %}">
+            {%- if section.settings.video != blank -%}
+              {%- comment -%}
+                A Shopify-hosted video, so autoplay, muting and looping are
+                attributes on a real <video> rather than provider query
+                parameters. `muted` is forced on whenever autoplay is on: every
+                browser blocks an unmuted autoplay, and the failure is silent -
+                a poster frame that never moves and no error anywhere.
+              {%- endcomment -%}
+              {%- liquid
+                assign v_muted = section.settings.video_mute
+                if section.settings.video_autoplay
+                  assign v_muted = true
+                endif
+              -%}
+              {{
+                section.settings.video
+                | video_tag:
+                  image_size: '1400x',
+                  autoplay: section.settings.video_autoplay,
+                  loop: section.settings.video_loop,
+                  muted: v_muted,
+                  controls: section.settings.video_controls,
+                  preload: 'metadata'
+              }}
+            {%- elsif section.settings.video_url != blank -%}
+              {%- comment -%}
+                YouTube and Vimeo do not take the same parameters: YouTube wants
+                `mute` and needs `playlist` set to its own id before `loop` does
+                anything at all, Vimeo wants `muted`. Sending one provider the
+                other's names is accepted and ignored, which looks like the
+                setting simply not working.
+              {%- endcomment -%}
+              <div class="pdp-why__embed">
+                {%- if section.settings.video_url.type == 'youtube' -%}
+                  {{
+                    section.settings.video_url
+                    | external_video_url:
+                      autoplay: section.settings.video_autoplay,
+                      mute: section.settings.video_autoplay,
+                      loop: section.settings.video_loop,
+                      playlist: section.settings.video_url.id,
+                      controls: section.settings.video_controls
+                    | external_video_tag: loading: 'lazy'
+                  }}
+                {%- else -%}
+                  {{
+                    section.settings.video_url
+                    | external_video_url:
+                      autoplay: section.settings.video_autoplay,
+                      muted: section.settings.video_autoplay,
+                      loop: section.settings.video_loop,
+                      controls: section.settings.video_controls
+                    | external_video_tag: loading: 'lazy'
+                  }}
+                {%- endif -%}
+              </div>
+            {%- else -%}
+              {{
+                section.settings.image
+                | image_url: width: 1400
+                | image_tag:
+                  loading: 'lazy',
+                  sizes: '(min-width: 990px) 50vw, 100vw',
+                  widths: '400, 600, 800, 1000, 1200, 1400',
+                  alt: section.settings.image.alt
+              }}
+            {%- endif -%}
           </div>
         {%- endif -%}
       </div>
@@ -179,6 +265,117 @@
       "id": "image",
       "label": "Closing image",
       "info": "Sits at the foot of the card, full width. Leave empty to hide it."
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "paragraph",
+      "content": "A video wins over the image when one is set, and a Shopify-hosted video wins over a URL. Clear the video to go back to the photo."
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video (uploaded)"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "label": "Video link",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ],
+      "info": "Used only when no uploaded video is set."
+    },
+    {
+      "type": "checkbox",
+      "id": "video_autoplay",
+      "label": "Autoplay",
+      "default": true,
+      "info": "Muting is forced on while autoplay is on — browsers block an unmuted autoplay silently."
+    },
+    {
+      "type": "checkbox",
+      "id": "video_mute",
+      "label": "Mute",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "video_loop",
+      "label": "Loop",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "video_controls",
+      "label": "Show player controls",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "media_ratio",
+      "label": "Media shape",
+      "default": "adapt",
+      "info": "Applies where the media stacks under 990px. From 990px it is one half of the card and fills that column's height.",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "Adapt to the media"
+        },
+        {
+          "value": "1 / 1",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "4 / 5",
+          "label": "Portrait (4:5)"
+        },
+        {
+          "value": "3 / 4",
+          "label": "Portrait (3:4)"
+        },
+        {
+          "value": "4 / 3",
+          "label": "Landscape (4:3)"
+        },
+        {
+          "value": "3 / 2",
+          "label": "Landscape (3:2)"
+        },
+        {
+          "value": "16 / 9",
+          "label": "Wide (16:9)"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "desktop_split",
+      "label": "Desktop split",
+      "default": "even",
+      "options": [
+        {
+          "value": "even",
+          "label": "Even halves"
+        },
+        {
+          "value": "copy",
+          "label": "Wider copy"
+        },
+        {
+          "value": "media",
+          "label": "Wider media"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_media_first",
+      "label": "Show media first on mobile",
+      "default": true
     },
     {
       "type": "color_scheme",
@@ -223,21 +420,66 @@
           "label": "Icon",
           "default": "leaf",
           "options": [
-            { "value": "none", "label": "None" },
-            { "value": "leaf", "label": "Leaf" },
-            { "value": "flower", "label": "Flower" },
-            { "value": "needle", "label": "Needle and thread" },
-            { "value": "shield", "label": "Shield" },
-            { "value": "box", "label": "Parcel" },
-            { "value": "feather", "label": "Feather" },
-            { "value": "hand", "label": "Hand" },
-            { "value": "weave", "label": "Weave" },
-            { "value": "block-print", "label": "Block print" },
-            { "value": "garment", "label": "Garment" },
-            { "value": "tag", "label": "Tag" },
-            { "value": "exchange", "label": "Exchange" },
-            { "value": "process", "label": "Process" },
-            { "value": "person", "label": "Person" }
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "leaf",
+              "label": "Leaf"
+            },
+            {
+              "value": "flower",
+              "label": "Flower"
+            },
+            {
+              "value": "needle",
+              "label": "Needle and thread"
+            },
+            {
+              "value": "shield",
+              "label": "Shield"
+            },
+            {
+              "value": "box",
+              "label": "Parcel"
+            },
+            {
+              "value": "feather",
+              "label": "Feather"
+            },
+            {
+              "value": "hand",
+              "label": "Hand"
+            },
+            {
+              "value": "weave",
+              "label": "Weave"
+            },
+            {
+              "value": "block-print",
+              "label": "Block print"
+            },
+            {
+              "value": "garment",
+              "label": "Garment"
+            },
+            {
+              "value": "tag",
+              "label": "Tag"
+            },
+            {
+              "value": "exchange",
+              "label": "Exchange"
+            },
+            {
+              "value": "process",
+              "label": "Process"
+            },
+            {
+              "value": "person",
+              "label": "Person"
+            }
           ]
         },
         {
@@ -266,11 +508,37 @@
     {
       "name": "PDP: Why you'll love it",
       "blocks": [
-        { "type": "column", "settings": { "icon": "leaf" } },
-        { "type": "column", "settings": { "icon": "flower" } },
-        { "type": "column", "settings": { "icon": "needle" } },
-        { "type": "column", "settings": { "icon": "shield" } },
-        { "type": "column", "settings": { "icon": "box", "highlight": true } }
+        {
+          "type": "column",
+          "settings": {
+            "icon": "leaf"
+          }
+        },
+        {
+          "type": "column",
+          "settings": {
+            "icon": "flower"
+          }
+        },
+        {
+          "type": "column",
+          "settings": {
+            "icon": "needle"
+          }
+        },
+        {
+          "type": "column",
+          "settings": {
+            "icon": "shield"
+          }
+        },
+        {
+          "type": "column",
+          "settings": {
+            "icon": "box",
+            "highlight": true
+          }
+        }
       ]
     }
   ]

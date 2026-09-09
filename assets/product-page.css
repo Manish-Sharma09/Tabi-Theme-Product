@@ -50,7 +50,11 @@
   --pdp-line-soft: #ebe7df;
   --pdp-band: #f3f0ea;
   --pdp-band-deep: #ece7dd;
-  --pdp-accent: #3f4a2e;
+  /* The store's green, and the only one. --pdp-accent used to be #3f4a2e and
+     the add-to-bag hover #354027, which put three olives on one page. Both now
+     resolve to --pdp-green; the deep shade exists solely so a hover still
+     reads as a state change. */
+  --pdp-accent: #253c30;
   --pdp-accent-ink: #ffffff;
 
   /* The site's own green. The design asks for the benefit icons, the CHECK
@@ -58,6 +62,7 @@
      value rather than --pdp-accent, so that they match the header and the
      Add to cart button instead of sitting a shade off them. */
   --pdp-green: #253c30;
+  --pdp-green-deep: #1b2c23;
 
   /* The pincode panel's ground. A step warmer and lighter than --pdp-band,
      which the full-width sections keep using. */
@@ -733,8 +738,8 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 }
 
 .pdp .product-form__submit:not([disabled]):hover {
-  background: #354027;
-  border-color: #354027;
+  background: var(--pdp-green-deep);
+  border-color: var(--pdp-green-deep);
 }
 
 .pdp .product-form__submit[disabled] {
@@ -890,7 +895,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 }
 
 .pdp-delivery__submit:hover {
-  background: #1b2c23;
+  background: var(--pdp-green-deep);
 }
 
 .pdp-delivery__error {
@@ -1094,10 +1099,68 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   margin-bottom: calc(-1 * var(--pdp-why-pad));
 }
 
-.pdp-why__media img {
+.pdp-why__media {
+  position: relative;
+  overflow: hidden;
+}
+
+.pdp-why__media > img,
+.pdp-why__media > video {
   display: block;
   width: 100%;
   height: auto;
+}
+
+/* An <iframe> has no intrinsic proportions of its own, so a YouTube or Vimeo
+   embed always needs a box to sit in - unlike an image or an uploaded video,
+   which bring their own. It takes the chosen ratio, or 16:9, which is the shape
+   both providers letterbox into anyway. */
+.pdp-why__embed {
+  position: relative;
+  aspect-ratio: var(--pdp-why-ratio, 16 / 9);
+}
+
+.pdp-why__embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+@media screen and (max-width: 989px) {
+  /* The reviewed mobile design opens the card with the photograph, so the
+     media leads by default and the rows follow. Flex rather than reordering
+     the markup, because from 990px the same two children are grid columns and
+     the copy has to come first there. */
+  .pdp-why__card--media-first {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pdp-why__card--media-first > .pdp-why__media {
+    order: 1;
+  }
+
+  .pdp-why__card--media-first > .pdp-why__content {
+    order: 2;
+  }
+
+  /* A ratio only means something where the media has a box of its own. From
+     990px it is one half of the card and its height is whatever the rows of
+     copy beside it come to - see the split rules below. */
+  .pdp-why__media--ratio {
+    aspect-ratio: var(--pdp-why-ratio);
+  }
+
+  .pdp-why__media--ratio > img,
+  .pdp-why__media--ratio > video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 /* --- from 990px: two columns ------------------------------------------- */
@@ -1148,11 +1211,20 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
     overflow: hidden;
   }
 
-  .pdp-why__card--split .pdp-why__media img {
+  .pdp-why__card--split .pdp-why__media > img,
+  .pdp-why__card--split .pdp-why__media > video {
     position: absolute;
     inset: 0;
+    width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  /* The embed stops being a ratio box and becomes a fill, like the other two. */
+  .pdp-why__card--split .pdp-why__embed {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
   }
 
   .pdp-why__card--split .pdp-why__lede {
@@ -1169,6 +1241,26 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 @media screen and (max-width: 749px) {
   .pdp-why__card {
     --pdp-why-pad: 2rem;
+  }
+
+  /* The card IS the section on a phone - it carries its own ground colour and
+     its own padding - so the section's padding on top of that read as a band of
+     dead page above and below it. Cut to 40% of whatever the merchant set, and
+     the card's own padding does the rest.
+
+     Overriding the two properties rather than --pdp-pad-top / --pdp-pad-bottom:
+     those are set in a style attribute on the section root, and an inline
+     custom property beats a stylesheet one, so redeclaring the variable here
+     would have changed nothing at all. Reading it in a calc works, because the
+     property is the thing being overridden. */
+  .pdp-why.pdp-section {
+    padding-top: calc(var(--pdp-pad-top, 4.8rem) * 0.4);
+    padding-bottom: calc(var(--pdp-pad-bottom, 4.8rem) * 0.4);
+  }
+
+  .pdp-why .pdp-section__inner {
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .pdp-why__lede {
@@ -2053,8 +2145,10 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   border-color: var(--pdp-line);
 }
 
+/* Dawn marks the current thumbnail with a 1px border AND a 1px box-shadow ring
+   on top of it, which reads as a 2px frame. One hairline, in black. */
 .pdp .thumbnail[aria-current='true'] {
-  border-color: var(--pdp-ink);
+  border: 0.1rem solid #000;
   box-shadow: none;
 }
 
@@ -2176,4 +2270,126 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
        zoomed thumbnail is never clipped by the column scrolling past it. */
     z-index: 2;
   }
+}
+
+/* --------------------------------------------------------------------------
+   15. BREADCRUMB
+
+   The markup and its own <style> already live in sections/main-product.liquid,
+   for every product template. These rules only restate the colours and the
+   type so the trail belongs to the redesign rather than sitting on it in
+   #282b30 at 14px.
+
+   The selectors carry `nav.breadcrumb.onlydesktopbredcrumb` rather than a
+   plain class because that inline block is that specific, and a shorter
+   selector here would lose to it.
+   -------------------------------------------------------------------------- */
+
+.pdp nav.breadcrumb {
+  margin: 0 0 1.6rem;
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+.pdp nav.breadcrumb.onlydesktopbredcrumb a,
+.pdp nav.breadcrumb.onlymobile a,
+.pdp nav.breadcrumb a {
+  color: var(--pdp-muted);
+  font-size: 1.2rem;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.pdp nav.breadcrumb.onlydesktopbredcrumb a:hover,
+.pdp nav.breadcrumb.onlymobile a:hover,
+.pdp nav.breadcrumb a:hover {
+  color: var(--pdp-green);
+}
+
+/* The separators and the current page. The last crumb is a <span>, so it and
+   the "›" share a selector - the current page reads as the darker of the two
+   because it is the only one that is not a link. */
+.pdp nav.breadcrumb.onlydesktopbredcrumb span,
+.pdp nav.breadcrumb.onlymobile span,
+.pdp nav.breadcrumb span {
+  color: var(--pdp-faint);
+  font-size: 1.2rem;
+}
+
+.pdp nav.breadcrumb span:last-child {
+  color: var(--pdp-ink);
+}
+
+/* --------------------------------------------------------------------------
+   16. SIZE GUIDE DIALOG
+
+   Scoped by id prefix, not by `.pdp`. ModalDialog.connectedCallback() does
+   `document.body.appendChild(this)`, so by the time these rules matter the
+   dialog is a child of <body> and no longer inside the section root - a `.pdp`
+   ancestor selector would never match it.
+   -------------------------------------------------------------------------- */
+
+/* Dawn sets `top: 0; margin-top: 5rem; height: 80%`, which puts the panel 50px
+   down and then 80% of the viewport tall - so on anything taller than about
+   250px the last 50px of the panel is below the fold and the bottom of a size
+   chart is unreachable. Pinning both edges instead makes the height whatever
+   is actually left. */
+[id^='PdpSizeGuide-'] .product-popup-modal__content {
+  top: 0;
+  height: auto;
+  max-height: calc(100% - 4rem);
+  margin-top: 2rem;
+  border-radius: 0;
+  border-color: var(--pdp-line);
+  /* Dawn's is `0 1.5rem 0 3rem` - twice as much padding on the left as the
+     right, which on a phone reads as a chart that has slipped sideways. */
+  padding: 0 1.8rem 2.4rem;
+}
+
+@media screen and (min-width: 750px) {
+  [id^='PdpSizeGuide-'] .product-popup-modal__content {
+    max-height: calc(100% - 12rem);
+    margin-top: 6rem;
+    padding: 0 3rem 3rem;
+  }
+}
+
+/* The close button is `position: sticky` in Dawn, so it rides the top of the
+   scrolling panel. It needs to sit above the content it rides over, and to be
+   big enough to hit on a phone - 44px is the usual floor. */
+[id^='PdpSizeGuide-'] .product-popup-modal__toggle {
+  z-index: 2;
+  min-width: 4.4rem;
+  min-height: 4.4rem;
+  border-radius: 50%;
+  border-color: var(--pdp-line);
+  color: var(--pdp-ink);
+  background: #fff;
+}
+
+[id^='PdpSizeGuide-'] .product-popup-modal__content-info h2 {
+  margin-top: 0;
+}
+
+/* A size chart is a wide table in a narrow dialog. Let it scroll inside its
+   own box rather than making the whole dialog scroll sideways. */
+[id^='PdpSizeGuide-'] .product-popup-modal__content-info table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 1.25rem;
+}
+
+[id^='PdpSizeGuide-'] .product-popup-modal__content-info th,
+[id^='PdpSizeGuide-'] .product-popup-modal__content-info td {
+  padding: 0.9rem 1.2rem;
+  border: 0.1rem solid var(--pdp-line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+[id^='PdpSizeGuide-'] .product-popup-modal__content-info th {
+  background: var(--pdp-sand);
+  font-weight: 500;
 }

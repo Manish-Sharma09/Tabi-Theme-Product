@@ -74,6 +74,33 @@
       else
         assign flags = flags | append: '0,'
       endif
+    elsif block.type == 'description'
+      comment
+        The full product description, which the buy box no longer carries - it
+        shows custom.short_description there instead. A product with an empty
+        description hides the row rather than opening onto nothing.
+      endcomment
+      assign live = false
+      if block.settings.heading != blank and product.description != blank
+        assign live = true
+      endif
+      if live
+        assign flags = flags | append: '1,'
+      else
+        assign flags = flags | append: '0,'
+      endif
+    elsif block.type == 'contact'
+      assign live = false
+      if block.settings.heading != blank
+        if block.settings.instagram_handle != blank or block.settings.whatsapp_display != blank or block.settings.text != blank
+          assign live = true
+        endif
+      endif
+      if live
+        assign flags = flags | append: '1,'
+      else
+        assign flags = flags | append: '0,'
+      endif
     else
       assign live = false
       if block.settings.heading != blank
@@ -286,6 +313,49 @@
                       {%- else -%}
                         {{ block.settings.content }}
                       {%- endif -%}
+                    {%- elsif block.type == 'description' -%}
+                      {{ product.description }}
+                    {%- elsif block.type == 'contact' -%}
+                      {%- if block.settings.text != blank -%}
+                        <p>{{ block.settings.text | escape }}</p>
+                      {%- endif -%}
+                      {%- comment -%}
+                        Same two links as the buy box's size-help block, and the
+                        same reason the wa.me number is a separate digits-only
+                        setting: wa.me rejects spaces and plus signs, so the
+                        number shown and the number linked cannot be one field.
+                      {%- endcomment -%}
+                      <ul class="pdp-info__contact">
+                        {%- if block.settings.instagram_handle != blank -%}
+                          <li>
+                            <a
+                              class="pdp-info__contactlink"
+                              href="{{ block.settings.instagram_url | default: 'https://instagram.com/' }}"
+                              target="_blank"
+                              rel="noopener"
+                            >
+                              {%- render 'pdp-icon', icon: 'instagram' -%}
+                              <span>{{ block.settings.instagram_handle | escape }}</span>
+                            </a>
+                          </li>
+                        {%- endif -%}
+                        {%- if block.settings.whatsapp_display != blank -%}
+                          {%- assign wa = block.settings.whatsapp_number | remove: ' ' | remove: '+' | remove: '-' | strip -%}
+                          <li>
+                            {%- if wa != blank -%}
+                              <a class="pdp-info__contactlink" href="https://wa.me/{{ wa }}" target="_blank" rel="noopener">
+                                {%- render 'pdp-icon', icon: 'whatsapp' -%}
+                                <span>{{ block.settings.whatsapp_display | escape }}</span>
+                              </a>
+                            {%- else -%}
+                              <span class="pdp-info__contactlink">
+                                {%- render 'pdp-icon', icon: 'whatsapp' -%}
+                                <span>{{ block.settings.whatsapp_display | escape }}</span>
+                              </span>
+                            {%- endif -%}
+                          </li>
+                        {%- endif -%}
+                      </ul>
                     {%- elsif field != blank -%}
                       {%- comment -%}
                         A rich text metafield renders its own HTML when output
@@ -459,24 +529,158 @@
           "info": "Shown only on products where all three metafields are empty. Leave empty to hide the row there instead."
         }
       ]
+    },
+    {
+      "type": "description",
+      "name": "Accordion: product description",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Shows the product's own description. The buy box shows the short intro from custom.short_description instead, so this is where the full copy lives. Hidden on products with no description."
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Description"
+        }
+      ]
+    },
+    {
+      "type": "contact",
+      "name": "Accordion: contact / size help",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Need help choosing your size?"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Intro line",
+          "default": "Chat with us on Instagram or Whatsapp"
+        },
+        {
+          "type": "header",
+          "content": "Instagram"
+        },
+        {
+          "type": "text",
+          "id": "instagram_handle",
+          "label": "Handle",
+          "default": "@mytabi.in"
+        },
+        {
+          "type": "url",
+          "id": "instagram_url",
+          "label": "Link"
+        },
+        {
+          "type": "header",
+          "content": "WhatsApp"
+        },
+        {
+          "type": "text",
+          "id": "whatsapp_display",
+          "label": "Number shown",
+          "default": "+91 93197 50031"
+        },
+        {
+          "type": "text",
+          "id": "whatsapp_number",
+          "label": "Number for the link",
+          "info": "Digits only, with country code — wa.me rejects spaces and plus signs. e.g. 919319750031",
+          "default": "919319750031"
+        }
+      ]
     }
   ],
   "presets": [
     {
       "name": "PDP: Info columns",
       "blocks": [
-        { "type": "group", "settings": { "heading": "Product details" } },
-        { "type": "item", "settings": { "heading": "Fabric", "metafield_key": "fabric" } },
-        { "type": "item", "settings": { "heading": "Craft / technique", "metafield_key": "craft_technique" } },
-        { "type": "item", "settings": { "heading": "Construction", "metafield_key": "construction" } },
-        { "type": "item", "settings": { "heading": "Silhouette", "metafield_key": "silhouette" } },
-        { "type": "item", "settings": { "heading": "Product-specific detailing", "metafield_key": "product_detailing" } },
-        { "type": "group", "settings": { "heading": "Material & care" } },
-        { "type": "item", "settings": { "heading": "Fabric composition" } },
-        { "type": "item", "settings": { "heading": "Wash instructions", "metafield_key": "wash_instructions" } },
-        { "type": "item", "settings": { "heading": "Care instructions" } },
-        { "type": "group", "settings": { "heading": "Shipping & delivery" } },
-        { "type": "group", "settings": { "heading": "Exchanges & returns" } }
+        {
+          "type": "group",
+          "settings": {
+            "heading": "Product details"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "heading": "Fabric",
+            "metafield_key": "fabric"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "heading": "Craft / technique",
+            "metafield_key": "craft_technique"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "heading": "Construction",
+            "metafield_key": "construction"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "heading": "Silhouette",
+            "metafield_key": "silhouette"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "heading": "Product-specific detailing",
+            "metafield_key": "product_detailing"
+          }
+        },
+        {
+          "type": "group",
+          "settings": {
+            "heading": "Material & care"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "heading": "Fabric composition"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "heading": "Wash instructions",
+            "metafield_key": "wash_instructions"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "heading": "Care instructions"
+          }
+        },
+        {
+          "type": "group",
+          "settings": {
+            "heading": "Shipping & delivery"
+          }
+        },
+        {
+          "type": "group",
+          "settings": {
+            "heading": "Exchanges & returns"
+          }
+        }
       ]
     }
   ]

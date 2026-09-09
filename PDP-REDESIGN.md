@@ -97,6 +97,116 @@ a theme-editor field.
 
 ---
 
+## Third round
+
+**The size gate is off.** `require_size_selection` is now `false`, so add to bag
+works on the first available size the moment the page loads. This reverses
+"18M size is automatically selected, please remove this otherwise it can create
+an accidental order" from the Product Page Analysis, and puts that risk back:
+a shopper who never touches the size row can order a size they did not pick.
+The gate's code is untouched and one checkbox turns it back on.
+
+**One green.** `--pdp-accent` was `#3f4a2e` and the add-to-bag hover `#354027`,
+so the page carried three olives. Both now resolve to `--pdp-green` (#253c30).
+`--pdp-green-deep` exists only so a hover still reads as a state change.
+
+**The buy box shows a short intro,** from `custom.short_description`, and no
+"Read more". The full `product.description` moved to a Description accordion in
+the information section. The intro does NOT fall back to the full description
+when the metafield is empty — falling back would put the long copy straight
+back in the buy box on every product nobody has written an intro for.
+**So `custom.short_description` is a new metafield to create** (multi-line
+text), and the buy box has no copy until it is filled.
+
+**Product details** gained two rows: Description, and a size-help row carrying
+the Instagram handle and the WhatsApp number. The buy box keeps its own
+size-help block as well.
+
+**Related products** sits between "Why you'll love it" and the Tabi journey
+band.
+
+**"Why you'll love it" takes a video** — uploaded to Shopify, or a YouTube or
+Vimeo link — with autoplay, mute, loop and controls, plus a media shape and a
+desktop split. A video wins over the image; clear it to go back to the photo.
+Muting is forced whenever autoplay is on: browsers block an unmuted autoplay
+and the failure is silent. The shape applies below 990px, where the media has
+a box of its own; above that it is one half of the card and its height is
+whatever the rows of copy come to. On mobile the media now leads, and the
+section's own padding is cut to 40% — the card is the section there, so the
+page padding on top of the card's own padding read as dead space. The card also
+goes full bleed under 750px.
+
+**The gallery autoplays its first video** when `autoplay_media` is on. Dawn
+keeps every video in a `<template>` inside `<deferred-media>` and clones it in
+on a poster click, so `autoplay` in Liquid alone does nothing — there is no
+video element on first paint. The script calls Dawn's own `loadContent(false)`
+instead. Only the first one starts: `loadContent()` calls `pauseAllMedia()` on
+the way in, so two racing would each pause the other.
+
+**The size guide cross works.** Dawn's `ModalDialog` binds its close handler
+with `this.querySelector('[id^="ModalClose-"]')` in the constructor. The button
+was `PdpSizeGuideClose-`, so that returned null, the constructor threw on the
+`addEventListener` after it, and the ESC-key and backdrop-click listeners
+registered below it never bound either — the dialog opened with no way at all
+to close it. The id now starts with `ModalClose-`.
+
+Its mobile layout is fixed too. Dawn sets `top: 0; margin-top: 5rem;
+height: 80%`, which on anything taller than about 250px puts the last 50px of
+the panel below the fold, so the bottom of a size chart was unreachable. Both
+edges are pinned instead, the padding is symmetric (Dawn's was `0 1.5rem 0
+3rem`), the close button is 44px, and a wide chart scrolls inside its own box.
+
+**The active thumbnail** is one black hairline. Dawn draws a 1px border and a
+1px box-shadow ring on top of it, which reads as a 2px frame.
+
+**The breadcrumb** was already in `sections/main-product.liquid`, in a desktop
+and a mobile variant with their own inline `<style>`. Only its colours and type
+are restated, in `product-page.css`, so the trail belongs to the redesign
+rather than sitting on it in #282b30 at 14px. The selectors carry
+`nav.breadcrumb.onlydesktopbredcrumb` because that inline block is that
+specific.
+
+### Three interactive additions
+
+**Hover zoom.** `image_zoom` is `hover` rather than `lightbox`. Both work at
+once - `snippets/product-thumbnail.liquid` renders the lightbox opener
+regardless, and `image_zoom` only picks the magnify class and the corner icon -
+so the main image magnifies under the pointer and still opens full size on a
+click. Dawn's own `magnify.js` does the work; nothing was written for this.
+
+**The sticky add-to-bag bar now appears on scroll.** It already existed
+(`sections/sticky-atc.liquid`, rendered for every product page from
+`layout/theme.liquid`) but shipped with `show` hardcoded on the element and its
+scroll handler commented out, so it sat across the bottom of the page from
+first paint.
+
+The handler it replaces measured the add-to-bag button's position once on
+DOMContentLoaded. That number goes stale the moment anything above the button
+changes height - a gallery image finishing loading, a variant change
+re-rendering the buy box, a phone rotating - and the bar then appeared at the
+wrong scroll position or not at all. An IntersectionObserver watches the button
+itself instead: no measurement, survives every relayout, and fires only when
+the button actually leaves the viewport. It is re-pointed on variant change,
+because product-info replaces the markup holding the button it was watching.
+The bar's height is reserved as page padding while it is shown, so a fixed bar
+cannot cover the footer.
+
+Its button needed no restyling - the section is on `scheme-5`, whose button
+colour is already #253c30.
+
+**Thumbnail hover swaps the main image**, on desktop with a real mouse. It
+calls Dawn's own `setActiveMedia()` so the thumbnails' `aria-current`, the live
+region and the slider's bookkeeping stay in step. Images only: that method ends
+by calling `playActiveMedia()`, and a video starting because the pointer
+crossed its thumbnail is an ambush rather than a swap. 70ms delay, cancelled on
+mouseleave - sweeping across a six-thumbnail rail otherwise ran five swaps on
+the way to the last one.
+
+**`max_blocks` is 30** on the main product section. Dawn ships it without one,
+which means Shopify's default of 16, and the redesigned templates carry 19.
+
+---
+
 ## 1. Before anything goes live
 
 Work on a **duplicate theme**, not the live one:

@@ -318,59 +318,56 @@
                   {%- endif -%}
                 </p>
               {%- when 'description' -%}
-                {%- if product.description != blank -%}
-                  {%- comment -%}
-                    The redesign collapses the description to two lines behind a
-                    "Read more" toggle, so the size chips and the buy buttons
-                    stay reachable without scrolling on a phone.
+                {%- comment -%}
+                  On the redesigned layout the buy box shows a SHORT
+                  introduction from `custom.short_description`, two or three
+                  lines written per product, and the full `product.description`
+                  moved down to the information accordions.
 
-                    The clamp is CSS and the full description is always in the
-                    markup, so search engines and a reader-mode view get the
-                    whole text either way. What needs the script is the toggle,
-                    and the clamp is scoped to `pdp-read-more:defined` in
-                    product-page.css - so if product-page.js never arrives the
-                    description renders in full rather than stranding a
-                    shopper two lines in with no way to open it.
-                  {%- endcomment -%}
-                  {%- if section.settings.enable_new_layout and block.settings.enable_read_more -%}
-                    <pdp-read-more
-                      class="pdp-readmore"
-                      style="--pdp-readmore-lines: {{ block.settings.read_more_lines | default: 2 }};"
-                      data-more="{{ block.settings.read_more_label | default: 'Read more' | escape }}"
-                      data-less="{{ block.settings.read_less_label | default: 'Read less' | escape }}"
+                  So there is no "Read more" here any more. The toggle existed
+                  to keep a long description from pushing the size chips off a
+                  phone screen; a field that is short by definition does not
+                  need one, and a collapsed two-line clamp over an already
+                  two-line intro only ever rendered a toggle that revealed
+                  nothing.
+
+                  It does NOT fall back to product.description when the
+                  metafield is empty. Falling back would put the long copy right
+                  back in the buy box on every product nobody had written a
+                  short intro for yet, which is the thing this change removes.
+                  An empty metafield renders nothing, the same way every other
+                  metafield-driven block on this page behaves.
+
+                  `enable_read_more` and its labels stay in the schema because
+                  the 21 un-migrated templates still store them, and removing a
+                  setting a template holds makes that template fail validation.
+                  Nothing reads them on this branch.
+
+                  The id is kept: the template carries merchant custom_css that
+                  targets `div#ProductDescription-...` to zero its margin.
+                {%- endcomment -%}
+                {%- if section.settings.enable_new_layout -%}
+                  {%- liquid
+                    assign short = product.metafields.custom.short_description
+                    assign short_value = short.value | default: short
+                  -%}
+                  {%- if short_value != blank -%}
+                    <div
+                      id="ProductDescription-{{ section.id }}"
+                      class="product__description rte quick-add-hidden pdp-intro"
                       {{ block.shopify_attributes }}
                     >
-                      <div
-                        id="ProductDescription-{{ section.id }}"
-                        class="product__description rte quick-add-hidden pdp-readmore__body"
-                        data-pdp-readmore-body
-                      >
-                        {{ product.description }}
-                      </div>
-                      {%- comment -%}
-                        Hidden until the script has measured that the text
-                        actually overflows two lines - a one-line description
-                        should not offer a toggle that reveals nothing.
-                      {%- endcomment -%}
-                      <button
-                        class="pdp-readmore__toggle"
-                        type="button"
-                        aria-expanded="false"
-                        aria-controls="ProductDescription-{{ section.id }}"
-                        data-pdp-readmore-toggle
-                        hidden
-                      >
-                        <span data-pdp-readmore-label>
-                          {{- block.settings.read_more_label | default: 'Read more' | escape -}}
-                        </span>
-                        {%- render 'pdp-icon', icon: 'caret' -%}
-                      </button>
-                    </pdp-read-more>
-                  {%- else -%}
-                    <div class="product__description rte quick-add-hidden" {{ block.shopify_attributes }}>
-                      {{ product.description }}
+                      {%- if short.type == 'rich_text_field' -%}
+                        {{ short }}
+                      {%- else -%}
+                        <p>{{ short_value | escape | newline_to_br }}</p>
+                      {%- endif -%}
                     </div>
                   {%- endif -%}
+                {%- elsif product.description != blank -%}
+                  <div class="product__description rte quick-add-hidden" {{ block.shopify_attributes }}>
+                    {{ product.description }}
+                  </div>
                 {%- endif -%}
               {%- when 'sku' -%}
                 <p
@@ -1088,8 +1085,16 @@
           class="product-popup-modal__content"
           tabindex="-1"
         >
+          {%- comment -%}
+            The id has to start with `ModalClose-`. Dawn's ModalDialog binds its
+            close handler with `this.querySelector('[id^="ModalClose-"]')` in the
+            constructor, so any other name makes that call return null, the
+            constructor throws on the addEventListener after it, and the ESC-key
+            and backdrop-click listeners registered below it never bind either -
+            the dialog opens with no way at all to close it.
+          {%- endcomment -%}
           <button
-            id="PdpSizeGuideClose-{{ section.id }}"
+            id="ModalClose-PdpSizeGuide-{{ section.id }}"
             type="button"
             class="product-popup-modal__toggle"
             aria-label="{{ 'accessibility.close' | t }}"
@@ -1235,9 +1240,9 @@
       "limit": 1,
       "settings": [
         {
-          "type":"checkbox",
+          "type": "checkbox",
           "id": "shipping-tax",
-            "label": "show tax"
+          "label": "show tax"
         }
       ]
     },
@@ -1419,9 +1424,18 @@
           "default": "dynamic",
           "info": "Shopify's dynamic checkout renders wallet buttons (Shop Pay, GPay) and cannot be restyled. The custom button is a plain outlined 'Buy now' that adds to cart and goes straight to checkout.",
           "options": [
-            { "value": "dynamic", "label": "Shopify dynamic checkout" },
-            { "value": "custom", "label": "Custom Buy now button" },
-            { "value": "none", "label": "None" }
+            {
+              "value": "dynamic",
+              "label": "Shopify dynamic checkout"
+            },
+            {
+              "value": "custom",
+              "label": "Custom Buy now button"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            }
           ]
         },
         {
@@ -2655,76 +2669,216 @@
           "label": "Icon 1",
           "default": "leaf",
           "options": [
-            { "value": "none", "label": "None" },
-            { "value": "leaf", "label": "Leaf" },
-            { "value": "tag", "label": "Tag" },
-            { "value": "hand", "label": "Hand" },
-            { "value": "exchange", "label": "Exchange" },
-            { "value": "feather", "label": "Feather" },
-            { "value": "weave", "label": "Weave" },
-            { "value": "block-print", "label": "Block print" },
-            { "value": "truck", "label": "Truck" },
-            { "value": "receipt", "label": "Receipt" }
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "leaf",
+              "label": "Leaf"
+            },
+            {
+              "value": "tag",
+              "label": "Tag"
+            },
+            {
+              "value": "hand",
+              "label": "Hand"
+            },
+            {
+              "value": "exchange",
+              "label": "Exchange"
+            },
+            {
+              "value": "feather",
+              "label": "Feather"
+            },
+            {
+              "value": "weave",
+              "label": "Weave"
+            },
+            {
+              "value": "block-print",
+              "label": "Block print"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "receipt",
+              "label": "Receipt"
+            }
           ]
         },
-        { "type": "text", "id": "label_1", "label": "Label 1", "default": "Natural Fabrics" },
+        {
+          "type": "text",
+          "id": "label_1",
+          "label": "Label 1",
+          "default": "Natural Fabrics"
+        },
         {
           "type": "select",
           "id": "icon_2",
           "label": "Icon 2",
           "default": "tag",
           "options": [
-            { "value": "none", "label": "None" },
-            { "value": "leaf", "label": "Leaf" },
-            { "value": "tag", "label": "Tag" },
-            { "value": "hand", "label": "Hand" },
-            { "value": "exchange", "label": "Exchange" },
-            { "value": "feather", "label": "Feather" },
-            { "value": "weave", "label": "Weave" },
-            { "value": "block-print", "label": "Block print" },
-            { "value": "truck", "label": "Truck" },
-            { "value": "receipt", "label": "Receipt" }
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "leaf",
+              "label": "Leaf"
+            },
+            {
+              "value": "tag",
+              "label": "Tag"
+            },
+            {
+              "value": "hand",
+              "label": "Hand"
+            },
+            {
+              "value": "exchange",
+              "label": "Exchange"
+            },
+            {
+              "value": "feather",
+              "label": "Feather"
+            },
+            {
+              "value": "weave",
+              "label": "Weave"
+            },
+            {
+              "value": "block-print",
+              "label": "Block print"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "receipt",
+              "label": "Receipt"
+            }
           ]
         },
-        { "type": "text", "id": "label_2", "label": "Label 2", "default": "Made to Order" },
+        {
+          "type": "text",
+          "id": "label_2",
+          "label": "Label 2",
+          "default": "Made to Order"
+        },
         {
           "type": "select",
           "id": "icon_3",
           "label": "Icon 3",
           "default": "hand",
           "options": [
-            { "value": "none", "label": "None" },
-            { "value": "leaf", "label": "Leaf" },
-            { "value": "tag", "label": "Tag" },
-            { "value": "hand", "label": "Hand" },
-            { "value": "exchange", "label": "Exchange" },
-            { "value": "feather", "label": "Feather" },
-            { "value": "weave", "label": "Weave" },
-            { "value": "block-print", "label": "Block print" },
-            { "value": "truck", "label": "Truck" },
-            { "value": "receipt", "label": "Receipt" }
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "leaf",
+              "label": "Leaf"
+            },
+            {
+              "value": "tag",
+              "label": "Tag"
+            },
+            {
+              "value": "hand",
+              "label": "Hand"
+            },
+            {
+              "value": "exchange",
+              "label": "Exchange"
+            },
+            {
+              "value": "feather",
+              "label": "Feather"
+            },
+            {
+              "value": "weave",
+              "label": "Weave"
+            },
+            {
+              "value": "block-print",
+              "label": "Block print"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "receipt",
+              "label": "Receipt"
+            }
           ]
         },
-        { "type": "text", "id": "label_3", "label": "Label 3", "default": "Gentle on Skin" },
+        {
+          "type": "text",
+          "id": "label_3",
+          "label": "Label 3",
+          "default": "Gentle on Skin"
+        },
         {
           "type": "select",
           "id": "icon_4",
           "label": "Icon 4",
           "default": "exchange",
           "options": [
-            { "value": "none", "label": "None" },
-            { "value": "leaf", "label": "Leaf" },
-            { "value": "tag", "label": "Tag" },
-            { "value": "hand", "label": "Hand" },
-            { "value": "exchange", "label": "Exchange" },
-            { "value": "feather", "label": "Feather" },
-            { "value": "weave", "label": "Weave" },
-            { "value": "block-print", "label": "Block print" },
-            { "value": "truck", "label": "Truck" },
-            { "value": "receipt", "label": "Receipt" }
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "leaf",
+              "label": "Leaf"
+            },
+            {
+              "value": "tag",
+              "label": "Tag"
+            },
+            {
+              "value": "hand",
+              "label": "Hand"
+            },
+            {
+              "value": "exchange",
+              "label": "Exchange"
+            },
+            {
+              "value": "feather",
+              "label": "Feather"
+            },
+            {
+              "value": "weave",
+              "label": "Weave"
+            },
+            {
+              "value": "block-print",
+              "label": "Block print"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "receipt",
+              "label": "Receipt"
+            }
           ]
         },
-        { "type": "text", "id": "label_4", "label": "Label 4", "default": "Easy Exchanges" }
+        {
+          "type": "text",
+          "id": "label_4",
+          "label": "Label 4",
+          "default": "Easy Exchanges"
+        }
       ]
     },
     {
@@ -2736,8 +2890,18 @@
           "type": "paragraph",
           "content": "Values come from the product metafields custom.fit, custom.model_details and custom.fit_recommendation. A row is hidden when its metafield is empty, and the whole block disappears when all three are."
         },
-        { "type": "text", "id": "fit_label", "label": "Fit label", "default": "Fit:" },
-        { "type": "text", "id": "model_label", "label": "Model label", "default": "Model Details:" },
+        {
+          "type": "text",
+          "id": "fit_label",
+          "label": "Fit label",
+          "default": "Fit:"
+        },
+        {
+          "type": "text",
+          "id": "model_label",
+          "label": "Model label",
+          "default": "Model Details:"
+        },
         {
           "type": "text",
           "id": "recommendation_label",
@@ -2751,16 +2915,35 @@
       "name": "PDP: Size help",
       "limit": 1,
       "settings": [
-        { "type": "text", "id": "heading", "label": "Heading", "default": "Need help choosing your size?" },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Need help choosing your size?"
+        },
         {
           "type": "text",
           "id": "subheading",
           "label": "Subheading",
           "default": "Chat with us on Instagram or Whatsapp"
         },
-        { "type": "text", "id": "instagram_handle", "label": "Instagram handle", "default": "@mytabi.in" },
-        { "type": "url", "id": "instagram_url", "label": "Instagram link" },
-        { "type": "text", "id": "whatsapp_display", "label": "WhatsApp number (shown)", "default": "+91 98765 43210" },
+        {
+          "type": "text",
+          "id": "instagram_handle",
+          "label": "Instagram handle",
+          "default": "@mytabi.in"
+        },
+        {
+          "type": "url",
+          "id": "instagram_url",
+          "label": "Instagram link"
+        },
+        {
+          "type": "text",
+          "id": "whatsapp_display",
+          "label": "WhatsApp number (shown)",
+          "default": "+91 98765 43210"
+        },
         {
           "type": "text",
           "id": "whatsapp_number",
@@ -2793,9 +2976,24 @@
           "type": "paragraph",
           "content": "Estimates are worked out in the theme from the settings below, not from a courier API. Treat them as indicative."
         },
-        { "type": "text", "id": "heading", "label": "Heading", "default": "When will it reach you?" },
-        { "type": "text", "id": "placeholder", "label": "Input placeholder", "default": "Enter delivery pincode" },
-        { "type": "text", "id": "button_label", "label": "Button label", "default": "Check" },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "When will it reach you?"
+        },
+        {
+          "type": "text",
+          "id": "placeholder",
+          "label": "Input placeholder",
+          "default": "Enter delivery pincode"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Check"
+        },
         {
           "type": "header",
           "content": "Dispatch"
@@ -2860,7 +3058,12 @@
           "label": "Pincodes not served",
           "info": "Comma separated prefixes. Leave empty if you deliver everywhere."
         },
-        { "type": "checkbox", "id": "cod_enabled", "label": "Offer COD", "default": true },
+        {
+          "type": "checkbox",
+          "id": "cod_enabled",
+          "label": "Offer COD",
+          "default": true
+        },
         {
           "type": "textarea",
           "id": "cod_prefixes",
@@ -2887,8 +3090,18 @@
           "label": "Dispatch line",
           "default": "Made to order in {min}–{max} working days"
         },
-        { "type": "text", "id": "label_estimated", "label": "Estimate prefix", "default": "Estimated delivery:" },
-        { "type": "text", "id": "label_cod_yes", "label": "COD available", "default": "COD available at this pincode" },
+        {
+          "type": "text",
+          "id": "label_estimated",
+          "label": "Estimate prefix",
+          "default": "Estimated delivery:"
+        },
+        {
+          "type": "text",
+          "id": "label_cod_yes",
+          "label": "COD available",
+          "default": "COD available at this pincode"
+        },
         {
           "type": "text",
           "id": "label_cod_no",
@@ -3071,6 +3284,13 @@
       "id": "enable_video_looping",
       "default": false,
       "label": "t:sections.main-product.settings.enable_video_looping.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay_media",
+      "default": false,
+      "label": "Autoplay the first video",
+      "info": "Starts the gallery's first video on page load instead of waiting for a click on its play button. Always muted — browsers block an unmuted autoplay nobody asked for."
     },
     {
       "type": "header",

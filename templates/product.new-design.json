@@ -52,7 +52,7 @@
             "size_guide_label": "Size Guide",
             "size_guide_option": "Size",
             "size_label": "Select Size",
-            "require_size_selection": true,
+            "require_size_selection": false,
             "size_required_label": "Select a size"
           }
         },
@@ -219,12 +219,13 @@
         "media_fit": "contain",
         "gallery_layout": "thumbnail",
         "media_position": "left",
-        "image_zoom": "lightbox",
+        "image_zoom": "hover",
         "mobile_thumbnails": "show",
         "hide_variants": true,
         "enable_video_looping": false,
         "padding_top": 36,
-        "padding_bottom": 48
+        "padding_bottom": 48,
+        "autoplay_media": true
       }
     },
     "pdp-why-love": {
@@ -289,7 +290,14 @@
         "padding_top": 48,
         "padding_bottom": 48,
         "lede": "Clothes with character, made for comfort.",
-        "image": "shopify://shop_images/ChatGPT_Image_Sep_5_2026_11_41_10_PM.png"
+        "image": "shopify://shop_images/ChatGPT_Image_Sep_5_2026_11_41_10_PM.png",
+        "mobile_media_first": true,
+        "media_ratio": "adapt",
+        "desktop_split": "even",
+        "video_autoplay": true,
+        "video_mute": true,
+        "video_loop": true,
+        "video_controls": false
       }
     },
     "pdp-band-batches": {
@@ -366,14 +374,33 @@
             "metafield_key": "",
             "metafield_only": false
           }
+        },
+        "i_description": {
+          "type": "description",
+          "settings": {
+            "heading": "Description"
+          }
+        },
+        "i_help": {
+          "type": "contact",
+          "settings": {
+            "heading": "Need help choosing your size?",
+            "text": "Chat with us on Instagram or Whatsapp",
+            "instagram_handle": "@mytabi.in",
+            "instagram_url": "https://www.instagram.com/mytabi.in/",
+            "whatsapp_display": "+91 93197 50031",
+            "whatsapp_number": "919319750031"
+          }
         }
       },
       "block_order": [
+        "i_description",
         "i_spec",
         "i_fabric",
         "i_craft",
         "i_exchange",
-        "i_material"
+        "i_material",
+        "i_help"
       ],
       "settings": {
         "heading": "Product details",
@@ -483,8 +510,8 @@
   "order": [
     "main",
     "pdp-info-columns",
-    "related-products",
     "pdp-why-love",
+    "related-products",
     "pdp-band-tabi-way",
     "pdp-band-batches",
     "pdp-approach"

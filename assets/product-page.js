@@ -629,6 +629,112 @@
   /* Guarded because product-info.js re-renders the section on variant change;
      a second definition of the same tag name throws and would stop the rest of
      this file from registering. */
+  /* Hover a thumbnail, see it in the viewer - no click.
+
+     Dawn's <media-gallery> already owns the swap, including the thumbnails'
+     aria-current, the live region and the slider's own bookkeeping, so this
+     calls its setActiveMedia() rather than moving classes around itself. A
+     hand-rolled swap would drift out of step with the thumbnail rail the first
+     time Dawn changed.
+
+     Three guards, each for something that made it worse in practice:
+
+     - Desktop and a real mouse only. On a touch screen `mouseenter` fires once
+       on tap, so the hover swap and the click swap both ran for one finger.
+     - Images only. setActiveMedia() ends by calling playActiveMedia(), and a
+       video starting because the pointer crossed its thumbnail is not a swap,
+       it is an ambush.
+     - A 70ms delay, cancelled on the way out. Sweeping the pointer across a
+       six-thumbnail rail to reach the last one otherwise ran five swaps on the
+       way, and the slider's scroll work made that visible. */
+  function enableThumbnailHover() {
+    if (!window.matchMedia('(min-width: 990px)').matches) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    document.querySelectorAll('.pdp media-gallery').forEach(function (gallery) {
+      var viewer = gallery.querySelector('[id^="GalleryViewer"]');
+      var rail = gallery.querySelector('[id^="GalleryThumbnails"]');
+      if (!viewer || !rail) return;
+      if (typeof gallery.setActiveMedia !== 'function') return;
+
+      var thumbs = rail.querySelectorAll('[data-target]');
+      if (thumbs.length < 2) return;
+
+      var timer = null;
+
+      thumbs.forEach(function (thumb) {
+        thumb.addEventListener('mouseenter', function () {
+          var id = thumb.getAttribute('data-target');
+          var item = viewer.querySelector('[data-media-id="' + id + '"]');
+          if (!item) return;
+          if (item.querySelector('deferred-media, product-model')) return;
+          if (item.classList.contains('is-active')) return;
+
+          window.clearTimeout(timer);
+          timer = window.setTimeout(function () {
+            gallery.setActiveMedia(id, false);
+          }, 70);
+        });
+
+        thumb.addEventListener('mouseleave', function () {
+          window.clearTimeout(timer);
+        });
+      });
+    });
+  }
+
+  /* Gallery video autoplay.
+
+     Dawn wraps every video in <deferred-media>, which holds the real <video>
+     or <iframe> in a <template> and only clones it in when the poster is
+     clicked. That is a deliberate weight saving, and it is also why setting
+     `autoplay` in Liquid alone changes nothing: on first paint there is no
+     video element in the document to autoplay.
+
+     So the poster click is simulated instead of reimplemented -
+     `loadContent(false)` is Dawn's own method, and it already calls .play()
+     for Safari's benefit. `false` keeps it from moving focus, which on load
+     would scroll the page to the gallery under the shopper.
+
+     Only the FIRST marked video starts. loadContent() calls
+     window.pauseAllMedia() on the way in, so two of them racing would each
+     pause the other and the visible result would be whichever lost.
+
+     Muting is Liquid's job (see snippets/product-thumbnail.liquid); the
+     `muted` property is set again here because Safari has historically
+     ignored the attribute on a freshly cloned element. */
+  function startAutoplayMedia() {
+    var target = document.querySelector('deferred-media[data-pdp-autoplay]');
+    if (!target) return;
+    if (typeof target.loadContent !== 'function') return;
+
+    target.loadContent(false);
+
+    var video = target.querySelector('video');
+    if (video) {
+      video.muted = true;
+      video.setAttribute('playsinline', '');
+      var played = video.play();
+      /* A blocked play() rejects, and an unhandled rejection is noise in the
+         console for something the shopper can fix with one click on the
+         poster that is still there. */
+      if (played && typeof played.catch === 'function') {
+        played.catch(function () {});
+      }
+    }
+  }
+
+  function initGalleryExtras() {
+    startAutoplayMedia();
+    enableThumbnailHover();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGalleryExtras);
+  } else {
+    initGalleryExtras();
+  }
+
   if (!customElements.get('pdp-delivery-check')) {
     customElements.define('pdp-delivery-check', PDPDeliveryCheck);
   }

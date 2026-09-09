@@ -132,18 +132,53 @@
             const btn = stickyATC.querySelector('[name="add"]')
             const btnSpinner = btn.querySelector('.loading__spinner')
             const selectField = stickyATC.querySelector('select[name="id"]')
-            const threshold = document.querySelector('button[name="add"]').getBoundingClientRect().bottom + Number(stickyATC.dataset.offset)
+            /* Show the bar once the real add-to-bag button has scrolled out of
+               sight, and hide it again when it comes back.
 
-            // window.addEventListener('scroll', () => {
-            //     if (window.scrollY > threshold) {
-            //         stickyATC.classList.add('show')
-            //         document.documentElement.style.paddingBottom = `${stickyATC.clientHeight}px`
-            //         document.documentElement.style.height = 'auto'
-            //     } else {
-            //         stickyATC.classList.remove('show')
-            //         document.documentElement.style.paddingBottom = '0'
-            //     }
-            // })
+               This replaces a commented-out scroll handler that measured the
+               button's position ONCE on DOMContentLoaded. That number is stale
+               the moment anything above the button changes height - a gallery
+               image finishing loading, a variant change re-rendering the buy
+               box, a phone rotating - and the bar then appeared at the wrong
+               scroll position or not at all. It also ran on every scroll event.
+
+               An IntersectionObserver watches the button itself, so it needs no
+               measurement, survives every relayout, and fires only when the
+               button actually crosses the viewport edge.
+
+               The observer is re-pointed on variant change because product-info
+               replaces the buy box markup, which throws away the button this
+               was watching. */
+            const stickyOffset = Number(stickyATC.dataset.offset) || 0
+
+            function setStickyShown(shown) {
+                stickyATC.classList.toggle('show', shown)
+                /* Reserve the bar's height so a fixed bar cannot cover the last
+                   thing on the page - the footer links, most often. */
+                document.documentElement.style.paddingBottom = shown ? `${stickyATC.clientHeight}px` : '0'
+            }
+
+            let anchorObserver = null
+
+            function watchAddToCart() {
+                const anchor = document.querySelector('product-info form [name="add"], .product-form [name="add"]')
+                if (anchorObserver) anchorObserver.disconnect()
+                if (!anchor || !('IntersectionObserver' in window)) return
+
+                anchorObserver = new IntersectionObserver(
+                    (entries) => setStickyShown(!entries[0].isIntersecting),
+                    { rootMargin: `0px 0px ${-stickyOffset}px 0px` }
+                )
+                anchorObserver.observe(anchor)
+            }
+
+            watchAddToCart()
+            document.addEventListener('variant:change', watchAddToCart)
+            /* Dawn publishes variant changes through its own pub/sub rather than
+               a DOM event, so subscribe to that too where it exists. */
+            if (typeof subscribe === 'function' && typeof PUB_SUB_EVENTS === 'object') {
+                subscribe(PUB_SUB_EVENTS.variantChange, watchAddToCart)
+            }
 
             if (selectField) {
                 selectField.addEventListener('change', () => {
@@ -164,7 +199,7 @@
 
   <div
     id="md-sticky-atc"
-    class="color-{{ section.settings.color_scheme }} show"
+    class="color-{{ section.settings.color_scheme }}"
     aria-hidden="true"
     data-offset="{{ section.settings.offset }}"
   >
