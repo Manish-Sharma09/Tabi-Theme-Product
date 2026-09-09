@@ -380,17 +380,6 @@
           "settings": {
             "heading": "Description"
           }
-        },
-        "i_help": {
-          "type": "contact",
-          "settings": {
-            "heading": "Need help choosing your size?",
-            "text": "Chat with us on Instagram or Whatsapp",
-            "instagram_handle": "@mytabi.in",
-            "instagram_url": "https://www.instagram.com/mytabi.in/",
-            "whatsapp_display": "+91 93197 50031",
-            "whatsapp_number": "919319750031"
-          }
         }
       },
       "block_order": [
@@ -399,15 +388,22 @@
         "i_fabric",
         "i_craft",
         "i_exchange",
-        "i_material",
-        "i_help"
+        "i_material"
       ],
       "settings": {
         "heading": "Product details",
         "open_first": false,
         "color_scheme": "scheme-5",
         "padding_top": 48,
-        "padding_bottom": 48
+        "padding_bottom": 48,
+        "help_enabled": true,
+        "help_title": "Need any help?",
+        "help_subtitle": "Get in touch.",
+        "help_phone_display": "+91 93197 50031",
+        "help_phone_number": "+919319750031",
+        "help_whatsapp_label": "Chat",
+        "help_whatsapp_number": "919319750031",
+        "help_hours": "Mon–Sat 9:30 AM to 5:30 PM (IST)"
       }
     },
     "pdp-band-tabi-way": {

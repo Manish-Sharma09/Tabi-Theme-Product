@@ -2132,6 +2132,32 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
    slider is left exactly as it is.
    -------------------------------------------------------------------------- */
 
+/* B. The thumbnail rail runs edge to edge on a phone.
+
+   Below 750px the rail sits under the photograph, inside the section's
+   page-width gutter, so it started and ended 1.5rem in from the screen while
+   the photograph above it did not - the two read as belonging to different
+   boxes. Cancelling the gutter with a matching negative margin puts the first
+   thumbnail on the same left edge as the image.
+
+   `--pdp-gutter` is the same token .pdp-section__inner pays, so if the gutter
+   changes this follows it instead of drifting out by however much it moved.
+   The scroll padding keeps the first and last thumbnail from sitting hard
+   against the bezel while the rail is scrolled. */
+@media screen and (max-width: 749px) {
+  .pdp .product__media-wrapper .thumbnail-slider,
+  .pdp .product__media-wrapper .thumbnail-list {
+    margin-left: calc(-1 * var(--pdp-gutter));
+    margin-right: calc(-1 * var(--pdp-gutter));
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .pdp .product__media-wrapper .thumbnail-list {
+    scroll-padding-left: var(--pdp-gutter);
+  }
+}
+
 .pdp .thumbnail-list {
   gap: 0.8rem;
 }
@@ -2392,4 +2418,122 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 [id^='PdpSizeGuide-'] .product-popup-modal__content-info th {
   background: var(--pdp-sand);
   font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   17. "NEED ANY HELP?" PANEL
+
+   Sits at the foot of the information accordions. The reference design puts a
+   bordered white card on a diagonally hatched ground, with the two title lines
+   on the left, the phone number and the chat link ranged right, and the opening
+   hours underneath.
+
+   The hatch is a repeating gradient rather than an image: it is two colours and
+   an angle, and an asset would be one more request plus a retina copy for
+   something CSS draws exactly.
+   -------------------------------------------------------------------------- */
+
+.pdp-info__help {
+  margin-top: 4rem;
+  padding: 1.4rem;
+  background-color: var(--pdp-sand);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 0.5rem,
+    var(--pdp-line) 0.5rem 0.6rem
+  );
+}
+
+.pdp-info__helpcard {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 1.6rem 2.4rem;
+  padding: 2.4rem;
+  border: 0.1rem solid var(--pdp-ink);
+  background: #fff;
+}
+
+.pdp-info__helptext {
+  grid-column: 1;
+}
+
+.pdp-info__helptitle {
+  margin: 0;
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-size: 1.9rem;
+  line-height: 1.35;
+  color: var(--pdp-ink);
+}
+
+.pdp-info__helplinks {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  justify-items: end;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pdp-info__helplink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-size: 1.5rem;
+  color: var(--pdp-ink);
+  text-decoration: none;
+}
+
+.pdp-info__helplink .pdp-icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--pdp-green);
+}
+
+.pdp-info__helplink:hover {
+  color: var(--pdp-green);
+}
+
+/* The chat link is the action of the two, so it carries the underline the
+   reference draws under it. */
+.pdp-info__helplink--chat span {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+/* Hours sit under the titles, in the first column, on their own row - so they
+   stay left-aligned whether or not the contacts wrapped. */
+.pdp-info__helphours {
+  grid-column: 1;
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.5;
+  color: var(--pdp-faint);
+}
+
+/* One column on a phone: the two title lines, then the contacts left-aligned
+   under them rather than ranged right against nothing, then the hours. */
+@media screen and (max-width: 749px) {
+  .pdp-info__help {
+    padding: 1rem;
+  }
+
+  .pdp-info__helpcard {
+    grid-template-columns: 1fr;
+    gap: 1.4rem;
+    padding: 2rem;
+  }
+
+  .pdp-info__helplinks {
+    grid-column: 1;
+    grid-row: auto;
+    justify-items: start;
+  }
+
+  .pdp-info__helptitle {
+    font-size: 1.7rem;
+  }
 }
