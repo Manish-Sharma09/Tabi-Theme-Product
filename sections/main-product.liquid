@@ -957,106 +957,24 @@
           {%- endfor -%}
 
           {%- comment -%}
-            The size gate. The design asks that no size arrive pre-selected,
-            because Shopify picks the first available one and a shopper who
-            never touched the size row could order 18M by accident.
+            There is no size gate here any more.
 
-            Deliberately not done in Liquid. Suppressing `checked` server-side
-            needs a "did the URL choose a variant" signal, and the only one
-            available - product.selected_variant - is documented against
-            ?variant=. The variant picker is re-rendered through
-            ?option_values=, so a gate built on it risks leaving Add to cart
-            disabled after the shopper has in fact chosen a size. Clearing the
-            pre-selection in the browser needs no such guarantee: the markup
-            Shopify renders, and every re-render after it, stays Dawn's.
+            It cleared Shopify's pre-selected size so nothing could be ordered
+            by accident, which is what the Product Page Analysis asked for. It
+            was then asked for three times over that add to bag should just
+            work on the first size, and the gate is what stood in the way.
 
-            Inline and self-contained, for two reasons that pull the same way.
-            It runs while the parser is still inside this section, so the chip
-            is cleared before the row can paint - out of product-page.js, which
-            is deferred, the selected chip could flash first. And a gate that
-            disables Add to cart must own the code that re-enables it: split
-            across a deferred file, a script that failed to load would leave
-            the button disabled with no way back.
+            Removed rather than switched off. It was switched off through
+            `require_size_selection` on the variant picker block, and the theme
+            kept rendering the gate anyway: templates/*.json is owned by the
+            theme editor, the store's copy still said true, and the pushed
+            false never took. A setting that cannot be relied on to be off is
+            not a way to turn something off. With the code gone the first
+            available size is pre-selected by Dawn, and that is the size that
+            goes in the bag unless the shopper picks another.
+
+            git history has it if the accidental-order concern comes back.
           {%- endcomment -%}
-          {%- if section.settings.enable_new_layout -%}
-            {%- assign gate_picker = section.blocks | where: 'type', 'variant_picker' | first -%}
-            {%- if gate_picker.settings.require_size_selection and product.has_only_default_variant == false -%}
-              <script>
-                (function () {
-                  var info = document.getElementById('ProductInfo-{{ section.id }}');
-                  if (!info) return;
-
-                  /* A URL that already names a variant, or the option values
-                     of one, is a shopper who has chosen - or a shared link to
-                     a chosen size. Leave those exactly as rendered. */
-                  var params = new URLSearchParams(window.location.search);
-                  if (params.has('variant') || params.has('option_values')) return;
-
-                  var groups = info.querySelectorAll('[data-pdp-size-gate]');
-                  if (!groups.length) return;
-
-                  var button = document.getElementById('ProductSubmitButton-{{ section.id }}');
-                  var form = document.getElementById('product-form-{{ section.id }}');
-                  var label = {{ gate_picker.settings.size_required_label | default: 'Select a size' | json }};
-                  var gated = true;
-                  var i, j, radios;
-
-                  for (i = 0; i < groups.length; i++) {
-                    radios = groups[i].querySelectorAll('input[type="radio"]');
-                    for (j = 0; j < radios.length; j++) radios[j].checked = false;
-                  }
-
-                  function buttonText() {
-                    return button ? button.querySelector('span') : null;
-                  }
-
-                  if (button) {
-                    button.setAttribute('disabled', 'disabled');
-                    var initial = buttonText();
-                    if (initial) initial.textContent = label;
-                  }
-
-                  function release() {
-                    if (!gated) return;
-                    gated = false;
-                    info.removeEventListener('change', onChange);
-                    if (form) form.removeEventListener('submit', onSubmit, true);
-                    if (!button) return;
-                    button.removeAttribute('disabled');
-                    /* Restore Dawn's own wording, then leave the button alone:
-                       product-info.js corrects it to Sold out or Unavailable
-                       once the fetch for the chosen size comes back. */
-                    var text = buttonText();
-                    var addToCart = window.variantStrings && window.variantStrings.addToCart;
-                    if (text && addToCart) text.textContent = addToCart;
-                  }
-
-                  function onChange(event) {
-                    var target = event.target;
-                    if (!target || target.type !== 'radio') return;
-                    if (!target.closest('[data-pdp-size-gate]')) return;
-                    release();
-                  }
-
-                  /* Enter inside the quantity field submits the form even with
-                     the button disabled. Registered on the capture phase, but
-                     what stops Dawn is stopImmediatePropagation: submit fires
-                     with the form as its target, where capture and bubble
-                     listeners run in the order they were added, and a deferred
-                     product-form.js always adds its own after this one. */
-                  function onSubmit(event) {
-                    if (!gated) return;
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                    if (groups[0]) groups[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
-                  }
-
-                  info.addEventListener('change', onChange);
-                  if (form) form.addEventListener('submit', onSubmit, true);
-                })();
-              </script>
-            {%- endif -%}
-          {%- endif -%}
           <a href="{{ product.url }}" class="link product__view-details animate-arrow">
             {{ 'products.product.view_full_details' | t }}
             {{- 'icon-arrow.svg' | inline_asset_content -}}
@@ -1396,19 +1314,6 @@
         {
           "type": "header",
           "content": "Size selection"
-        },
-        {
-          "type": "checkbox",
-          "id": "require_size_selection",
-          "label": "Do not pre-select a size",
-          "default": false,
-          "info": "The page loads with no size chosen and Add to cart disabled until the shopper picks one, so nobody can order the first size in the list by accident. Applies to the option named above."
-        },
-        {
-          "type": "text",
-          "id": "size_required_label",
-          "label": "Add to cart label before a size is chosen",
-          "default": "Select a size"
         }
       ]
     },

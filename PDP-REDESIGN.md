@@ -99,12 +99,30 @@ a theme-editor field.
 
 ## Third round
 
-**The size gate is off.** `require_size_selection` is now `false`, so add to bag
-works on the first available size the moment the page loads. This reverses
-"18M size is automatically selected, please remove this otherwise it can create
-an accidental order" from the Product Page Analysis, and puts that risk back:
-a shopper who never touches the size row can order a size they did not pick.
-The gate's code is untouched and one checkbox turns it back on.
+**The size gate is gone,** not switched off. Add to bag works on the first
+available size the moment the page loads. This reverses "18M size is
+automatically selected, please remove this otherwise it can create an
+accidental order" from the Product Page Analysis, and puts that risk back: a
+shopper who never touches the size row can order a size they did not pick.
+
+It was first switched off through `require_size_selection` on the variant
+picker block, and the theme went on rendering the gate anyway - `templates/*.json`
+is owned by the theme editor, the store's copy still said `true`, and the
+pushed `false` never took. A setting that cannot be relied on to be off is not
+a way to turn something off, so the code went instead. git history has it if
+the accidental-order concern comes back.
+
+**Which brings up the thing to know about this repo: pushing a template does
+not reliably change the theme.** Everything else does. Verified against the
+live page after one push: `assets/product-page.css`, `locales/en.default.json`
+and `sections/main-product.liquid` were all current, while
+`templates/product.new-design.json` was several commits behind and
+`sections/pdp-info-columns.liquid` had not arrived at all.
+
+So anything that has to actually take effect belongs in a schema default or in
+code, never only in a template setting. That is why the "Need any help?" panel
+reads section settings that all carry defaults, and why the size gate was
+deleted rather than disabled.
 
 **One green.** `--pdp-accent` was `#3f4a2e` and the add-to-bag hover `#354027`,
 so the page carried three olives. Both now resolve to `--pdp-green` (#253c30).

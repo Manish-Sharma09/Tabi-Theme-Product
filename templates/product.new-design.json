@@ -51,9 +51,7 @@
             "size_guide_page": "size-guide",
             "size_guide_label": "Size Guide",
             "size_guide_option": "Size",
-            "size_label": "Select Size",
-            "require_size_selection": false,
-            "size_required_label": "Select a size"
+            "size_label": "Select Size"
           }
         },
         "pdp_fit": {
