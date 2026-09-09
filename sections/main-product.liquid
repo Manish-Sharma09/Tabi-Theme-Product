@@ -1163,11 +1163,31 @@
   });
 </script>
 
+{%- comment -%}
+  `max_blocks` is 30 rather than absent.
+
+  Dawn ships this section without it, which means Shopify's default of 16. The
+  redesigned templates carry 19 blocks: Dawn's own title, price, description,
+  variant picker, quantity and buy buttons; the six collapsible tabs the
+  pre-redesign copy still lives in; and the five pdp_ blocks. Over the default,
+  the theme editor refuses to add a block and the template reads as holding
+  more than its section allows.
+
+  30 legitimises what is already there and leaves room. Shopify's own ceiling
+  is 50. Raising it cannot affect a template carrying fewer blocks, so the 21
+  templates that never took the redesign are untouched by this.
+
+  Deleting the six disabled collapsible tabs would also have brought the count
+  under 16, and would have thrown away the fabric, care and shipping copy those
+  tabs still hold - the copy the accordions were migrated from.
+{%- endcomment -%}
+
 {% schema %}
 {
   "name": "t:sections.main-product.name",
   "tag": "section",
   "class": "section",
+  "max_blocks": 30,
   "blocks": [
     {
       "type": "@app"
