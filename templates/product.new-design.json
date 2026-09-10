@@ -72,7 +72,8 @@
             "instagram_url": "https://www.instagram.com/mytabi.in/",
             "whatsapp_display": "+91 93197 50031",
             "whatsapp_number": "919319750031"
-          }
+          },
+          "disabled": true
         },
         "quantity_selector": {
           "type": "quantity_selector",
@@ -393,15 +394,7 @@
         "open_first": false,
         "color_scheme": "scheme-5",
         "padding_top": 48,
-        "padding_bottom": 48,
-        "help_enabled": true,
-        "help_title": "Need any help?",
-        "help_subtitle": "Get in touch.",
-        "help_phone_display": "+91 93197 50031",
-        "help_phone_number": "+919319750031",
-        "help_whatsapp_label": "Chat",
-        "help_whatsapp_number": "919319750031",
-        "help_hours": "Mon–Sat 9:30 AM to 5:30 PM (IST)"
+        "padding_bottom": 48
       }
     },
     "pdp-band-tabi-way": {
@@ -499,11 +492,27 @@
         "padding_top": 48,
         "padding_bottom": 48
       }
+    },
+    "pdp-help": {
+      "type": "pdp-help",
+      "settings": {
+        "title": "Need any help?",
+        "subtitle": "Get in touch.",
+        "hours": "Mon-Sat 9:30 AM TO 5:30 PM (IST)",
+        "call_label": "Call",
+        "call_number": "+919319750031",
+        "chat_label": "Chat",
+        "chat_number": "919319750031",
+        "color_scheme": "scheme-5",
+        "padding_top": 24,
+        "padding_bottom": 48
+      }
     }
   },
   "order": [
     "main",
     "pdp-info-columns",
+    "pdp-help",
     "pdp-why-love",
     "related-products",
     "pdp-band-tabi-way",

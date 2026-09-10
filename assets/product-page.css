@@ -2421,119 +2421,137 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 }
 
 /* --------------------------------------------------------------------------
-   17. "NEED ANY HELP?" PANEL
+   17. SECTION: "NEED ANY HELP?"
 
-   Sits at the foot of the information accordions. The reference design puts a
-   bordered white card on a diagonally hatched ground, with the two title lines
-   on the left, the phone number and the chat link ranged right, and the opening
-   hours underneath.
+   A bordered card on a hatched ground: the two title lines left, CALL and CHAT
+   ranged right, the opening hours under the titles.
 
-   The hatch is a repeating gradient rather than an image: it is two colours and
-   an angle, and an asset would be one more request plus a retina copy for
-   something CSS draws exactly.
+   The hatch is a repeating gradient, not an image. It is two colours and an
+   angle, and an asset would be one more request plus a second copy for retina
+   for something CSS draws exactly at any size.
+
+   The card is the full width of the section. It is short and wide by design -
+   the reference draws a band, not a box - so the two columns stay side by side
+   until there is genuinely no room, which is a narrower point than the rest of
+   the page uses.
    -------------------------------------------------------------------------- */
 
-.pdp-info__help {
-  margin-top: 4rem;
-  padding: 1.4rem;
-  background-color: var(--pdp-sand);
+.pdp-needhelp {
+  padding: 1.2rem;
+  background-color: #fff;
   background-image: repeating-linear-gradient(
     45deg,
-    transparent 0 0.5rem,
-    var(--pdp-line) 0.5rem 0.6rem
+    transparent 0 0.9rem,
+    var(--pdp-line-soft) 0.9rem 1.5rem
   );
 }
 
-.pdp-info__helpcard {
+.pdp-needhelp__card {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: start;
-  gap: 1.6rem 2.4rem;
-  padding: 2.4rem;
+  gap: 1.2rem 3rem;
+  padding: 2.6rem 3rem;
   border: 0.1rem solid var(--pdp-ink);
   background: #fff;
 }
 
-.pdp-info__helptext {
+.pdp-needhelp__text {
   grid-column: 1;
+  grid-row: 1;
 }
 
-.pdp-info__helptitle {
+.pdp-needhelp__title {
   margin: 0;
   font-family: var(--font-heading-family);
   font-weight: var(--font-heading-weight);
-  font-size: 1.9rem;
-  line-height: 1.35;
+  font-size: 2rem;
+  line-height: 1.4;
   color: var(--pdp-ink);
 }
 
-.pdp-info__helplinks {
+/* Ranged right and vertically centred against the two title lines, which is
+   where the reference sits them - not against the top of the card, and not
+   against the hours line below. */
+.pdp-needhelp__actions {
   grid-column: 2;
   grid-row: 1;
-  display: grid;
-  justify-items: end;
-  gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 2.6rem;
   margin: 0;
   padding: 0;
   list-style: none;
+  align-self: center;
 }
 
-.pdp-info__helplink {
+.pdp-needhelp__action {
   display: inline-flex;
   align-items: center;
-  gap: 0.9rem;
-  font-size: 1.5rem;
+  gap: 0.7rem;
+  font-size: 1.45rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--pdp-ink);
   text-decoration: none;
 }
 
-.pdp-info__helplink .pdp-icon {
-  width: 2rem;
-  height: 2rem;
-  color: var(--pdp-green);
-}
-
-.pdp-info__helplink:hover {
-  color: var(--pdp-green);
-}
-
-/* The chat link is the action of the two, so it carries the underline the
-   reference draws under it. */
-.pdp-info__helplink--chat span {
+/* The underline is on the label, not the whole link, so it does not run under
+   the icon - which is how the reference draws it. */
+.pdp-needhelp__action span {
   text-decoration: underline;
   text-underline-offset: 0.25em;
 }
 
-/* Hours sit under the titles, in the first column, on their own row - so they
-   stay left-aligned whether or not the contacts wrapped. */
-.pdp-info__helphours {
+.pdp-needhelp__action .pdp-icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--pdp-ink);
+}
+
+.pdp-needhelp__action:hover,
+.pdp-needhelp__action:hover .pdp-icon {
+  color: var(--pdp-green);
+}
+
+/* Hours share the first column and take their own row, so they stay under the
+   titles whether or not the actions wrapped. */
+.pdp-needhelp__hours {
   grid-column: 1;
+  grid-row: 2;
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   line-height: 1.5;
   color: var(--pdp-faint);
 }
 
-/* One column on a phone: the two title lines, then the contacts left-aligned
-   under them rather than ranged right against nothing, then the hours. */
+/* Below 750px the two columns stop fitting: CALL and CHAT drop under the
+   titles, still side by side with each other, and the hours go last. Ranged
+   left there, because ranging them right would leave them against nothing. */
 @media screen and (max-width: 749px) {
-  .pdp-info__help {
-    padding: 1rem;
+  .pdp-needhelp {
+    padding: 0.9rem;
   }
 
-  .pdp-info__helpcard {
+  .pdp-needhelp__card {
     grid-template-columns: 1fr;
-    gap: 1.4rem;
-    padding: 2rem;
+    gap: 1.6rem;
+    padding: 2.2rem;
   }
 
-  .pdp-info__helplinks {
+  .pdp-needhelp__title {
+    font-size: 1.8rem;
+  }
+
+  .pdp-needhelp__actions {
     grid-column: 1;
-    grid-row: auto;
-    justify-items: start;
+    grid-row: 2;
+    justify-content: flex-start;
+    align-self: start;
+    gap: 2.2rem;
   }
 
-  .pdp-info__helptitle {
-    font-size: 1.7rem;
+  .pdp-needhelp__hours {
+    grid-row: 3;
   }
 }

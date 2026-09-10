@@ -184,6 +184,32 @@ rather than sitting on it in #282b30 at 14px. The selectors carry
 `nav.breadcrumb.onlydesktopbredcrumb` because that inline block is that
 specific.
 
+### "Need any help?" is its own section
+
+`sections/pdp-help.liquid`, placed directly after the information accordions,
+and it replaces the buy box's *Size help* block - that block is now disabled on
+the template.
+
+A section rather than part of `pdp-info-columns`, for a reason particular to
+this theme: a section can be dragged in from the theme editor. Pushing
+`templates/*.json` does not reliably reach the store here, so **if the section
+does not appear after a push, add it by hand** - Customize, the product
+template, Add section, "PDP: Need any help". Every setting carries a default,
+so one added that way renders complete without filling a field.
+
+Its classes are `pdp-needhelp*`, not `pdp-help*`. The buy box's size-help
+snippet already owns `.pdp-help`, `.pdp-help__title` and `.pdp-help__text`; the
+first version of this section reused those names, which would have restyled the
+size-help block on any template still showing it.
+
+The two numbers are separate fields from the two labels. `wa.me` rejects spaces
+and plus signs while `tel:` accepts them, so one field cannot serve both the
+text shown and the link followed.
+
+The reference design sets this in a geometric sans. It renders in the theme's
+own heading family instead, so it does not read as imported from another store -
+change `.pdp-needhelp__title` if the sans is wanted.
+
 ### Three interactive additions
 
 **Hover zoom.** `image_zoom` is `hover` rather than `lightbox`. Both work at

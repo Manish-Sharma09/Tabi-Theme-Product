@@ -1,0 +1,158 @@
+{% comment %}
+  "Need any help?" - a bordered card on a hatched ground, with CALL and CHAT
+  ranged right and the opening hours underneath.
+
+  A section of its own rather than part of pdp-info-columns, and rather than the
+  size-help block it replaces in the buy box. Two reasons:
+
+  - It is brand-level, identical on every product, and it belongs at the foot of
+    the page rather than between the size chips and the buy buttons.
+  - A section can be dragged in from the theme editor. That matters in this
+    theme: pushing templates/*.json does not reliably reach the store, so a
+    preset is the way to place this even when the template change does not
+    take. Every setting carries a default, so a section added by hand renders
+    complete without anyone filling a field.
+
+  The two numbers are separate from the two labels on purpose. `wa.me` rejects
+  spaces and plus signs while `tel:` is happy with them, so one field cannot
+  serve both the text shown and the link followed.
+{% endcomment %}
+
+{{ 'product-page.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign call_href = section.settings.call_number | remove: ' ' | remove: '-' | strip
+  assign chat_href = section.settings.chat_number | remove: ' ' | remove: '+' | remove: '-' | strip
+
+  assign has_action = false
+  if section.settings.call_label != blank or section.settings.chat_label != blank
+    assign has_action = true
+  endif
+
+  assign show = false
+  if section.settings.title != blank or has_action
+    assign show = true
+  endif
+-%}
+
+{%- if show -%}
+  <div
+    class="pdp-section pdp-needhelp-section color-{{ section.settings.color_scheme }}"
+    style="--pdp-pad-top: {{ section.settings.padding_top }}px; --pdp-pad-bottom: {{ section.settings.padding_bottom }}px;"
+  >
+    <div class="pdp-section__inner">
+      <div class="pdp-needhelp">
+        <div class="pdp-needhelp__card">
+          <div class="pdp-needhelp__text">
+            {%- if section.settings.title != blank -%}
+              <p class="pdp-needhelp__title">{{ section.settings.title | escape }}</p>
+            {%- endif -%}
+            {%- if section.settings.subtitle != blank -%}
+              <p class="pdp-needhelp__title">{{ section.settings.subtitle | escape }}</p>
+            {%- endif -%}
+          </div>
+
+          {%- if has_action -%}
+            <ul class="pdp-needhelp__actions">
+              {%- if section.settings.call_label != blank -%}
+                <li>
+                  {%- if call_href != blank -%}
+                    <a class="pdp-needhelp__action" href="tel:{{ call_href }}">
+                      {%- render 'pdp-icon', icon: 'phone' -%}
+                      <span>{{ section.settings.call_label | escape }}</span>
+                    </a>
+                  {%- else -%}
+                    <span class="pdp-needhelp__action">
+                      {%- render 'pdp-icon', icon: 'phone' -%}
+                      <span>{{ section.settings.call_label | escape }}</span>
+                    </span>
+                  {%- endif -%}
+                </li>
+              {%- endif -%}
+
+              {%- if section.settings.chat_label != blank -%}
+                <li>
+                  {%- if chat_href != blank -%}
+                    <a
+                      class="pdp-needhelp__action"
+                      href="https://wa.me/{{ chat_href }}"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {%- render 'pdp-icon', icon: 'whatsapp' -%}
+                      <span>{{ section.settings.chat_label | escape }}</span>
+                    </a>
+                  {%- else -%}
+                    <span class="pdp-needhelp__action">
+                      {%- render 'pdp-icon', icon: 'whatsapp' -%}
+                      <span>{{ section.settings.chat_label | escape }}</span>
+                    </span>
+                  {%- endif -%}
+                </li>
+              {%- endif -%}
+            </ul>
+          {%- endif -%}
+
+          {%- if section.settings.hours != blank -%}
+            <p class="pdp-needhelp__hours">{{ section.settings.hours | escape }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "PDP: Need any help",
+  "tag": "section",
+  "class": "pdp-section-wrapper",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Line one", "default": "Need any help?" },
+    { "type": "text", "id": "subtitle", "label": "Line two", "default": "Get in touch." },
+    { "type": "text", "id": "hours", "label": "Hours", "default": "Mon-Sat 9:30 AM TO 5:30 PM (IST)" },
+    { "type": "header", "content": "Call" },
+    { "type": "text", "id": "call_label", "label": "Link text", "default": "Call" },
+    {
+      "type": "text",
+      "id": "call_number",
+      "label": "Number",
+      "default": "+919319750031",
+      "info": "With the country code. A plus sign is fine here — tel: accepts it."
+    },
+    { "type": "header", "content": "WhatsApp" },
+    { "type": "text", "id": "chat_label", "label": "Link text", "default": "Chat" },
+    {
+      "type": "text",
+      "id": "chat_number",
+      "label": "Number",
+      "default": "919319750031",
+      "info": "Digits only — wa.me rejects spaces and plus signs."
+    },
+    { "type": "header", "content": "t:sections.all.colors.label" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:sections.all.colors.label", "default": "scheme-1" },
+    { "type": "header", "content": "t:sections.all.padding.section_padding_heading" },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 48
+    }
+  ],
+  "presets": [{ "name": "PDP: Need any help" }]
+}
+{% endschema %}
