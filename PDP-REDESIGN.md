@@ -206,6 +206,24 @@ The two numbers are separate fields from the two labels. `wa.me` rejects spaces
 and plus signs while `tel:` accepts them, so one field cannot serve both the
 text shown and the link followed.
 
+Under 750px the card goes to one column and the two actions become a pair of
+full-width boxes rather than two short links. Left as links they filled about a
+third of the row, and the empty two thirds beside them read as the card having
+been cut off - and they were 15px of underlined text to hit with a thumb, well
+under the 44px a tap target wants. The boxes fill on hover and press instead of
+carrying an underline, because there the box is what says "link".
+
+One thing to know if that layout ever looks wrong again: the grid sizes the
+`<li>`, while the `<a>` inside it is `inline-flex` and shrinks to its own text.
+Both need to stretch, or the boxes sit at a third of their cell with the rest
+empty beside them - which is exactly the gap the two-column layout was added to
+remove.
+
+Hover, press and keyboard focus are all distinct: the label and icon turn green
+and the icon leans 2px into the direction of travel, press drops it 1px, and
+focus draws an offset green outline. All of it is behind
+`prefers-reduced-motion`.
+
 The reference design sets this in a geometric sans. It renders in the theme's
 own heading family instead, so it does not read as imported from another store -
 change `.pdp-needhelp__title` if the sans is wanted.

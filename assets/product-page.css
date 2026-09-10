@@ -2430,10 +2430,11 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
    angle, and an asset would be one more request plus a second copy for retina
    for something CSS draws exactly at any size.
 
-   The card is the full width of the section. It is short and wide by design -
-   the reference draws a band, not a box - so the two columns stay side by side
-   until there is genuinely no room, which is a narrower point than the rest of
-   the page uses.
+   Under 750px the card goes to one column, and there the two actions become a
+   pair of full-width boxes rather than two short links ranged left. Left as
+   links they filled about a third of the row and the remaining two thirds read
+   as the card having been cut off - and they were 15px of underlined text to
+   hit with a thumb, well under the 44px a tap target wants.
    -------------------------------------------------------------------------- */
 
 .pdp-needhelp {
@@ -2470,9 +2471,9 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   color: var(--pdp-ink);
 }
 
-/* Ranged right and vertically centred against the two title lines, which is
-   where the reference sits them - not against the top of the card, and not
-   against the hours line below. */
+/* Ranged right and centred against the two title lines, which is where the
+   reference sits them - not against the top of the card, and not against the
+   hours line below. */
 .pdp-needhelp__actions {
   grid-column: 2;
   grid-row: 1;
@@ -2488,12 +2489,14 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 .pdp-needhelp__action {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.7rem;
   font-size: 1.45rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--pdp-ink);
   text-decoration: none;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
 
 /* The underline is on the label, not the whole link, so it does not run under
@@ -2501,17 +2504,36 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 .pdp-needhelp__action span {
   text-decoration: underline;
   text-underline-offset: 0.25em;
+  text-decoration-thickness: from-font;
 }
 
 .pdp-needhelp__action .pdp-icon {
   width: 2rem;
   height: 2rem;
   color: var(--pdp-ink);
+  transition: color 0.15s ease, transform 0.2s ease;
 }
 
 .pdp-needhelp__action:hover,
 .pdp-needhelp__action:hover .pdp-icon {
   color: var(--pdp-green);
+}
+
+/* The icon leans in on hover. Small enough to read as the link answering
+   rather than as something moving on the page. */
+.pdp-needhelp__action:hover .pdp-icon {
+  transform: translateX(0.2rem);
+}
+
+.pdp-needhelp__action:active {
+  transform: translateY(0.1rem);
+}
+
+/* Keyboard focus needs to be visible without the pointer styles firing, and
+   `outline` rather than a border so it cannot shift the layout. */
+.pdp-needhelp__action:focus-visible {
+  outline: 0.2rem solid var(--pdp-green);
+  outline-offset: 0.4rem;
 }
 
 /* Hours share the first column and take their own row, so they stay under the
@@ -2525,9 +2547,20 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   color: var(--pdp-faint);
 }
 
-/* Below 750px the two columns stop fitting: CALL and CHAT drop under the
-   titles, still side by side with each other, and the hours go last. Ranged
-   left there, because ranging them right would leave them against nothing. */
+@media (prefers-reduced-motion: reduce) {
+  .pdp-needhelp__action,
+  .pdp-needhelp__action .pdp-icon {
+    transition: none;
+  }
+
+  .pdp-needhelp__action:hover .pdp-icon,
+  .pdp-needhelp__action:active {
+    transform: none;
+  }
+}
+
+/* --- one column under 750px -------------------------------------------- */
+
 @media screen and (max-width: 749px) {
   .pdp-needhelp {
     padding: 0.9rem;
@@ -2535,20 +2568,60 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 
   .pdp-needhelp__card {
     grid-template-columns: 1fr;
-    gap: 1.6rem;
-    padding: 2.2rem;
+    gap: 1.8rem;
+    padding: 2.2rem 2rem;
   }
 
   .pdp-needhelp__title {
     font-size: 1.8rem;
   }
 
+  /* Two equal boxes across the full width. This is the fix for the empty
+     right-hand third: the row is now paid for, and each action is a 4.8rem
+     target instead of a line of text. */
   .pdp-needhelp__actions {
     grid-column: 1;
     grid-row: 2;
-    justify-content: flex-start;
-    align-self: start;
-    gap: 2.2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-self: stretch;
+  }
+
+  /* The <li> is what the grid sizes; the <a> inside it is inline-flex and so
+     shrinks to its own text. Without these two the boxes sat at a third of the
+     row each with the rest of the cell empty beside them - the same gap the
+     two-column layout was meant to remove. */
+  .pdp-needhelp__actions li {
+    display: flex;
+  }
+
+  .pdp-needhelp__action {
+    flex: 1 1 auto;
+    min-height: 4.8rem;
+    padding: 0 1.2rem;
+    border: 0.1rem solid var(--pdp-line);
+    background: var(--pdp-sand);
+    font-size: 1.35rem;
+  }
+
+  /* Inside a box the label no longer needs an underline to read as a link -
+     the box does that - and the box fills instead. */
+  .pdp-needhelp__action span {
+    text-decoration: none;
+  }
+
+  .pdp-needhelp__action:hover,
+  .pdp-needhelp__action:active {
+    border-color: var(--pdp-green);
+    background: var(--pdp-green);
+    color: #fff;
+  }
+
+  .pdp-needhelp__action:hover .pdp-icon,
+  .pdp-needhelp__action:active .pdp-icon {
+    color: #fff;
+    transform: none;
   }
 
   .pdp-needhelp__hours {
