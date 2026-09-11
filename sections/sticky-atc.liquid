@@ -19,6 +19,9 @@
         display: none !important;
     }
             #md-sticky-atc {
+                /* Keep the button clear of the home indicator on a notched
+                   phone. Zero everywhere else, so it costs nothing. */
+                padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
                 position: fixed;
                 bottom: 0;
                 left: 0;
@@ -154,8 +157,16 @@
             function setStickyShown(shown) {
                 stickyATC.classList.toggle('show', shown)
                 /* Reserve the bar's height so a fixed bar cannot cover the last
-                   thing on the page - the footer links, most often. */
-                document.documentElement.style.paddingBottom = shown ? `${stickyATC.clientHeight}px` : '0'
+                   thing on the page - the footer links, most often.
+
+                   On <body>, not <html>. Padding on the root element paints the
+                   root's own background, which is white here while the foot of
+                   the page is not, so the reservation showed up as a white
+                   strip under the bar - read as "a gap below the sticky CTA".
+                   On <body> the same space takes the page's own background and
+                   the bar sits flush against what is above it. */
+                document.body.style.paddingBottom = shown ? `${stickyATC.offsetHeight}px` : ''
+                document.documentElement.style.paddingBottom = ''
             }
 
             let anchorObserver = null

@@ -38,18 +38,27 @@
 {%- if show -%}
   <div
     class="pdp-section pdp-needhelp-section color-{{ section.settings.color_scheme }}"
-    style="--pdp-pad-top: {{ section.settings.padding_top }}px; --pdp-pad-bottom: {{ section.settings.padding_bottom }}px;"
+    style="--pdp-pad-top: {{ section.settings.padding_top }}px; --pdp-pad-bottom: {{ section.settings.padding_bottom }}px; --pdp-needhelp-width: {{ section.settings.card_width }}px;"
   >
     <div class="pdp-section__inner">
       <div class="pdp-needhelp">
         <div class="pdp-needhelp__card">
+          {%- comment -%}
+            One paragraph, not two. The card is a single row now - copy left,
+            actions right - so the two fields run on as one sentence and wrap
+            only when the screen makes them. Kept as two settings because that
+            is how the copy is written and reviewed.
+          {%- endcomment -%}
           <div class="pdp-needhelp__text">
-            {%- if section.settings.title != blank -%}
-              <p class="pdp-needhelp__title">{{ section.settings.title | escape }}</p>
-            {%- endif -%}
-            {%- if section.settings.subtitle != blank -%}
-              <p class="pdp-needhelp__title">{{ section.settings.subtitle | escape }}</p>
-            {%- endif -%}
+            <p class="pdp-needhelp__title">
+              {%- if section.settings.title != blank -%}
+                {{- section.settings.title | escape -}}
+              {%- endif -%}
+              {%- if section.settings.subtitle != blank -%}
+                {% if section.settings.title != blank %} {% endif %}
+                {{- section.settings.subtitle | escape -}}
+              {%- endif -%}
+            </p>
           </div>
 
           {%- if has_action -%}
@@ -108,11 +117,45 @@
   "tag": "section",
   "class": "pdp-section-wrapper",
   "settings": [
-    { "type": "text", "id": "title", "label": "Line one", "default": "Need any help?" },
-    { "type": "text", "id": "subtitle", "label": "Line two", "default": "Get in touch." },
-    { "type": "text", "id": "hours", "label": "Hours", "default": "Mon-Sat 9:30 AM TO 5:30 PM (IST)" },
-    { "type": "header", "content": "Call" },
-    { "type": "text", "id": "call_label", "label": "Link text", "default": "Call" },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Line one",
+      "default": "Need any help?"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Line two",
+      "default": "Get in touch."
+    },
+    {
+      "type": "text",
+      "id": "hours",
+      "label": "Hours",
+      "default": "Mon-Sat 9:30 AM TO 5:30 PM (IST)"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "min": 600,
+      "max": 1500,
+      "step": 20,
+      "unit": "px",
+      "label": "Maximum width",
+      "default": 1000,
+      "info": "Caps the card and centres it. Below this width it simply fills the section."
+    },
+    {
+      "type": "header",
+      "content": "Call"
+    },
+    {
+      "type": "text",
+      "id": "call_label",
+      "label": "Link text",
+      "default": "Call"
+    },
     {
       "type": "text",
       "id": "call_number",
@@ -120,8 +163,16 @@
       "default": "+919319750031",
       "info": "With the country code. A plus sign is fine here — tel: accepts it."
     },
-    { "type": "header", "content": "WhatsApp" },
-    { "type": "text", "id": "chat_label", "label": "Link text", "default": "Chat" },
+    {
+      "type": "header",
+      "content": "WhatsApp"
+    },
+    {
+      "type": "text",
+      "id": "chat_label",
+      "label": "Link text",
+      "default": "Chat"
+    },
     {
       "type": "text",
       "id": "chat_number",
@@ -129,9 +180,20 @@
       "default": "919319750031",
       "info": "Digits only — wa.me rejects spaces and plus signs."
     },
-    { "type": "header", "content": "t:sections.all.colors.label" },
-    { "type": "color_scheme", "id": "color_scheme", "label": "t:sections.all.colors.label", "default": "scheme-1" },
-    { "type": "header", "content": "t:sections.all.padding.section_padding_heading" },
+    {
+      "type": "header",
+      "content": "t:sections.all.colors.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
     {
       "type": "range",
       "id": "padding_top",
@@ -153,6 +215,10 @@
       "default": 48
     }
   ],
-  "presets": [{ "name": "PDP: Need any help" }]
+  "presets": [
+    {
+      "name": "PDP: Need any help"
+    }
+  ]
 }
 {% endschema %}

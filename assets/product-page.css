@@ -63,6 +63,10 @@
      Add to cart button instead of sitting a shade off them. */
   --pdp-green: #253c30;
   --pdp-green-deep: #1b2c23;
+  /* A pale wash of the same green. For things that need to be picked out from
+     what surrounds them without reading as a button - see the highlighted row
+     in section 8. */
+  --pdp-green-pale: #dde4de;
 
   /* The pincode panel's ground. A step warmer and lighter than --pdp-band,
      which the full-width sections keep using. */
@@ -880,10 +884,21 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   flex: 0 0 auto;
   height: 4.8rem;
   padding: 0 2.6rem;
-  border: 0;
+  /* Outlined, not filled.
+
+     It was filled in --pdp-green, the same green as ADD TO BAG a few
+     centimetres above it, and two identical buttons on one screen do not read
+     as a primary and a secondary - they read as two primaries, with the
+     shopper left to work out which one buys the dress. CHECK is a utility: it
+     answers a question and does not move the sale forward.
+
+     Outlined in the same green keeps it unmistakably part of the same family
+     and clearly the quieter of the two. It fills on hover, so it still
+     confirms that it is a button. */
+  border: 0.1rem solid var(--pdp-green);
   border-radius: 0;
-  background: var(--pdp-green);
-  color: #fff;
+  background: transparent;
+  color: var(--pdp-green);
   font-family: inherit;
   font-size: 1.35rem;
   font-weight: 500;
@@ -891,11 +906,17 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   text-align: center;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .pdp-delivery__submit:hover {
-  background: var(--pdp-green-deep);
+  background: var(--pdp-green);
+  color: #fff;
+}
+
+.pdp-delivery__submit:focus-visible {
+  outline: 0.2rem solid var(--pdp-green);
+  outline-offset: 0.3rem;
 }
 
 .pdp-delivery__error {
@@ -1072,11 +1093,15 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
    cancelling its padding on both sides and paying it back as its own. It draws
    no divider, and neither does whatever follows it - the colour change is the
    separation. */
+/* Filled in the full --pdp-green this row read as a button: the same solid
+   green as ADD TO BAG, in a block the width of the card, several times the
+   size of the real CTA. A pale wash of the same green picks the row out of the
+   list - which is the job - without offering to be clicked. */
 .pdp-why__row--highlight {
   margin: 0 calc(-1 * var(--pdp-why-pad));
   padding: 1.8rem var(--pdp-why-pad);
   border-top: 0;
-  background: var(--pdp-green);
+  background: var(--pdp-green-pale);
 }
 
 .pdp-why__row--highlight + .pdp-why__row {
@@ -1085,11 +1110,11 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 
 .pdp-why__row--highlight .pdp-why__icon .pdp-icon,
 .pdp-why__row--highlight .pdp-why__heading {
-  color: #fff;
+  color: var(--pdp-green);
 }
 
 .pdp-why__row--highlight .pdp-why__text {
-  color: rgba(255, 255, 255, 0.82);
+  color: #4a5a4e;
 }
 
 /* A highlighted row that ends the list reaches the foot of the content column
@@ -2132,6 +2157,53 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
    slider is left exactly as it is.
    -------------------------------------------------------------------------- */
 
+/* A. The mobile gallery swipes one whole image at a time.
+
+   Dawn builds it as a "peek" carousel, and three rules together are what makes
+   it feel like the page is sliding diagonally under your thumb:
+
+     .product__media-list      margin-left: -2.5rem; width: calc(100% + 4rem)
+     .product__media-item      width: calc(100% - 3rem - <grid spacing>)
+     .product__media-list      a styled, visible 2px scrollbar
+
+   The list is 4rem wider than its parent but pulled only 2.5rem left, so it
+   is off-centre by 1.5rem; each slide is 3rem narrower than the frame so the
+   next photograph shows down one edge; and the scrollbar advertises that there
+   is somewhere to scroll sideways. Between them you always see a margin, a
+   sliver of the next image, or both, and a vertical swipe that drifts a few
+   degrees starts moving the strip.
+
+   Here each slide is exactly the width of the frame and the frame is exactly
+   the width of the screen, so a swipe lands on one photograph and nothing
+   else is ever in view. `scroll-snap-type: x mandatory` is already on
+   .slider--mobile in component-slider.css and now has whole slides to snap to.
+
+   The negative margins on slider-component stay: those are what take the
+   gallery out to the screen edges, and they are symmetric. */
+@media screen and (max-width: 749px) {
+  .pdp .product__media-list {
+    margin-left: 0;
+    width: 100%;
+    /* Dawn offsets the snap by the gutter it no longer has to pay for. */
+    scroll-padding-left: 0;
+  }
+
+  .pdp .product__media-list .product__media-item {
+    width: 100%;
+  }
+
+  /* A scrollbar under the photographs is what the client saw as "margins". The
+     dots already say how many images there are. */
+  .pdp .product__media-list {
+    scrollbar-width: none;
+  }
+
+  .pdp .product__media-list::-webkit-scrollbar {
+    height: 0;
+    width: 0;
+  }
+}
+
 /* B. The thumbnail rail runs edge to edge on a phone.
 
    Below 750px the rail sits under the photograph, inside the section's
@@ -2423,21 +2495,30 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 /* --------------------------------------------------------------------------
    17. SECTION: "NEED ANY HELP?"
 
-   A bordered card on a hatched ground: the two title lines left, CALL and CHAT
-   ranged right, the opening hours under the titles.
+   A bordered card on a hatched ground, one row at every width: the copy left,
+   CALL and CHAT ranged right, the opening hours under the copy.
 
    The hatch is a repeating gradient, not an image. It is two colours and an
    angle, and an asset would be one more request plus a second copy for retina
    for something CSS draws exactly at any size.
 
-   Under 750px the card goes to one column, and there the two actions become a
-   pair of full-width boxes rather than two short links ranged left. Left as
-   links they filled about a third of the row and the remaining two thirds read
-   as the card having been cut off - and they were 15px of underlined text to
-   hit with a thumb, well under the 44px a tap target wants.
+   It stayed one row on a phone rather than stacking. The stacked version put
+   the two actions on a row of their own, and as two short links they filled
+   about a third of it - the empty two thirds beside them read as the card
+   having been cut off. Widening them to half the row each fixed that and made
+   the card tall and button-heavy for what is a line of contact details. Beside
+   the copy they pay for the width they take and the card stays one band.
+
+   The actions keep a 3.6rem hit area on a phone. That is under the 44px a tap
+   target wants, and it is the trade the one-row layout makes - the alternative
+   was the row of boxes above.
    -------------------------------------------------------------------------- */
 
 .pdp-needhelp {
+  /* Narrower than the section. A band of contact details does not need the
+     full 1400px the accordions above it use. */
+  max-width: var(--pdp-needhelp-width, 100rem);
+  margin: 0 auto;
   padding: 1.2rem;
   background-color: #fff;
   background-image: repeating-linear-gradient(
@@ -2450,9 +2531,9 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 .pdp-needhelp__card {
   display: grid;
   grid-template-columns: 1fr auto;
-  align-items: start;
-  gap: 1.2rem 3rem;
-  padding: 2.6rem 3rem;
+  align-items: center;
+  gap: 0.8rem 2.4rem;
+  padding: 2.2rem 2.6rem;
   border: 0.1rem solid var(--pdp-ink);
   background: #fff;
 }
@@ -2466,24 +2547,20 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   margin: 0;
   font-family: var(--font-heading-family);
   font-weight: var(--font-heading-weight);
-  font-size: 2rem;
-  line-height: 1.4;
+  font-size: 1.9rem;
+  line-height: 1.35;
   color: var(--pdp-ink);
 }
 
-/* Ranged right and centred against the two title lines, which is where the
-   reference sits them - not against the top of the card, and not against the
-   hours line below. */
 .pdp-needhelp__actions {
   grid-column: 2;
   grid-row: 1;
   display: flex;
   align-items: center;
-  gap: 2.6rem;
+  gap: 2.2rem;
   margin: 0;
   padding: 0;
   list-style: none;
-  align-self: center;
 }
 
 .pdp-needhelp__action {
@@ -2491,12 +2568,14 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   align-items: center;
   justify-content: center;
   gap: 0.7rem;
-  font-size: 1.45rem;
+  min-height: 3.6rem;
+  font-size: 1.4rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  white-space: nowrap;
   color: var(--pdp-ink);
   text-decoration: none;
-  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease;
 }
 
 /* The underline is on the label, not the whole link, so it does not run under
@@ -2508,8 +2587,8 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 }
 
 .pdp-needhelp__action .pdp-icon {
-  width: 2rem;
-  height: 2rem;
+  width: 1.9rem;
+  height: 1.9rem;
   color: var(--pdp-ink);
   transition: color 0.15s ease, transform 0.2s ease;
 }
@@ -2529,20 +2608,19 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   transform: translateY(0.1rem);
 }
 
-/* Keyboard focus needs to be visible without the pointer styles firing, and
-   `outline` rather than a border so it cannot shift the layout. */
+/* `outline` rather than a border, so focus cannot shift the row. */
 .pdp-needhelp__action:focus-visible {
   outline: 0.2rem solid var(--pdp-green);
   outline-offset: 0.4rem;
 }
 
 /* Hours share the first column and take their own row, so they stay under the
-   titles whether or not the actions wrapped. */
+   copy rather than under the actions. */
 .pdp-needhelp__hours {
   grid-column: 1;
   grid-row: 2;
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   line-height: 1.5;
   color: var(--pdp-faint);
 }
@@ -2559,72 +2637,37 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   }
 }
 
-/* --- one column under 750px -------------------------------------------- */
+/* --- tighter under 750px, still one row --------------------------------- */
 
 @media screen and (max-width: 749px) {
   .pdp-needhelp {
-    padding: 0.9rem;
+    padding: 0.8rem;
   }
 
   .pdp-needhelp__card {
-    grid-template-columns: 1fr;
-    gap: 1.8rem;
-    padding: 2.2rem 2rem;
+    gap: 0.6rem 1.4rem;
+    padding: 1.8rem;
   }
 
   .pdp-needhelp__title {
-    font-size: 1.8rem;
+    font-size: 1.55rem;
   }
 
-  /* Two equal boxes across the full width. This is the fix for the empty
-     right-hand third: the row is now paid for, and each action is a 4.8rem
-     target instead of a line of text. */
   .pdp-needhelp__actions {
-    grid-column: 1;
-    grid-row: 2;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    align-self: stretch;
-  }
-
-  /* The <li> is what the grid sizes; the <a> inside it is inline-flex and so
-     shrinks to its own text. Without these two the boxes sat at a third of the
-     row each with the rest of the cell empty beside them - the same gap the
-     two-column layout was meant to remove. */
-  .pdp-needhelp__actions li {
-    display: flex;
+    gap: 1.4rem;
   }
 
   .pdp-needhelp__action {
-    flex: 1 1 auto;
-    min-height: 4.8rem;
-    padding: 0 1.2rem;
-    border: 0.1rem solid var(--pdp-line);
-    background: var(--pdp-sand);
-    font-size: 1.35rem;
+    font-size: 1.25rem;
+    gap: 0.5rem;
   }
 
-  /* Inside a box the label no longer needs an underline to read as a link -
-     the box does that - and the box fills instead. */
-  .pdp-needhelp__action span {
-    text-decoration: none;
-  }
-
-  .pdp-needhelp__action:hover,
-  .pdp-needhelp__action:active {
-    border-color: var(--pdp-green);
-    background: var(--pdp-green);
-    color: #fff;
-  }
-
-  .pdp-needhelp__action:hover .pdp-icon,
-  .pdp-needhelp__action:active .pdp-icon {
-    color: #fff;
-    transform: none;
+  .pdp-needhelp__action .pdp-icon {
+    width: 1.7rem;
+    height: 1.7rem;
   }
 
   .pdp-needhelp__hours {
-    grid-row: 3;
+    font-size: 1.15rem;
   }
 }

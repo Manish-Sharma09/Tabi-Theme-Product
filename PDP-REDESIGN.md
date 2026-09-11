@@ -269,6 +269,63 @@ which means Shopify's default of 16, and the redesigned templates carry 19.
 
 ---
 
+## Client review round
+
+**The "diagonal scroll".** The mobile gallery is Dawn's "peek" carousel, and
+three rules together are what made it feel like the page slid sideways under a
+thumb:
+
+    .product__media-list   margin-left: -2.5rem; width: calc(100% + 4rem)
+    .product__media-item   width: calc(100% - 3rem - <grid spacing>)
+    .product__media-list   a styled, visible 2px scrollbar
+
+The list is 4rem wider than its parent but pulled only 2.5rem left, so it is
+off-centre by 1.5rem; each slide is 3rem narrower than the frame, so the next
+photograph shows down one edge; and the scrollbar advertises that sideways
+scrolling exists. Between them there was always a margin, a sliver of the next
+image, or both. Each slide is now exactly the width of the frame, the frame is
+exactly the width of the screen, and the scrollbar is gone -
+`scroll-snap-type: x mandatory` was already on `.slider--mobile` and now has
+whole slides to snap to.
+
+Worth recording: the document itself never scrolled horizontally. Measured on
+the live page, `scrollWidth` equalled `innerWidth`. The overflow was inside the
+gallery's own scroll container, which is why it never showed up as a page-level
+problem.
+
+**The CHECK button is outlined, not filled.** It was the same solid
+`--pdp-green` as ADD TO BAG a few centimetres above it, and two identical
+buttons on one screen read as two primaries. CHECK answers a question; it does
+not move the sale forward.
+
+**The highlighted row is a pale wash** (`--pdp-green-pale`) with green type,
+not solid green with white. Filled, it read as a button: the same green as ADD
+TO BAG, in a block the width of the card, several times the size of the real
+CTA.
+
+**The sticky bar's reservation moved from `<html>` to `<body>`.** The bar is
+`position: fixed; bottom: 0` and measured flush against the viewport, so the
+"gap below it" was the height reservation: padding on the root element paints
+the root's own background, which is white here while the foot of the page is
+not, so it showed as a white strip. On `<body>` the same space takes the page's
+background. The bar also gained `env(safe-area-inset-bottom)` so its button
+clears the home indicator on a notched phone.
+
+**"Need any help?" is one row at every width,** copy left and the two actions
+right, capped at a width of its own (`card_width`, default 1000px). It had
+stacked on a phone, where two short links filled about a third of their row and
+the empty two thirds read as the card having been cut off; widening them to
+half the row each fixed that and made the card tall and button-heavy for what
+is a line of contact details. The trade is a 3.6rem hit area rather than 44px.
+
+**Model details still needs its metafields.** The Specification row reads
+`custom.fit`, `custom.model_details` and `custom.fit_recommendation`, and hides
+itself while all three are empty - which is why it has never appeared. The code
+has been there since the first round; the definitions do not exist yet. Section
+2 lists them.
+
+---
+
 ## 1. Before anything goes live
 
 Work on a **duplicate theme**, not the live one:
