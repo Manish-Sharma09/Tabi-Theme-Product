@@ -2157,6 +2157,35 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
    slider is left exactly as it is.
    -------------------------------------------------------------------------- */
 
+/* The first photograph starts directly under the header on a phone.
+
+   Measured on the live page, there were 33px of white between the header and
+   the image, from two places:
+
+     27px   the section's own top padding. The template sets padding_top: 36
+            and Dawn multiplies it by 0.75 below 750px.
+     5.25px the slide's padding-top, which is Dawn reserving room for a media
+            shadow this design does not draw.
+
+   Done here rather than by setting padding_top to 0 on the template, because
+   template settings do not reliably reach this store - see the note in
+   PDP-REDESIGN.md. The section keeps its padding from 750px up, where the
+   gallery sits beside the buy box and the gap is doing something.
+
+   `product-info.pdp` rather than `.pdp`: the padding comes from Dawn's
+   generated `.section-<id>-padding`, which is one class, same as `.pdp`.
+   product-page.css happens to load after that rule today and would win the
+   tie, but adding the element name means it does not depend on that. */
+@media screen and (max-width: 749px) {
+  product-info.pdp {
+    padding-top: 0;
+  }
+
+  .pdp .product__media-list .product__media-item {
+    padding-top: 0;
+  }
+}
+
 /* A. The mobile gallery swipes one whole image at a time.
 
    Dawn builds it as a "peek" carousel, and three rules together are what makes

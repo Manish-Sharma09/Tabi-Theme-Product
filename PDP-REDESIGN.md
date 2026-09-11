@@ -293,6 +293,19 @@ the live page, `scrollWidth` equalled `innerWidth`. The overflow was inside the
 gallery's own scroll container, which is why it never showed up as a page-level
 problem.
 
+**The first photograph starts under the header on a phone.** There were 33px
+of white between them, measured on the live page, from two places: 27px of the
+section's own top padding (the template sets `padding_top: 36` and Dawn
+multiplies it by 0.75 below 750px) and 5.25px on the slide, which is Dawn
+reserving room for a media shadow this design does not draw. Both are zeroed
+under 750px; from 750px up the gallery sits beside the buy box and the padding
+is doing something, so it stays.
+
+Done in CSS rather than by setting `padding_top: 0` on the template, for the
+sync reason above. The selector is `product-info.pdp`, not `.pdp`: the padding
+comes from Dawn's generated `.section-<id>-padding`, which is also one class,
+and product-page.css only happens to load after it today.
+
 **The CHECK button is outlined, not filled.** It was the same solid
 `--pdp-green` as ADD TO BAG a few centimetres above it, and two identical
 buttons on one screen read as two primaries. CHECK answers a question; it does
