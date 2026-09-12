@@ -2489,6 +2489,15 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
     max-height: calc(100% - 12rem);
     margin-top: 6rem;
     padding: 0 3rem 3rem;
+    /* Dawn sets `width: 92%` with no ceiling, so on a 2560px monitor this
+       panel opens about 2350px wide and everything in it stretches to match -
+       a measuring diagram blown up past its own resolution and a size table
+       with half a screen of white between the columns.
+
+       88rem is wider than any size chart is drawn and still leaves the panel
+       reading as a dialog rather than as a page. The panel is centred with
+       `left: 50%` and a translate, so a max-width keeps it centred. */
+    max-width: 88rem;
   }
 }
 
@@ -2829,9 +2838,41 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 
 /* --- the size chart dialog body ----------------------------------------- */
 
-/* A chart supplied as artwork. Capped rather than stretched: a 900px-wide
-   chart blown up to a 1200px dialog is unreadable, and the dialog is wider
-   than most charts are drawn. */
+/* Dawn sizes this dialog's content with `.product-popup-modal__content-info > *`
+   - direct children only. The chart body is wrapped in .pdp-sizechart now, so
+   that rule lands on the wrapper and everything inside it was left to its own
+   natural size. This puts the constraint back where the content actually is.
+
+   Natural size capped at the container, not stretched to fill it: the images in
+   a size guide page are measuring diagrams drawn at a fixed size, and blowing
+   one up to the full width of the panel makes it blurry without making it any
+   easier to read.
+
+   Same specificity as the .pdp-sizechart__image rule below (one class, one
+   type), so source order is what makes that one win for the artwork case. Keep
+   this rule above it. */
+.pdp-sizechart img,
+.pdp-sizechart svg {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto 1.6rem;
+}
+
+.pdp-sizechart iframe,
+.pdp-sizechart video {
+  max-width: 100%;
+}
+
+/* Anything else the page content brings - a wide <div>, a flex row - stays
+   inside the panel rather than pushing it sideways. */
+.pdp-sizechart__copy > * {
+  max-width: 100%;
+}
+
+/* A chart supplied as artwork. This one does stretch, because it is the chart
+   itself rather than a diagram beside it - but never past its own width. */
 .pdp-sizechart__image {
   margin: 0 0 2rem;
 }
@@ -2839,7 +2880,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 .pdp-sizechart__image img {
   display: block;
   width: 100%;
-  max-width: 90rem;
+  max-width: 100%;
   height: auto;
   margin: 0 auto;
 }
