@@ -374,6 +374,42 @@
             "metafield_only": false
           }
         },
+        "i_construction": {
+          "type": "item",
+          "settings": {
+            "heading": "Construction",
+            "content": "",
+            "metafield_key": "construction",
+            "metafield_only": true
+          }
+        },
+        "i_silhouette": {
+          "type": "item",
+          "settings": {
+            "heading": "Silhouette",
+            "content": "",
+            "metafield_key": "silhouette",
+            "metafield_only": true
+          }
+        },
+        "i_detailing": {
+          "type": "item",
+          "settings": {
+            "heading": "Product detailing",
+            "content": "",
+            "metafield_key": "product_detailing",
+            "metafield_only": true
+          }
+        },
+        "i_wash": {
+          "type": "item",
+          "settings": {
+            "heading": "Wash & care",
+            "content": "",
+            "metafield_key": "wash_instructions",
+            "metafield_only": true
+          }
+        },
         "i_description": {
           "type": "description",
           "settings": {
@@ -386,8 +422,12 @@
         "i_spec",
         "i_fabric",
         "i_craft",
-        "i_exchange",
-        "i_material"
+        "i_construction",
+        "i_silhouette",
+        "i_detailing",
+        "i_material",
+        "i_wash",
+        "i_exchange"
       ],
       "settings": {
         "heading": "Product details",
@@ -495,6 +535,32 @@
     },
     "pdp-help": {
       "type": "pdp-help",
+      "blocks": {
+        "ch_call": {
+          "type": "channel",
+          "settings": {
+            "icon": "phone",
+            "label": "Call",
+            "action": "call",
+            "value": "+91 93197 50031",
+            "url": ""
+          }
+        },
+        "ch_whatsapp": {
+          "type": "channel",
+          "settings": {
+            "icon": "whatsapp",
+            "label": "Chat",
+            "action": "whatsapp",
+            "value": "+91 93197 50031",
+            "url": ""
+          }
+        }
+      },
+      "block_order": [
+        "ch_call",
+        "ch_whatsapp"
+      ],
       "settings": {
         "title": "Need any help?",
         "subtitle": "Get in touch.",

@@ -165,17 +165,28 @@ change.
 
 ### A product can rename a row
 
-Fill `<key>_heading` in the same namespace and that product shows a different
-heading. A row keyed `fabric` reads **`custom.fabric_heading`**.
+Fill the row's own key with `_heading` on the end, in the same namespace, and
+that product shows a different heading. A row keyed `fabric` reads
+**`custom.fabric_heading`**; a row keyed `construction` reads
+**`custom.construction_heading`**.
 
 This is for the product whose "Fabric" row is really about its brass, or its
 leather. Every other product keeps the heading typed on the block — which still
 has to be filled in, because it is how the row is recognisable in the theme
 editor.
 
-| Key | Type |
+> **`<key>` is a placeholder, not a key to type.** Substitute the row's actual
+> key. There is no metafield called `<key>_heading` and creating one does
+> nothing — the theme looks for the row's own key with `_heading` on the end.
+
+| Row's Metafield key | Definition to create for the override |
 | --- | --- |
-| `<any row key>_heading` | **Single line text** |
+| `fabric` | `custom.fabric_heading` — Single line text |
+| `construction` | `custom.construction_heading` — Single line text |
+| `specs.thread_count` | `specs.thread_count_heading` — Single line text |
+
+Create these **only when a specific product actually needs a renamed row**.
+Most catalogues never need one.
 
 ### Specification row: add your own
 
