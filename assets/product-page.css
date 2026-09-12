@@ -28,6 +28,10 @@
     12. Related products carousel
     13. Media gallery adjustments
     14. Sticky media column
+    15. Breadcrumb
+    16. Size guide dialog
+    17. Section: "Need any help?"
+    18. Metafield-rendered content
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -42,7 +46,14 @@
    -------------------------------------------------------------------------- */
 
 .pdp,
-.pdp-section {
+.pdp-section,
+/* The size guide dialog. ModalDialog.connectedCallback() does
+   `document.body.appendChild(this)`, so it ends up outside every .pdp root -
+   and section 16 has been asking it for --pdp-line and --pdp-sand from there,
+   where both resolve to nothing: the table borders fell back to currentColor
+   and the header row lost its ground entirely. Declaring the tokens on the
+   dialog too is the whole fix. */
+[id^='PdpSizeGuide-'] {
   --pdp-ink: #2c2c28;
   --pdp-muted: #6f6f66;
   --pdp-faint: #8d8d84;
@@ -2699,4 +2710,159 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   .pdp-needhelp__hours {
     font-size: 1.15rem;
   }
+}
+
+/* --- the two copy lines, and three or more channels ---------------------- */
+
+/* One sentence on a desktop, two lines on a phone. The spans carry no space
+   between them in the markup, so the gap is a margin rather than a collapsed
+   text node - which means removing it on mobile removes all of it, with no
+   stray half-space left at the end of line one. */
+.pdp-needhelp__line {
+  display: inline;
+}
+
+.pdp-needhelp__line + .pdp-needhelp__line {
+  margin-left: 0.35em;
+}
+
+/* Wrapping is a safety net rather than the layout: in the `auto` grid track
+   these sit in, the list is as wide as its content and never needs to wrap. It
+   matters once the track is squeezed - six channels on a 320px phone - where
+   without it the labels would overflow the card's border instead. */
+.pdp-needhelp__actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 1rem;
+}
+
+@media screen and (max-width: 749px) {
+  .pdp-needhelp__line {
+    display: block;
+  }
+
+  .pdp-needhelp__line + .pdp-needhelp__line {
+    margin-left: 0;
+  }
+
+  /* Two channels still fit beside the copy, which is the reviewed design. From
+     three up, sections/pdp-help.liquid adds this class and the card becomes one
+     column: copy, then the channels, then the hours. The section counts its
+     blocks to decide, because CSS cannot count children and a wrap-based rule
+     cannot tell a deliberate two-line layout from a collapse. */
+  .pdp-needhelp__card--stack {
+    grid-template-columns: 1fr;
+  }
+
+  .pdp-needhelp__card--stack .pdp-needhelp__actions {
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: flex-start;
+    column-gap: 1.8rem;
+  }
+
+  .pdp-needhelp__card--stack .pdp-needhelp__hours {
+    grid-column: 1;
+    grid-row: 3;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   18. METAFIELD-RENDERED CONTENT
+
+   What snippets/pdp-metafield.liquid produces, and the size chart dialog body
+   built out of it.
+
+   These are deliberately plain. The snippet is shared by the info accordions,
+   the size chart and anything added later, so anything opinionated here would
+   have to be right in all three places at once - and each of those already has
+   its own type scale and its own ground. So: sensible defaults for the markup
+   types a metafield can turn into, and nothing that fights the container.
+
+   Not scoped behind `.pdp`, because the size chart dialog is appended to
+   <body> and would fall outside it - see section 16.
+   -------------------------------------------------------------------------- */
+
+/* A list metafield. `.rte ul` already styles lists inside the accordions, so
+   this only has to hold up where there is no .rte around it. */
+.pdp-mf__list {
+  margin: 0 0 1rem;
+  padding-left: 1.8rem;
+  list-style: disc;
+}
+
+.pdp-mf__list > li + li {
+  margin-top: 0.4rem;
+}
+
+/* A file metafield. `display: block` on the media kills the inline-baseline gap
+   under it, which otherwise shows as a few stray pixels of container colour. */
+.pdp-mf__media {
+  margin: 0 0 1.2rem;
+}
+
+.pdp-mf__media img,
+.pdp-mf__media video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pdp-mf__media--stack > * + * {
+  margin-top: 1.2rem;
+}
+
+/* A colour metafield: the chip carries the colour, the text carries the code. */
+.pdp-mf__color {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.pdp-mf__swatch {
+  flex: 0 0 auto;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 0.1rem solid var(--pdp-line, #e0dcd3);
+  border-radius: 50%;
+}
+
+/* --- the size chart dialog body ----------------------------------------- */
+
+/* A chart supplied as artwork. Capped rather than stretched: a 900px-wide
+   chart blown up to a 1200px dialog is unreadable, and the dialog is wider
+   than most charts are drawn. */
+.pdp-sizechart__image {
+  margin: 0 0 2rem;
+}
+
+.pdp-sizechart__image img {
+  display: block;
+  width: 100%;
+  max-width: 90rem;
+  height: auto;
+  margin: 0 auto;
+}
+
+.pdp-sizechart__copy > *:last-child {
+  margin-bottom: 0;
+}
+
+.pdp-sizechart__copy + .pdp-sizechart__copy {
+  margin-top: 1.8rem;
+}
+
+/* The per-product note. Ruled off and set down, because it qualifies the chart
+   above it - "this style runs small" - rather than continuing it. */
+.pdp-sizechart__note {
+  margin-top: 2.4rem;
+  padding-top: 1.6rem;
+  border-top: 0.1rem solid var(--pdp-line);
+  font-size: 1.3rem;
+  line-height: 1.6;
+  color: var(--pdp-muted);
+}
+
+.pdp-sizechart__note > *:last-child {
+  margin-bottom: 0;
 }

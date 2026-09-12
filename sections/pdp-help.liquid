@@ -1,6 +1,6 @@
 {% comment %}
-  "Need any help?" - a bordered card on a hatched ground, with CALL and CHAT
-  ranged right and the opening hours underneath.
+  "Need any help?" - a bordered card on a hatched ground, with the contact
+  channels ranged right and the opening hours underneath.
 
   A section of its own rather than part of pdp-info-columns, and rather than the
   size-help block it replaces in the buy box. Two reasons:
@@ -13,25 +13,164 @@
     take. Every setting carries a default, so a section added by hand renders
     complete without anyone filling a field.
 
-  The two numbers are separate from the two labels on purpose. `wa.me` rejects
-  spaces and plus signs while `tel:` is happy with them, so one field cannot
-  serve both the text shown and the link followed.
+  The channels are blocks, so a store can show a phone number and WhatsApp, or
+  add Instagram, an email address and a shop address, without a code change
+  each time. Each block says what kind of link it is and the href is built to
+  suit: `tel:` keeps the plus sign and drops the spaces, `wa.me` drops the plus
+  sign as well because it rejects one, `mailto:` is passed through as typed.
+
+  That is also why the number shown and the number linked are one field here
+  and were two before. The old pair existed because a single field could not
+  serve both a `tel:` href and a `wa.me` href - `+91 93197 50031` is valid for
+  one and rejected by the other. With the block declaring which kind of link it
+  is, the stripping is decided per channel and the merchant types the number
+  once, in whatever shape reads best.
+
+  Legacy: a section with no blocks at all - which is every template that
+  already had this section, since templates/*.json carry its settings and no
+  blocks - falls back to the old Call and WhatsApp settings. So this deploys
+  without touching a template, and a merchant who then adds a channel block
+  takes over from the fallback completely.
 {% endcomment %}
 
 {{ 'product-page.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
-  assign call_href = section.settings.call_number | remove: ' ' | remove: '-' | strip
-  assign chat_href = section.settings.chat_number | remove: ' ' | remove: '+' | remove: '-' | strip
+  comment
+    The channels, flattened into four lists read by one loop below. Liquid
+    cannot build an array of objects, and the alternative - a block loop plus a
+    second, near-identical legacy branch in the markup - is two copies of the
+    row markup that drift apart the first time one is styled.
 
-  assign has_action = false
-  if section.settings.call_label != blank or section.settings.chat_label != blank
-    assign has_action = true
+    A blank entry would leave two delimiters together and shift every channel
+    after it onto the wrong row, so every list carries a value for every
+    surviving channel: '-' for "no link", '0'/'1' for the flags.
+  endcomment
+  assign ch_icons = ''
+  assign ch_labels = ''
+  assign ch_hrefs = ''
+  assign ch_external = ''
+  assign ch_count = 0
+
+  for block in section.blocks
+    unless block.type == 'channel'
+      continue
+    endunless
+
+    assign label = block.settings.label | strip
+    comment
+      The label is what the shopper clicks, so a channel without one has
+      nothing to show even if its number is filled in.
+    endcomment
+    if label == blank
+      continue
+    endif
+
+    assign value = block.settings.value | strip
+    assign href = '-'
+    assign external = '0'
+
+    case block.settings.action
+      when 'call'
+        comment
+          `tel:` accepts the plus sign and the country code, and wants the
+          spaces and dashes gone.
+        endcomment
+        assign digits = value | remove: ' ' | remove: '-' | strip
+        if digits != blank
+          assign href = 'tel:' | append: digits
+        endif
+      when 'whatsapp'
+        comment
+          wa.me rejects spaces, plus signs and dashes outright - it does not
+          redirect, it errors - so all three go.
+        endcomment
+        assign digits = value | remove: ' ' | remove: '+' | remove: '-' | strip
+        if digits != blank
+          assign href = 'https://wa.me/' | append: digits
+          assign external = '1'
+        endif
+      when 'email'
+        if value != blank
+          assign href = 'mailto:' | append: value
+        endif
+      when 'link'
+        if block.settings.url != blank
+          assign href = block.settings.url
+          assign external = '1'
+        endif
+    endcase
+
+    comment
+      Resolved into a variable first. `ch_icons | append: x | default: 'none'`
+      reads as if the default guards x, but it guards the whole accumulated
+      string - which is only ever blank on the first channel, so a missing icon
+      on the second would append nothing and shift every icon after it.
+    endcomment
+    assign icon_name = block.settings.icon | default: 'none'
+    assign ch_icons = ch_icons | append: icon_name | append: '~|~'
+    assign ch_labels = ch_labels | append: label | append: '~|~'
+    assign ch_hrefs = ch_hrefs | append: href | append: '~|~'
+    assign ch_external = ch_external | append: external | append: '~|~'
+    assign ch_count = ch_count | plus: 1
+  endfor
+
+  comment
+    No blocks means a section placed before the blocks existed. Rebuild the two
+    channels it used to hard-code, from the settings it already carries, so an
+    existing template renders exactly as it did.
+  endcomment
+  if ch_count == 0
+    if section.settings.call_label != blank
+      assign digits = section.settings.call_number | remove: ' ' | remove: '-' | strip
+      assign href = '-'
+      if digits != blank
+        assign href = 'tel:' | append: digits
+      endif
+      assign ch_icons = ch_icons | append: 'phone' | append: '~|~'
+      assign ch_labels = ch_labels | append: section.settings.call_label | append: '~|~'
+      assign ch_hrefs = ch_hrefs | append: href | append: '~|~'
+      assign ch_external = ch_external | append: '0' | append: '~|~'
+      assign ch_count = ch_count | plus: 1
+    endif
+
+    if section.settings.chat_label != blank
+      assign digits = section.settings.chat_number | remove: ' ' | remove: '+' | remove: '-' | strip
+      assign href = '-'
+      assign external = '0'
+      if digits != blank
+        assign href = 'https://wa.me/' | append: digits
+        assign external = '1'
+      endif
+      assign ch_icons = ch_icons | append: 'whatsapp' | append: '~|~'
+      assign ch_labels = ch_labels | append: section.settings.chat_label | append: '~|~'
+      assign ch_hrefs = ch_hrefs | append: href | append: '~|~'
+      assign ch_external = ch_external | append: external | append: '~|~'
+      assign ch_count = ch_count | plus: 1
+    endif
   endif
 
+  assign icon_list = ch_icons | split: '~|~'
+  assign label_list = ch_labels | split: '~|~'
+  assign href_list = ch_hrefs | split: '~|~'
+  assign external_list = ch_external | split: '~|~'
+
   assign show = false
-  if section.settings.title != blank or has_action
+  if section.settings.title != blank or ch_count > 0
     assign show = true
+  endif
+
+  comment
+    Two channels fit beside the copy on a phone and the reviewed design keeps
+    them there. Three do not - they either wrap into the hours or squeeze the
+    title to nothing - so from three up the card stacks on small screens
+    instead. The count decides it here rather than CSS guessing at it, because
+    `:has()` cannot count children and a wrap-based fix cannot tell a deliberate
+    two-line layout from a collapse.
+  endcomment
+  assign stack = false
+  if ch_count > 2
+    assign stack = true
   endif
 -%}
 
@@ -42,63 +181,72 @@
   >
     <div class="pdp-section__inner">
       <div class="pdp-needhelp">
-        <div class="pdp-needhelp__card">
+        <div class="pdp-needhelp__card{% if stack %} pdp-needhelp__card--stack{% endif %}">
           {%- comment -%}
-            One paragraph, not two. The card is a single row now - copy left,
-            actions right - so the two fields run on as one sentence and wrap
-            only when the screen makes them. Kept as two settings because that
-            is how the copy is written and reviewed.
+            One paragraph, two spans. The card is a single row - copy left,
+            actions right - so the two lines run on as one sentence on a desktop
+            and break after the first on a phone, where the row is tight enough
+            that "Need any help? Get in touch." wrapping mid-phrase looked like
+            an accident. The break is CSS on the spans rather than a <br>, so
+            there is one piece of markup for both widths and nothing to hide.
+
+            Kept as two settings because that is how the copy is written and
+            reviewed, and because the break needs to know where line one ends.
           {%- endcomment -%}
           <div class="pdp-needhelp__text">
             <p class="pdp-needhelp__title">
               {%- if section.settings.title != blank -%}
-                {{- section.settings.title | escape -}}
+                <span class="pdp-needhelp__line">{{ section.settings.title | escape }}</span>
               {%- endif -%}
               {%- if section.settings.subtitle != blank -%}
-                {% if section.settings.title != blank %} {% endif %}
-                {{- section.settings.subtitle | escape -}}
+                <span class="pdp-needhelp__line">{{ section.settings.subtitle | escape }}</span>
               {%- endif -%}
             </p>
           </div>
 
-          {%- if has_action -%}
+          {%- if ch_count > 0 -%}
             <ul class="pdp-needhelp__actions">
-              {%- if section.settings.call_label != blank -%}
+              {%- for label in label_list -%}
+                {%- liquid
+                  assign href = href_list[forloop.index0]
+                  assign icon_name = icon_list[forloop.index0]
+                  assign is_external = false
+                  if external_list[forloop.index0] == '1'
+                    assign is_external = true
+                  endif
+                -%}
                 <li>
-                  {%- if call_href != blank -%}
-                    <a class="pdp-needhelp__action" href="tel:{{ call_href }}">
-                      {%- render 'pdp-icon', icon: 'phone' -%}
-                      <span>{{ section.settings.call_label | escape }}</span>
-                    </a>
-                  {%- else -%}
-                    <span class="pdp-needhelp__action">
-                      {%- render 'pdp-icon', icon: 'phone' -%}
-                      <span>{{ section.settings.call_label | escape }}</span>
-                    </span>
-                  {%- endif -%}
-                </li>
-              {%- endif -%}
-
-              {%- if section.settings.chat_label != blank -%}
-                <li>
-                  {%- if chat_href != blank -%}
+                  {%- comment -%}
+                    A channel with a label and no usable number still shows, as
+                    text rather than a link. That is deliberate: a phone number
+                    written into the label with nothing in the number field is a
+                    half-finished setup, and showing it unlinked makes that
+                    visible on the page instead of hiding the whole row.
+                  {%- endcomment -%}
+                  {%- if href != '-' -%}
                     <a
                       class="pdp-needhelp__action"
-                      href="https://wa.me/{{ chat_href }}"
-                      target="_blank"
-                      rel="noopener"
+                      href="{{ href }}"
+                      {% if is_external %}
+                        target="_blank"
+                        rel="noopener"
+                      {% endif %}
                     >
-                      {%- render 'pdp-icon', icon: 'whatsapp' -%}
-                      <span>{{ section.settings.chat_label | escape }}</span>
+                      {%- if icon_name != 'none' -%}
+                        {%- render 'pdp-icon', icon: icon_name -%}
+                      {%- endif -%}
+                      <span>{{ label | escape }}</span>
                     </a>
                   {%- else -%}
                     <span class="pdp-needhelp__action">
-                      {%- render 'pdp-icon', icon: 'whatsapp' -%}
-                      <span>{{ section.settings.chat_label | escape }}</span>
+                      {%- if icon_name != 'none' -%}
+                        {%- render 'pdp-icon', icon: icon_name -%}
+                      {%- endif -%}
+                      <span>{{ label | escape }}</span>
                     </span>
                   {%- endif -%}
                 </li>
-              {%- endif -%}
+              {%- endfor -%}
             </ul>
           {%- endif -%}
 
@@ -127,7 +275,8 @@
       "type": "text",
       "id": "subtitle",
       "label": "Line two",
-      "default": "Get in touch."
+      "default": "Get in touch.",
+      "info": "Runs on after line one on a desktop and moves to its own line on a phone."
     },
     {
       "type": "text",
@@ -148,35 +297,35 @@
     },
     {
       "type": "header",
-      "content": "Call"
+      "content": "Fallback: Call and WhatsApp"
+    },
+    {
+      "type": "paragraph",
+      "content": "Used only while no Contact blocks have been added. Add a block and these are ignored — so an existing page keeps working untouched, and moving to blocks is one step rather than a migration."
     },
     {
       "type": "text",
       "id": "call_label",
-      "label": "Link text",
+      "label": "Call: link text",
       "default": "Call"
     },
     {
       "type": "text",
       "id": "call_number",
-      "label": "Number",
+      "label": "Call: number",
       "default": "+919319750031",
       "info": "With the country code. A plus sign is fine here — tel: accepts it."
     },
     {
-      "type": "header",
-      "content": "WhatsApp"
-    },
-    {
       "type": "text",
       "id": "chat_label",
-      "label": "Link text",
+      "label": "WhatsApp: link text",
       "default": "Chat"
     },
     {
       "type": "text",
       "id": "chat_number",
-      "label": "Number",
+      "label": "WhatsApp: number",
       "default": "919319750031",
       "info": "Digits only — wa.me rejects spaces and plus signs."
     },
@@ -215,9 +364,99 @@
       "default": 48
     }
   ],
+  "blocks": [
+    {
+      "type": "channel",
+      "name": "Contact",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "One channel — a phone number, WhatsApp, an email address, a social profile or a shop address. Type the number however it reads best; the link is built to suit the action chosen below."
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "default": "phone",
+          "options": [
+            { "value": "phone", "label": "Phone" },
+            { "value": "whatsapp", "label": "WhatsApp" },
+            { "value": "chat", "label": "Chat" },
+            { "value": "email", "label": "Email" },
+            { "value": "instagram", "label": "Instagram" },
+            { "value": "facebook", "label": "Facebook" },
+            { "value": "youtube", "label": "YouTube" },
+            { "value": "pinterest", "label": "Pinterest" },
+            { "value": "tiktok", "label": "TikTok" },
+            { "value": "twitter", "label": "X / Twitter" },
+            { "value": "linkedin", "label": "LinkedIn" },
+            { "value": "telegram", "label": "Telegram" },
+            { "value": "map-pin", "label": "Address" },
+            { "value": "globe", "label": "Website" },
+            { "value": "none", "label": "No icon" }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Link text",
+          "default": "Call",
+          "info": "What the shopper reads — a word like Call, or the number itself. Leave empty to hide this channel."
+        },
+        {
+          "type": "select",
+          "id": "action",
+          "label": "Action",
+          "default": "call",
+          "info": "Decides how the number below is turned into a link.",
+          "options": [
+            { "value": "call", "label": "Start a phone call" },
+            { "value": "whatsapp", "label": "Open WhatsApp" },
+            { "value": "email", "label": "Open an email" },
+            { "value": "link", "label": "Open a link" },
+            { "value": "none", "label": "Show as text, no link" }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Number or email address",
+          "default": "+91 93197 50031",
+          "info": "For Call, WhatsApp and Email. Include the country code on a number; spaces, dashes and a plus sign are all fine and are stripped where the link needs them gone."
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link",
+          "info": "Used only when the action is Open a link — an Instagram profile, a contact page, a map."
+        }
+      ]
+    }
+  ],
   "presets": [
     {
-      "name": "PDP: Need any help"
+      "name": "PDP: Need any help",
+      "blocks": [
+        {
+          "type": "channel",
+          "settings": {
+            "icon": "phone",
+            "label": "Call",
+            "action": "call",
+            "value": "+91 93197 50031"
+          }
+        },
+        {
+          "type": "channel",
+          "settings": {
+            "icon": "whatsapp",
+            "label": "Chat",
+            "action": "whatsapp",
+            "value": "+91 93197 50031"
+          }
+        }
+      ]
     }
   ]
 }

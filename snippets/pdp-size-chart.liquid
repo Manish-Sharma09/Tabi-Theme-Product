@@ -1,0 +1,122 @@
+{% comment %}
+  The body of the Size Guide dialog.
+
+  The chart used to be one page per template - templates/product.*.json each
+  pointed the variant picker's `size_guide_page` setting at "size-guide" or
+  "kids-size-guide". That is the right default and it stays, but it cannot be
+  the only answer: a kaftan, a pair of trousers and a cushion cover on the same
+  template need different charts, and adding a template per chart means adding
+  a template per chart forever.
+
+  So the chart is resolved per product from metafields, and the template page
+  becomes the fallback underneath them. Four keys, in the `custom` namespace:
+
+    custom.size_chart_title   single line text   dialog heading
+    custom.size_chart_image   file (image)       a chart supplied as artwork
+    custom.size_chart         rich text          a chart written as copy
+    custom.size_chart_page    page reference     a chart written once as a page
+    custom.size_chart_note    multi-line text    the line under the chart
+
+  How they combine:
+
+  - Anything product-level set at all means the template page is not used. That
+    keeps "this product has its own chart" a single decision rather than a
+    merge the merchant has to reason about.
+  - Within product-level, all three render, in the order image, copy, page.
+    A brand whose designer sends a JPG and whose copywriter sends two lines of
+    "measure across the chest" gets both, in that order, without a code change.
+  - The note always renders last, template page or not. It is the one line that
+    is genuinely per product - "this style runs small" - while the chart it
+    sits under is usually shared.
+
+  Reuse across a catalogue is what `size_chart_page` is for: point fifty
+  products at one "Womens tops size chart" page and edit it in one place. The
+  image and copy keys are for the product that is genuinely its own case.
+
+  A product with nothing set and a template with no page renders no dialog and
+  no link - sections/main-product.liquid and snippets/product-variant-picker
+  .liquid both gate on the same three keys, so the link never opens onto an
+  empty box.
+
+  Accepts:
+  - product: {Object} product object.
+  - block:   {Object} the variant_picker block, carrying the template fallback
+              page and the label used when nothing supplies a title.
+
+  Usage:
+  {% render 'pdp-size-chart', product: product, block: block %}
+{% endcomment %}
+
+{%- liquid
+  assign mf_image = product.metafields.custom.size_chart_image
+  assign mf_copy = product.metafields.custom.size_chart
+  assign mf_page = product.metafields.custom.size_chart_page
+  assign mf_note = product.metafields.custom.size_chart_note
+  assign mf_title = product.metafields.custom.size_chart_title.value | default: product.metafields.custom.size_chart_title
+
+  assign template_page = block.settings.size_guide_page
+
+  comment
+    One "does this product bring its own chart" answer, computed once and used
+    for both the branch below and the heading. Three conditions written out
+    three times is how the link and the dialog drift apart.
+  endcomment
+  assign has_own = false
+  if mf_image != blank or mf_copy != blank or mf_page != blank
+    assign has_own = true
+  endif
+
+  comment
+    Heading, most specific first: an explicit title, then the title of whichever
+    page supplies the chart, then the link's own label. The page title is worth
+    preferring over the label because "Womens tops size chart" says more than
+    "Size Guide" once a store has several.
+  endcomment
+  assign heading = mf_title
+  if heading == blank
+    if has_own
+      assign heading = mf_page.value.title
+    else
+      assign heading = template_page.title
+    endif
+  endif
+  if heading == blank
+    assign heading = block.settings.size_guide_label | default: 'Size Guide'
+  endif
+-%}
+
+<h2 class="h2">{{ heading | escape }}</h2>
+
+<div class="pdp-sizechart">
+  {%- if has_own -%}
+    {%- if mf_image != blank -%}
+      <div class="pdp-sizechart__image">
+        {%- render 'pdp-metafield', field: mf_image -%}
+      </div>
+    {%- endif -%}
+
+    {%- if mf_copy != blank -%}
+      <div class="pdp-sizechart__copy">
+        {%- render 'pdp-metafield', field: mf_copy -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%}
+      A page's content is output rather than handed to pdp-metafield, because
+      the page is reached through a reference here and that snippet's
+      page_reference branch expects the metafield, not the page. Same HTML
+      either way.
+    {%- endcomment -%}
+    {%- if mf_page != blank -%}
+      <div class="pdp-sizechart__copy">{{ mf_page.value.content }}</div>
+    {%- endif -%}
+  {%- else -%}
+    <div class="pdp-sizechart__copy">{{ template_page.content }}</div>
+  {%- endif -%}
+
+  {%- if mf_note != blank -%}
+    <div class="pdp-sizechart__note">
+      {%- render 'pdp-metafield', field: mf_note -%}
+    </div>
+  {%- endif -%}
+</div>

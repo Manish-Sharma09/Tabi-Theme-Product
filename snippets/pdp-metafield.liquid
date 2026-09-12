@@ -1,0 +1,271 @@
+{% comment %}
+  Renders one metafield as finished page content, whatever type it is.
+
+  Every dynamic part of the product page needs the same thing: take a metafield
+  a merchant filled in and put it on the page correctly. Doing that per caller
+  is what produced the bugs this snippet exists to end - a list metafield
+  rendered as one run-on string, a file metafield rendered as the literal word
+  its drop stringifies to, a rich text metafield escaped into visible tags.
+
+  So the type switch lives here, once. Callers resolve *which* metafield they
+  want; this decides whether that is a paragraph, a bulleted list, an image, a
+  video or a link.
+
+  Pass the metafield itself, never its `.value`. The type is only readable on
+  the metafield, and without the type every value is an indistinguishable
+  string - which is exactly how the old per-caller code went wrong.
+
+  Types handled:
+    rich_text_field                         its own HTML, as authored
+    single_line_text_field                  <p>, line breaks preserved
+    multi_line_text_field                   <p>, line breaks preserved
+    file_reference        image             responsive <img>
+                          video             <video>, muted loop, no controls
+                          anything else     a download link
+    page_reference                          that page's content
+    url                                     a link
+    boolean                                 "Yes" / "No"
+    number_integer / number_decimal         the number
+    dimension / weight / volume             value + unit, e.g. "42 in"
+    rating                                  value + scale, e.g. "4.5 / 5"
+    money                                   formatted in the shop's currency
+    date / date_time                        formatted long, e.g. "4 March 2026"
+    color                                   a swatch chip beside the hex
+    product / collection / variant ref      a link to it
+    list.<any of the above>                 a <ul>, or a stack for files
+
+  Not handled: metaobject_reference, json. Liquid forbids a snippet rendering
+  itself, so a metaobject - whose fields are themselves metafields of arbitrary
+  type - cannot be walked from here without duplicating this whole switch. Both
+  render nothing rather than something wrong; callers that need a metaobject
+  read its fields themselves.
+
+  Accepts:
+  - field: {Object} the metafield, e.g. product.metafields.custom.fabric.
+  - bare:  {Boolean} omit the <p> around plain text, for callers that already
+            have a text container. Default false.
+
+  Usage:
+  {% render 'pdp-metafield', field: product.metafields.custom.fabric %}
+{% endcomment %}
+
+{%- liquid
+  assign f = field
+  assign t = f.type | default: ''
+
+  comment
+    A list metafield is the scalar type with 'list.' in front, and its value is
+    an array. Strip the prefix so one `case` serves both, and remember which it
+    was so the markup can differ - a list of sizes wants bullets, a single
+    paragraph does not.
+  endcomment
+  assign is_list = false
+  assign base = t
+  if t contains 'list.'
+    assign is_list = true
+    assign base = t | remove_first: 'list.'
+  endif
+
+  assign date_format = '%-d %B %Y'
+-%}
+
+{%- case base -%}
+  {%- comment -%}
+    Rich text arrives as HTML Shopify built from the editor's own structure, so
+    it is output as-is. Escaping it here would put visible <p> tags on the page;
+    `newline_to_br` on top of it would double every paragraph break.
+
+    A list of rich text has no wrapper: each entry is already block-level
+    content, and a <ul> of paragraphs indents copy that was never meant to be
+    indented.
+  {%- endcomment -%}
+  {%- when 'rich_text_field' -%}
+    {%- if is_list -%}
+      {%- for item in f.value -%}{{ item }}{%- endfor -%}
+    {%- else -%}
+      {{ f.value }}
+    {%- endif -%}
+
+  {%- comment -%}
+    Plain text. Escaped because a merchant pasting "M & L" or "<40cm" into a
+    text field means those characters literally, then `newline_to_br` so the
+    line breaks they typed survive into HTML. That order matters: escaping
+    after would turn the <br> tags back into visible text.
+  {%- endcomment -%}
+  {%- when 'single_line_text_field' or 'multi_line_text_field' -%}
+    {%- if is_list -%}
+      <ul class="pdp-mf__list">
+        {%- for item in f.value -%}
+          <li>{{ item | escape | newline_to_br }}</li>
+        {%- endfor -%}
+      </ul>
+    {%- elsif bare -%}
+      {{- f.value | escape | newline_to_br -}}
+    {%- else -%}
+      <p>{{ f.value | escape | newline_to_br }}</p>
+    {%- endif -%}
+
+  {%- comment -%}
+    Files. One `file_reference` can hold an image, a video or a document, and
+    which one is only knowable from the drop Shopify returns - so each is
+    sniffed by a property only it has: `sources` for video, `width` for an
+    image. Testing `media_type` alone is not enough, because an image file
+    reference returns an image drop with no media_type at all.
+
+    A list is a stack rather than a <ul>: bullets beside a photograph read as a
+    mistake.
+  {%- endcomment -%}
+  {%- when 'file_reference' -%}
+    {%- if is_list -%}
+      <div class="pdp-mf__media pdp-mf__media--stack">
+        {%- for item in f.value -%}
+          {%- if item.sources.size > 0 or item.media_type == 'video' -%}
+            {{ item | video_tag: image_size: '1200x', autoplay: false, loop: true, muted: true, controls: true, preload: 'metadata' }}
+          {%- elsif item.width > 0 -%}
+            {{
+              item
+              | image_url: width: 1400
+              | image_tag: loading: 'lazy', widths: '400, 600, 800, 1000, 1200, 1400', alt: item.alt
+            }}
+          {%- elsif item.url != blank -%}
+            <p><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.alt | default: item.url }}</a></p>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      {%- assign file = f.value -%}
+      {%- if file.sources.size > 0 or file.media_type == 'video' -%}
+        <div class="pdp-mf__media">
+          {{ file | video_tag: image_size: '1200x', autoplay: false, loop: true, muted: true, controls: true, preload: 'metadata' }}
+        </div>
+      {%- elsif file.width > 0 -%}
+        <div class="pdp-mf__media">
+          {{
+            file
+            | image_url: width: 1400
+            | image_tag: loading: 'lazy', widths: '400, 600, 800, 1000, 1200, 1400', alt: file.alt
+          }}
+        </div>
+      {%- elsif file.url != blank -%}
+        <p><a href="{{ file.url }}" target="_blank" rel="noopener">{{ file.alt | default: file.url }}</a></p>
+      {%- endif -%}
+    {%- endif -%}
+
+  {%- comment -%}
+    A page reference is how a chart or a policy gets written once and reused on
+    a hundred products. Its content is already HTML - tables included, which no
+    text metafield type can carry - so it is output unescaped.
+  {%- endcomment -%}
+  {%- when 'page_reference' -%}
+    {%- if is_list -%}
+      {%- for item in f.value -%}{{ item.content }}{%- endfor -%}
+    {%- else -%}
+      {{ f.value.content }}
+    {%- endif -%}
+
+  {%- when 'url' -%}
+    {%- if is_list -%}
+      <ul class="pdp-mf__list">
+        {%- for item in f.value -%}
+          <li><a href="{{ item }}" target="_blank" rel="noopener">{{ item }}</a></li>
+        {%- endfor -%}
+      </ul>
+    {%- else -%}
+      <p><a href="{{ f.value }}" target="_blank" rel="noopener">{{ f.value }}</a></p>
+    {%- endif -%}
+
+  {%- comment -%}
+    A boolean is shown as a word because the rows that use one are statements a
+    shopper reads - "Pre-shrunk: Yes" - not form state. `if f.value` rather
+    than a string compare: the value is a real boolean.
+  {%- endcomment -%}
+  {%- when 'boolean' -%}
+    {%- comment -%}
+      Literal words rather than a translation key: `t` on a key no locale file
+      defines returns the string "Translation missing: ...", which is not blank,
+      so a `default` filter behind it never fires and the shopper reads the
+      error. Adding the key to all fifty locale files is the fix if this page
+      is ever translated.
+    {%- endcomment -%}
+    <p>
+      {%- if f.value -%}Yes{%- else -%}No{%- endif -%}
+    </p>
+
+  {%- when 'number_integer' or 'number_decimal' -%}
+    {%- if is_list -%}
+      <ul class="pdp-mf__list">
+        {%- for item in f.value -%}<li>{{ item }}</li>{%- endfor -%}
+      </ul>
+    {%- else -%}
+      <p>{{ f.value }}</p>
+    {%- endif -%}
+
+  {%- comment -%}
+    Measurements are objects, not numbers: {value, unit}. Printing the object
+    gives the shopper a JSON blob, which is the single most common way a
+    "dimension" metafield goes wrong on a live page.
+  {%- endcomment -%}
+  {%- when 'dimension' or 'weight' or 'volume' -%}
+    {%- if is_list -%}
+      <ul class="pdp-mf__list">
+        {%- for item in f.value -%}<li>{{ item.value }} {{ item.unit }}</li>{%- endfor -%}
+      </ul>
+    {%- else -%}
+      <p>{{ f.value.value }} {{ f.value.unit }}</p>
+    {%- endif -%}
+
+  {%- when 'rating' -%}
+    <p>{{ f.value.rating }} / {{ f.value.scale_max }}</p>
+
+  {%- comment -%}
+    `money` rather than the raw amount, so the figure carries the shopper's
+    currency and the market's formatting instead of a bare decimal.
+  {%- endcomment -%}
+  {%- when 'money' -%}
+    <p>{{ f.value | money }}</p>
+
+  {%- when 'date' or 'date_time' -%}
+    {%- if is_list -%}
+      <ul class="pdp-mf__list">
+        {%- for item in f.value -%}<li>{{ item | date: date_format }}</li>{%- endfor -%}
+      </ul>
+    {%- else -%}
+      <p>{{ f.value | date: date_format }}</p>
+    {%- endif -%}
+
+  {%- comment -%}
+    A hex string on its own tells a shopper nothing, so the chip carries the
+    colour and the text carries the code for anyone who needs it.
+  {%- endcomment -%}
+  {%- when 'color' -%}
+    <p class="pdp-mf__color">
+      <span class="pdp-mf__swatch" style="background-color: {{ f.value }};"></span>
+      <span>{{ f.value }}</span>
+    </p>
+
+  {%- when 'product_reference' or 'collection_reference' or 'variant_reference' -%}
+    {%- if is_list -%}
+      <ul class="pdp-mf__list">
+        {%- for item in f.value -%}
+          <li><a href="{{ item.url }}">{{ item.title }}</a></li>
+        {%- endfor -%}
+      </ul>
+    {%- else -%}
+      <p><a href="{{ f.value.url }}">{{ f.value.title }}</a></p>
+    {%- endif -%}
+
+  {%- comment -%}
+    An unknown or undefined type. A metafield created before its definition
+    existed reports no type at all, and it is always a string in practice, so
+    it is treated as one rather than dropped.
+  {%- endcomment -%}
+  {%- else -%}
+    {%- assign fallback = f.value | default: f -%}
+    {%- if fallback != blank -%}
+      {%- if bare -%}
+        {{- fallback | escape | newline_to_br -}}
+      {%- else -%}
+        <p>{{ fallback | escape | newline_to_br }}</p>
+      {%- endif -%}
+    {%- endif -%}
+{%- endcase -%}

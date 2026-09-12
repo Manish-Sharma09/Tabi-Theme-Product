@@ -30,6 +30,27 @@
   Rows with neither a metafield value nor typed text are skipped, a column with
   no surviving rows is skipped, and the section disappears when nothing
   survives at all.
+
+  Three things make that worth using rather than just possible:
+
+  - Any metafield type works, because the value goes through
+    snippets/pdp-metafield.liquid rather than being printed here. A list comes
+    out as a bulleted list, a file as an image or a video, a page reference as
+    that page's content, a measurement as "42 in" rather than as the JSON of
+    the object Shopify actually returns. Before, everything but rich text was
+    escaped and printed, so a list metafield arrived as one run-on word.
+
+  - `Metafield key` takes `namespace.key` as well as a bare key, and a bare key
+    means the `custom` namespace. So an app's namespace, or a second namespace
+    of the store's own, is reachable without a code change, and every key
+    already typed into an existing template keeps working untouched.
+
+  - A product can override the row's heading too, at `<key>_heading` in the
+    same namespace. A row keyed `fabric` reads `custom.fabric_heading`. That is
+    for the product whose "Fabric" row is really about its leather, or its
+    brass - the row heading is part of the copy, and on that product it is
+    wrong. The block's heading still has to be filled in: it is how the row is
+    recognisable in the theme editor, and it is what every other product shows.
 {% endcomment %}
 
 {{ 'product-page.css' | asset_url | stylesheet_tag }}
@@ -37,15 +58,92 @@
 
 {%- liquid
   comment
-    The Specification row is built from three fit metafields rather than one
-    key, so resolve them up front - the liveness pass and the render loop then
-    read the same values instead of asking twice and risking disagreement.
+    The Specification row is built from several metafields rather than one key,
+    so resolve them up front - the liveness pass and the render loop then read
+    the same values instead of asking twice and risking disagreement.
+
+    Three of them are fixed, because the fit, the model's height and the
+    sizing-up advice are on every garment and the design names them. The rest
+    are label-and-key pairs typed on the block, so "Length", "Thread count" or
+    "Drop" can be added from the theme editor without touching this file. There
+    is no difference in how they render.
   endcomment
+  assign spec_block = section.blocks | where: 'type', 'spec' | first
   assign spec_fit = product.metafields.custom.fit.value | default: product.metafields.custom.fit
   assign spec_model = product.metafields.custom.model_details.value | default: product.metafields.custom.model_details
   assign spec_reco = product.metafields.custom.fit_recommendation.value | default: product.metafields.custom.fit_recommendation
+
+  comment
+    The extra pairs are flattened into two delimited strings rather than kept
+    as metafields, because a spec row is one short line by contract - "Fit:
+    Relaxed" - and a string is the only thing this section can carry from the
+    resolution pass into the render loop through a Liquid `assign`.
+
+    That is also why these do not go through snippets/pdp-metafield.liquid: it
+    returns block-level markup, <p> and <ul>, and a spec row puts its value in
+    a <span> beside the term, where a <p> is invalid nesting. The handful of
+    types that are not already a plain string are flattened to one here.
+
+    '~|~' matches the delimiter sections/pdp-why-love.liquid uses for the same
+    job: no label or value is ever going to contain it, and unlike a comma it
+    does not appear inside the values themselves.
+  endcomment
+  assign spec_extra_terms = ''
+  assign spec_extra_values = ''
+  assign spec_extra_count = 0
+  for i in (1..3)
+    assign label_key = 'extra_' | append: i | append: '_label'
+    assign field_key = 'extra_' | append: i | append: '_key'
+    assign term = spec_block.settings[label_key]
+    assign raw_key = spec_block.settings[field_key] | strip
+
+    if term == blank or raw_key == blank
+      continue
+    endif
+
+    assign ns = 'custom'
+    assign key = raw_key
+    if raw_key contains '.'
+      assign parts = raw_key | split: '.'
+      assign ns = parts[0]
+      assign key = parts[1]
+    endif
+    assign f = product.metafields[ns][key]
+
+    assign value = ''
+    if f.type == 'dimension' or f.type == 'weight' or f.type == 'volume'
+      assign value = f.value.value | append: ' ' | append: f.value.unit
+    elsif f.type == 'rating'
+      assign value = f.value.rating | append: ' / ' | append: f.value.scale_max
+    elsif f.type == 'boolean'
+      if f.value
+        assign value = 'Yes'
+      else
+        assign value = 'No'
+      endif
+    elsif f.type contains 'list.'
+      assign value = f.value | join: ', '
+    elsif f.type == 'money'
+      assign value = f.value | money
+    elsif f.type == 'date' or f.type == 'date_time'
+      assign value = f.value | date: '%-d %B %Y'
+    else
+      assign value = f.value | default: f
+    endif
+
+    if value == blank
+      continue
+    endif
+
+    assign spec_extra_terms = spec_extra_terms | append: term | append: '~|~'
+    assign spec_extra_values = spec_extra_values | append: value | append: '~|~'
+    assign spec_extra_count = spec_extra_count | plus: 1
+  endfor
+  assign spec_extra_term_list = spec_extra_terms | split: '~|~'
+  assign spec_extra_value_list = spec_extra_values | split: '~|~'
+
   assign has_spec = false
-  if spec_fit != blank or spec_model != blank or spec_reco != blank
+  if spec_fit != blank or spec_model != blank or spec_reco != blank or spec_extra_count > 0
     assign has_spec = true
   endif
 
@@ -104,10 +202,28 @@
     else
       assign live = false
       if block.settings.heading != blank
-        assign key = block.settings.metafield_key | strip
+        comment
+          `namespace.key`, or a bare key meaning `custom`. Split on the dot
+          rather than searching for a known namespace, so a namespace this
+          theme has never heard of works the day an app creates it.
+
+          Resolved here and again in the render loop rather than once into a
+          variable, because Liquid has no way to carry a metafield object out
+          of this loop - only strings survive an `assign` across iterations,
+          and a string is exactly what must not be passed on: it is the type
+          that decides how the value is rendered.
+        endcomment
+        assign raw_key = block.settings.metafield_key | strip
+        assign ns = 'custom'
+        assign key = raw_key
+        if raw_key contains '.'
+          assign parts = raw_key | split: '.'
+          assign ns = parts[0]
+          assign key = parts[1]
+        endif
         assign field = ''
         if key != blank
-          assign field = product.metafields.custom[key]
+          assign field = product.metafields[ns][key]
         endif
         comment
           Typed text is a fallback, not an alternative. A row pointed at a
@@ -266,10 +382,35 @@
                 {%- endif -%}
 
                 {%- liquid
-                  assign key = block.settings.metafield_key | strip
+                  assign raw_key = block.settings.metafield_key | strip
+                  assign ns = 'custom'
+                  assign key = raw_key
+                  if raw_key contains '.'
+                    assign parts = raw_key | split: '.'
+                    assign ns = parts[0]
+                    assign key = parts[1]
+                  endif
+
                   assign field = ''
                   if key != blank
-                    assign field = product.metafields.custom[key]
+                    assign field = product.metafields[ns][key]
+                  endif
+
+                  comment
+                    The heading can be overridden per product at
+                    `<key>_heading`, for the product whose "Fabric" row is
+                    really about its brass. Resolved only when the row has a
+                    key at all, so a row with no metafield behind it cannot
+                    pick up an override by coincidence.
+                  endcomment
+                  assign row_heading = block.settings.heading
+                  if key != blank
+                    assign heading_key = key | append: '_heading'
+                    assign heading_field = product.metafields[ns][heading_key]
+                    assign heading_override = heading_field.value | default: heading_field
+                    if heading_override != blank
+                      assign row_heading = heading_override
+                    endif
                   endif
                 -%}
                 <details
@@ -278,7 +419,7 @@
                   {{ block.shopify_attributes }}
                 >
                   <summary>
-                    <span class="pdp-info__heading">{{ block.settings.heading | escape }}</span>
+                    <span class="pdp-info__heading">{{ row_heading | escape }}</span>
                     {%- render 'pdp-icon', icon: 'caret' -%}
                   </summary>
                   <div class="pdp-info__content rte">
@@ -309,6 +450,21 @@
                               <span>{{ spec_reco | escape | newline_to_br }}</span>
                             </li>
                           {%- endif -%}
+
+                          {%- comment -%}
+                            The pairs typed on the block, after the three the
+                            design names. Read by index from the two lists
+                            built in the resolution pass, which only ever grew
+                            together - a pair missing either its label or its
+                            value was dropped from both, so the two lists
+                            cannot fall out of step.
+                          {%- endcomment -%}
+                          {%- for term in spec_extra_term_list -%}
+                            <li>
+                              <span class="pdp-info__specterm">{{ term | escape }}</span>
+                              <span>{{ spec_extra_value_list[forloop.index0] | escape | newline_to_br }}</span>
+                            </li>
+                          {%- endfor -%}
                         </ul>
                       {%- else -%}
                         {{ block.settings.content }}
@@ -358,16 +514,19 @@
                       </ul>
                     {%- elsif field != blank -%}
                       {%- comment -%}
-                        A rich text metafield renders its own HTML when output
-                        directly. Every other type is a plain string, which has
-                        to be escaped and needs its line breaks turned into
-                        markup to survive in an HTML context.
+                        The metafield itself, not its value - the type is what
+                        decides whether this row is a paragraph, a bulleted
+                        list, an image, a video or a page, and the type is only
+                        readable on the metafield.
+
+                        This branch used to handle rich text and treat
+                        everything else as a string, which meant a list
+                        metafield arrived as one run-on word and a file
+                        metafield as the name of its drop. That switch now
+                        lives in one place, shared with the size chart and the
+                        "why you'll love it" rows.
                       {%- endcomment -%}
-                      {%- if field.type == 'rich_text_field' -%}
-                        {{ field }}
-                      {%- else -%}
-                        <p>{{ field.value | default: field | escape | newline_to_br }}</p>
-                      {%- endif -%}
+                      {%- render 'pdp-metafield', field: field -%}
                     {%- else -%}
                       {{ block.settings.content }}
                     {%- endif -%}
@@ -394,6 +553,10 @@
     {
       "type": "paragraph",
       "content": "Add a Column heading block to start a column, then Accordion blocks under it. Every accordion belongs to the column heading above it, and the number of columns is however many you add — the design uses four."
+    },
+    {
+      "type": "paragraph",
+      "content": "Any accordion can be filled per product from a metafield instead of typed text — open it and look under 'Per-product text'. Rows with nothing to show on a product are hidden on that product, and a column left with no rows is hidden too."
     },
     {
       "type": "text",
@@ -476,10 +639,18 @@
           "content": "Per-product text (optional)"
         },
         {
+          "type": "paragraph",
+          "content": "Any metafield type works. Text becomes a paragraph, a list becomes bullet points, a file becomes an image or a video, a page reference shows that page, a measurement shows its unit."
+        },
+        {
           "type": "text",
           "id": "metafield_key",
           "label": "Metafield key",
-          "info": "Key inside the `custom` namespace, e.g. `craft_technique`. Products that have this metafield show it instead of the text above; products that do not fall back to the text above. Leave both empty to hide this row."
+          "info": "A key in the `custom` namespace, e.g. `craft_technique` — or `namespace.key` for any other namespace. Products that have it show it instead of the text above; products that do not fall back to the text above. Leave both empty to hide this row."
+        },
+        {
+          "type": "paragraph",
+          "content": "A product can also rename this row, by filling `<key>_heading` in the same namespace — a row keyed `fabric` reads `custom.fabric_heading`. Every other product keeps the heading above."
         },
         {
           "type": "checkbox",
@@ -497,7 +668,7 @@
       "settings": [
         {
           "type": "paragraph",
-          "content": "Built from three product metafields — custom.fit, custom.model_details and custom.fit_recommendation. The row hides itself on products where all three are empty, unless you type fallback text below."
+          "content": "Built from product metafields — custom.fit, custom.model_details and custom.fit_recommendation, plus any you add below. The row hides itself on products where all of them are empty, unless you type fallback text."
         },
         {
           "type": "text",
@@ -524,10 +695,53 @@
           "default": "Fit tip"
         },
         {
+          "type": "header",
+          "content": "More specifications"
+        },
+        {
+          "type": "paragraph",
+          "content": "Three more rows of your own — a label and the metafield that fills it. Each appears only on products where that metafield is set, and only when both fields here are filled in. Use `namespace.key` for a namespace other than `custom`."
+        },
+        {
+          "type": "text",
+          "id": "extra_1_label",
+          "label": "Label 4"
+        },
+        {
+          "type": "text",
+          "id": "extra_1_key",
+          "label": "Metafield key 4",
+          "info": "e.g. `length` or `specs.thread_count`"
+        },
+        {
+          "type": "text",
+          "id": "extra_2_label",
+          "label": "Label 5"
+        },
+        {
+          "type": "text",
+          "id": "extra_2_key",
+          "label": "Metafield key 5"
+        },
+        {
+          "type": "text",
+          "id": "extra_3_label",
+          "label": "Label 6"
+        },
+        {
+          "type": "text",
+          "id": "extra_3_key",
+          "label": "Metafield key 6"
+        },
+        {
+          "type": "header",
+          "content": "Fallback"
+        },
+        {
           "type": "richtext",
           "id": "content",
           "label": "Fallback text",
-          "info": "Shown only on products where all three metafields are empty. Leave empty to hide the row there instead."
+          "info": "Shown only on products where every metafield above is empty. Leave empty to hide the row there instead."
         }
       ]
     },

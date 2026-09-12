@@ -5,6 +5,10 @@
   - product: {Object} product object.
   - block: {Object} passing the block information.
   - product_form_id: {String} Id of the product form to which the variant picker is associated.
+  - has_size_chart: {Boolean} optional. Whether a size chart exists for this
+    product, from either its metafields or the template page. Omit it and the
+    block's own size_guide_page setting decides, which is what the featured
+    product section relies on.
   Usage:
   {% render 'product-variant-picker', product: product, block: block, product_form_id: product_form_id %}
 {% endcomment %}
@@ -66,8 +70,28 @@
             assign is_guide_option = true
           endif
 
+          comment
+            `has_size_chart` comes from sections/main-product.liquid, which
+            resolves the product's own size chart metafields as well as the
+            template's fallback page - so the link appears for a product that
+            carries its own chart on a template with no page set at all.
+
+            It is absent when this snippet is rendered from
+            sections/featured-product.liquid, whose variant picker block has no
+            size guide settings, so the page setting still decides there and
+            the featured product keeps Dawn's plain legend. Written as an OR
+            rather than a preference: where the caller says no, the page
+            setting is empty too, because that is how the caller worked it out.
+          endcomment
+          assign chart_available = false
+          if has_size_chart
+            assign chart_available = true
+          elsif block.settings.size_guide_page != blank
+            assign chart_available = true
+          endif
+
           assign show_guide = false
-          if block.settings.size_guide_page != blank and is_guide_option
+          if chart_available and is_guide_option
             assign show_guide = true
           endif
 

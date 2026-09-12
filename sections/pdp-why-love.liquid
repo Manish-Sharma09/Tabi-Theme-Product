@@ -23,50 +23,141 @@
   batches", which used to be a full-width band of its own. Marking two rows
   works, but the design intends one.
 
+  Every part of the card can come from the product, not just the copy. The
+  block settings stay exactly as they were and every one of them still works -
+  they are the fallback, and the theme editor is unchanged. What the metafields
+  add is the ability to say something different on one product without adding a
+  template for it.
+
   Metafields read:
+  - custom.usp_label                              (single line text)
+  - custom.usp_lede                               (single line text)
+  - custom.usp_media                              (file: image or video)
   - custom.usp_1_heading .. custom.usp_6_heading  (single line text)
   - custom.usp_1_text    .. custom.usp_6_text     (multi-line text)
+  - custom.usp_1_icon    .. custom.usp_6_icon     (single line text, icon name)
+  - custom.usp_1_highlight .. usp_6_highlight     (true/false)
+
+  Two consequences worth knowing about:
+
+  - The rows are the six numbered slots, not the blocks. A product can fill
+    usp_6_heading on a template that only has five blocks and the sixth row
+    appears, with the icon from usp_6_icon. That is the point of numbering them
+    - a row is a position, and a block is only the default copy for it.
+
+  - custom.usp_media takes one file and works out what it is. An image renders
+    as the photo, a video renders as a real <video> with the section's autoplay,
+    loop, mute and controls settings applied to it. So the merchant uploads
+    whatever the shoot produced without choosing a field first, and the section
+    behaves the same either way. A YouTube or Vimeo link is still a section
+    setting, because Shopify has no metafield type that holds one as an
+    embeddable video rather than as a bare string.
 {% endcomment %}
 
 {{ 'product-page.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
+  comment
+    The section label and the opening line, per product where the product says
+    so. Resolved the same way as everything else here: the metafield if it has
+    one, the block or section setting if it does not.
+  endcomment
+  assign section_label = product.metafields.custom.usp_label.value | default: product.metafields.custom.usp_label
+  if section_label == blank
+    assign section_label = section.settings.heading
+  endif
+
+  assign section_lede = product.metafields.custom.usp_lede.value | default: product.metafields.custom.usp_lede
+  if section_lede == blank
+    assign section_lede = section.settings.lede
+  endif
+
   assign rendered = 0
   assign headings = ''
   assign bodies = ''
   assign icons = ''
   assign highlights = ''
 
-  for block in section.blocks
-    assign heading_key = 'usp_' | append: forloop.index | append: '_heading'
-    assign text_key = 'usp_' | append: forloop.index | append: '_text'
+  comment
+    Six slots, walked by number, rather than a loop over the blocks.
+
+    The mapping is the same one the blocks always had - slot 1 is the first
+    block, slot 2 the second - so dragging a row in the theme editor still
+    reorders which metafield shows where, and nothing about an existing
+    template changes. What it also allows is a slot with a metafield and no
+    block behind it: a product that fills usp_6_heading on a five-block
+    template gets a sixth row rather than silently losing it. Six because that
+    is the block limit and the documented range of the keys.
+  endcomment
+  for i in (1..6)
+    assign row_block = section.blocks[forloop.index0]
+
+    assign heading_key = 'usp_' | append: i | append: '_heading'
+    assign text_key = 'usp_' | append: i | append: '_text'
+    assign icon_key = 'usp_' | append: i | append: '_icon'
+    assign highlight_key = 'usp_' | append: i | append: '_highlight'
 
     assign heading = product.metafields.custom[heading_key].value | default: product.metafields.custom[heading_key]
     assign body = product.metafields.custom[text_key].value | default: product.metafields.custom[text_key]
+    assign icon = product.metafields.custom[icon_key].value | default: product.metafields.custom[icon_key]
 
     comment
       Fall back per field rather than per row: a product that has a heading
       metafield but no body should keep the block's body, not lose it.
     endcomment
     if heading == blank
-      assign heading = block.settings.heading
+      assign heading = row_block.settings.heading
     endif
     if body == blank
-      assign body = block.settings.text
+      assign body = row_block.settings.text
+    endif
+    if icon == blank
+      assign icon = row_block.settings.icon
+    endif
+    comment
+      'none' rather than nothing when no icon resolves - which is what happens
+      on a slot with no block behind it. An empty string appended to the list
+      below would leave two delimiters together and shift every icon after it
+      onto the wrong row. 'none' is already the value the render loop reads as
+      "draw no icon", so the sentinel and the setting are the same thing.
+    endcomment
+    if icon == blank
+      assign icon = 'none'
+    endif
+
+    comment
+      Highlight is a boolean, so "the product has not decided" cannot be told
+      from "the product says no" by looking at the value - false and nil both
+      read as blank. The type is only readable when the metafield exists, so
+      that is what decides whether the product has an opinion at all.
+    endcomment
+    assign highlight_field = product.metafields.custom[highlight_key]
+    if highlight_field.type == 'boolean'
+      assign highlight = highlight_field.value
+    else
+      assign highlight = row_block.settings.highlight
     endif
 
     if heading != blank
       assign rendered = rendered | plus: 1
       assign headings = headings | append: heading | append: '~|~'
+      comment
+        A blank body is the one entry allowed to be empty. `split` keeps an
+        empty entry between two delimiters, so an interior blank still holds
+        its position; a blank on the last row is dropped instead, and a body
+        list one short is read as nil at that index - which renders no body,
+        which is exactly what a blank body means. Nothing else here can be
+        empty, because a shifted icon or flag would attach to the wrong row.
+      endcomment
       assign bodies = bodies | append: body | append: '~|~'
-      assign icons = icons | append: block.settings.icon | append: '~|~'
+      assign icons = icons | append: icon | append: '~|~'
       comment
         Flags carry a value for every surviving row so this list stays the same
         length as the other three and can be read by the same index. A bare
         boolean appended to a string is '' when false, which would collapse two
         entries into one.
       endcomment
-      if block.settings.highlight
+      if highlight
         assign highlights = highlights | append: '1' | append: '~|~'
       else
         assign highlights = highlights | append: '0' | append: '~|~'
@@ -94,19 +185,60 @@
       {%- endcomment -%}
       {%- liquid
         comment
-          One "is there media" answer for the class, the ratio and the render,
-          rather than three conditions that can disagree. A Shopify-hosted video
-          wins over an external URL, and either wins over the image - so a
-          merchant who adds a video to a card that already had a photo gets the
-          video, and can go back by clearing it.
+          One answer for the class, the ratio and the render, rather than
+          several conditions that can disagree.
+
+          The product's own file wins over everything on the section, because
+          that is the whole point of it; within the section a Shopify-hosted
+          video wins over an external URL, and either wins over the image. So a
+          merchant who uploads a video to a product that already had a section
+          photo gets the video, and clearing the metafield puts the photo back.
+
+          `custom.usp_media` is one file field holding either an image or a
+          video, and which it is has to be sniffed rather than asked: an image
+          file reference returns a drop with no media_type at all, so the test
+          is for a property only one of them has - `sources` for a video,
+          `width` for an image. A list metafield is accepted too and its first
+          entry used, so a merchant who defined the field as a list rather than
+          a single file is not left with a card that renders nothing.
         endcomment
+        assign mf_media = product.metafields.custom.usp_media
+        assign mf_file = mf_media.value
+        if mf_media.type contains 'list.'
+          assign mf_file = mf_media.value.first
+        endif
+
+        assign media_kind = ''
+        if mf_file.sources.size > 0 or mf_file.media_type == 'video'
+          assign media_kind = 'product_video'
+        elsif mf_file.width > 0
+          assign media_kind = 'product_image'
+        elsif section.settings.video != blank
+          assign media_kind = 'video'
+        elsif section.settings.video_url != blank
+          assign media_kind = 'embed'
+        elsif section.settings.image != blank
+          assign media_kind = 'image'
+        endif
+
         assign has_video = false
-        if section.settings.video != blank or section.settings.video_url != blank
+        if media_kind == 'product_video' or media_kind == 'video' or media_kind == 'embed'
           assign has_video = true
         endif
+
         assign has_media = false
-        if has_video or section.settings.image != blank
+        if media_kind != blank
           assign has_media = true
+        endif
+
+        comment
+          Muting is forced on wherever autoplay is on, for every video source.
+          Every browser blocks an unmuted autoplay and the failure is silent - a
+          poster frame that never moves and nothing in the console.
+        endcomment
+        assign v_muted = section.settings.video_mute
+        if section.settings.video_autoplay
+          assign v_muted = true
         endif
 
         assign split = '1fr 1fr'
@@ -121,12 +253,12 @@
         style="--pdp-why-split: {{ split }};{% if section.settings.media_ratio != 'adapt' %} --pdp-why-ratio: {{ section.settings.media_ratio }};{% endif %}"
       >
         <div class="pdp-why__content">
-          {%- if section.settings.heading != blank -%}
-            <p class="pdp-eyebrow pdp-why__label">{{ section.settings.heading | escape }}</p>
+          {%- if section_label != blank -%}
+            <p class="pdp-eyebrow pdp-why__label">{{ section_label | escape }}</p>
           {%- endif -%}
 
-          {%- if section.settings.lede != blank -%}
-            <p class="pdp-why__lede">{{ section.settings.lede | escape }}</p>
+          {%- if section_lede != blank -%}
+            <p class="pdp-why__lede">{{ section_lede | escape }}</p>
           {%- endif -%}
 
           <ul class="pdp-why__list">
@@ -162,20 +294,40 @@
         {%- endcomment -%}
         {%- if has_media -%}
           <div class="pdp-why__media{% if has_video %} pdp-why__media--video{% endif %}{% if section.settings.media_ratio != 'adapt' %} pdp-why__media--ratio{% endif %}">
-            {%- if section.settings.video != blank -%}
+            {%- if media_kind == 'product_video' -%}
+              {%- comment -%}
+                The product's own video file. Rendered with exactly the section's
+                autoplay, loop, mute and controls settings, so a merchant who
+                swaps the section video for a per-product one does not also have
+                to re-set how it plays - which is the "settings stay the same"
+                half of this section being product-driven.
+              {%- endcomment -%}
+              {{
+                mf_file
+                | video_tag:
+                  image_size: '1400x',
+                  autoplay: section.settings.video_autoplay,
+                  loop: section.settings.video_loop,
+                  muted: v_muted,
+                  controls: section.settings.video_controls,
+                  preload: 'metadata'
+              }}
+            {%- elsif media_kind == 'product_image' -%}
+              {{
+                mf_file
+                | image_url: width: 1400
+                | image_tag:
+                  loading: 'lazy',
+                  sizes: '(min-width: 990px) 50vw, 100vw',
+                  widths: '400, 600, 800, 1000, 1200, 1400',
+                  alt: mf_file.alt
+              }}
+            {%- elsif media_kind == 'video' -%}
               {%- comment -%}
                 A Shopify-hosted video, so autoplay, muting and looping are
                 attributes on a real <video> rather than provider query
-                parameters. `muted` is forced on whenever autoplay is on: every
-                browser blocks an unmuted autoplay, and the failure is silent -
-                a poster frame that never moves and no error anywhere.
+                parameters.
               {%- endcomment -%}
-              {%- liquid
-                assign v_muted = section.settings.video_mute
-                if section.settings.video_autoplay
-                  assign v_muted = true
-                endif
-              -%}
               {{
                 section.settings.video
                 | video_tag:
@@ -186,7 +338,7 @@
                   controls: section.settings.video_controls,
                   preload: 'metadata'
               }}
-            {%- elsif section.settings.video_url != blank -%}
+            {%- elsif media_kind == 'embed' -%}
               {%- comment -%}
                 YouTube and Vimeo do not take the same parameters: YouTube wants
                 `mute` and needs `playlist` set to its own id before `loop` does
@@ -244,7 +396,19 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Each row shows the product metafield when it is set — custom.usp_1_heading and custom.usp_1_text for row one, usp_2_* for row two, and so on — and the text typed on the block otherwise. Clear both and that row is hidden."
+      "content": "Everything here is a fallback. A product that fills the matching metafield shows its own instead, and a product that does not shows what is typed here — so this section can be set up once and then said differently on any product without a new template."
+    },
+    {
+      "type": "paragraph",
+      "content": "Row one reads custom.usp_1_heading, usp_1_text, usp_1_icon and usp_1_highlight; row two reads usp_2_*, and so on to usp_6_*. A row with no heading from either source is hidden, and a product can fill a row this section has no block for."
+    },
+    {
+      "type": "paragraph",
+      "content": "Icon names for usp_N_icon: leaf, flower, needle, shield, box, feather, hand, weave, block-print, garment, tag, exchange, process, person, truck, clock, check, calendar, or none. Anything else draws no icon."
+    },
+    {
+      "type": "paragraph",
+      "content": "The label and opening line below read custom.usp_label and custom.usp_lede."
     },
     {
       "type": "text",
@@ -272,7 +436,11 @@
     },
     {
       "type": "paragraph",
-      "content": "A video wins over the image when one is set, and a Shopify-hosted video wins over a URL. Clear the video to go back to the photo."
+      "content": "custom.usp_media on the product wins over everything here. It is one file field that takes either an image or a video and works out which — the video plays with the settings below, so nothing needs re-setting per product."
+    },
+    {
+      "type": "paragraph",
+      "content": "Otherwise: a video wins over the image, and an uploaded video wins over a link. Clear the video to go back to the photo."
     },
     {
       "type": "video",
@@ -418,6 +586,7 @@
           "type": "select",
           "id": "icon",
           "label": "Icon",
+          "info": "Used when this row's usp_N_icon metafield is empty.",
           "default": "leaf",
           "options": [
             {
@@ -499,7 +668,7 @@
           "id": "highlight",
           "label": "Highlight this row",
           "default": false,
-          "info": "Inverts the row to the brand green and bleeds it to the card's edges. The design uses this on one row only."
+          "info": "Inverts the row to the brand green and bleeds it to the card's edges. The design uses this on one row only. A product's usp_N_highlight metafield overrides it either way."
         }
       ]
     }

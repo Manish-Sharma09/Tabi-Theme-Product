@@ -8,6 +8,40 @@
   be compared side by side on a preview theme, and so a single template can be
   rolled back from the theme editor without a deploy.
 {%- endcomment -%}
+
+{%- comment -%}
+  Whether a size chart exists at all, decided once for the whole section.
+
+  Two places need the answer and they must never disagree: the link beside the
+  "Select Size" legend, rendered from inside the block loop, and the dialog the
+  link opens, rendered at section level far below it. When the answer was
+  simply "is the template's size_guide_page set", both could read the setting
+  and agree by accident. Now that a chart can come from a product metafield
+  instead, an accidental agreement is not good enough - a product with a
+  metafield chart on a template with no page would have shown a dialog with no
+  opener, and the reverse would have shown a link that opened onto nothing.
+
+  See snippets/pdp-size-chart.liquid for what each key does.
+{%- endcomment -%}
+{%- liquid
+  assign variant_picker_block = section.blocks | where: 'type', 'variant_picker' | first
+  assign size_guide_page = variant_picker_block.settings.size_guide_page
+
+  assign pdp_has_own_size_chart = false
+  if product.metafields.custom.size_chart_image != blank
+    assign pdp_has_own_size_chart = true
+  elsif product.metafields.custom.size_chart != blank
+    assign pdp_has_own_size_chart = true
+  elsif product.metafields.custom.size_chart_page != blank
+    assign pdp_has_own_size_chart = true
+  endif
+
+  assign pdp_has_size_chart = false
+  if pdp_has_own_size_chart or size_guide_page != blank
+    assign pdp_has_size_chart = true
+  endif
+-%}
+
 <product-info
   id="MainProduct-{{ section.id }}"
   class="section-{{ section.id }}-padding gradient color-{{ section.settings.color_scheme }}{% if section.settings.enable_new_layout %} pdp{% endif %}"
@@ -634,7 +668,12 @@
                 %}
 
               {%- when 'variant_picker' -%}
-                {% render 'product-variant-picker', product: product, block: block, product_form_id: product_form_id %}
+                {% render 'product-variant-picker',
+                  product: product,
+                  block: block,
+                  product_form_id: product_form_id,
+                  has_size_chart: pdp_has_size_chart
+                %}
               {%- when 'buy_buttons' -%}
                 {%- render 'buy-buttons',
                   block: block,
@@ -992,9 +1031,7 @@
       variant picker matters because product-info.js replaces that markup on
       every variant change, which would tear down an open modal mid-interaction.
     {%- endcomment -%}
-    {%- assign variant_picker_block = section.blocks | where: 'type', 'variant_picker' | first -%}
-    {%- assign size_guide_page = variant_picker_block.settings.size_guide_page -%}
-    {%- if size_guide_page != blank -%}
+    {%- if pdp_has_size_chart -%}
       <modal-dialog id="PdpSizeGuide-{{ section.id }}" class="product-popup-modal">
         <div
           role="dialog"
@@ -1020,8 +1057,7 @@
             {{- 'icon-close.svg' | inline_asset_content -}}
           </button>
           <div class="product-popup-modal__content-info">
-            <h2 class="h2">{{ size_guide_page.title | escape }}</h2>
-            {{ size_guide_page.content }}
+            {%- render 'pdp-size-chart', product: product, block: variant_picker_block -%}
           </div>
         </div>
       </modal-dialog>
@@ -1286,10 +1322,14 @@
           "content": "Size guide"
         },
         {
+          "type": "paragraph",
+          "content": "Per product, fill any of these metafields and they replace the page below for that product only: custom.size_chart_image (a chart as artwork), custom.size_chart (a chart as rich text), custom.size_chart_page (a chart written once as a page and shared). custom.size_chart_note always shows under the chart, and custom.size_chart_title renames the dialog."
+        },
+        {
           "type": "page",
           "id": "size_guide_page",
           "label": "Size guide page",
-          "info": "Adds a link beside the option name that opens this page in a modal. Leave empty to hide the link."
+          "info": "The fallback, used on every product that has no size chart metafield of its own. Leave this empty and the link shows only on products that do."
         },
         {
           "type": "text",
