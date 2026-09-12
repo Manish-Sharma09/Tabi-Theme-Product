@@ -1116,7 +1116,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 }
 
 .pdp-why__row--highlight + .pdp-why__row {
-  border-top: 0;
+  /* border-top: 0; */
 }
 
 .pdp-why__row--highlight .pdp-why__icon .pdp-icon,
