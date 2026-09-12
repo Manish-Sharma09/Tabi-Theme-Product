@@ -238,6 +238,15 @@
     "pdp-info-columns": {
       "type": "pdp-info-columns",
       "blocks": {
+        "item_eHhWhJ": {
+          "type": "item",
+          "settings": {
+            "heading": "Fabric",
+            "content": "",
+            "metafield_key": "",
+            "metafield_only": false
+          }
+        },
         "item_yWBW4B": {
           "type": "item",
           "settings": {
@@ -264,22 +273,13 @@
             "metafield_key": "",
             "metafield_only": false
           }
-        },
-        "i_material": {
-          "type": "item",
-          "settings": {
-            "heading": "Material and care",
-            "content": "<p>{{ product.metafields.custom.product_detail_3 | metafield_tag }}</p>",
-            "metafield_key": "",
-            "metafield_only": false
-          }
         }
       },
       "block_order": [
+        "item_eHhWhJ",
         "item_yWBW4B",
         "i_fabric",
-        "i_exchange",
-        "i_material"
+        "i_exchange"
       ],
       "settings": {
         "heading": "Product details",
@@ -296,7 +296,7 @@
           "type": "channel",
           "settings": {
             "icon": "instagram",
-            "label": "Instagram",
+            "label": "DM",
             "action": "link",
             "value": "",
             "url": ""
