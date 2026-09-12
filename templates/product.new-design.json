@@ -296,7 +296,7 @@
           "type": "channel",
           "settings": {
             "icon": "instagram",
-            "label": "Insta",
+            "label": "Instagram",
             "action": "link",
             "value": "",
             "url": ""
