@@ -2807,7 +2807,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 /* A file metafield. `display: block` on the media kills the inline-baseline gap
    under it, which otherwise shows as a few stray pixels of container colour. */
 .pdp-mf__media {
-  margin: 1.2rem 0 1.2rem;
+  margin: 2rem 0 1.2rem;
 }
 
 .pdp-mf__media img,
