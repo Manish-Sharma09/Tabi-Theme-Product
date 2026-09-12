@@ -9,6 +9,12 @@ Everything here is a **worked example, not boilerplate to paste 200 times**.
 Change the fabric, the place, the measurement. A sentence that is true of every
 product tells a shopper nothing.
 
+> **When you paste.** The copy below is wrapped to keep this document readable.
+> The `product_detail_*` fields are Multi-line text, where a line break you
+> paste is a line break on the page — so let each paragraph run as one
+> continuous line and keep the blank line between paragraphs. Paste it wrapped
+> and the sentences will break in odd places on a phone.
+
 ---
 
 ## 0. First: fill this, skip that
@@ -23,12 +29,11 @@ leave it empty and let the fallback do its job.
 | `fit` | Clothing only. One word. |
 | `model_details` | Clothing only, and only where there is a model shot. |
 | `fit_recommendation` | Only where the fit is genuinely unusual. |
-| `fabric` | **Always.** The one field a shopper actually reads. |
-| `craft_technique` | Only where there is a craft — printing, embroidery, smocking, quilting. |
-| `construction` | Where the make is a selling point — French seams, hand-rolled hems. |
-| `silhouette` | Clothing only. |
-| `product_detailing` | Only where there are details worth naming. |
-| `wash_instructions` | Where care differs from the default — indigo, silk, brass. |
+| `product_detail_1` — Fabric | **Always.** The one field a shopper actually reads. |
+| `product_detail_2` — Craft & technique | Only where there is a craft — printing, embroidery, smocking, quilting. |
+| `product_detail_3` — Construction | Where the make is a selling point — French seams, hand-rolled hems. |
+| `product_detail_4` — Details | Silhouette, trims, dimensions. Whatever is worth naming. |
+| `product_detail_5` — Wash & care | Where care differs from the default — indigo, silk, brass. |
 | `size_chart_page` | **Always, on anything sized.** Point at a shared page. |
 | `size_chart_note` | Only where the product runs small, large or odd. |
 | `size_chart_image` / `size_chart` / `size_chart_title` | Rarely. Only for the product that is its own case. |
@@ -132,7 +137,7 @@ Cut generously through the body. If you are between sizes, take the smaller
 one — it will still sit loose.
 ```
 
-**`fabric`** — Rich text
+**`product_detail_1`** — Multi-line text · heading "Fabric"
 ```
 100% cotton voile. Light enough for a hot afternoon and opaque enough to wear
 on its own.
@@ -141,7 +146,7 @@ Woven and printed in Bagru, Rajasthan. Small irregularities in the print are
 part of hand-block printing, not a flaw in the piece.
 ```
 
-**`craft_technique`** — Rich text
+**`product_detail_2`** — Multi-line text · heading "Craft & technique"
 ```
 Hand-block printed with carved teak blocks, one colour and one block at a time.
 A single length of fabric passes under the printer's hand several hundred
@@ -151,7 +156,7 @@ Dyed with natural indigo in a fermented vat. The colour deepens over the first
 few washes and then settles.
 ```
 
-**`construction`** — Rich text
+**`product_detail_3`** — Multi-line text · heading "Construction"
 ```
 French seams throughout, so there are no raw edges inside.
 
@@ -159,19 +164,16 @@ A faced neckline rather than a bias binding, which sits flatter against the
 collarbone. Side slits to the hip.
 ```
 
-**`silhouette`** — Rich text
+**`product_detail_4`** — Multi-line text · heading "Details"
 ```
 Straight through the shoulder and body with a deep armhole. Falls to the ankle
 on a 5'6" frame.
-```
 
-**`product_detailing`** — Rich text
-```
 Hand-embroidered mirror work at the neckline. Coconut shell buttons. Side
 pockets set into the seam, deep enough for a phone.
 ```
 
-**`wash_instructions`** — Rich text
+**`product_detail_5`** — Multi-line text · heading "Wash & care"
 ```
 Wash separately in cold water the first two or three times — natural indigo
 releases colour until it settles.
@@ -213,7 +215,7 @@ Model is 3 years old and is wearing 2-3Y
 Sized with room to grow. If your child is between sizes, take the larger one.
 ```
 
-**`fabric`**
+**`product_detail_1`** · heading "Fabric"
 ```
 100% cotton poplin, pre-washed so it softens with wear rather than shrinking
 out of shape.
@@ -222,31 +224,28 @@ Chosen for how it behaves after twenty washes, not how it looks on the first
 day.
 ```
 
-**`craft_technique`**
+**`product_detail_2`** · heading "Craft & technique"
 ```
 Hand-smocked across the bodice. Each pleat is gathered and stitched by hand,
 which is what lets the fabric stretch over the head and then sit flat again.
 ```
 
-**`construction`**
+**`product_detail_3`** · heading "Construction"
 ```
 Flat-felled seams at the shoulder, so nothing rubs. Generous hem allowance —
 let it down once and the dress lasts another season.
 ```
 
-**`silhouette`**
+**`product_detail_4`** — Multi-line text · heading "Details"
 ```
 Gathered at the chest and loose to the knee. Wide enough through the skirt to
 sit cross-legged.
-```
 
-**`product_detailing`**
-```
 Wooden buttons at the back. A small hand-embroidered flower at each cuff.
 No labels at the neck — the care details are printed inside the side seam.
 ```
 
-**`wash_instructions`**
+**`product_detail_5`** · heading "Wash & care"
 ```
 Gentle machine wash, cold, with similar colours. Reshape the smocking while
 damp and dry flat in shade.
@@ -287,7 +286,7 @@ right as it is.
 ## 4. Archetype C — home, table linen, cushion covers
 
 The case the defaults get wrong. **Leave `fit`, `model_details`,
-`fit_recommendation` and `silhouette` completely empty** — the Specification
+`fit_recommendation` and `product_detail_4` completely empty** — the Specification
 row then hides itself, which is correct: a tablecloth has no fit.
 
 **`short_description`**
@@ -296,7 +295,7 @@ A hand-block printed cotton tablecloth, sized for a six-seater and hemmed to
 fall just past the knee of a seated guest.
 ```
 
-**`fabric`**
+**`product_detail_1`** · heading "Fabric"
 ```
 100% cotton, in a mid-weight plain weave that presses flat and stays put on a
 polished table.
@@ -304,26 +303,26 @@ polished table.
 Pre-shrunk, so the first wash will not cost you two inches of drop.
 ```
 
-**`craft_technique`**
+**`product_detail_2`** · heading "Craft & technique"
 ```
 Hand-block printed in Bagru, Rajasthan, with carved teak blocks. The border and
 the field are printed separately, in that order, which is why the corners meet
 the way they do.
 ```
 
-**`construction`**
+**`product_detail_3`** · heading "Construction"
 ```
 Double-turned mitred hem, stitched by machine for strength at the corners where
 a tablecloth actually wears.
 ```
 
-**`product_detailing`**
+**`product_detail_4`** · heading "Details"
 ```
 Printed border on all four sides. Finished size 60 x 90 inches, which seats six
 comfortably with room for serving dishes down the middle.
 ```
 
-**`wash_instructions`**
+**`product_detail_5`** · heading "Wash & care"
 ```
 Machine wash warm with similar colours. Remove while still slightly damp and
 iron on the reverse — cotton takes a crease best just before it is dry.
@@ -379,13 +378,13 @@ Everyday things, made to be used.
 Non-textile. Two fields do the heavy lifting here.
 
 **The heading override.** A "Fabric" accordion on a brass object reads wrong.
-Set **`fabric_heading`** on the product:
+Set **`product_detail_1_heading`** on the product:
 
 ```
 Material
 ```
 
-Then `fabric` itself:
+Then `product_detail_1` itself:
 ```
 Solid brass, sand-cast and hand-finished. Unlacquered, so it will darken and
 patinate with handling.
@@ -393,7 +392,7 @@ patinate with handling.
 If you prefer it bright, a cut lemon and a pinch of salt will take it back.
 ```
 
-**`wash_instructions`**
+**`product_detail_5`** · heading "Wash & care"
 ```
 Wipe with a dry cloth after use. Do not put it in the dishwasher — the
 detergent will strip the finish unevenly.
@@ -402,7 +401,7 @@ To brighten: half a lemon dipped in salt, then rinse and dry immediately. Water
 left standing on brass is what leaves marks.
 ```
 
-**Upcycled pieces** — `craft_technique` is the whole story:
+**Upcycled pieces** — `product_detail_2` is the whole story:
 ```
 Made from fabric left over from our own production runs. No two are identical,
 because no two offcuts are.

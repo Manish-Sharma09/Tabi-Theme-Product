@@ -102,7 +102,36 @@
     {%- elsif bare -%}
       {{- f.value | escape | newline_to_br -}}
     {%- else -%}
-      <p>{{ f.value | escape | newline_to_br }}</p>
+      {%- comment -%}
+        A blank line starts a new paragraph; a single line break stays a line
+        break. Which is what anyone typing into a textarea expects, and what
+        the rest of the accordion already looks like - the fallback copy beside
+        these rows is rich text and arrives as real <p> elements. Rendering a
+        metafield as one <p> full of <br> put visibly different spacing in one
+        row than the row under it, for no reason a reader could see.
+
+        Liquid has no escape sequences, so '\n' in a string is a backslash and
+        an n. The newline has to come from the template's own source instead -
+        hence the capture below, whose {% endcapture %} sits at column 0
+        deliberately. Indent it and the indentation is captured with the
+        newline, and the split silently stops matching.
+
+        The normalise step ahead of it is for Windows line endings: newline_to_br
+        matches \r\n as well as \n and replaces both with '<br />' plus a
+        newline, so putting the tags back out leaves every break as a bare \n.
+        Without it, text saved with \r\n falls through as a single paragraph.
+      {%- endcomment -%}
+      {%- capture pdp_nl %}
+{% endcapture -%}
+      {%- assign pdp_break = pdp_nl | append: pdp_nl -%}
+      {%- assign pdp_text = f.value | newline_to_br | replace: '<br />', '' | strip -%}
+      {%- assign pdp_paras = pdp_text | split: pdp_break -%}
+      {%- for pdp_para in pdp_paras -%}
+        {%- assign pdp_para_text = pdp_para | strip -%}
+        {%- if pdp_para_text != blank -%}
+          <p>{{ pdp_para_text | escape | newline_to_br }}</p>
+        {%- endif -%}
+      {%- endfor -%}
     {%- endif -%}
 
   {%- comment -%}

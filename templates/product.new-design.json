@@ -343,7 +343,7 @@
           "settings": {
             "heading": "Fabric",
             "content": "<p>100% cotton, chosen for softness, breathability and everyday durability.</p>",
-            "metafield_key": "fabric",
+            "metafield_key": "product_detail_1",
             "metafield_only": false
           }
         },
@@ -352,7 +352,7 @@
           "settings": {
             "heading": "Craft & technique",
             "content": "",
-            "metafield_key": "craft_technique",
+            "metafield_key": "product_detail_2",
             "metafield_only": true
           }
         },
@@ -379,25 +379,16 @@
           "settings": {
             "heading": "Construction",
             "content": "",
-            "metafield_key": "construction",
+            "metafield_key": "product_detail_3",
             "metafield_only": true
           }
         },
         "i_silhouette": {
           "type": "item",
           "settings": {
-            "heading": "Silhouette",
+            "heading": "Details",
             "content": "",
-            "metafield_key": "silhouette",
-            "metafield_only": true
-          }
-        },
-        "i_detailing": {
-          "type": "item",
-          "settings": {
-            "heading": "Product detailing",
-            "content": "",
-            "metafield_key": "product_detailing",
+            "metafield_key": "product_detail_4",
             "metafield_only": true
           }
         },
@@ -406,7 +397,7 @@
           "settings": {
             "heading": "Wash & care",
             "content": "",
-            "metafield_key": "wash_instructions",
+            "metafield_key": "product_detail_5",
             "metafield_only": true
           }
         },
@@ -424,7 +415,6 @@
         "i_craft",
         "i_construction",
         "i_silhouette",
-        "i_detailing",
         "i_material",
         "i_wash",
         "i_exchange"

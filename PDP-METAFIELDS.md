@@ -210,23 +210,60 @@ unchanged.
 Spec values are one short line by contract, so a list is joined with commas, a
 dimension shows its unit, and a true/false shows Yes or No.
 
-### Keys already in use
+### Keys wired into the template
 
-These are wired into the existing templates and need definitions if they do not
-have them yet. All namespace `custom`, all on Products:
+Five numbered fields, one per accordion, plus the buy-box intro. All namespace
+`custom`, all on Products. **These six are all you need.**
 
-| Key | Type | Used by |
+| Key | Type | Accordion it fills | Shows |
+| --- | --- | --- | --- |
+| `product_detail_1` | Multi-line text | **Fabric** | always — has fallback copy |
+| `product_detail_2` | Multi-line text | **Craft & technique** | only when filled |
+| `product_detail_3` | Multi-line text | **Construction** | only when filled |
+| `product_detail_4` | Multi-line text | **Details** | only when filled |
+| `product_detail_5` | Multi-line text | **Wash & care** | only when filled |
+| `short_description` | Multi-line text | — (the intro in the buy box) | always |
+
+**How multi-line text is laid out.** A blank line between two paragraphs
+becomes two paragraphs on the page. A single line break stays a line break.
+That is all the formatting there is, and it is the reason plain text is a fine
+choice here — nobody can paste a stray font size or a purple heading out of
+Word, and the theme styles every row identically.
+
+Rich text also works if you ever switch a field to it; the theme reads the type
+and renders whichever it finds.
+
+**The headings are not in the metafields.** "Fabric", "Craft & technique" and
+the rest are typed on the blocks in the theme editor, so renaming a row is one
+edit there and no data changes. Rename them to whatever suits the catalogue —
+`product_detail_3` will happily be "Dimensions" on a homewares template.
+
+#### The one thing to watch
+
+A numbered key carries no meaning of its own. What `product_detail_3` *means*
+lives in the block order, not in the data — so **reordering the accordions in
+the theme editor silently changes what every product's row 3 is about.** With a
+key called `construction` that could not happen.
+
+So: set the row order and the headings once, then leave them. If you do need to
+reorder later, move the *content* between fields at the same time, or you will
+have two hundred products quietly saying the wrong thing under the right
+heading.
+
+### Optional: the Specification row
+
+Three more, and **you can ignore all three**. Do not create them and the
+Specification row simply never appears — it costs nothing to leave the block in
+the template.
+
+| Key | Type | Specification row |
 | --- | --- | --- |
-| `fabric` | Rich text | Fabric accordion |
-| `craft_technique` | Rich text | Craft & technique accordion (hidden when empty) |
-| `construction` | Rich text | Construction accordion |
-| `silhouette` | Rich text | Silhouette accordion |
-| `product_detailing` | Rich text | Product-specific detailing accordion |
-| `wash_instructions` | Rich text | Wash instructions accordion |
-| `fit` | Single line text | Specification → Fit |
-| `model_details` | Single line text | Specification → Model |
-| `fit_recommendation` | Multi-line text | Specification → Fit tip |
-| `short_description` | Multi-line text | The intro in the buy box |
+| `fit` | Single line text | Fit |
+| `model_details` | Single line text | Model |
+| `fit_recommendation` | Multi-line text | Fit tip |
+
+Worth having on clothing, where "Model is 5'7\" and is wearing a size S" is the
+single most useful line on the page. Pointless on a tablecloth.
 
 ---
 
