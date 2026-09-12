@@ -1112,7 +1112,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   margin: 0 calc(-1 * var(--pdp-why-pad));
   padding: 1.8rem var(--pdp-why-pad);
   border-top: 0;
-  background: var(--pdp-green-pale);
+  /* background: var(--pdp-green-pale); */
 }
 
 .pdp-why__row--highlight + .pdp-why__row {
