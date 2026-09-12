@@ -2699,7 +2699,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   }
 
   .pdp-needhelp__title {
-    font-size: 1.55rem;
+    font-size: 15px;
   }
 
   .pdp-needhelp__actions {
