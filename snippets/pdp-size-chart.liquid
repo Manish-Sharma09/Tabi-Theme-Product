@@ -87,7 +87,7 @@
 
 <h2 class="h2">{{ heading | escape }}</h2>
 
-<div class="pdp-sizechart">
+{% comment %} <div class="pdp-sizechart">
   {%- if has_own -%}
     {%- if mf_image != blank -%}
       <div class="pdp-sizechart__image">
@@ -119,4 +119,4 @@
       {%- render 'pdp-metafield', field: mf_note -%}
     </div>
   {%- endif -%}
-</div>
+</div> {% endcomment %}
