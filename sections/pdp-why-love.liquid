@@ -58,6 +58,12 @@
 
 {%- liquid
   comment
+    One answer for every heading in this section, read once here rather than in
+    each render tag. See snippets/pdp-heading.liquid for what it permits.
+  endcomment
+  assign allow_breaks = section.settings.heading_line_breaks
+
+  comment
     The section label and the opening line, per product where the product says
     so. Resolved the same way as everything else here: the metafield if it has
     one, the block or section setting if it does not.
@@ -254,11 +260,11 @@
       >
         <div class="pdp-why__content">
           {%- if section_label != blank -%}
-            <p class="pdp-eyebrow pdp-why__label">{{ section_label | escape }}</p>
+            <p class="pdp-eyebrow pdp-why__label">{%- render 'pdp-heading', text: section_label, allow_breaks: allow_breaks -%}</p>
           {%- endif -%}
 
           {%- if section_lede != blank -%}
-            <p class="pdp-why__lede">{{ section_lede | escape }}</p>
+            <p class="pdp-why__lede">{%- render 'pdp-heading', text: section_lede, allow_breaks: allow_breaks -%}</p>
           {%- endif -%}
 
           <ul class="pdp-why__list">
@@ -275,7 +281,7 @@
                   </span>
                 {%- endif -%}
                 <div class="pdp-why__body">
-                  <h3 class="pdp-why__heading">{{ heading | escape }}</h3>
+                  <h3 class="pdp-why__heading">{%- render 'pdp-heading', text: heading, allow_breaks: allow_breaks -%}</h3>
                   {%- assign body = body_list[forloop.index0] -%}
                   {%- if body != blank -%}
                     <p class="pdp-why__text">{{ body | escape | newline_to_br }}</p>
@@ -550,6 +556,13 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "heading_line_breaks",
+      "default": false,
+      "label": "Allow line breaks in headings",
+      "info": "Off, a heading runs as one paragraph and wraps by itself. On, type <br> where you want the line to break. Applies to this section's headings only."
     },
     {
       "type": "header",

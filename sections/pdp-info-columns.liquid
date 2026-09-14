@@ -37,6 +37,12 @@
 
 {%- liquid
   comment
+    One answer for every heading in this section, read once here rather than in
+    each render tag. See snippets/pdp-heading.liquid for what it permits.
+  endcomment
+  assign allow_breaks = section.settings.heading_line_breaks
+
+  comment
     The Specification row is built from three fit metafields rather than one
     key, so resolve them up front - the liveness pass and the render loop then
     read the same values instead of asking twice and risking disagreement.
@@ -181,7 +187,7 @@
   >
     <div class="pdp-section__inner">
       {%- if section.settings.heading != blank -%}
-        <p class="pdp-eyebrow pdp-info__label">{{ section.settings.heading | escape }}</p>
+        <p class="pdp-eyebrow pdp-info__label">{%- render 'pdp-heading', text: section.settings.heading, allow_breaks: allow_breaks -%}</p>
       {%- endif -%}
 
       {%- comment -%}
@@ -214,7 +220,7 @@
                   aria-expanded="true"
                   data-pdp-group-toggle
                 >
-                  <span class="pdp-info__grouptitle">{{ group_heading | escape }}</span>
+                  <span class="pdp-info__grouptitle">{%- render 'pdp-heading', text: group_heading, allow_breaks: allow_breaks -%}</span>
                   {%- render 'pdp-icon', icon: 'caret' -%}
                 </button>
               </h3>
@@ -251,7 +257,7 @@
                   {{ block.shopify_attributes }}
                 >
                   <summary>
-                    <span class="pdp-info__heading">{{ block.settings.heading | escape }}</span>
+                    <span class="pdp-info__heading">{%- render 'pdp-heading', text: block.settings.heading, allow_breaks: allow_breaks -%}</span>
                     {%- render 'pdp-icon', icon: 'caret' -%}
                   </summary>
                   <div class="pdp-info__content rte">
@@ -345,6 +351,13 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "heading_line_breaks",
+      "default": false,
+      "label": "Allow line breaks in headings",
+      "info": "Off, a heading runs as one paragraph and wraps by itself. On, type <br> where you want the line to break. Applies to this section's headings only."
     },
     {
       "type": "header",

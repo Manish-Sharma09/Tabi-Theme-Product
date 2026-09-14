@@ -1,0 +1,52 @@
+{% comment %}
+  Prints a heading or a line of display copy, optionally honouring the line
+  breaks the merchant asked for.
+
+  WHY THIS EXISTS. Every heading across the PDP sections is a `text` setting,
+  which is a single-line box in the theme editor - there is no key you can press
+  in one to produce a line break. So "Made in small batches." could never be set
+  as two lines however the merchant typed it, and a heading that wraps badly on
+  a phone had nowhere to be fixed except by shortening the words.
+
+  Two ways in, because one of them has to work in a box that cannot hold a
+  newline:
+
+  - a real line break, for the settings that are `textarea`
+  - a typed `<br>`, for the settings that are `text` - `<br>`, `<br/>` and
+    `<br />` all count, in any case
+
+  Both are behind the section's own *Allow line breaks in headings* checkbox,
+  which is off by default. That is the point of the switch: with it off a
+  merchant who types `<br>` sees `<br>` on the page and knows immediately that
+  it was not meant to be markup, rather than having the theme silently accept
+  HTML in a field that is documented as plain text.
+
+  SAFETY. The text is escaped first and the breaks are put back afterwards, so
+  the only markup that can ever reach the page from one of these fields is the
+  `<br>` this snippet writes itself. Anything else a merchant types - a
+  `<script>`, an `<img onerror>`, a stray angle bracket - is still printed as
+  characters. That ordering is the whole guarantee; do not be tempted to
+  shorten it by skipping the escape when the checkbox is on.
+
+  Accepts:
+  - text:         {String} the setting's value.
+  - allow_breaks: {Boolean} the section's checkbox.
+
+  Usage:
+  {% render 'pdp-heading', text: section.settings.heading, allow_breaks: allow_breaks %}
+{% endcomment %}
+
+{%- liquid
+  assign out = text | escape
+
+  if allow_breaks
+    assign out = out | newline_to_br
+    assign out = out | replace: '&lt;br&gt;', '<br>'
+    assign out = out | replace: '&lt;br/&gt;', '<br>'
+    assign out = out | replace: '&lt;br /&gt;', '<br>'
+    assign out = out | replace: '&lt;BR&gt;', '<br>'
+    assign out = out | replace: '&lt;BR/&gt;', '<br>'
+    assign out = out | replace: '&lt;BR /&gt;', '<br>'
+  endif
+-%}
+{{- out -}}

@@ -7,6 +7,7 @@
      C. <pdp-buy-now>         add to cart, then straight to checkout
      D. <pdp-info-group>      fold one information column away
      E. <pdp-read-more>       clamp the description, reveal it on demand
+     F. <pdp-chart-zoom>      magnify the size chart, and pan it
 
    D is not the breakpoint script the first version of the information section
    had. That one opened and closed an outer <details> layer at 750px, because
@@ -623,6 +624,190 @@
   };
 
   /* ====================================================================== */
+  /* F. SIZE CHART ZOOM                                                      */
+  /* ====================================================================== */
+
+  /* Magnifies the size chart inside the Size Guide dialog.
+
+     It wraps the whole chart body rather than one image, because the chart can
+     arrive from three places - the artwork metafield, a rich text metafield and
+     a shared page - and only the first is markup this theme writes. Wiring
+     every <img> the wrapper contains covers all three without pdp-size-chart
+     .liquid having to reach inside content it did not author.
+
+     Zoomed means the image drops its max-width and is scrolled inside its own
+     box. That box, not a transform, is what does the panning: a transform would
+     need the drag maths, the bounds and the pinch handling written by hand,
+     while a scroll container gets native momentum, native pinch-zoom on top of
+     it, and a keyboard. The pointer drag below is only there so a mouse can pan
+     as well - a trackpad and a thumb already could.
+
+     The zoom is restored to "out" whenever the dialog closes, so re-opening it
+     never starts halfway across a chart the shopper last looked at. */
+  var PDPChartZoom = class extends HTMLElement {
+    connectedCallback() {
+      /* connectedCallback runs more than once here, and the second run is not
+         a variant re-render - it is Dawn. ModalDialog.connectedCallback() does
+         `document.body.appendChild(this)` to lift the dialog out of the
+         section, and moving a node disconnects and reconnects everything
+         inside it. Without this flag the second run would find the same
+         images, wrap each one in a second scroll box and hang a second hint
+         off it.
+
+         The flag rather than "have I already got boxes": boxes stay in place
+         across the move, so re-deriving the answer from the DOM would work
+         today and break the moment a chart legitimately has no images. */
+      if (!this.wired) {
+        var images = Array.prototype.slice.call(this.querySelectorAll('img'));
+        this.boxes = [];
+        images.forEach(this.wire.bind(this));
+        this.wired = true;
+      }
+
+      /* Re-attached every time, because disconnectedCallback drops it and the
+         move above is a disconnect. */
+      if (this.boxes.length) this.watchDialog();
+    }
+
+    disconnectedCallback() {
+      if (this.observer) {
+        this.observer.disconnect();
+        this.observer = null;
+      }
+    }
+
+    /* Each image gets a scroll box of its own and the hint sits in that box, so
+       a chart page carrying a table AND two measuring diagrams magnifies
+       whichever one was tapped rather than all three together. */
+    wire(img) {
+      var box = document.createElement('div');
+      box.className = 'pdp-sizechart__zoomable';
+      img.parentNode.insertBefore(box, img);
+      box.appendChild(img);
+
+      var hint = document.createElement('span');
+      hint.className = 'pdp-sizechart__zoomhint';
+      hint.innerHTML =
+        '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" ' +
+        'aria-hidden="true" focusable="false">' +
+        '<circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.5 12.5 L17 17"/>' +
+        '<path d="M6 8.5h5M8.5 6v5"/></svg><span data-zoom-label>Zoom</span>';
+      box.appendChild(hint);
+
+      box.addEventListener('click', this.onClick.bind(this, box));
+      this.addDrag(box);
+      this.boxes.push(box);
+    }
+
+    onClick(box, event) {
+      /* A pan that ended on the image fires a click too. Swallow it, or every
+         drag would zoom back out at the end. */
+      if (box.dataset.dragged === '1') {
+        box.dataset.dragged = '0';
+        return;
+      }
+      if (box.classList.contains('is-zoomed')) {
+        this.zoomOut(box);
+      } else {
+        this.zoomIn(box, event);
+      }
+    }
+
+    zoomIn(box, event) {
+      box.classList.add('is-zoomed');
+      this.setLabel(box, 'Close');
+
+      /* Centre the magnified chart on the point that was tapped, so tapping the
+         right-hand columns of a wide table does not land you back at column
+         one. Read after the class, which is what resizes the image. */
+      var rect = box.getBoundingClientRect();
+      var ratioX = rect.width ? (event.clientX - rect.left) / rect.width : 0.5;
+      var ratioY = rect.height ? (event.clientY - rect.top) / rect.height : 0.5;
+      box.scrollLeft = (box.scrollWidth - box.clientWidth) * ratioX;
+      box.scrollTop = (box.scrollHeight - box.clientHeight) * ratioY;
+    }
+
+    zoomOut(box) {
+      box.classList.remove('is-zoomed');
+      box.classList.remove('is-dragging');
+      box.scrollLeft = 0;
+      box.scrollTop = 0;
+      this.setLabel(box, 'Zoom');
+    }
+
+    setLabel(box, text) {
+      var label = box.querySelector('[data-zoom-label]');
+      if (label) label.textContent = text;
+    }
+
+    /* Drag to pan, for a pointer that has no other way to scroll sideways.
+       Pointer events rather than mouse events so a stylus works; touch is
+       deliberately left to the browser, which already pans and pinches. */
+    addDrag(box) {
+      var startX = 0;
+      var startY = 0;
+      var fromLeft = 0;
+      var fromTop = 0;
+      var dragging = false;
+
+      box.addEventListener('pointerdown', function (event) {
+        if (!box.classList.contains('is-zoomed')) return;
+        if (event.pointerType === 'touch') return;
+        dragging = true;
+        startX = event.clientX;
+        startY = event.clientY;
+        fromLeft = box.scrollLeft;
+        fromTop = box.scrollTop;
+        box.dataset.dragged = '0';
+        box.classList.add('is-dragging');
+        box.setPointerCapture(event.pointerId);
+      });
+
+      box.addEventListener('pointermove', function (event) {
+        if (!dragging) return;
+        var dx = event.clientX - startX;
+        var dy = event.clientY - startY;
+        /* Three pixels of slop, so a click with a shaky hand is still a click
+           and only a real drag suppresses the zoom-out. */
+        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) box.dataset.dragged = '1';
+        box.scrollLeft = fromLeft - dx;
+        box.scrollTop = fromTop - dy;
+        event.preventDefault();
+      });
+
+      function end(event) {
+        if (!dragging) return;
+        dragging = false;
+        box.classList.remove('is-dragging');
+        if (box.hasPointerCapture && box.hasPointerCapture(event.pointerId)) {
+          box.releasePointerCapture(event.pointerId);
+        }
+      }
+
+      box.addEventListener('pointerup', end);
+      box.addEventListener('pointercancel', end);
+    }
+
+    /* Dawn opens and closes the dialog by toggling the `open` attribute on
+       <modal-dialog>, so that attribute is the close signal. An observer rather
+       than a listener because ModalDialog fires no close event of its own. */
+    watchDialog() {
+      if (this.observer) return;
+      var dialog = this.closest('modal-dialog');
+      if (!dialog || typeof MutationObserver === 'undefined') return;
+
+      var self = this;
+      this.observer = new MutationObserver(function () {
+        if (dialog.hasAttribute('open')) return;
+        self.boxes.forEach(function (box) {
+          self.zoomOut(box);
+        });
+      });
+      this.observer.observe(dialog, { attributes: true, attributeFilter: ['open'] });
+    }
+  };
+
+  /* ====================================================================== */
   /* Registration                                                            */
   /* ====================================================================== */
 
@@ -749,5 +934,8 @@
   }
   if (!customElements.get('pdp-read-more')) {
     customElements.define('pdp-read-more', PDPReadMore);
+  }
+  if (!customElements.get('pdp-chart-zoom')) {
+    customElements.define('pdp-chart-zoom', PDPChartZoom);
   }
 })();

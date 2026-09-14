@@ -1032,7 +1032,18 @@
       every variant change, which would tear down an open modal mid-interaction.
     {%- endcomment -%}
     {%- if pdp_has_size_chart -%}
-      <modal-dialog id="PdpSizeGuide-{{ section.id }}" class="product-popup-modal">
+      {%- comment -%}
+        The chart's ceiling travels on the dialog as a custom property rather
+        than as a width on the image, because three different things can supply
+        the chart - the artwork metafield, a rich text metafield and a page -
+        and only one of them is markup this theme writes. One property on the
+        root reaches the images in all three.
+      {%- endcomment -%}
+      <modal-dialog
+        id="PdpSizeGuide-{{ section.id }}"
+        class="product-popup-modal"
+        style="--pdp-chart-max: {{ variant_picker_block.settings.size_guide_image_width | default: 900 }}px;"
+      >
         <div
           role="dialog"
           aria-label="{{ variant_picker_block.settings.size_guide_label | default: 'Size Guide' | escape }}"
@@ -1057,7 +1068,11 @@
             {{- 'icon-close.svg' | inline_asset_content -}}
           </button>
           <div class="product-popup-modal__content-info">
-            {%- render 'pdp-size-chart', product: product, block: variant_picker_block -%}
+            {%- render 'pdp-size-chart',
+              product: product,
+              block: variant_picker_block,
+              allow_zoom: variant_picker_block.settings.size_guide_zoom
+            -%}
           </div>
         </div>
       </modal-dialog>
@@ -1330,6 +1345,24 @@
           "id": "size_guide_page",
           "label": "Size guide page",
           "info": "The fallback, used on every product that has no size chart metafield of its own. Leave this empty and the link shows only on products that do."
+        },
+        {
+          "type": "range",
+          "id": "size_guide_image_width",
+          "min": 400,
+          "max": 1200,
+          "step": 20,
+          "unit": "px",
+          "default": 900,
+          "label": "Chart image width",
+          "info": "How wide a chart image may be inside the dialog on a desktop. On a phone a chart always fills the panel. The dialog's own width does not change with this."
+        },
+        {
+          "type": "checkbox",
+          "id": "size_guide_zoom",
+          "default": true,
+          "label": "Tap a chart to zoom",
+          "info": "Lets a shopper magnify the chart and drag it around, for a dense table that is still small at full panel width."
         },
         {
           "type": "text",

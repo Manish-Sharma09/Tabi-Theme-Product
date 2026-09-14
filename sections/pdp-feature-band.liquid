@@ -25,6 +25,12 @@
 {{ 'product-page.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
+  comment
+    One answer for every heading in this section, read once here rather than in
+    each render tag. See snippets/pdp-heading.liquid for what it permits.
+  endcomment
+  assign allow_breaks = section.settings.heading_line_breaks
+
   assign media_right = false
   if section.settings.image_position == 'right'
     assign media_right = true
@@ -86,11 +92,11 @@
 
       <div class="pdp-band__content">
         {%- if section.settings.eyebrow != blank -%}
-          <p class="pdp-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+          <p class="pdp-eyebrow">{%- render 'pdp-heading', text: section.settings.eyebrow, allow_breaks: allow_breaks -%}</p>
         {%- endif -%}
 
         {%- if section.settings.heading != blank -%}
-          <h2 class="pdp-display">{{ section.settings.heading | escape }}</h2>
+          <h2 class="pdp-display">{%- render 'pdp-heading', text: section.settings.heading, allow_breaks: allow_breaks -%}</h2>
         {%- endif -%}
 
         {%- if section.settings.body != blank -%}
@@ -306,6 +312,13 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "heading_line_breaks",
+      "default": false,
+      "label": "Allow line breaks in headings",
+      "info": "Off, a heading runs as one paragraph and wraps by itself. On, type <br> where you want the line to break. Applies to this section's headings only."
     },
     {
       "type": "header",

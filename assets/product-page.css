@@ -223,6 +223,31 @@
   }
 }
 
+/* A phone-width backstop against the sideways drift, on top of the actual fix
+   in section 13. Nothing below the buy box is drawn outside its own section at
+   this width - the feature band's seal sits inside the copy half, the
+   highlighted row cancels and repays the card's padding, and the carousel's
+   arrows only leave the track from 1200px up - so clipping here can remove
+   nothing that is meant to be seen, and one over-wide element added later
+   cannot put the whole page back on a horizontal scroll.
+
+   `clip` rather than `hidden`, for the reason custom-fixes.css section 7 gives
+   for #MainContent: `hidden` makes the element a scroll container, which would
+   break `position: sticky` for any descendant. `clip` does not. */
+@media screen and (max-width: 749px) {
+  .pdp-section {
+    overflow-x: clip;
+  }
+}
+
+@supports not (overflow: clip) {
+  @media screen and (max-width: 749px) {
+    .pdp-section {
+      overflow-x: hidden;
+    }
+  }
+}
+
 .pdp-section__inner {
   max-width: var(--page-width);
   margin: 0 auto;
@@ -2255,17 +2280,40 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
    `--pdp-gutter` is the same token .pdp-section__inner pays, so if the gutter
    changes this follows it instead of drifting out by however much it moved.
    The scroll padding keeps the first and last thumbnail from sitting hard
-   against the bezel while the rail is scrolled. */
+   against the bezel while the rail is scrolled.
+
+   THE SIDEWAYS SCROLL. This rule used to name `.thumbnail-slider` AND
+   `.thumbnail-list`, and it was the page's horizontal overflow - the whole of
+   it. Dawn already pulls the rail out to the screen edges itself:
+
+     section-main-product.css
+     .product__media-wrapper slider-component:not(.thumbnail-slider--no-slide)
+       { margin-left: -1.5rem; margin-right: -1.5rem }
+
+   `.thumbnail-slider` IS a slider-component, so on any product with more than
+   three images Dawn's rule had already matched and this one pulled it a second
+   1.5rem each side. Then `.thumbnail-list`, the <ul> inside it, was pulled
+   1.5rem again on top of that. Three pulls, two of them unasked for: the rail
+   came out 6rem wider than the screen and the document scrolled sideways with
+   it - which is the drift felt as a diagonal swipe, because a vertical scroll
+   that wanders a few degrees starts moving the page horizontally as well.
+
+   So the pull now applies to exactly the case Dawn leaves behind:
+   `.thumbnail-slider--no-slide`, the class Dawn's own selector excludes, which
+   is a product with three images or fewer. Everything else is already at the
+   screen edges and must not be touched.
+
+   The list keeps its padding reset - that is Dawn's 0.5rem slider padding, not
+   a margin, and it never contributed to the overflow. */
 @media screen and (max-width: 749px) {
-  .pdp .product__media-wrapper .thumbnail-slider,
-  .pdp .product__media-wrapper .thumbnail-list {
+  .pdp .product__media-wrapper slider-component.thumbnail-slider--no-slide {
     margin-left: calc(-1 * var(--pdp-gutter));
     margin-right: calc(-1 * var(--pdp-gutter));
-    padding-left: 0;
-    padding-right: 0;
   }
 
   .pdp .product__media-wrapper .thumbnail-list {
+    padding-left: 0;
+    padding-right: 0;
     scroll-padding-left: var(--pdp-gutter);
   }
 }
@@ -2872,7 +2920,19 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 }
 
 /* A chart supplied as artwork. This one does stretch, because it is the chart
-   itself rather than a diagram beside it - but never past its own width. */
+   itself rather than a diagram beside it.
+
+   It used to stretch to `max-width: 50%`, which is where "the size chart is too
+   small" came from: half a panel that is itself 88rem at most, and on a phone
+   half of about 350px - a size table rendered 175px wide, with the numbers in
+   it somewhere around 4px tall. A chart is the one thing in this dialog the
+   shopper opened the dialog to read, so it now fills the panel and takes its
+   ceiling from the theme editor instead (`--pdp-chart-max`, set on the dialog
+   in sections/main-product.liquid).
+
+   Below 750px there is no ceiling at all. The panel is already the narrowest
+   thing on the page and capping the chart inside it only makes a small chart
+   smaller. */
 .pdp-sizechart__image {
   margin: 0 0 2rem;
 }
@@ -2880,9 +2940,87 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 .pdp-sizechart__image img {
   display: block;
   width: 100%;
-  max-width: 50%;
+  max-width: 100%;
   height: auto;
   margin: 0 auto;
+}
+
+@media screen and (min-width: 750px) {
+  .pdp-sizechart__image img {
+    max-width: min(100%, var(--pdp-chart-max, 900px));
+  }
+}
+
+/* --- zoom --------------------------------------------------------------- */
+
+/* The behaviour is in product-page.js. The `:defined` gate is the same device
+   the description's Read more uses: until the element is upgraded none of this
+   applies, so a blocked or broken script leaves a chart that is simply not
+   zoomable rather than one wearing a zoom cursor that does nothing. */
+pdp-chart-zoom {
+  display: block;
+}
+
+pdp-chart-zoom:defined .pdp-sizechart__zoomable {
+  position: relative;
+  cursor: zoom-in;
+}
+
+/* A wide chart, once magnified, is scrolled inside this box rather than by the
+   dialog - so the panel never scrolls sideways under the shopper.
+
+   Only while zoomed. Unzoomed the image already fits its box, and `auto` would
+   buy nothing but the chance of a stray scrollbar on a rounding error. */
+pdp-chart-zoom:defined .pdp-sizechart__zoomable.is-zoomed {
+  cursor: grab;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+pdp-chart-zoom:defined .pdp-sizechart__zoomable.is-zoomed img {
+  /* `none` rather than a multiplier, so the chart magnifies to the resolution
+     it was actually uploaded at and no further - a chart blown up past its own
+     pixels is bigger without being any more readable. The responsive srcset in
+     pdp-metafield.liquid goes to 1400px, so that is the ceiling. */
+  width: auto;
+  max-width: none;
+  height: auto;
+}
+
+pdp-chart-zoom:defined .pdp-sizechart__zoomable.is-dragging {
+  cursor: grabbing;
+  /* A drag that lands on the image must not start a native image drag. */
+  user-select: none;
+}
+
+/* The affordance. Small, corner-set and out of the way of the chart, because it
+   is a hint rather than a control - the whole image is the hit area. */
+pdp-chart-zoom:defined .pdp-sizechart__zoomhint {
+  position: absolute;
+  right: 0.8rem;
+  bottom: 0.8rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border: 0.1rem solid var(--pdp-line, #e0dcd3);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--pdp-muted, #6f6f66);
+  font-size: 1.1rem;
+  letter-spacing: var(--pdp-eyebrow-tracking, 0.14em);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+pdp-chart-zoom:defined .pdp-sizechart__zoomhint svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  /* The shared `.pdp-sizechart img, .pdp-sizechart svg` rule above centres and
+     spaces every mark in this dialog. The icon is part of a label, not content
+     in its own right. */
+  margin: 0;
 }
 
 .pdp-sizechart__copy > *:last-child {

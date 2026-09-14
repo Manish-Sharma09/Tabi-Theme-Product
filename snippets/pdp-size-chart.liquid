@@ -39,12 +39,15 @@
   empty box.
 
   Accepts:
-  - product: {Object} product object.
-  - block:   {Object} the variant_picker block, carrying the template fallback
-              page and the label used when nothing supplies a title.
+  - product:    {Object} product object.
+  - block:      {Object} the variant_picker block, carrying the template
+                 fallback page and the label used when nothing supplies a title.
+  - allow_zoom: {Boolean} wrap the chart in <pdp-chart-zoom> so a tap magnifies
+                 it. Every image inside is wired by that one element, whichever
+                 of the three sources supplied it.
 
   Usage:
-  {% render 'pdp-size-chart', product: product, block: block %}
+  {% render 'pdp-size-chart', product: product, block: block, allow_zoom: true %}
 {% endcomment %}
 
 {%- liquid
@@ -83,11 +86,20 @@
   if heading == blank
     assign heading = block.settings.size_guide_label | default: 'Size Guide'
   endif
+
+  comment
+    A plain <div> when zoom is off, so the behaviour costs nothing on a store
+    that does not want it and there is no element left for the script to find.
+  endcomment
+  assign chart_tag = 'div'
+  if allow_zoom
+    assign chart_tag = 'pdp-chart-zoom'
+  endif
 -%}
 
 <h2 class="h2">{{ heading | escape }}</h2>
 
-<div class="pdp-sizechart">
+<{{ chart_tag }} class="pdp-sizechart">
   {%- if has_own -%}
     {%- if mf_image != blank -%}
       <div class="pdp-sizechart__image">
@@ -119,4 +131,4 @@
       {%- render 'pdp-metafield', field: mf_note -%}
     </div>
   {%- endif -%}
-</div>
+</{{ chart_tag }}>

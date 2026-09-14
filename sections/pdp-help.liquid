@@ -37,6 +37,12 @@
 
 {%- liquid
   comment
+    One answer for every heading in this section, read once here rather than in
+    each render tag. See snippets/pdp-heading.liquid for what it permits.
+  endcomment
+  assign allow_breaks = section.settings.heading_line_breaks
+
+  comment
     The channels, flattened into four lists read by one loop below. Liquid
     cannot build an array of objects, and the alternative - a block loop plus a
     second, near-identical legacy branch in the markup - is two copies of the
@@ -196,10 +202,10 @@
           <div class="pdp-needhelp__text">
             <p class="pdp-needhelp__title">
               {%- if section.settings.title != blank -%}
-                <span class="pdp-needhelp__line">{{ section.settings.title | escape }}</span>
+                <span class="pdp-needhelp__line">{%- render 'pdp-heading', text: section.settings.title, allow_breaks: allow_breaks -%}</span>
               {%- endif -%}
               {%- if section.settings.subtitle != blank -%}
-                <span class="pdp-needhelp__line">{{ section.settings.subtitle | escape }}</span>
+                <span class="pdp-needhelp__line">{%- render 'pdp-heading', text: section.settings.subtitle, allow_breaks: allow_breaks -%}</span>
               {%- endif -%}
             </p>
           </div>
@@ -338,6 +344,13 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "heading_line_breaks",
+      "default": false,
+      "label": "Allow line breaks in headings",
+      "info": "Off, a heading runs as one paragraph and wraps by itself. On, type <br> where you want the line to break. Applies to this section's headings only."
     },
     {
       "type": "header",
