@@ -1112,11 +1112,11 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   margin: 0 calc(-1 * var(--pdp-why-pad));
   padding: 1.8rem var(--pdp-why-pad);
   border-top: 0;
-  background: var(--pdp-green-pale);
+  /* background: var(--pdp-green-pale); */
 }
 
 .pdp-why__row--highlight + .pdp-why__row {
-  border-top: 0;
+  /* border-top: 0; */
 }
 
 .pdp-why__row--highlight .pdp-why__icon .pdp-icon,
@@ -2699,7 +2699,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   }
 
   .pdp-needhelp__title {
-    font-size: 1.55rem;
+    font-size: 15px;
   }
 
   .pdp-needhelp__actions {
@@ -2807,7 +2807,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 /* A file metafield. `display: block` on the media kills the inline-baseline gap
    under it, which otherwise shows as a few stray pixels of container colour. */
 .pdp-mf__media {
-  margin: 0 0 1.2rem;
+  margin: 2rem 0 1.2rem;
 }
 
 .pdp-mf__media img,
@@ -2880,7 +2880,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 .pdp-sizechart__image img {
   display: block;
   width: 100%;
-  max-width: 100%;
+  max-width: 50%;
   height: auto;
   margin: 0 auto;
 }

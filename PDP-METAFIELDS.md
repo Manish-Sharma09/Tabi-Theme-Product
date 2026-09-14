@@ -65,7 +65,7 @@ Namespace `custom`, all on **Products**:
 
 | Key | Type | What it does |
 | --- | --- | --- |
-| `size_chart_page` | **Reference → Page** | The chart, written once as a page and pointed at from many products. **Start here** — this is the one to use for most products. |
+| `size_chart_page` | **Reference → Page** | The chart, written once as a page and pointed at from many products. **Start here** — one page per real chart, then point products at the right one. |
 | `size_chart_image` | **File** (accept images) | The chart as artwork, for when the designer sends a JPG or PNG. |
 | `size_chart` | **Rich text** | The chart as copy — "measure across the chest", a list of points. Rich text cannot hold a table; use a page for a table. |
 | `size_chart_note` | **Multi-line text** | The one line that is genuinely per product: "this style runs small". |
@@ -74,41 +74,48 @@ Namespace `custom`, all on **Products**:
 ### How they resolve
 
 ```
-Does the product have size_chart_image, size_chart or size_chart_page?
-├── Yes → show whichever of those are filled, in this order:
-│         1. size_chart_image   (the artwork)
-│         2. size_chart         (the copy)
-│         3. size_chart_page    (the page's content)
-│         The template's page is NOT used.
-└── No  → show the template's "Size guide page" setting.
+Whichever of these the product has, in this order:
+  1. size_chart_image   (the artwork)
+  2. size_chart         (the copy)
+  3. size_chart_page    (the page's content)
+  4. size_chart_note    (always last, under whatever is above it)
 
-size_chart_note always shows last, under whatever appeared above it.
+None of 1-3 → no dialog, and no Size Guide link on that product.
 ```
 
-The dialog heading is, in order: `size_chart_title` → the title of whichever
-page supplied the chart → the link's own label ("Size Guide").
+**There is no template-wide fallback.** A product with no chart shows no link.
 
-"Anything product-level at all means the template page is not used" is
-deliberate. It keeps *this product has its own chart* a single decision rather
-than a merge you have to reason about.
+That is deliberate, and it is the fix for a real bug: the template used to point
+every product at one page, so a kids dress sized 18m-8y opened a chart of adult
+XS-4XL body measurements. A wrong chart nobody notices is worse than a missing
+link somebody fixes.
+
+The dialog heading is, in order: `size_chart_title` → the title of the page
+supplying the chart → the link's own label ("Size Guide").
 
 ### Reuse across the catalogue
 
-`size_chart_page` is the reuse mechanism. Write **Womens tops size chart** once
-as a page, point fifty products at it, and edit it in one place forever. Use
-`size_chart_image` / `size_chart` only for the product that is genuinely its
-own case.
+`size_chart_page` is the reuse mechanism, and it is what replaces the old
+template-wide page. Write **Womens tops size chart** and **Kids size chart**
+once as pages, point each product at the right one, and edit them in one place
+forever. Use `size_chart_image` / `size_chart` only for the product that is
+genuinely its own case.
+
+It is one field per product, and it is the field that stops a kids dress
+opening an adult chart.
 
 ### Theme editor
 
-Product page → **Variant picker** block → **Size guide**:
+Product page → **Variant picker** block → **Size guide**. The page picker is
+gone — the chart is per product now. What is left:
 
-- **Size guide page** is now the *fallback*, used on every product with no
-  metafield of its own. Leave the existing `size-guide` page here and it keeps
-  working exactly as today.
-- Leave it **empty** and the "Size Guide" link appears only on products that
-  carry their own chart. That is the right setting for a template mixing
-  clothing and non-clothing.
+- **Chart image width** — how wide images inside the dialog may be, 300–900px,
+  default 480. **The dialog's own width does not change with it.** They are
+  separate on purpose: a panel narrow enough to suit a 400px measuring diagram
+  is too narrow for an eight-column size table. Lower this for a diagram, raise
+  it for a dense chart.
+- **Link label**, **Show beside which option**, **Replace option name with** —
+  unchanged.
 
 ### Known limit
 
