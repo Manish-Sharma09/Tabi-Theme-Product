@@ -58,6 +58,8 @@
             "picker_type": "button",
             "swatch_shape": "circle",
             "size_guide_page": "size-guide",
+            "size_guide_image_width": 900,
+            "size_guide_zoom": true,
             "size_guide_label": "Size Guide",
             "size_guide_option": "",
             "size_label": ""
@@ -286,6 +288,7 @@
         "heading": "Product details",
         "open_first": false,
         "color_scheme": "scheme-5",
+        "heading_line_breaks": false,
         "padding_top": 0,
         "padding_bottom": 20
       }
@@ -329,6 +332,7 @@
         "chat_label": "Chat",
         "chat_number": "919319750031",
         "color_scheme": "",
+        "heading_line_breaks": false,
         "padding_top": 12,
         "padding_bottom": 12
       }
@@ -348,6 +352,7 @@
         "desktop_split": "even",
         "mobile_media_first": true,
         "color_scheme": "scheme-5",
+        "heading_line_breaks": false,
         "padding_top": 48,
         "padding_bottom": 48
       }
@@ -380,7 +385,7 @@
     "pdp-band-tabi-way": {
       "type": "pdp-feature-band",
       "settings": {
-        "image": "shopify://shop_images/IsharaWomenBrandCover.webp",
+        "image": "shopify://shop_images/Khwaab_Brand_Image_1.webp",
         "image_position": "left",
         "split": "even",
         "mobile_text_first": false,
@@ -397,6 +402,7 @@
         "seal_speed": 28,
         "seal_direction": "clockwise",
         "color_scheme": "scheme-5",
+        "heading_line_breaks": false,
         "padding_top": 48,
         "padding_bottom": 48
       }
@@ -423,6 +429,7 @@
         "seal_speed": 28,
         "seal_direction": "clockwise",
         "color_scheme": "scheme-5",
+        "heading_line_breaks": false,
         "padding_top": 48,
         "padding_bottom": 48
       }
@@ -470,6 +477,7 @@
         "cta_label": "Discover how Tabi works",
         "cta_url": "shopify://pages/about",
         "color_scheme": "scheme-5",
+        "heading_line_breaks": false,
         "padding_top": 48,
         "padding_bottom": 32
       }
