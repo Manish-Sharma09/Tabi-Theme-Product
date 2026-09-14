@@ -71,19 +71,30 @@
 
 {%- case base -%}
   {%- comment -%}
-    Rich text arrives as HTML Shopify built from the editor's own structure, so
-    it is output as-is. Escaping it here would put visible <p> tags on the page;
-    `newline_to_br` on top of it would double every paragraph break.
+    Rich text is output as the METAFIELD, never as its `.value`. Shopify turns
+    the metafield itself into HTML; `.value` is the editor's own document tree,
+    and printing that is what put
 
-    A list of rich text has no wrapper: each entry is already block-level
+      {"type"=>"root", "children"=>[{"type"=>"paragraph", ...
+
+    on the page in place of the size chart. It is the one type in this switch
+    where `.value` is not the thing you want, which is exactly why it is easy
+    to write - every other branch below reads `.value` and is right to.
+
+    Not escaped: the HTML here is Shopify's, built from the editor's structure,
+    and escaping would put visible <p> tags on the page.
+
+    A list of rich text has no wrapper - each entry is already block-level
     content, and a <ul> of paragraphs indents copy that was never meant to be
-    indented.
+    indented. Shopify has no `list.rich_text_field` today, so that branch is
+    kept only so it degrades to HTML rather than to a document tree if one
+    ever appears.
   {%- endcomment -%}
   {%- when 'rich_text_field' -%}
     {%- if is_list -%}
-      {%- for item in f.value -%}{{ item }}{%- endfor -%}
+      {%- for item in f -%}{{ item }}{%- endfor -%}
     {%- else -%}
-      {{ f.value }}
+      {{ f }}
     {%- endif -%}
 
   {%- comment -%}

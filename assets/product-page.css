@@ -2551,7 +2551,15 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
 
 /* The close button is `position: sticky` in Dawn, so it rides the top of the
    scrolling panel. It needs to sit above the content it rides over, and to be
-   big enough to hit on a phone - 44px is the usual floor. */
+   big enough to hit on a phone - 44px is the usual floor.
+
+   The shadow is there because what it rides over here is usually a size chart,
+   and a plain white disc sitting on a table of numbers reads as a hole punched
+   in the chart. With a shadow it reads as a button floating above it, which is
+   what it is. It is Dawn's own behaviour on every popup in this theme and not
+   worth fighting - but it did become a real problem when the zoom control was
+   a second overlay in the opposite corner, which is why that one moved out
+   from over the chart entirely. */
 [id^='PdpSizeGuide-'] .product-popup-modal__toggle {
   z-index: 2;
   min-width: 4.4rem;
@@ -2560,6 +2568,7 @@ pdp-read-more:not(:defined) .pdp-readmore__body,
   border-color: var(--pdp-line);
   color: var(--pdp-ink);
   background: #fff;
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.12);
 }
 
 [id^='PdpSizeGuide-'] .product-popup-modal__content-info h2 {
@@ -2966,16 +2975,23 @@ pdp-chart-zoom:defined .pdp-sizechart__zoomable {
   cursor: zoom-in;
 }
 
-/* A wide chart, once magnified, is scrolled inside this box rather than by the
-   dialog - so the panel never scrolls sideways under the shopper.
+/* Magnified, the box becomes a window onto the chart rather than growing to
+   hold it. Both parts matter on the real article - a 1400x1724 chart - because
+   at natural size that is 1724px of dialog, and a "zoom" that makes the panel
+   itself four screens long is just a longer scroll. Capped, it is a pane you
+   push the chart around inside.
 
-   Only while zoomed. Unzoomed the image already fits its box, and `auto` would
-   buy nothing but the chance of a stray scrollbar on a rounding error. */
+   The chart is scrolled inside this box rather than by the dialog, so the
+   panel never scrolls sideways under the shopper. Unzoomed there is nothing to
+   scroll, so `auto` is not set there: it would buy nothing but the chance of a
+   stray scrollbar on a rounding error. */
 pdp-chart-zoom:defined .pdp-sizechart__zoomable.is-zoomed {
   cursor: grab;
+  max-height: 70vh;
   overflow: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  background: var(--pdp-band, #f3f0ea);
 }
 
 pdp-chart-zoom:defined .pdp-sizechart__zoomable.is-zoomed img {
@@ -2986,6 +3002,7 @@ pdp-chart-zoom:defined .pdp-sizechart__zoomable.is-zoomed img {
   width: auto;
   max-width: none;
   height: auto;
+  margin: 0;
 }
 
 pdp-chart-zoom:defined .pdp-sizechart__zoomable.is-dragging {
@@ -2994,31 +3011,49 @@ pdp-chart-zoom:defined .pdp-sizechart__zoomable.is-dragging {
   user-select: none;
 }
 
-/* The affordance. Small, corner-set and out of the way of the chart, because it
-   is a hint rather than a control - the whole image is the hit area. */
-pdp-chart-zoom:defined .pdp-sizechart__zoomhint {
-  position: absolute;
-  right: 0.8rem;
-  bottom: 0.8rem;
-  z-index: 1;
+/* The control sits under the chart, never on it.
+
+   The first version was a pill in the chart's bottom-right corner, which on a
+   phone covered the last column of the size table - and there is no spare
+   corner on a size chart, every part of it is data. Under it, the chart is
+   never obscured, the target is a full 4.4rem row instead of a 15px pill, and
+   it is a real <button>: focusable, and it says whether it is open. */
+pdp-chart-zoom:defined .pdp-sizechart__zoombtn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1rem;
+  justify-content: center;
+  gap: 0.8rem;
+  width: 100%;
+  min-height: 4.4rem;
+  margin: 0.8rem 0 0;
+  padding: 0.8rem 1.2rem;
   border: 0.1rem solid var(--pdp-line, #e0dcd3);
-  background: rgba(255, 255, 255, 0.92);
+  background: #fff;
   color: var(--pdp-muted, #6f6f66);
-  font-size: 1.1rem;
+  font-family: inherit;
+  font-size: 1.2rem;
   letter-spacing: var(--pdp-eyebrow-tracking, 0.14em);
   text-transform: uppercase;
-  pointer-events: none;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 
-pdp-chart-zoom:defined .pdp-sizechart__zoomhint svg {
-  width: 1.4rem;
-  height: 1.4rem;
+pdp-chart-zoom:defined .pdp-sizechart__zoombtn:hover {
+  color: var(--pdp-ink, #2c2c28);
+  border-color: var(--pdp-ink, #2c2c28);
+}
+
+pdp-chart-zoom:defined .pdp-sizechart__zoombtn:focus-visible {
+  outline: 0.2rem solid var(--pdp-green, #253c30);
+  outline-offset: 0.2rem;
+}
+
+pdp-chart-zoom:defined .pdp-sizechart__zoombtn svg {
+  flex: 0 0 auto;
+  width: 1.6rem;
+  height: 1.6rem;
   /* The shared `.pdp-sizechart img, .pdp-sizechart svg` rule above centres and
-     spaces every mark in this dialog. The icon is part of a label, not content
+     spaces every mark in this dialog. This one is part of a label, not content
      in its own right. */
   margin: 0;
 }

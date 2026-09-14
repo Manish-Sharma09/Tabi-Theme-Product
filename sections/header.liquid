@@ -306,21 +306,24 @@ transform: scale(1.03);
     single grid row - navigation | logo | icons - so whichever of the three is
     tallest sets the bar.
 
-    The logo is the tallest, and it is tall because of its file rather than its
-    design. Dawn sizes it `logo_height = logo_width / aspect_ratio`, so a
-    wordmark exported onto a square canvas is given a square box: at
-    `logo_width: 90` that is 90px of header for letters perhaps 30px tall, and
-    the other 60px is transparent pixels inside the PNG. There is nothing left
-    to trim in the padding, because the space is not in the padding.
+    Dawn sizes the logo `logo_height = logo_width / aspect_ratio`, so a wordmark
+    exported onto an oversized canvas is given a box the shape of the FILE and
+    the blank part of that canvas becomes header height. This crops it back.
 
     `object-fit: cover` on a shortened box is the crop. The box keeps its full
     width, so `cover` scales the image on width alone - the wordmark stays
-    exactly the size it is now - and the overflow is taken off the top and
-    bottom, which is where the blank canvas is. Nothing is scaled up, so
-    nothing goes soft.
+    exactly the size it is now - and the overflow comes off the top and bottom,
+    which is where a blank canvas would be. Nothing is scaled up.
 
-    The real fix is a logo exported to its own edges; this makes the header
-    right today without waiting for that, and does nothing at all at 0.
+    DEFAULT 0, AND IT SHOULD STAY 0 FOR THIS STORE. The logo here is already
+    cropped to its own edges - 600x175, which Dawn renders 90x26 - so there is
+    no blank canvas and any trim at all cuts the letters. It was briefly
+    defaulted to 50 on the strength of a measurement taken from
+    `...2000_x_2000_px_1.png?width=600` without the `?v=` the theme sends;
+    unversioned, the CDN returned a superseded 600x600 copy of the file and
+    that copy really was seven tenths empty. The setting is kept for the day
+    someone uploads a padded logo again, but the header's height on this store
+    is not the logo and this is not the lever for it.
   {%- endcomment -%}
   {%- liquid
     assign trim = section.settings.logo_trim | default: 0
@@ -1227,9 +1230,9 @@ transform: scale(1.03);
       "max": 60,
       "step": 5,
       "unit": "%",
-      "default": 50,
+      "default": 0,
       "label": "Trim blank space around the logo",
-      "info": "The theme reserves a box the shape of the logo FILE, so a wordmark saved on a square canvas reserves a square, and the empty part of that canvas becomes header height. The logo in use is 2000x2000 with the wordmark filling 29.5% of it, so at 0% about seven tenths of the header is transparent pixels. This crops the canvas; it does not change how big the wordmark itself is. Set it back to 0 after uploading a logo that is already cropped to its own edges."
+      "info": "Only for a logo saved with blank space around it. The theme reserves a box the shape of the logo FILE, so a wordmark on an oversized canvas turns that canvas into header height; this crops it without changing how big the wordmark is. The logo in use is already cropped to its own edges (600x175), so leave this at 0 - raising it cuts the letters."
     },
     {
       "type": "checkbox",

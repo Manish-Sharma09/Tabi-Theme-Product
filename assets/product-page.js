@@ -676,27 +676,53 @@
       }
     }
 
-    /* Each image gets a scroll box of its own and the hint sits in that box, so
-       a chart page carrying a table AND two measuring diagrams magnifies
-       whichever one was tapped rather than all three together. */
+    /* Each image gets a pan box of its own and a button of its own, so a chart
+       page carrying a table AND two measuring diagrams magnifies whichever one
+       was asked for rather than all three together.
+
+       The button sits AFTER the image, not on top of it. The first version was
+       a pill in the bottom-right corner of the chart, which on the real
+       article - a 1400x1724 chart rendered about 320px wide on a phone - sat
+       squarely over the last column of the size table and hid the numbers it
+       was offering to magnify. There is no corner of a size chart that is
+       spare: every part of it is data. Below it also makes the control a real
+       <button>, so it is reachable by keyboard and announces its own state,
+       which an inert <span> over an image never was. */
     wire(img) {
       var box = document.createElement('div');
       box.className = 'pdp-sizechart__zoomable';
       img.parentNode.insertBefore(box, img);
       box.appendChild(img);
 
-      var hint = document.createElement('span');
-      hint.className = 'pdp-sizechart__zoomhint';
-      hint.innerHTML =
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'pdp-sizechart__zoombtn';
+      button.setAttribute('aria-expanded', 'false');
+      button.innerHTML =
         '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" ' +
         'aria-hidden="true" focusable="false">' +
         '<circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.5 12.5 L17 17"/>' +
-        '<path d="M6 8.5h5M8.5 6v5"/></svg><span data-zoom-label>Zoom</span>';
-      box.appendChild(hint);
+        '<path d="M6 8.5h5" data-zoom-plus/><path d="M8.5 6v5" data-zoom-plus/></svg>' +
+        '<span data-zoom-label>Zoom in</span>';
+      box.parentNode.insertBefore(button, box.nextSibling);
 
+      box.button = button;
+      button.box = box;
+
+      button.addEventListener('click', this.toggle.bind(this, box));
+      /* The image itself still toggles, because tapping a chart to enlarge it
+         is what a shopper tries first. */
       box.addEventListener('click', this.onClick.bind(this, box));
       this.addDrag(box);
       this.boxes.push(box);
+    }
+
+    toggle(box) {
+      if (box.classList.contains('is-zoomed')) {
+        this.zoomOut(box);
+      } else {
+        this.zoomIn(box, null);
+      }
     }
 
     onClick(box, event) {
@@ -715,14 +741,22 @@
 
     zoomIn(box, event) {
       box.classList.add('is-zoomed');
-      this.setLabel(box, 'Close');
+      this.setLabel(box, 'Zoom out', true);
 
       /* Centre the magnified chart on the point that was tapped, so tapping the
          right-hand columns of a wide table does not land you back at column
-         one. Read after the class, which is what resizes the image. */
-      var rect = box.getBoundingClientRect();
-      var ratioX = rect.width ? (event.clientX - rect.left) / rect.width : 0.5;
-      var ratioY = rect.height ? (event.clientY - rect.top) / rect.height : 0.5;
+         one. Read after the class, which is what resizes the image.
+
+         `event` is null when the press came from the button rather than the
+         chart, and there is no point to centre on then - the middle is the
+         honest answer. */
+      var ratioX = 0.5;
+      var ratioY = 0;
+      if (event) {
+        var rect = box.getBoundingClientRect();
+        if (rect.width) ratioX = (event.clientX - rect.left) / rect.width;
+        if (rect.height) ratioY = (event.clientY - rect.top) / rect.height;
+      }
       box.scrollLeft = (box.scrollWidth - box.clientWidth) * ratioX;
       box.scrollTop = (box.scrollHeight - box.clientHeight) * ratioY;
     }
@@ -732,12 +766,18 @@
       box.classList.remove('is-dragging');
       box.scrollLeft = 0;
       box.scrollTop = 0;
-      this.setLabel(box, 'Zoom');
+      this.setLabel(box, 'Zoom in', false);
     }
 
-    setLabel(box, text) {
-      var label = box.querySelector('[data-zoom-label]');
+    setLabel(box, text, expanded) {
+      if (!box.button) return;
+      var label = box.button.querySelector('[data-zoom-label]');
       if (label) label.textContent = text;
+      box.button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      /* The magnifier loses its `+` when it is no longer offering to add. */
+      Array.prototype.forEach.call(box.button.querySelectorAll('[data-zoom-plus]'), function (path) {
+        path.style.display = expanded ? 'none' : '';
+      });
     }
 
     /* Drag to pan, for a pointer that has no other way to scroll sideways.
