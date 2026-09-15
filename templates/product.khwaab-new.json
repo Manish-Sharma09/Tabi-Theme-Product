@@ -46,8 +46,8 @@
             "label_1": "Natural Fabrics",
             "icon_2": "hand",
             "label_2": "Handcrafted",
-            "icon_3": "tag",
-            "label_3": "Made in Small Batches",
+            "icon_3": "none",
+            "label_3": "",
             "icon_4": "exchange",
             "label_4": "Easy Returns"
           }
