@@ -43,11 +43,11 @@
           "type": "pdp_trust",
           "settings": {
             "icon_1": "leaf",
-            "label_1": "Natural Fabric",
+            "label_1": "Natural Fabrics",
             "icon_2": "hand",
             "label_2": "Handcrafted",
             "icon_3": "tag",
-            "label_3": "Made to Order",
+            "label_3": "Made in Small Batches",
             "icon_4": "exchange",
             "label_4": "Easy Returns"
           }
