@@ -348,7 +348,7 @@
         "video_mute": true,
         "video_loop": true,
         "video_controls": true,
-        "media_ratio": "3 / 4",
+        "media_ratio": "adapt",
         "desktop_split": "even",
         "mobile_media_first": true,
         "color_scheme": "scheme-5",
