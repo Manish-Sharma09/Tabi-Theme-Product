@@ -516,5 +516,6 @@ src="https://www.facebook.com/tr?id=1206956518215158&ev=PageView&noscript=1"/>
     </script>
   
 {% render 'razorpay-magic-checkout' %}
+{% render 'magicSidecartScript', email: customer.email, phone: customer.phone %}
 </body>
 </html>
