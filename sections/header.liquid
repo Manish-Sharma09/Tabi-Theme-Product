@@ -46,9 +46,15 @@
   assign menu = section.settings.menu
   assign sticky_type = section.settings.sticky_header_type | default: 'none'
 
-  assign logo_image = section.settings.logo_image | default: settings.logo
+  comment
+    The logo is the theme's own (Theme settings > Logo), at the theme's own
+    width, exactly as the previous header drew it. The text wordmark is only
+    an alternative; it is also what shows if no logo has been uploaded.
+  endcomment
+  assign logo_image = settings.logo
+  assign logo_w = settings.logo_width | default: 90
   assign use_logo_image = false
-  if section.settings.logo_style == 'image' and logo_image != blank
+  if section.settings.logo_style != 'text' and logo_image != blank
     assign use_logo_image = true
   endif
   assign wordmark = section.settings.logo_text | default: shop.name
@@ -88,16 +94,18 @@
     --tabi-display-font: {{ display_font.family }}, {{ display_font.fallback_families }};
     --tabi-display-weight: {{ display_font.weight }};
     --tabi-display-style: {{ display_font.style }};
-    --tabi-logo-width: {{ section.settings.logo_width }}px;
+    --tabi-logo-width: {{ logo_w }}px;
   }
 {%- endstyle -%}
 
 {%- capture logo_markup -%}
   {%- if use_logo_image -%}
-    {%- assign logo_alt = logo_image.alt | default: shop.name | escape -%}
-    {%- assign logo_w = section.settings.logo_width -%}
-    {%- capture logo_widths -%}{{ logo_w }}, {{ logo_w | times: 1.5 | round }}, {{ logo_w | times: 2 }}{%- endcapture -%}
-    {%- assign logo_sizes = logo_w | append: 'px' -%}
+    {%- liquid
+      assign logo_alt = logo_image.alt | default: shop.name | escape
+      assign logo_h = logo_w | divided_by: logo_image.aspect_ratio | round
+      assign logo_sizes = logo_w | append: 'px'
+    -%}
+    {%- capture logo_widths -%}{{ logo_w }}, {{ logo_w | times: 1.5 | round }}, {{ logo_w | times: 2 }}, {{ logo_w | times: 3 }}{%- endcapture -%}
     {{
       logo_image
       | image_url: width: 600
@@ -105,8 +113,11 @@
         class: 'tabi-header__logo-img',
         widths: logo_widths,
         sizes: logo_sizes,
+        width: logo_w,
+        height: logo_h,
         alt: logo_alt,
-        loading: 'eager'
+        loading: 'eager',
+        preload: true
     }}
   {%- else -%}
     <span class="tabi-wordmark" translate="no">{{ wordmark | escape }}</span>
@@ -321,7 +332,14 @@
           {%- endif -%}
         {%- endfor -%}
 
-        <a href="{{ routes.cart_url }}" class="tabi-header__icon tabi-header__icon--cart" id="cart-icon-bubble">
+        {%- comment -%}
+          Razorpay Magic Checkout's sidecart takes over this link: its script
+          (snippets/magicSidecartScript.liquid) catches clicks on
+          a[href='/cart'] / .icon-cart before the theme's cart drawer sees
+          them. Keep the href and the classes. header__icon--cart is the old
+          header's class, kept for scripts that look for it.
+        {%- endcomment -%}
+        <a href="{{ routes.cart_url }}" class="tabi-header__icon tabi-header__icon--cart header__icon--cart" id="cart-icon-bubble">
           {%- render 'tabi-cart-icon' -%}
         </a>
       </div>
@@ -678,33 +696,18 @@
       "id": "logo_style",
       "label": "Logo style",
       "options": [
-        { "value": "text", "label": "Text wordmark" },
-        { "value": "image", "label": "Logo image" }
+        { "value": "image", "label": "Logo image" },
+        { "value": "text", "label": "Text wordmark" }
       ],
-      "default": "text",
-      "info": "The reviewed design sets the name as type. Choose Logo image to show an uploaded logo instead."
+      "default": "image",
+      "info": "Logo image uses the logo and width set in Theme settings > Logo, as before."
     },
     {
       "type": "text",
       "id": "logo_text",
       "label": "Wordmark",
-      "default": "tabi"
-    },
-    {
-      "type": "image_picker",
-      "id": "logo_image",
-      "label": "Logo image",
-      "info": "Used when Logo style is Logo image. Falls back to the logo in theme settings. A dark version reads best on the cream bar."
-    },
-    {
-      "type": "range",
-      "id": "logo_width",
-      "min": 50,
-      "max": 250,
-      "step": 5,
-      "unit": "px",
-      "label": "Logo image width",
-      "default": 100
+      "default": "tabi",
+      "info": "Only used when Logo style is Text wordmark, or when no logo is uploaded."
     },
     {
       "type": "header",
