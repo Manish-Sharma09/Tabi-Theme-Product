@@ -1,0 +1,538 @@
+/* ==========================================================================
+   home-hero.css
+   The home page hero slideshow (sections/home-hero.liquid).
+
+     1. Frame and height
+     2. Slides: stacking, crossfade, slow zoom
+     3. Overlay and copy
+     4. Controls: arrows, dots, pause
+     5. Reduced motion
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. FRAME AND HEIGHT
+   "screen" fills what is left of the first screen below the header. svh, not
+   vh: on a phone vh counts the space behind the collapsing address bar, and
+   the dots and pause button would start life below the fold.
+   -------------------------------------------------------------------------- */
+
+.home-hero {
+  --hero-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --hero-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --hero-fade: 1.1s;
+  --hero-gutter: 1.6rem;
+
+  position: relative;
+  display: block;
+  overflow: hidden;
+  isolation: isolate;
+  background: #2b2621;
+  color: var(--hero-ink, #fff);
+  height: calc(100vh - var(--tabi-header-h, 8.4rem));
+  height: calc(100svh - var(--tabi-header-h, 8.4rem));
+  min-height: 48rem;
+  max-height: 110rem;
+}
+
+.home-hero--image {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: var(--hero-ratio-mobile, 4 / 5);
+}
+
+@media screen and (min-width: 750px) {
+  .home-hero {
+    --hero-gutter: 2.6rem;
+    min-height: 52rem;
+  }
+
+  .home-hero--image {
+    aspect-ratio: var(--hero-ratio, 16 / 9);
+  }
+}
+
+.home-hero__track {
+  position: absolute;
+  inset: 0;
+  touch-action: pan-y;
+}
+
+/* --------------------------------------------------------------------------
+   2. SLIDES
+   Every slide is stacked in the same box. The incoming slide fades in ON TOP
+   of the outgoing one, which stays fully opaque underneath until the fade has
+   finished (.is-leaving). Fading both at once would let the dark frame show
+   through halfway, and the change would read as a dip to black.
+   -------------------------------------------------------------------------- */
+
+.home-hero__slide {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.home-hero__slide.is-leaving {
+  z-index: 1;
+  opacity: 1;
+  visibility: visible;
+}
+
+.home-hero__slide.is-active {
+  z-index: 2;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--hero-fade) var(--hero-ease);
+}
+
+.home-hero__media,
+.home-hero__media picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.home-hero__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Zoomed in slightly while waiting; settles to full size over the time the
+     slide is on screen. The leaving slide keeps the same transition so it
+     carries on settling under the fade instead of snapping. */
+  transform: scale(1.08);
+  transform-origin: 50% 50%;
+}
+
+.home-hero__slide.is-active .home-hero__img,
+.home-hero__slide.is-leaving .home-hero__img {
+  transform: scale(1);
+  transition: transform calc(var(--hero-speed, 6s) + 3s) var(--hero-ease-out);
+}
+
+/* First paint: the first slide is already active in the HTML, so nothing has
+   transitioned. Its settle is a one-off animation instead, and it moves only
+   `transform` - fading the LCP image in would delay LCP. */
+.home-hero__slide.is-first-paint .home-hero__img {
+  animation: hero-settle 2.6s var(--hero-ease-out) both;
+}
+
+@keyframes hero-settle {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media screen and (max-width: 749px) {
+  /* image_tag writes the desktop image's focal point inline; the mobile
+     source has a focal point of its own. */
+  .home-hero__slide .home-hero__img {
+    object-position: var(--hero-focal-mobile, 50% 50%) !important;
+  }
+}
+
+.home-hero__placeholder {
+  background: #3a332c;
+  fill: rgb(255 255 255 / 0.18);
+}
+
+/* --------------------------------------------------------------------------
+   3. OVERLAY AND COPY
+   -------------------------------------------------------------------------- */
+
+/* A <span>, not a <div>: base.css hides every empty div (`div:empty {
+   display: none }`), and the overlay has no content of its own. The live
+   status line in the markup is a span for the same reason. */
+.home-hero__overlay {
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 55% at 50% 50%, rgb(0 0 0 / 0.12), transparent 75%),
+    linear-gradient(180deg, transparent 60%, rgb(0 0 0 / 0.18) 100%),
+    rgb(0 0 0 / var(--hero-overlay, 0.15));
+}
+
+.home-hero__content {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5rem;
+  /* Ranged a little below centre, as drawn: on a portrait screen the face in
+     the photograph usually sits in the upper half. */
+  padding: 12rem var(--hero-gutter) 6.5rem;
+  text-align: center;
+  color: var(--hero-ink, #fff);
+}
+
+.home-hero__heading {
+  max-width: 18ch;
+  margin: 0;
+  color: inherit;
+  font-family: var(--hero-font, var(--font-heading-family));
+  font-weight: var(--hero-font-weight, 400);
+  font-style: var(--hero-font-style, normal);
+  font-size: clamp(3.6rem, 13vw, 5.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+  text-shadow: 0 0.1rem 2.4rem rgb(0 0 0 / 0.22);
+}
+
+/* The link itself is left unpositioned so its ::after (below) can stretch over
+   the whole slide; the underline lives on the inner span for the same reason,
+   and so its hover animation never replaces the link's entrance animation. */
+.home-hero__link {
+  display: inline-block;
+  color: inherit;
+  font-family: var(--hero-font, var(--font-heading-family));
+  font-weight: var(--hero-font-weight, 400);
+  font-size: clamp(2rem, 5.9vw, 2.3rem);
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-shadow: 0 0.1rem 1.6rem rgb(0 0 0 / 0.25);
+}
+
+.home-hero__link-text {
+  display: inline-block;
+  padding-bottom: 0.4rem;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
+}
+
+/* The underline draws out to the right and back in from the left. */
+@media (hover: hover) {
+  .home-hero__link:hover .home-hero__link-text {
+    animation: hero-underline 0.9s var(--hero-ease-out);
+  }
+}
+
+@keyframes hero-underline {
+  0% {
+    background-size: 100% 1px;
+    background-position: 100% 100%;
+  }
+  45% {
+    background-size: 0% 1px;
+    background-position: 100% 100%;
+  }
+  46% {
+    background-size: 0% 1px;
+    background-position: 0 100%;
+  }
+  100% {
+    background-size: 100% 1px;
+    background-position: 0 100%;
+  }
+}
+
+.home-hero__link:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 0.6rem;
+  box-shadow: none;
+}
+
+/* The whole slide is the link's hit area. The arrows, dots and pause button
+   sit above it, so they stay clickable. */
+.home-hero__link--cover::after,
+.home-hero__cover {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.home-hero__heading {
+  pointer-events: none;
+}
+
+/* Copy rises in after its photograph has started to arrive, and leaves
+   faster than it came. */
+.home-hero__heading,
+.home-hero__link {
+  opacity: 0;
+  transform: translateY(2.2rem);
+  transition:
+    opacity 0.5s var(--hero-ease),
+    transform 0.5s var(--hero-ease);
+}
+
+.home-hero__slide.is-active .home-hero__heading,
+.home-hero__slide.is-active .home-hero__link {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.9s var(--hero-ease) 0.45s,
+    transform 1.2s var(--hero-ease-out) 0.45s;
+}
+
+.home-hero__slide.is-active .home-hero__link {
+  transition-delay: 0.62s;
+}
+
+.home-hero__slide.is-first-paint .home-hero__heading {
+  animation: hero-rise 1.2s var(--hero-ease-out) 0.15s both;
+}
+
+.home-hero__slide.is-first-paint .home-hero__link {
+  animation: hero-rise 1.2s var(--hero-ease-out) 0.32s both;
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(2.2rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media screen and (min-width: 750px) {
+  /* The headline sits a little below the optical centre, as drawn, with the
+     link close beneath it. */
+  .home-hero__content {
+    gap: 3rem;
+    padding-top: 10.2rem;
+    padding-bottom: 8rem;
+  }
+
+  .home-hero__heading {
+    font-size: clamp(4.6rem, 4.95vw, 8rem);
+    line-height: 1.02;
+  }
+
+  .home-hero__link {
+    font-size: clamp(2.2rem, 2vw, 3.2rem);
+    letter-spacing: 0.08em;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. CONTROLS
+   All three are glass-thin white outlines over the photograph, so none of
+   them competes with the headline.
+   -------------------------------------------------------------------------- */
+
+.home-hero__arrow,
+.home-hero__pause {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 0.65);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.04);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  color: var(--hero-ink, #fff);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    background-color 0.35s var(--hero-ease),
+    border-color 0.35s var(--hero-ease),
+    transform 0.35s var(--hero-ease);
+}
+
+.home-hero__arrow .tabi-icon,
+.home-hero__pause .tabi-icon {
+  width: 2rem;
+  height: 2rem;
+  stroke-width: 1.5;
+  transition: transform 0.35s var(--hero-ease);
+}
+
+@media (hover: hover) {
+  .home-hero__arrow:hover,
+  .home-hero__pause:hover {
+    background-color: rgb(255 255 255 / 0.16);
+    border-color: rgb(255 255 255 / 0.95);
+  }
+
+  .home-hero__arrow--prev:hover .tabi-icon {
+    transform: translateX(-0.2rem);
+  }
+
+  .home-hero__arrow--next:hover .tabi-icon {
+    transform: translateX(0.2rem);
+  }
+}
+
+.home-hero__arrow:active,
+.home-hero__pause:active {
+  transform: scale(0.94);
+}
+
+.home-hero__arrow:focus-visible,
+.home-hero__pause:focus-visible,
+.home-hero__dot:focus-visible {
+  outline: 1px solid var(--hero-ink, #fff);
+  outline-offset: 0.3rem;
+  box-shadow: none;
+}
+
+.home-hero__arrow {
+  top: 50%;
+  display: none;
+  width: 5.2rem;
+  height: 5.2rem;
+  margin-top: -2.6rem;
+}
+
+.home-hero__arrow:active {
+  transform: scale(0.94);
+}
+
+.home-hero__arrow--prev {
+  left: var(--hero-gutter);
+}
+
+.home-hero__arrow--next {
+  right: var(--hero-gutter);
+}
+
+@media screen and (min-width: 750px) {
+  .home-hero__arrow {
+    display: inline-flex;
+  }
+}
+
+.home-hero__dots {
+  position: absolute;
+  left: 50%;
+  bottom: 2.7rem;
+  z-index: 3;
+  display: flex;
+  gap: 0.3rem;
+  transform: translateX(-50%);
+}
+
+.home-hero__dot {
+  position: relative;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.home-hero__dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin: auto;
+  border: 1.5px solid var(--hero-ink, #fff);
+  border-radius: 50%;
+  background: transparent;
+  transition:
+    background-color 0.4s var(--hero-ease),
+    transform 0.4s var(--hero-ease);
+}
+
+.home-hero__dot[aria-current='true']::before {
+  background-color: var(--hero-ink, #fff);
+}
+
+@media (hover: hover) {
+  .home-hero__dot:hover::before {
+    transform: scale(1.25);
+  }
+}
+
+.home-hero__pause {
+  right: var(--hero-gutter);
+  bottom: 2.2rem;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-width: 1.5px;
+  border-color: rgb(255 255 255 / 0.85);
+}
+
+.home-hero__pause .tabi-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+.home-hero__play-icon,
+.home-hero.is-paused .home-hero__pause-icon {
+  display: none;
+}
+
+.home-hero.is-paused .home-hero__play-icon {
+  display: block;
+}
+
+.home-hero__pause-icon,
+.home-hero__play-icon {
+  line-height: 0;
+}
+
+.home-hero--no-mobile-pause .home-hero__pause {
+  display: none;
+}
+
+@media screen and (min-width: 750px) {
+  .home-hero__dots {
+    bottom: 2.8rem;
+  }
+
+  .home-hero__pause,
+  .home-hero--no-mobile-pause .home-hero__pause {
+    display: inline-flex;
+    bottom: 2.4rem;
+    width: 4.4rem;
+    height: 4.4rem;
+  }
+
+  .home-hero__pause .tabi-icon {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. REDUCED MOTION
+   No zoom, no rise, no autoplay (home-hero.js). Slides still crossfade,
+   quickly, so a change of slide is visible rather than a hard cut.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero {
+    --hero-fade: 0.35s;
+  }
+
+  .home-hero__img,
+  .home-hero__slide.is-active .home-hero__img,
+  .home-hero__slide.is-leaving .home-hero__img,
+  .home-hero__heading,
+  .home-hero__link {
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .home-hero__slide.is-active .home-hero__heading,
+  .home-hero__slide.is-active .home-hero__link {
+    transition: opacity 0.35s linear;
+  }
+}

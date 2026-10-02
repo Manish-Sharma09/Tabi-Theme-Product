@@ -1,0 +1,66 @@
+{% doc %}
+  Line icons for the header, the mobile menu and the home hero.
+
+  One stroke weight and one 24px grid for the whole set, so the search, account
+  and bag glyphs read as a family the way the reference design draws them.
+  Every icon is decorative: the control it sits in carries the accessible name.
+
+  @param {string} icon - search | account | bag | menu | close | chevron-left | chevron-right | chevron-down | pause | play | plus
+
+  @example
+  {% render 'tabi-icon', icon: 'search' %}
+{% enddoc %}
+{%- case icon -%}
+  {%- when 'search' -%}
+    <svg class="tabi-icon tabi-icon--search" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="10.5" cy="10.5" r="6.25" />
+      <path d="m15.25 15.25 4.75 4.75" />
+    </svg>
+  {%- when 'account' -%}
+    <svg class="tabi-icon tabi-icon--account" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="8.25" r="3.75" />
+      <path d="M4.75 20.25c.85-3.7 3.75-5.75 7.25-5.75s6.4 2.05 7.25 5.75" />
+    </svg>
+  {%- when 'bag' -%}
+    <svg class="tabi-icon tabi-icon--bag" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5.25 8.25h13.5l-.9 11.25a1 1 0 0 1-1 .9H7.15a1 1 0 0 1-1-.9z" />
+      <path d="M9 10.5V7a3 3 0 0 1 6 0v3.5" />
+    </svg>
+  {%- when 'menu' -%}
+    <svg class="tabi-icon tabi-icon--menu" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  {%- when 'close' -%}
+    <svg class="tabi-icon tabi-icon--close" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m6 6 12 12M18 6 6 18" />
+    </svg>
+  {%- when 'chevron-left' -%}
+    <svg class="tabi-icon tabi-icon--chevron-left" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m14.5 6-6 6 6 6" />
+    </svg>
+  {%- when 'chevron-right' -%}
+    <svg class="tabi-icon tabi-icon--chevron-right" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m9.5 6 6 6-6 6" />
+    </svg>
+  {%- when 'chevron-down' -%}
+    <svg class="tabi-icon tabi-icon--chevron-down" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m6.5 9.5 5.5 5.5 5.5-5.5" />
+    </svg>
+  {%- when 'pause' -%}
+    <svg class="tabi-icon tabi-icon--pause" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M9.75 7.5v9M14.25 7.5v9" />
+    </svg>
+  {%- when 'play' -%}
+    <svg class="tabi-icon tabi-icon--play" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M9.5 7.25v9.5l7.25-4.75z" />
+    </svg>
+  {%- when 'plus' -%}
+    {%- comment -%}
+      Two separate strokes so the vertical one can fold away and leave a minus
+      when its accordion row opens - see .tabi-icon__plus-v in tabi-header.css.
+    {%- endcomment -%}
+    <svg class="tabi-icon tabi-icon--plus" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5.5 12h13" />
+      <path class="tabi-icon__plus-v" d="M12 5.5v13" />
+    </svg>
+{%- endcase -%}

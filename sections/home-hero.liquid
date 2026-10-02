@@ -1,0 +1,369 @@
+{%- comment -%}
+  HOME HERO - the full-screen banner under the header on the home page.
+
+  Built to the reviewed mockup: photograph edge to edge, a two-line serif
+  headline and an underlined text link centred on it, round arrows at the
+  sides, dots and a pause button along the bottom.
+
+  A new section rather than a rework of slideshow-dorec, because the home page
+  uses slideshow-dorec twice and the second one (the "New In" banner) is not
+  part of this change.
+
+  The first slide is in the HTML fully visible, and its image is eager with
+  fetchpriority=high - it is the page's LCP element, so nothing about it waits
+  for JavaScript. Script only adds the slideshow on top.
+{%- endcomment -%}
+
+{{ 'home-hero.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'home-hero.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign display_font = section.settings.type_display_font
+  assign slide_count = section.blocks.size
+  assign autoplay = false
+  if section.settings.autoplay and slide_count > 1
+    assign autoplay = true
+  endif
+
+  assign first_image = section.blocks.first.settings.image | default: section.blocks.first.settings.image_mobile
+  assign first_mobile = section.blocks.first.settings.image_mobile | default: first_image
+-%}
+
+{%- style -%}
+  {{ display_font | font_face: font_display: 'swap' }}
+
+  #shopify-section-{{ section.id }} {
+    --hero-font: {{ display_font.family }}, {{ display_font.fallback_families }};
+    --hero-font-weight: {{ display_font.weight }};
+    --hero-font-style: {{ display_font.style }};
+    --hero-ink: {{ section.settings.text_color }};
+    --hero-speed: {{ section.settings.autoplay_speed }}s;
+    {%- if section.settings.height == 'image' and first_image != blank %}
+      --hero-ratio: {{ first_image.aspect_ratio }};
+      --hero-ratio-mobile: {{ first_mobile.aspect_ratio }};
+    {%- endif %}
+  }
+{%- endstyle -%}
+
+<home-hero
+  class="home-hero home-hero--{{ section.settings.height }}{% unless section.settings.show_pause_mobile %} home-hero--no-mobile-pause{% endunless %}"
+  role="region"
+  aria-roledescription="{{ 'sections.slideshow.carousel' | t }}"
+  aria-label="{{ section.settings.label | escape }}"
+  data-autoplay="{{ autoplay }}"
+  data-speed="{{ section.settings.autoplay_speed }}"
+>
+  <div class="home-hero__track">
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign desktop = block.settings.image | default: block.settings.image_mobile
+        assign mobile = block.settings.image_mobile | default: desktop
+
+        assign loading = 'lazy'
+        assign priority = 'low'
+        if forloop.first and section.index < 3
+          assign loading = 'eager'
+          assign priority = 'high'
+        endif
+
+        assign heading = block.settings.heading | strip
+        assign cover_name = heading | strip_newlines | default: desktop.alt | default: shop.name
+      -%}
+      <div
+        class="home-hero__slide{% if forloop.first %} is-active is-first-paint{% endif %}"
+        id="HomeHero-{{ section.id }}-{{ forloop.index }}"
+        role="group"
+        aria-roledescription="{{ 'sections.slideshow.slide' | t }}"
+        aria-label="{{ forloop.index }} {{ 'general.slider.of' | t }} {{ forloop.length }}"
+        style="--hero-overlay: {{ block.settings.overlay_opacity | divided_by: 100.0 }};{% if mobile != blank %} --hero-focal-mobile: {{ mobile.presentation.focal_point }};{% endif %}"
+        {% unless forloop.first %}
+          inert
+        {% endunless %}
+        {{ block.shopify_attributes }}
+      >
+        <div class="home-hero__media">
+          {%- if desktop != blank -%}
+            <picture>
+              {%- if block.settings.image_mobile != blank and block.settings.image != blank -%}
+                {%- comment -%}
+                  Widths past the file's own are left out: the CDN would serve
+                  the original under a larger `w` descriptor, and the browser
+                  would pick it for screens it is too small for.
+                {%- endcomment -%}
+                {%- assign mobile_widths = '750,1100,1500' | split: ',' -%}
+                {%- capture mobile_srcset -%}
+                  {%- for width_string in mobile_widths -%}
+                    {%- assign w = width_string | plus: 0 -%}
+                    {%- if forloop.first or w <= mobile.width -%}
+                      {%- unless forloop.first %}, {% endunless -%}
+                      {{- mobile | image_url: width: w }} {{ w }}w
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endcapture -%}
+                <source
+                  media="(max-width: 749px)"
+                  srcset="{{ mobile_srcset | strip }}"
+                  sizes="100vw"
+                  width="{{ mobile.width }}"
+                  height="{{ mobile.height }}"
+                >
+              {%- endif -%}
+              {{
+                desktop
+                | image_url: width: 3840
+                | image_tag:
+                  class: 'home-hero__img',
+                  widths: '750, 1100, 1500, 1920, 2560, 3200, 3840',
+                  sizes: '100vw',
+                  loading: loading,
+                  fetchpriority: priority
+              }}
+            </picture>
+          {%- else -%}
+            {%- liquid
+              assign placeholder_index = forloop.index0 | modulo: 2 | plus: 1
+              assign placeholder_name = 'lifestyle-' | append: placeholder_index
+            -%}
+            {{ placeholder_name | placeholder_svg_tag: 'home-hero__img home-hero__placeholder' }}
+          {%- endif -%}
+        </div>
+
+        <span class="home-hero__overlay" aria-hidden="true"></span>
+
+        <div class="home-hero__content">
+          {%- if heading != blank -%}
+            <h2 class="home-hero__heading">{{ heading | escape | newline_to_br }}</h2>
+          {%- endif -%}
+
+          {%- if block.settings.link != blank -%}
+            {%- if block.settings.link_label != blank -%}
+              <a
+                href="{{ block.settings.link }}"
+                class="home-hero__link{% if block.settings.whole_slide_link %} home-hero__link--cover{% endif %}"
+              >
+                <span class="home-hero__link-text">{{ block.settings.link_label | escape }}</span>
+              </a>
+            {%- elsif block.settings.whole_slide_link -%}
+              <a href="{{ block.settings.link }}" class="home-hero__cover">
+                <span class="visually-hidden">{{ cover_name | escape }}</span>
+              </a>
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  {%- if slide_count > 1 -%}
+    {%- if section.settings.show_arrows -%}
+      <button
+        type="button"
+        class="home-hero__arrow home-hero__arrow--prev"
+        aria-label="{{ 'sections.slideshow.previous_slideshow' | t }}"
+        data-hero-prev
+      >
+        {% render 'tabi-icon', icon: 'chevron-left' %}
+      </button>
+      <button
+        type="button"
+        class="home-hero__arrow home-hero__arrow--next"
+        aria-label="{{ 'sections.slideshow.next_slideshow' | t }}"
+        data-hero-next
+      >
+        {% render 'tabi-icon', icon: 'chevron-right' %}
+      </button>
+    {%- endif -%}
+
+    <div class="home-hero__dots">
+      {%- for block in section.blocks -%}
+        <button
+          type="button"
+          class="home-hero__dot"
+          aria-label="{{ 'sections.slideshow.load_slide' | t }} {{ forloop.index }} {{ 'general.slider.of' | t }} {{ forloop.length }}"
+          aria-controls="HomeHero-{{ section.id }}-{{ forloop.index }}"
+          {% if forloop.first %}
+            aria-current="true"
+          {% endif %}
+          data-hero-dot="{{ forloop.index0 }}"
+        ></button>
+      {%- endfor -%}
+    </div>
+
+    {%- if autoplay -%}
+      <button
+        type="button"
+        class="home-hero__pause"
+        aria-label="{{ 'sections.slideshow.pause_slideshow' | t }}"
+        data-pause-label="{{ 'sections.slideshow.pause_slideshow' | t }}"
+        data-play-label="{{ 'sections.slideshow.play_slideshow' | t }}"
+        data-hero-pause
+      >
+        <span class="home-hero__pause-icon">{% render 'tabi-icon', icon: 'pause' %}</span>
+        <span class="home-hero__play-icon">{% render 'tabi-icon', icon: 'play' %}</span>
+      </button>
+    {%- endif -%}
+
+    <span class="visually-hidden" aria-live="polite" aria-atomic="true" data-hero-status></span>
+  {%- endif -%}
+</home-hero>
+
+{% schema %}
+{
+  "name": "Home: Hero slideshow",
+  "class": "home-hero-section",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Name for screen readers",
+      "default": "Featured stories",
+      "info": "Announced when someone using a screen reader reaches the banner."
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Height",
+      "options": [
+        { "value": "screen", "label": "Fill the screen below the header" },
+        { "value": "image", "label": "Match the first image" }
+      ],
+      "default": "screen"
+    },
+    {
+      "type": "header",
+      "content": "Slideshow"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Change slides automatically",
+      "default": true,
+      "info": "Stops while a shopper hovers, focuses or swipes the banner, and never starts for visitors who have asked their device to reduce motion."
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 4,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Time on each slide",
+      "default": 6
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show arrows",
+      "default": true,
+      "info": "Tablet and desktop. Phones swipe."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pause_mobile",
+      "label": "Show pause button on phones",
+      "default": true,
+      "info": "The mockup leaves it off on phones. Moving content that plays for more than five seconds needs a way to stop it, so it is on by default."
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "font_picker",
+      "id": "type_display_font",
+      "label": "Font",
+      "default": "ebgaramond_n4"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text and controls",
+      "default": "#ffffff"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Desktop image",
+          "info": "Landscape, at least 2400px wide. Set a focal point on the image so the crop keeps the subject."
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Mobile image",
+          "info": "Portrait, at least 1100px wide. Without one, phones show a centred crop of the desktop image."
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading",
+          "default": "A little thread.\nA lasting story.",
+          "info": "Each new line starts a new line in the banner."
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link text",
+          "default": "Discover Tabi"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "checkbox",
+          "id": "whole_slide_link",
+          "label": "Make the whole slide clickable",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "min": 0,
+          "max": 70,
+          "step": 5,
+          "unit": "%",
+          "label": "Darken the image",
+          "default": 15,
+          "info": "Keeps white text readable on a bright photograph."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home: Hero slideshow",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "A little thread.\nA lasting story.",
+            "link_label": "Discover Tabi"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "Printed by hand,\nblock by block.",
+            "link_label": "Shop New Arrivals"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "Made in small batches,\noften to order.",
+            "link_label": "Shop Women"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

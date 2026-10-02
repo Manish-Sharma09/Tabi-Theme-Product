@@ -1,0 +1,1024 @@
+/* ==========================================================================
+   tabi-header.css
+   The header, its desktop dropdowns and the mobile menu drawer, built to the
+   reviewed header mockup. Loaded from sections/header.liquid only.
+
+   Everything is namespaced `tabi-`. Dawn's own header classes (.header,
+   .header__inline-menu, .menu-drawer) are deliberately not reused: base.css,
+   custom-fixes.css and theme.liquid all carry rules for those, written for the
+   old header, and inheriting them would mean fighting them line by line.
+
+     1. Tokens
+     2. Bar layout
+     3. Wordmark / logo
+     4. Icons, cart count, search toggle
+     5. Desktop menu + dropdowns
+     6. Mobile drawer
+     7. Sticky behaviour
+     8. Reduced motion
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. TOKENS
+   Defaults for the colours and font the section's {% style %} block sets on
+   #shopify-section-<id>. That id selector out-ranks this class, so a theme
+   editor change always wins; these only apply if the style block is missing.
+   -------------------------------------------------------------------------- */
+
+.section-header {
+  --tabi-cream: #f9f7f4;
+  --tabi-ink: #14284a;
+  --tabi-display-font: var(--font-heading-family);
+  --tabi-display-weight: 400;
+  --tabi-display-style: normal;
+  --tabi-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --tabi-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --tabi-gutter: 1.2rem;
+
+  /* Hairlines and washes are mixed from the two brand colours rather than
+     picked separately, so changing either setting keeps them in step. The
+     plain values in front are for browsers without color-mix(). */
+  --tabi-hairline: #e7e6e4;
+  --tabi-hairline: color-mix(in srgb, var(--tabi-ink) 9%, var(--tabi-cream));
+  --tabi-field: #f2f0ec;
+  --tabi-field: color-mix(in srgb, var(--tabi-ink) 3%, var(--tabi-cream));
+  --tabi-field-line: #dcdcdc;
+  --tabi-field-line: color-mix(in srgb, var(--tabi-ink) 14%, var(--tabi-cream));
+  --tabi-muted: #5f6d7a;
+  --tabi-muted: color-mix(in srgb, var(--tabi-ink) 68%, var(--tabi-cream));
+  --tabi-placeholder: #8a898f;
+  --tabi-placeholder: color-mix(in srgb, var(--tabi-ink) 45%, var(--tabi-cream));
+}
+
+@media screen and (min-width: 990px) {
+  .section-header {
+    --tabi-gutter: clamp(2.4rem, 2.9vw, 5.6rem);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. BAR LAYOUT
+   One grid for both widths, re-mapped by area rather than re-ordered in the
+   markup:  phone  [menu] [logo] [icons]   desktop  [logo] [nav] [icons]
+   The outer columns are 1fr each, so the middle one is centred on the page
+   whatever the logo and the icon row measure.
+   -------------------------------------------------------------------------- */
+
+.tabi-header-wrapper {
+  background: var(--tabi-cream);
+  color: var(--tabi-ink);
+}
+
+.tabi-header {
+  position: relative;
+  background: var(--tabi-cream);
+  color: var(--tabi-ink);
+  box-shadow: 0 1px 0 var(--tabi-hairline);
+  transition: box-shadow 0.4s var(--tabi-ease);
+}
+
+.tabi-header__bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-areas: 'menu logo icons';
+  align-items: center;
+  height: var(--tabi-header-h, 8.4rem);
+  padding-inline: var(--tabi-gutter);
+}
+
+.tabi-header__menu-button {
+  grid-area: menu;
+  justify-self: start;
+}
+
+.tabi-header__logo {
+  grid-area: logo;
+  margin: 0;
+  line-height: 1;
+}
+
+.tabi-nav {
+  display: none;
+}
+
+.tabi-header__icons {
+  grid-area: icons;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  /* Pull the last 44px hit area out by its own padding, so the bag glyph -
+     not the invisible box round it - lines up with the page gutter. */
+  margin-inline-end: -1.2rem;
+}
+
+@media screen and (min-width: 990px) {
+  .tabi-header__bar {
+    grid-template-areas: 'logo nav icons';
+  }
+
+  /* Two classes: section 4 gives every .tabi-header__icon `display:
+     inline-flex` further down, which would otherwise win - and a menu button
+     with no grid area on desktop is auto-placed into a second row, squashing
+     the whole bar to the top. */
+  .tabi-header__bar .tabi-header__menu-button {
+    display: none;
+  }
+
+  .tabi-header__logo {
+    justify-self: start;
+  }
+
+  .tabi-nav {
+    grid-area: nav;
+    display: block;
+    height: 100%;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. WORDMARK / LOGO
+   -------------------------------------------------------------------------- */
+
+.tabi-header__logo-link,
+.tabi-drawer__logo {
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.3s var(--tabi-ease);
+}
+
+.tabi-header__logo-link:hover,
+.tabi-drawer__logo:hover {
+  opacity: 0.75;
+}
+
+.tabi-wordmark {
+  display: block;
+  font-family: var(--tabi-display-font);
+  font-weight: var(--tabi-display-weight);
+  font-style: var(--tabi-display-style);
+  font-size: 3.7rem;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  /* Tracking adds space after the last letter too; give it back so the word
+     centres on its letters rather than on letters-plus-a-gap. */
+  margin-inline-end: -0.07em;
+  color: var(--tabi-ink);
+}
+
+.tabi-header__logo-img {
+  display: block;
+  width: var(--tabi-logo-width, 10rem);
+  max-width: 100%;
+  height: auto;
+}
+
+@media screen and (min-width: 990px) {
+  .tabi-header .tabi-wordmark {
+    font-size: 4.8rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. ICONS, CART COUNT, SEARCH TOGGLE
+   -------------------------------------------------------------------------- */
+
+.tabi-icon {
+  display: block;
+  width: 2.8rem;
+  height: 2.8rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+
+.tabi-icon--play {
+  fill: currentColor;
+  stroke: none;
+}
+
+.tabi-header__icon,
+.tabi-header .header__search .header__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 4.4rem;
+  height: 4.4rem;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: var(--tabi-ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.tabi-header__icon .tabi-icon,
+.tabi-header .header__search .tabi-icon {
+  transition: transform 0.35s var(--tabi-ease), opacity 0.35s var(--tabi-ease);
+}
+
+@media (hover: hover) {
+  .tabi-header__icon:hover .tabi-icon,
+  .tabi-header .header__search .header__icon:hover .tabi-icon {
+    transform: translateY(-1px);
+    opacity: 0.7;
+  }
+}
+
+.tabi-header__icon:active .tabi-icon,
+.tabi-header .header__search .header__icon:active .tabi-icon {
+  transform: scale(0.9);
+}
+
+.tabi-header__icon:focus-visible,
+.tabi-header .header__search .header__icon:focus-visible {
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: -4px;
+  box-shadow: none;
+}
+
+/* Dawn sizes any .svg-wrapper inside .header__icon at 44px, which would blow
+   the search glyph up to the size of its hit area. */
+.tabi-header .header__icon .svg-wrapper,
+.tabi-header__icon .svg-wrapper {
+  width: 2.8rem;
+  height: 2.8rem;
+}
+
+/* The account icon is desktop-only in the design; on a phone it lives in the
+   drawer's footer instead. */
+.tabi-header__icon--account {
+  display: none;
+}
+
+@media screen and (min-width: 990px) {
+  .tabi-header__icon--account {
+    display: inline-flex;
+  }
+}
+
+.tabi-header__icon--cart .cart-count-bubble {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.5rem;
+  bottom: auto;
+  left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border-radius: 99rem;
+  background: var(--tabi-ink);
+  color: var(--tabi-cream);
+  font-family: var(--font-body-family);
+  font-size: 1rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  animation: tabi-count-in 0.45s var(--tabi-ease-out);
+}
+
+@keyframes tabi-count-in {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+
+.tabi-header__localization {
+  margin-inline-end: 0.8rem;
+}
+
+/* Dawn's search modal is positioned over .header-wrapper and painted from the
+   colour scheme; keep it on the header's own cream so opening it reads as the
+   bar changing state rather than a second bar arriving. */
+.tabi-header-wrapper .search-modal {
+  background: var(--tabi-cream);
+  color: var(--tabi-ink);
+}
+
+/* --------------------------------------------------------------------------
+   5. DESKTOP MENU + DROPDOWNS
+
+   Each item stretches to the full height of the bar, so the pointer never
+   leaves it on the way from a label down into its panel - the panel starts
+   at the bar's bottom edge, which is the item's bottom edge too.
+
+   A link with children opens its panel on hover (mouse), on a first tap
+   (touch: the second tap follows the link) and from the small toggle button
+   beside it (keyboard - that button is invisible until it takes focus).
+   -------------------------------------------------------------------------- */
+
+.tabi-nav nav,
+.tabi-nav__list {
+  height: 100%;
+}
+
+.tabi-nav__list {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(2rem, 2.8vw, 4.4rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tabi-nav__item {
+  display: flex;
+  align-items: center;
+}
+
+/* Small panels hang from their own item; mega panels span the whole bar and
+   so are positioned against .tabi-header instead. */
+.tabi-nav__item--parent:not(.tabi-nav__item--mega) {
+  position: relative;
+}
+
+.tabi-nav__trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tabi-nav__link {
+  display: inline-flex;
+  align-items: center;
+  padding-block: 0.8rem;
+  color: var(--tabi-ink);
+  text-decoration: none;
+  font-family: var(--tabi-display-font);
+  font-weight: var(--tabi-display-weight);
+  font-style: var(--tabi-display-style);
+  font-size: 1.7rem;
+  line-height: 1.2;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+}
+
+/* The underline grows from the centre: a 1px background image whose width
+   animates, rather than text-decoration, which cannot be transitioned. */
+.tabi-nav__label {
+  padding-bottom: 0.3rem;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 50% 100%;
+  background-size: 0% 1px;
+  transition: background-size 0.45s var(--tabi-ease-out);
+}
+
+.tabi-nav__link:hover .tabi-nav__label,
+.tabi-nav__link.is-active .tabi-nav__label,
+.tabi-nav__item.is-open .tabi-nav__label {
+  background-size: 100% 1px;
+}
+
+.tabi-nav__link:focus-visible {
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: 0.4rem;
+  box-shadow: none;
+}
+
+.tabi-nav__toggle {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  margin: -0.9rem 0 0 0.2rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tabi-ink);
+  opacity: 0;
+  cursor: pointer;
+}
+
+.tabi-nav__toggle .tabi-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+  transition: transform 0.35s var(--tabi-ease);
+}
+
+.tabi-nav__toggle:focus-visible {
+  opacity: 1;
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+.tabi-nav__item.is-open .tabi-nav__toggle .tabi-icon {
+  transform: rotate(180deg);
+}
+
+.tabi-nav__panel {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  z-index: 3;
+  min-width: 22rem;
+  padding: 2.2rem 2.8rem 2.4rem;
+  background: var(--tabi-cream);
+  border: 1px solid var(--tabi-hairline);
+  border-top: 0;
+  box-shadow: 0 2.4rem 4.8rem -2.4rem rgb(20 40 74 / 0.18);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -0.8rem);
+  transition:
+    opacity 0.28s var(--tabi-ease),
+    transform 0.4s var(--tabi-ease-out),
+    visibility 0s linear 0.4s;
+}
+
+.tabi-nav__panel--mega {
+  left: 0;
+  right: 0;
+  padding: 3.6rem var(--tabi-gutter) 4rem;
+  border-inline: 0;
+  transform: translateY(-0.8rem);
+}
+
+.tabi-nav__item.is-open > .tabi-nav__panel {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition:
+    opacity 0.28s var(--tabi-ease),
+    transform 0.4s var(--tabi-ease-out),
+    visibility 0s linear 0s;
+}
+
+.tabi-nav__item.is-open > .tabi-nav__panel--mega {
+  transform: none;
+}
+
+.tabi-nav__panel-inner {
+  display: flex;
+  gap: 4rem;
+  justify-content: center;
+}
+
+.tabi-nav__columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 22rem));
+  gap: 2.4rem 4.8rem;
+  justify-content: center;
+  flex: 1 1 auto;
+  max-width: 120rem;
+}
+
+.tabi-nav__column-title {
+  display: inline-block;
+  margin-bottom: 1.2rem;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-display-font);
+  font-size: 1.9rem;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.tabi-nav__sublist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tabi-nav__sublink {
+  display: inline-block;
+  padding-block: 0.45rem;
+  color: var(--tabi-muted);
+  font-family: var(--tabi-display-font);
+  font-size: 1.6rem;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 calc(100% - 0.2rem);
+  background-size: 0% 1px;
+  transition:
+    color 0.3s var(--tabi-ease),
+    background-size 0.4s var(--tabi-ease-out);
+}
+
+.tabi-nav__column-title:hover,
+.tabi-nav__sublink:hover,
+.tabi-nav__sublink[aria-current='page'] {
+  color: var(--tabi-ink);
+  background-size: 100% 1px;
+}
+
+.tabi-nav__column-title:focus-visible,
+.tabi-nav__sublink:focus-visible,
+.tabi-nav__card:focus-visible {
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: 0.3rem;
+  box-shadow: none;
+}
+
+/* Panel content arrives a beat after the panel itself. */
+.tabi-nav__panel-inner > * {
+  opacity: 0;
+  transform: translateY(0.6rem);
+  transition:
+    opacity 0.3s var(--tabi-ease),
+    transform 0.45s var(--tabi-ease-out);
+}
+
+.tabi-nav__item.is-open .tabi-nav__panel-inner > * {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.08s;
+}
+
+.tabi-nav__card {
+  flex: 0 0 24rem;
+  display: block;
+  color: var(--tabi-ink);
+  text-decoration: none;
+}
+
+.tabi-nav__card-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  transition: transform 0.8s var(--tabi-ease-out);
+}
+
+.tabi-nav__card:hover .tabi-nav__card-img {
+  transform: scale(1.03);
+}
+
+.tabi-nav__card-title {
+  display: block;
+  margin-top: 1rem;
+  font-family: var(--tabi-display-font);
+  font-size: 1.6rem;
+}
+
+/* --------------------------------------------------------------------------
+   6. MOBILE DRAWER
+
+   A <dialog> opened with showModal(): the browser supplies the focus trap,
+   Escape, and inertness for the page behind it, and the top layer puts it
+   above every z-index on the page - including the sticky add-to-bag bar and
+   the cart drawer, which have both out-ranked Dawn's drawer before. The dialog
+   itself is a transparent full-viewport frame; the dim and the panel are its
+   children so they can transition independently.
+   -------------------------------------------------------------------------- */
+
+.tabi-drawer__dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: transparent;
+  color: var(--tabi-ink);
+  overscroll-behavior: contain;
+}
+
+.tabi-drawer__dialog::backdrop {
+  background: transparent;
+}
+
+/* A <span>, not a <div>: base.css hides every empty div (`div:empty {
+   display: none }`), and the dim layer has no content of its own. */
+.tabi-drawer__backdrop {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: rgb(16 14 12 / 0.55);
+  opacity: 0;
+  transition: opacity 0.45s var(--tabi-ease);
+}
+
+.tabi-drawer__panel {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(81vw, 36rem);
+  background: var(--tabi-cream);
+  box-shadow: 0 0 4rem rgb(0 0 0 / 0.14);
+  transform: translateX(-100%);
+  transition: transform 0.55s var(--tabi-ease-out);
+}
+
+.tabi-drawer__dialog.is-open .tabi-drawer__backdrop {
+  opacity: 1;
+}
+
+.tabi-drawer__dialog.is-open .tabi-drawer__panel {
+  transform: none;
+}
+
+.tabi-drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  min-height: 8.4rem;
+  padding: 1.2rem 1rem 0 2.8rem;
+}
+
+.tabi-drawer__head .tabi-wordmark {
+  font-size: 4.2rem;
+}
+
+.tabi-drawer__close .tabi-icon {
+  width: 3.4rem;
+  height: 3.4rem;
+  transition: transform 0.4s var(--tabi-ease);
+}
+
+@media (hover: hover) {
+  .tabi-drawer__close:hover .tabi-icon {
+    transform: rotate(90deg);
+  }
+}
+
+.tabi-drawer__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2.6rem 2.2rem 2.4rem 2.8rem;
+}
+
+.tabi-drawer__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0 0 1.6rem;
+}
+
+.tabi-drawer__search .tabi-icon {
+  position: absolute;
+  left: 1.3rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  color: var(--tabi-ink);
+  pointer-events: none;
+}
+
+.tabi-drawer__search-input {
+  width: 100%;
+  height: 5.6rem;
+  padding: 0 1.4rem 0 5.2rem;
+  border: 1px solid var(--tabi-field-line);
+  border-radius: 0.3rem;
+  background: var(--tabi-field);
+  color: var(--tabi-ink);
+  font-family: var(--tabi-display-font);
+  font-size: 1.85rem;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    border-color 0.3s var(--tabi-ease),
+    background-color 0.3s var(--tabi-ease);
+}
+
+.tabi-drawer__search-input::placeholder {
+  color: var(--tabi-placeholder);
+  font-style: italic;
+  opacity: 1;
+}
+
+.tabi-drawer__search-input:focus {
+  outline: none;
+  border-color: var(--tabi-ink);
+  background: var(--tabi-cream);
+  box-shadow: none;
+}
+
+.tabi-drawer__search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+.tabi-drawer__list,
+.tabi-drawer__sublist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tabi-drawer__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 7.6rem;
+  padding: 0 0.4rem 0 0;
+  border: 0;
+  background: none;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-display-font);
+  font-weight: var(--tabi-display-weight);
+  font-size: 2.45rem;
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Inset, because rows inside an open accordion sit in an overflow: hidden box
+   that would clip an outset ring down to one edge. */
+.tabi-drawer__link:focus-visible,
+.tabi-drawer__sublink:focus-visible,
+.tabi-drawer__utility:focus-visible {
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: -0.2rem;
+  box-shadow: none;
+}
+
+.tabi-drawer__trigger .tabi-icon {
+  flex: none;
+  width: 2.8rem;
+  height: 2.8rem;
+  margin-inline-end: -0.2rem;
+  stroke-width: 1.1;
+}
+
+/* Rows inside an open accordion carry a smaller + to match their type. */
+.tabi-drawer__sublink.tabi-drawer__trigger .tabi-icon {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+/* + becomes - : the vertical stroke folds away about its own centre. */
+.tabi-icon__plus-v {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.4s var(--tabi-ease-out);
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] .tabi-icon__plus-v {
+  transform: scaleY(0);
+}
+
+/* Height animates by transitioning a 0fr -> 1fr grid row: the browser
+   measures the content, so there is no script measuring scrollHeight and no
+   max-height guess to clip a long list. `visibility` keeps the links of a
+   closed row out of the tab order, flipping only after the fold finishes. */
+.tabi-drawer__sub {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows 0.45s var(--tabi-ease-out),
+    visibility 0s linear 0.45s;
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] + .tabi-drawer__sub {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition:
+    grid-template-rows 0.45s var(--tabi-ease-out),
+    visibility 0s linear 0s;
+}
+
+.tabi-drawer__sub-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tabi-drawer__sublist {
+  padding: 0 0 1.4rem 0.2rem;
+}
+
+.tabi-drawer__sublist--deep {
+  padding: 0 0 1rem 1.4rem;
+  border-left: 1px solid var(--tabi-hairline);
+  margin-left: 0.2rem;
+}
+
+.tabi-drawer__sublink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 4.4rem;
+  padding: 0 0.4rem 0 0;
+  border: 0;
+  background: none;
+  color: var(--tabi-muted);
+  font-family: var(--tabi-display-font);
+  font-size: 1.75rem;
+  line-height: 1.3;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s var(--tabi-ease);
+}
+
+.tabi-drawer__sublink:hover,
+.tabi-drawer__sublink[aria-current='page'],
+.tabi-drawer__sublink[aria-expanded='true'] {
+  color: var(--tabi-ink);
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] + .tabi-drawer__sub .tabi-drawer__sublist > li {
+  animation: tabi-rise 0.5s var(--tabi-ease-out) both;
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] + .tabi-drawer__sub .tabi-drawer__sublist > li:nth-child(2) {
+  animation-delay: 0.03s;
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] + .tabi-drawer__sub .tabi-drawer__sublist > li:nth-child(3) {
+  animation-delay: 0.06s;
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] + .tabi-drawer__sub .tabi-drawer__sublist > li:nth-child(n + 4) {
+  animation-delay: 0.09s;
+}
+
+/* Rows rise into place one after another as the panel slides in. */
+.tabi-drawer__item,
+.tabi-drawer__search,
+.tabi-drawer__foot > * {
+  opacity: 0;
+  transform: translateX(-1.2rem);
+  transition:
+    opacity 0.4s var(--tabi-ease),
+    transform 0.6s var(--tabi-ease-out);
+}
+
+.tabi-drawer__dialog.is-open .tabi-drawer__search {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.12s;
+}
+
+.tabi-drawer__dialog.is-open .tabi-drawer__item {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(0.16s + var(--tabi-i, 0) * 0.045s);
+}
+
+.tabi-drawer__dialog.is-open .tabi-drawer__foot > * {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.38s;
+}
+
+@keyframes tabi-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+}
+
+.tabi-drawer__foot {
+  flex: none;
+  margin: 0 2.2rem 0 2.8rem;
+  padding: 1.4rem 0 calc(4.4rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--tabi-hairline);
+}
+
+.tabi-drawer__utility {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 4.4rem;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-display-font);
+  font-size: 1.6rem;
+  text-decoration: none;
+}
+
+.tabi-drawer__utility .tabi-icon {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+.tabi-drawer__localization {
+  margin-bottom: 0.8rem;
+}
+
+.tabi-drawer__localization .localization-form {
+  padding: 0;
+}
+
+.tabi-drawer__localization .localization-form__select,
+.tabi-drawer__localization .disclosure__button {
+  padding-inline-start: 0;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-display-font);
+  font-size: 1.5rem;
+}
+
+.tabi-drawer__tagline {
+  margin: 1.2rem 0 0;
+  color: var(--tabi-muted);
+  font-family: var(--tabi-display-font);
+  font-size: 1.32rem;
+  line-height: 1.6;
+  letter-spacing: 0.2em;
+  text-align: center;
+}
+
+/* While the drawer is open the page behind it must not scroll. <dialog> makes
+   the page inert but does not stop it scrolling. */
+html.tabi-scroll-lock,
+html.tabi-scroll-lock body {
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   7. STICKY BEHAVIOUR
+   custom-fixes.css sets `.section-header { position: relative }` for its
+   stacking fix, and loads after base.css - so it silently out-ranks Dawn's
+   `.shopify-section-header-sticky { position: sticky }` and a sticky header
+   would never stick. Two classes put sticky back on top. `top` is left to
+   base.css: it is 0 when shown and minus the header height when hidden, and
+   setting it here would out-rank the hidden value and pin the bar in place.
+   -------------------------------------------------------------------------- */
+
+.section-header.shopify-section-header-sticky {
+  position: sticky;
+}
+
+.section-header.animate {
+  transition: top 0.45s var(--tabi-ease-out);
+}
+
+.section-header.scrolled-past-header .tabi-header {
+  box-shadow:
+    0 1px 0 var(--tabi-hairline),
+    0 1rem 3rem -2rem rgb(20 40 74 / 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   8. REDUCED MOTION
+   Movement goes; plain fades stay, quickened, so state changes still read.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .tabi-header *,
+  .tabi-drawer * {
+    animation: none !important;
+  }
+
+  /* Closed and open panels share one position, so only opacity changes. The
+     small panel keeps the -50% that centres it under its link. */
+  .tabi-nav__panel,
+  .tabi-nav__item.is-open > .tabi-nav__panel {
+    transform: translateX(-50%);
+  }
+
+  .tabi-nav__panel--mega,
+  .tabi-nav__item.is-open > .tabi-nav__panel--mega,
+  .tabi-nav__panel-inner > *,
+  .tabi-drawer__panel,
+  .tabi-drawer__item,
+  .tabi-drawer__search,
+  .tabi-drawer__foot > *,
+  .tabi-header__icon .tabi-icon,
+  .tabi-drawer__close .tabi-icon {
+    transform: none !important;
+  }
+
+  .tabi-icon__plus-v {
+    transition: none;
+  }
+
+  .tabi-drawer__panel {
+    transition: opacity 0.2s linear;
+    opacity: 0;
+  }
+
+  .tabi-drawer__dialog.is-open .tabi-drawer__panel {
+    opacity: 1;
+  }
+
+  .tabi-drawer__sub {
+    transition: none;
+  }
+
+  .section-header.animate {
+    transition: none;
+  }
+}

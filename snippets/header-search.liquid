@@ -3,6 +3,9 @@
 
   Accepts:
   - input_id: {String} Id for the search input element (required)
+  - tabi_icons: {Boolean} Draw the toggle with the redesigned header's line
+    icons (snippets/tabi-icon.liquid) instead of Dawn's. Optional; the modal
+    itself is identical either way.
 
   Usage:
   {% render 'header-search', input_id: 'My-Id'%}
@@ -16,12 +19,17 @@
       aria-label="{{ 'general.search.search' | t }}"
     >
       <span>
-        <span class="svg-wrapper">
-          {{- 'icon-search.svg' | inline_asset_content -}}
-        </span>
-        <span class="svg-wrapper header__icon-close">
-          {{- 'icon-close.svg' | inline_asset_content -}}
-        </span>
+        {%- if tabi_icons -%}
+          <span class="svg-wrapper">{% render 'tabi-icon', icon: 'search' %}</span>
+          <span class="svg-wrapper header__icon-close">{% render 'tabi-icon', icon: 'close' %}</span>
+        {%- else -%}
+          <span class="svg-wrapper">
+            {{- 'icon-search.svg' | inline_asset_content -}}
+          </span>
+          <span class="svg-wrapper header__icon-close">
+            {{- 'icon-close.svg' | inline_asset_content -}}
+          </span>
+        {%- endif -%}
       </span>
     </summary>
     <div

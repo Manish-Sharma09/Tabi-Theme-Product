@@ -1,15 +1,6 @@
-{% if cart == empty %}
-  <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
-{% else %}
-  <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
-{% endif %}
-
-<span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
-{%- if cart != empty -%}
-  <div class="cart-count-bubble">
-    {%- if cart.item_count < 100 -%}
-      <span aria-hidden="true">{{ cart.item_count }}</span>
-    {%- endif -%}
-    <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
-  </div>
-{%- endif -%}
+{%- comment -%}
+  Fetched by the cart scripts through the Section Rendering API; its inner HTML
+  replaces the contents of #cart-icon-bubble in the header after a cart change.
+  The markup lives in the snippet so the header and this section stay identical.
+{%- endcomment -%}
+{%- render 'tabi-cart-icon' -%}
