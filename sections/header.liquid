@@ -133,6 +133,17 @@
   else
     assign wrapper_tag = 'sticky-header'
   endif
+
+  comment
+    Transparent over the home page's cover photograph (the reference site's
+    look): white type on a soft dark fade. It turns back into the frosted
+    cream bar once the page scrolls under it or a dropdown opens - see
+    section 10 of tabi-header.css.
+  endcomment
+  assign is_transparent = false
+  if request.page_type == 'index' and section.settings.overlay_home_banner and section.settings.transparent_home
+    assign is_transparent = true
+  endif
 -%}
 
 <{{ wrapper_tag }}
@@ -141,7 +152,7 @@
     data-sticky-type="{{ sticky_type }}"
   {% endif %}
 >
-  <header class="tabi-header">
+  <header class="tabi-header{% if is_transparent %} tabi-header--transparent{% endif %}">
     <div class="tabi-header__bar">
       {%- if menu != blank -%}
         <button
@@ -298,15 +309,17 @@
       {%- endif -%}
 
       <div class="tabi-header__icons">
-        {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
-          <localization-form class="tabi-header__localization" data-prevent-hide>
-            {%- form 'localization', id: 'HeaderCountryForm', class: 'localization-form' -%}
-              <div>
-                <h2 class="visually-hidden" id="HeaderCountryLabel">{{ 'localization.country_label' | t }}</h2>
-                {%- render 'country-localization', localPosition: 'HeaderCountry' -%}
-              </div>
-            {%- endform -%}
-          </localization-form>
+        {%- if section.settings.show_country_selector and localization.available_countries.size > 1 -%}
+          <div class="tabi-header__country header-localization">
+            <localization-form data-prevent-hide>
+              {%- form 'localization', id: 'HeaderCountryForm', class: 'localization-form' -%}
+                <div>
+                  <h2 class="visually-hidden" id="HeaderCountryLabel">{{ 'localization.country_label' | t }}</h2>
+                  {%- render 'country-localization', localPosition: 'HeaderCountry', compact: 'country' -%}
+                </div>
+              {%- endform -%}
+            </localization-form>
+          </div>
         {%- endif -%}
 
         {% render 'header-search', input_id: 'Search-In-Modal-Desktop', tabi_icons: true %}
@@ -354,57 +367,16 @@
       <dialog class="tabi-drawer__dialog" aria-label="{{ 'sections.header.menu' | t }}">
         <span class="tabi-drawer__backdrop" data-tabi-drawer-close></span>
         <div class="tabi-drawer__panel" tabindex="-1">
-          {%- comment -%}
-            Account and currency sit beside the close button as icons, as on
-            the reference site, rather than in a footer of their own: a
-            footer pinned to the bottom of the panel took a third of a small
-            phone's height and cut off the last menu rows.
-          {%- endcomment -%}
           <div class="tabi-drawer__head">
             <a href="{{ routes.root_url }}" class="tabi-drawer__logo">{{ logo_markup }}</a>
-            <div class="tabi-drawer__tools">
-              {%- if section.settings.drawer_show_localization and localization.available_countries.size > 1 -%}
-                <div class="tabi-drawer__localization header-localization">
-                  <localization-form>
-                    {%- form 'localization', id: 'HeaderCountryMobileForm', class: 'localization-form' -%}
-                      <div>
-                        <h2 class="visually-hidden" id="HeaderCountryMobileLabel">
-                          {{- 'localization.country_label' | t -}}
-                        </h2>
-                        {%- render 'country-localization', localPosition: 'HeaderCountryMobile', compact: true -%}
-                      </div>
-                    {%- endform -%}
-                  </localization-form>
-                </div>
-              {%- endif -%}
-
-              {%- if section.settings.drawer_show_account and shop.customer_accounts_enabled -%}
-                <a
-                  href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
-                  class="tabi-header__icon tabi-drawer__account"
-                >
-                  {% render 'tabi-icon', icon: 'account' %}
-                  <span class="visually-hidden">
-                    {%- liquid
-                      if customer
-                        echo 'customer.account_fallback' | t
-                      else
-                        echo 'customer.log_in' | t
-                      endif
-                    -%}
-                  </span>
-                </a>
-              {%- endif -%}
-
-              <button
-                type="button"
-                class="tabi-header__icon tabi-drawer__close"
-                aria-label="{{ 'accessibility.close' | t }}"
-                data-tabi-drawer-close
-              >
-                {% render 'tabi-icon', icon: 'close' %}
-              </button>
-            </div>
+            <button
+              type="button"
+              class="tabi-header__icon tabi-drawer__close"
+              aria-label="{{ 'accessibility.close' | t }}"
+              data-tabi-drawer-close
+            >
+              {% render 'tabi-icon', icon: 'close' %}
+            </button>
           </div>
 
           <div class="tabi-drawer__body">
@@ -515,7 +487,7 @@
             </nav>
 
             {%- if section.settings.drawer_show_localization and localization.available_languages.size > 1 -%}
-              <div class="tabi-drawer__localization tabi-drawer__localization--language header-localization">
+              <div class="tabi-drawer__localization tabi-drawer__localization--language">
                 <localization-form>
                   {%- form 'localization', id: 'HeaderLanguageMobileForm', class: 'localization-form' -%}
                     <div>
@@ -533,6 +505,64 @@
               <p class="tabi-drawer__tagline">{{ section.settings.drawer_tagline | escape }}</p>
             {%- endif -%}
           </div>
+          {%- comment -%}
+            Account and currency: one compact row pinned to the bottom of the
+            panel. One row only - the earlier three-row footer took a third
+            of a small phone's height and cut off the last menu rows; the
+            menu above it scrolls on its own.
+
+            The currency list is a localization-form like the footer's, but
+            deliberately without the `header-localization` class: that class
+            makes Dawn open the list downward (`top: 100%`), which from the
+            bottom of the panel put it below the screen. Without it Dawn opens
+            it as a bottom sheet on phones and upward elsewhere.
+          {%- endcomment -%}
+          {%- liquid
+            assign show_account = false
+            if section.settings.drawer_show_account and shop.customer_accounts_enabled
+              assign show_account = true
+            endif
+            assign show_currency = false
+            if section.settings.drawer_show_localization and localization.available_countries.size > 1
+              assign show_currency = true
+            endif
+          -%}
+          {%- if show_account or show_currency -%}
+            <div class="tabi-drawer__foot">
+              {%- if show_account -%}
+                <a
+                  href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
+                  class="tabi-drawer__account"
+                >
+                  {% render 'tabi-icon', icon: 'account' %}
+                  <span>
+                    {%- liquid
+                      if customer
+                        echo 'customer.account_fallback' | t
+                      else
+                        echo 'customer.log_in' | t
+                      endif
+                    -%}
+                  </span>
+                </a>
+              {%- endif -%}
+
+              {%- if show_currency -%}
+                <div class="tabi-drawer__localization">
+                  <localization-form>
+                    {%- form 'localization', id: 'HeaderCountryMobileForm', class: 'localization-form' -%}
+                      <div>
+                        <h2 class="visually-hidden" id="HeaderCountryMobileLabel">
+                          {{- 'localization.country_label' | t -}}
+                        </h2>
+                        {%- render 'country-localization', localPosition: 'HeaderCountryMobile', compact: true -%}
+                      </div>
+                    {%- endform -%}
+                  </localization-form>
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
         </div>
       </dialog>
     </tabi-drawer>
@@ -788,6 +818,13 @@
       "info": "The banner then fills the whole screen, with the bar floating on it."
     },
     {
+      "type": "checkbox",
+      "id": "transparent_home",
+      "label": "Transparent over the home page banner",
+      "default": true,
+      "info": "White type on a soft dark fade, as on the reference site. The bar turns frosted cream once the page scrolls or a dropdown opens. Off: the frosted bar all the time."
+    },
+    {
       "type": "color",
       "id": "header_text",
       "label": "Text and icons",
@@ -862,9 +899,10 @@
     },
     {
       "type": "checkbox",
-      "id": "enable_country_selector",
-      "default": false,
-      "label": "Show country/currency selector on desktop"
+      "id": "show_country_selector",
+      "default": true,
+      "label": "Show country selector",
+      "info": "A globe and the country name beside the search icon. Only appears when the store sells to more than one country."
     }
   ],
   "blocks": [

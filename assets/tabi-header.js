@@ -104,6 +104,8 @@
       item.classList.add('is-open');
       item.querySelector('.tabi-nav__toggle')?.setAttribute('aria-expanded', 'true');
       this.openItem = item;
+      // A transparent bar turns solid while a panel hangs from it.
+      this.closest('.tabi-header')?.classList.add('has-open-panel');
 
       // The sticky header must not slide away from under an open panel.
       const wrapper = this.closest('.header-wrapper');
@@ -114,6 +116,7 @@
       item.classList.remove('is-open');
       item.querySelector('.tabi-nav__toggle')?.setAttribute('aria-expanded', 'false');
       if (this.openItem === item) this.openItem = null;
+      if (!this.openItem) this.closest('.tabi-header')?.classList.remove('has-open-panel');
 
       const wrapper = this.closest('.header-wrapper');
       if (wrapper && !this.openItem) wrapper.preventHide = false;
@@ -167,18 +170,10 @@
         trigger.addEventListener('click', () => this.toggleRow(trigger))
       );
 
-      // Rotating a tablet past the desktop breakpoint leaves no visible way to
-      // close a drawer whose button has just been hidden.
-      this.desktop = window.matchMedia('(min-width: 990px)');
-      this.onBreakpoint = (event) => {
-        if (event.matches) this.close(true);
-      };
-      this.desktop.addEventListener('change', this.onBreakpoint);
     }
 
     disconnectedCallback() {
       this.openers?.forEach((button) => button.removeEventListener('click', this.onOpenerClick));
-      this.desktop?.removeEventListener('change', this.onBreakpoint);
       if (this.dialog?.open) this.dialog.close();
       this.teardown();
     }

@@ -17,6 +17,7 @@
      7. Sticky behaviour
      8. Reduced motion
      9. Glass
+    10. Transparent over the home banner
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -33,6 +34,9 @@
 .section-header {
   --tabi-cream: #f9f7f4;
   --tabi-ink: #14284a;
+  /* The navy itself, for the few places that need it while the transparent
+     bar has turned --tabi-ink white (section 10). */
+  --tabi-navy: var(--tabi-ink);
   --tabi-display-font: var(--font-heading-family);
   --tabi-display-weight: var(--font-heading-weight);
   --tabi-display-style: var(--font-heading-style);
@@ -72,10 +76,10 @@
 
 /* --------------------------------------------------------------------------
    2. BAR LAYOUT
-   One grid for both widths, re-mapped by area rather than re-ordered in the
-   markup:  phone  [menu] [logo] [icons]   desktop  [logo] [nav] [icons]
-   The outer columns are 1fr each, so the middle one is centred on the page
-   whatever the logo and the icon row measure.
+   Laid out like the reference site: menu button and logo on the left, the
+   links straight after them, everything else pushed to the right.
+     phone    [menu] [logo] ............. [icons]
+     desktop  [menu] [logo] [links] ..... [country] [icons]
    -------------------------------------------------------------------------- */
 
 .tabi-header-wrapper {
@@ -111,8 +115,9 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: auto auto 1fr;
   grid-template-areas: 'menu logo icons';
+  column-gap: 0.6rem;
   align-items: center;
   height: var(--tabi-header-h, 6rem);
   padding-inline: var(--tabi-gutter);
@@ -121,10 +126,13 @@
 .tabi-header__menu-button {
   grid-area: menu;
   justify-self: start;
+  /* Glyph, not hit area, on the page gutter. */
+  margin-inline-start: -1.2rem;
 }
 
 .tabi-header__logo {
   grid-area: logo;
+  justify-self: start;
   margin: 0;
   line-height: 1;
 }
@@ -145,25 +153,16 @@
 
 @media screen and (min-width: 990px) {
   .tabi-header__bar {
-    grid-template-areas: 'logo nav icons';
-  }
-
-  /* Two classes: section 4 gives every .tabi-header__icon `display:
-     inline-flex` further down, which would otherwise win - and a menu button
-     with no grid area on desktop is auto-placed into a second row, squashing
-     the whole bar to the top. */
-  .tabi-header__bar .tabi-header__menu-button {
-    display: none;
-  }
-
-  .tabi-header__logo {
-    justify-self: start;
+    grid-template-columns: auto auto auto 1fr;
+    grid-template-areas: 'menu logo nav icons';
+    column-gap: 1rem;
   }
 
   .tabi-nav {
     grid-area: nav;
     display: block;
     height: 100%;
+    margin-inline-start: clamp(2.4rem, 4.4vw, 7.2rem);
   }
 }
 
@@ -357,8 +356,8 @@
 .tabi-nav__list {
   display: flex;
   align-items: stretch;
-  justify-content: center;
-  gap: clamp(2rem, 2.8vw, 4.4rem);
+  justify-content: flex-start;
+  gap: clamp(2.4rem, 3.2vw, 5rem);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -387,13 +386,16 @@
   padding-block: 0.8rem;
   color: var(--tabi-ink);
   text-decoration: none;
-  font-family: var(--tabi-display-font);
-  font-weight: var(--tabi-display-weight);
-  font-style: var(--tabi-display-style);
-  font-size: 1.75rem;
+  /* Uppercase, tracked body sans, as on the reference site. */
+  font-family: var(--font-body-family);
+  font-weight: var(--font-body-weight);
+  font-style: normal;
+  font-size: 1.5rem;
   line-height: 1.2;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   white-space: nowrap;
+  transition: color 0.4s var(--tabi-ease);
 }
 
 /* The underline grows from the centre: a 1px background image whose width
@@ -532,10 +534,12 @@
   display: inline-block;
   margin-bottom: 1.2rem;
   color: var(--tabi-ink);
-  font-family: var(--tabi-display-font);
-  font-weight: var(--tabi-display-weight);
-  font-size: 2.1rem;
+  font-family: var(--font-body-family);
+  font-weight: var(--font-body-weight);
+  font-size: 1.3rem;
   line-height: 1.3;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   text-decoration: none;
 }
 
@@ -549,10 +553,11 @@
   display: inline-block;
   padding-block: 0.45rem;
   color: color-mix(in srgb, var(--tabi-ink) 82%, var(--tabi-cream));
-  font-family: var(--tabi-display-font);
-  font-weight: var(--tabi-display-weight);
-  font-size: 1.8rem;
-  line-height: 1.4;
+  font-family: var(--font-body-family);
+  font-weight: var(--font-body-weight);
+  font-size: 1.45rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
   text-decoration: none;
   white-space: nowrap;
   background-image: linear-gradient(currentColor, currentColor);
@@ -697,18 +702,48 @@
   border-bottom: 1px solid var(--tabi-hairline);
 }
 
-.tabi-drawer__head .tabi-wordmark {
-  font-size: 3.2rem;
-}
-
-.tabi-drawer__tools {
+/* --- Bottom row: account + currency --------------------------------------
+   Pinned under the scrolling menu; one row, so it never takes the menu's
+   space the way the old three-row footer did. */
+.tabi-drawer__foot {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  flex: none;
+  min-height: 5.6rem;
+  padding: 0.6rem 1.6rem calc(0.6rem + env(safe-area-inset-bottom)) 2.4rem;
+  border-top: 1px solid var(--tabi-hairline);
+}
+
+.tabi-drawer__account {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 4.4rem;
+  color: var(--tabi-ink);
+  font-family: var(--font-body-family);
+  font-size: 1.4rem;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .tabi-drawer__account .tabi-icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+.tabi-drawer__account:focus-visible {
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: 0.2rem;
+  box-shadow: none;
+}
+
+.tabi-drawer__head .tabi-wordmark {
+  font-size: 3.2rem;
 }
 
 .tabi-drawer__close .tabi-icon {
@@ -975,9 +1010,8 @@
 
 /* Compact currency control: globe + "INR ₹" (snippets/country-localization
    with compact: true). Selectors carry the extra classes to out-rank
-   component-localization-form.css, which sizes header selectors for a
-   desktop bar. */
-.tabi-drawer .tabi-drawer__localization.header-localization .disclosure .localization-form__select {
+   component-localization-form.css. */
+.tabi-drawer .tabi-drawer__localization .disclosure .localization-form__select {
   display: inline-flex;
   align-items: center;
   height: 4.4rem;
@@ -991,8 +1025,23 @@
   text-decoration: none;
 }
 
-.tabi-drawer .tabi-drawer__localization.header-localization .localization-form__select .icon-caret {
+.tabi-drawer .tabi-drawer__localization .localization-form__select .icon-caret {
   right: 0.4rem;
+}
+
+/* Dawn frames the select like a text field; here it is a quiet text control. */
+.tabi-drawer .tabi-drawer__localization .localization-form__select::before,
+.tabi-drawer .tabi-drawer__localization .localization-form__select::after {
+  box-shadow: none;
+}
+
+/* From the bottom-right of the panel the list opens up and to the left. On
+   phones Dawn turns it into a bottom sheet instead, which is left as is. */
+@media screen and (min-width: 750px) {
+  .tabi-drawer .tabi-drawer__localization .disclosure__list-wrapper {
+    left: auto;
+    right: 0;
+  }
 }
 
 .localization-compact {
@@ -1194,4 +1243,127 @@ html.tabi-scroll-lock body {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+}
+
+/* --------------------------------------------------------------------------
+   10. TRANSPARENT OVER THE HOME BANNER
+
+   The reference site's header: no bar at all, white type and icons, and a
+   soft dark fade from the top of the photograph so they stay legible on any
+   picture. The frosted cream bar (section 9) comes back - crossfading, not
+   snapping - as soon as there is something other than the photograph behind
+   the header: the page scrolled under it, a dropdown hanging from it, or the
+   search open over it.
+
+   The fade lives on ::after and the frosted bar on ::before, so the change
+   is two opacities transitioning against each other; a gradient cannot be
+   transitioned into a flat colour.
+   -------------------------------------------------------------------------- */
+
+.tabi-header--transparent::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Runs a little past the bar so the fade has no visible bottom edge. */
+  height: calc(100% + 4rem);
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgb(0 0 0 / 0.42) 0%,
+    rgb(0 0 0 / 0.2) 55%,
+    rgb(0 0 0 / 0) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.45s var(--tabi-ease);
+}
+
+.tabi-header--transparent::before {
+  transition:
+    background-color 0.5s var(--tabi-ease),
+    opacity 0.45s var(--tabi-ease);
+}
+
+.section-header:not(.scrolled-past-header) .tabi-header--transparent:not(.has-open-panel):not(:has(details[open])) {
+  --tabi-ink: #ffffff;
+  box-shadow: none;
+}
+
+.section-header:not(.scrolled-past-header) .tabi-header--transparent:not(.has-open-panel):not(:has(details[open]))::before {
+  opacity: 0;
+}
+
+.section-header:not(.scrolled-past-header) .tabi-header--transparent:not(.has-open-panel):not(:has(details[open]))::after {
+  opacity: 1;
+}
+
+.section-header:not(.scrolled-past-header) .tabi-header--transparent:not(.has-open-panel):not(:has(details[open])) .tabi-nav__label {
+  text-shadow: 0 1px 1.2rem rgb(0 0 0 / 0.25);
+}
+
+/* The count bubble inverts with the bar: white disc, navy figure. */
+.section-header:not(.scrolled-past-header) .tabi-header--transparent:not(.has-open-panel):not(:has(details[open])) .cart-count-bubble {
+  background: #ffffff;
+  color: var(--tabi-navy);
+}
+
+/* Icons and the country link follow the colour change smoothly. */
+.tabi-header--transparent .tabi-header__icon,
+.tabi-header--transparent .header__search .header__icon,
+.tabi-header--transparent .tabi-header__country .localization-form__select {
+  transition: color 0.4s var(--tabi-ease);
+}
+
+/* --------------------------------------------------------------------------
+   Desktop country link: globe + "India", underlined, as on the reference.
+   -------------------------------------------------------------------------- */
+
+.tabi-header__country {
+  display: none;
+}
+
+@media screen and (min-width: 990px) {
+  .tabi-header__country {
+    display: flex;
+    align-items: center;
+    margin-inline-end: 0.8rem;
+  }
+}
+
+.tabi-header__country .localization-form {
+  margin: 0;
+  padding: 0;
+}
+
+.js .tabi-header .tabi-header__country.header-localization .disclosure .localization-form__select {
+  display: inline-flex;
+  align-items: center;
+  height: 4.4rem;
+  min-height: 0;
+  margin: 0;
+  padding: 0 0.6rem;
+  background: none;
+  color: var(--tabi-ink);
+  font-family: var(--font-body-family);
+  font-size: 1.45rem;
+  letter-spacing: 0.02em;
+}
+
+/* The reference draws no caret; the underline says it is a control. */
+.tabi-header__country .localization-form__select .icon-caret {
+  display: none;
+}
+
+.localization-compact--country .localization-compact__label {
+  text-decoration: underline;
+  text-underline-offset: 0.35rem;
+  text-decoration-thickness: 1px;
+}
+
+.tabi-header__country .localization-compact__globe {
+  width: 2rem;
+  height: 2rem;
+  stroke-width: 1.2;
 }

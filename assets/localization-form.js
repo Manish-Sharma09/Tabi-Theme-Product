@@ -47,7 +47,7 @@ if (!customElements.get('localization-form')) {
           this.elements.search.setAttribute('aria-activedescendant', '');
         }
         document.body.classList.remove('overflow-hidden-mobile');
-        document.querySelector('.menu-drawer').classList.remove('country-selector-open');
+        document.querySelector('.menu-drawer')?.classList.remove('country-selector-open');
         this.header.preventHide = false;
       }
 
@@ -125,7 +125,9 @@ if (!customElements.get('localization-form')) {
         if (this.hasAttribute('data-prevent-hide')) {
           this.header.preventHide = true;
         }
-        document.querySelector('.menu-drawer').classList.add('country-selector-open');
+        // Optional: the redesigned header has no .menu-drawer, and without the ?. this
+        // line threw on every open and close of the country list.
+        document.querySelector('.menu-drawer')?.classList.add('country-selector-open');
       }
 
       closeSelector(event) {
