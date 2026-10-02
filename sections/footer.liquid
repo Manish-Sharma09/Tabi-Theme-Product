@@ -111,8 +111,27 @@
                     </div>
                   {%- when 'link_list' -%}
                     {%- if block.settings.menu != blank -%}
+                      {%- comment -%}
+                        "Links to hide" leaves named links out of this column
+                        without editing the menu itself, which other places may
+                        share. Matched on the link title, ignoring case.
+                      {%- endcomment -%}
+                      {%- assign hidden_titles = block.settings.hidden_links | downcase | split: ',' -%}
                       <ul class="footer-block__details-content list-unstyled">
                         {%- for link in block.settings.menu.links -%}
+                          {%- liquid
+                            assign link_key = link.title | downcase | strip
+                            assign hide_link = false
+                            for hidden_title in hidden_titles
+                              assign hidden_key = hidden_title | strip
+                              if hidden_key != blank and hidden_key == link_key
+                                assign hide_link = true
+                              endif
+                            endfor
+                          -%}
+                          {%- if hide_link -%}
+                            {%- continue -%}
+                          {%- endif -%}
                           <li>
                             <a
                               href="{{ link.url }}"
@@ -441,6 +460,13 @@
           "default": "footer",
           "label": "t:sections.footer.blocks.link_list.settings.menu.label",
           "info": "t:sections.footer.blocks.link_list.settings.menu.info"
+        },
+        {
+          "type": "text",
+          "id": "hidden_links",
+          "label": "Links to hide",
+          "default": "Care Guide, Size Guide",
+          "info": "Link titles to leave out of this column, separated by commas. The links stay in the menu itself."
         }
       ]
     },

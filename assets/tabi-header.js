@@ -151,6 +151,8 @@
       this.openers = Array.from(document.querySelectorAll(`[aria-controls="${this.id}"]`));
       this.onOpenerClick = (event) => {
         event.preventDefault();
+        // A click fired from the keyboard (Enter/Space) has detail 0.
+        this.openedByKeyboard = event.detail === 0;
         this.open(event.currentTarget);
       };
       this.openers.forEach((button) => button.addEventListener('click', this.onOpenerClick));
@@ -227,10 +229,16 @@
       document.documentElement.classList.remove('tabi-scroll-lock');
       this.openers?.forEach((button) => button.setAttribute('aria-expanded', 'false'));
 
-      if (this.returnFocus && document.contains(this.returnFocus)) {
+      // Hand focus back to the menu button only for keyboard users. After a
+      // tap, iOS draws the focus ring on a script-focused button, which left
+      // a box round the menu icon every time the drawer closed.
+      if (this.openedByKeyboard && this.returnFocus && document.contains(this.returnFocus)) {
         this.returnFocus.focus({ preventScroll: true });
+      } else if (this.returnFocus && document.activeElement === this.returnFocus) {
+        this.returnFocus.blur();
       }
       this.returnFocus = null;
+      this.openedByKeyboard = false;
     }
 
     toggleRow(trigger) {
