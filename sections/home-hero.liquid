@@ -18,7 +18,6 @@
 <script src="{{ 'home-hero.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
-  assign display_font = section.settings.type_display_font
   assign slide_count = section.blocks.size
   assign autoplay = false
   if section.settings.autoplay and slide_count > 1
@@ -30,12 +29,10 @@
 -%}
 
 {%- style -%}
-  {{ display_font | font_face: font_display: 'swap' }}
-
   #shopify-section-{{ section.id }} {
-    --hero-font: {{ display_font.family }}, {{ display_font.fallback_families }};
-    --hero-font-weight: {{ display_font.weight }};
-    --hero-font-style: {{ display_font.style }};
+    --hero-font: var(--font-heading-family);
+    --hero-font-weight: var(--font-heading-weight);
+    --hero-font-style: var(--font-heading-style);
     --hero-ink: {{ section.settings.text_color }};
     --hero-speed: {{ section.settings.autoplay_speed }}s;
     {%- if section.settings.height == 'image' and first_image != blank %}
@@ -268,12 +265,6 @@
     {
       "type": "header",
       "content": "Text"
-    },
-    {
-      "type": "font_picker",
-      "id": "type_display_font",
-      "label": "Font",
-      "default": "ebgaramond_n4"
     },
     {
       "type": "color",

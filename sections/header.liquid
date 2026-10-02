@@ -42,7 +42,6 @@
 <script src="{{ 'tabi-header.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
-  assign display_font = section.settings.type_display_font
   assign menu = section.settings.menu
   assign sticky_type = section.settings.sticky_header_type | default: 'none'
 
@@ -71,13 +70,7 @@
   endif
 -%}
 
-{%- unless display_font.system? -%}
-  {{ display_font | font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}
-{%- endunless -%}
-
 {%- style -%}
-  {{ display_font | font_face: font_display: 'swap' }}
-
   :root {
     --tabi-header-h: {{ section.settings.header_height_mobile }}px;
   }
@@ -91,9 +84,6 @@
   #shopify-section-{{ section.id }} {
     --tabi-cream: {{ section.settings.header_background }};
     --tabi-ink: {{ section.settings.header_text }};
-    --tabi-display-font: {{ display_font.family }}, {{ display_font.fallback_families }};
-    --tabi-display-weight: {{ display_font.weight }};
-    --tabi-display-style: {{ display_font.style }};
     --tabi-logo-width: {{ logo_w }}px;
   }
 {%- endstyle -%}
@@ -157,7 +147,7 @@
       </{{ logo_tag }}>
 
       {%- if menu != blank -%}
-        <tabi-nav class="tabi-nav">
+        <tabi-nav class="tabi-nav{% if section.settings.show_dropdown_arrows %} tabi-nav--arrows{% endif %}">
           <nav aria-label="{{ 'sections.header.menu' | t }}">
             <ul class="tabi-nav__list" role="list">
               {%- for link in menu.links -%}
@@ -718,7 +708,14 @@
       "id": "menu",
       "default": "main-menu",
       "label": "t:sections.header.settings.menu.label",
-      "info": "Top-level links show in the bar. A link with sub-links opens a dropdown on desktop and an expanding row in the mobile menu."
+      "info": "Top-level links show in the bar. A link with sub-links opens a dropdown on desktop and an expanding row in the mobile menu. To give a link a dropdown, nest links under it in Content > Menus."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dropdown_arrows",
+      "label": "Show dropdown arrows on desktop",
+      "default": true,
+      "info": "A small arrow beside each link that has a dropdown. Clicking it opens the dropdown; hovering the link does too."
     },
     {
       "type": "select",
@@ -743,13 +740,6 @@
     {
       "type": "header",
       "content": "Design"
-    },
-    {
-      "type": "font_picker",
-      "id": "type_display_font",
-      "label": "Header and banner font",
-      "default": "ebgaramond_n4",
-      "info": "Sets the wordmark, the menu and the mobile menu. The home banner has the same setting of its own."
     },
     {
       "type": "color",

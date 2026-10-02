@@ -21,17 +21,21 @@
 
 /* --------------------------------------------------------------------------
    1. TOKENS
-   Defaults for the colours and font the section's {% style %} block sets on
+   Defaults for the colours the section's {% style %} block sets on
    #shopify-section-<id>. That id selector out-ranks this class, so a theme
    editor change always wins; these only apply if the style block is missing.
+
+   The type is the theme's heading font (Theme settings > Typography), so one
+   change there restyles the header, the mobile menu and the home banner
+   together with the rest of the store.
    -------------------------------------------------------------------------- */
 
 .section-header {
   --tabi-cream: #f9f7f4;
   --tabi-ink: #14284a;
   --tabi-display-font: var(--font-heading-family);
-  --tabi-display-weight: 400;
-  --tabi-display-style: normal;
+  --tabi-display-weight: var(--font-heading-weight);
+  --tabi-display-style: var(--font-heading-style);
   --tabi-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --tabi-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --tabi-gutter: 1.2rem;
@@ -386,9 +390,9 @@
   font-family: var(--tabi-display-font);
   font-weight: var(--tabi-display-weight);
   font-style: var(--tabi-display-style);
-  font-size: 1.7rem;
+  font-size: 1.85rem;
   line-height: 1.2;
-  letter-spacing: 0.005em;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
@@ -448,6 +452,23 @@
 
 .tabi-nav__item.is-open .tabi-nav__toggle .tabi-icon {
   transform: rotate(180deg);
+}
+
+/* Visible arrows (the "Show dropdown arrows" setting): the toggle joins the
+   row beside its label instead of hiding until it takes keyboard focus, so a
+   shopper can see which links open a dropdown before hovering them. */
+.tabi-nav--arrows .tabi-nav__toggle {
+  position: static;
+  width: 2rem;
+  height: 2rem;
+  margin: 0 -0.4rem 0 0.2rem;
+  opacity: 0.7;
+  transition: opacity 0.3s var(--tabi-ease);
+}
+
+.tabi-nav--arrows .tabi-nav__item:hover .tabi-nav__toggle,
+.tabi-nav--arrows .tabi-nav__item.is-open .tabi-nav__toggle {
+  opacity: 1;
 }
 
 .tabi-nav__panel {
@@ -512,7 +533,8 @@
   margin-bottom: 1.2rem;
   color: var(--tabi-ink);
   font-family: var(--tabi-display-font);
-  font-size: 1.9rem;
+  font-weight: var(--tabi-display-weight);
+  font-size: 2.1rem;
   line-height: 1.3;
   text-decoration: none;
 }
@@ -526,9 +548,10 @@
 .tabi-nav__sublink {
   display: inline-block;
   padding-block: 0.45rem;
-  color: var(--tabi-muted);
+  color: color-mix(in srgb, var(--tabi-ink) 82%, var(--tabi-cream));
   font-family: var(--tabi-display-font);
-  font-size: 1.6rem;
+  font-weight: var(--tabi-display-weight);
+  font-size: 1.8rem;
   line-height: 1.4;
   text-decoration: none;
   white-space: nowrap;
@@ -851,9 +874,10 @@
   padding: 0 0.4rem 0 0;
   border: 0;
   background: none;
-  color: var(--tabi-muted);
+  color: color-mix(in srgb, var(--tabi-ink) 82%, var(--tabi-cream));
   font-family: var(--tabi-display-font);
-  font-size: 1.75rem;
+  font-weight: var(--tabi-display-weight);
+  font-size: 1.95rem;
   line-height: 1.3;
   text-align: left;
   text-decoration: none;
