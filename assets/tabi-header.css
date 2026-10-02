@@ -16,6 +16,7 @@
      6. Mobile drawer
      7. Sticky behaviour
      8. Reduced motion
+     9. Glass
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -48,6 +49,15 @@
   --tabi-muted: color-mix(in srgb, var(--tabi-ink) 68%, var(--tabi-cream));
   --tabi-placeholder: #8a898f;
   --tabi-placeholder: color-mix(in srgb, var(--tabi-ink) 45%, var(--tabi-cream));
+
+  /* Frosted glass, used in section 9 only where the browser can blur. The
+     tint stays high enough that navy text keeps its contrast over any photo. */
+  --tabi-glass: rgb(249 247 244 / 0.78);
+  --tabi-glass: color-mix(in srgb, var(--tabi-cream) 78%, transparent);
+  --tabi-glass-strong: rgb(249 247 244 / 0.84);
+  --tabi-glass-strong: color-mix(in srgb, var(--tabi-cream) 84%, transparent);
+  --tabi-glass-filter: saturate(180%) blur(20px);
+  --tabi-glass-edge: rgb(255 255 255 / 0.55);
 }
 
 @media screen and (min-width: 990px) {
@@ -65,19 +75,37 @@
    -------------------------------------------------------------------------- */
 
 .tabi-header-wrapper {
-  background: var(--tabi-cream);
+  /* Transparent so that, once the bar turns to glass, the page itself is what
+     shows through it - not a solid wrapper behind it. */
+  background: transparent;
   color: var(--tabi-ink);
 }
 
 .tabi-header {
   position: relative;
-  background: var(--tabi-cream);
   color: var(--tabi-ink);
   box-shadow: 0 1px 0 var(--tabi-hairline);
   transition: box-shadow 0.4s var(--tabi-ease);
 }
 
+/* The bar's surface is its own layer rather than the header's background.
+   An element with backdrop-filter becomes the "backdrop root" for everything
+   inside it, so if .tabi-header itself were the glass, the dropdown panels in
+   it could only ever blur the header - never the page behind them. On a
+   sibling layer the panels keep a view of the page. */
+.tabi-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--tabi-cream);
+  pointer-events: none;
+  transition: background-color 0.5s var(--tabi-ease);
+}
+
 .tabi-header__bar {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   grid-template-areas: 'menu logo icons';
@@ -1020,5 +1048,91 @@ html.tabi-scroll-lock body {
 
   .section-header.animate {
     transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   9. GLASS
+
+   Frosted glass on the surfaces that float over content:
+   - the bar, once it is sticky and the page is scrolling under it (at the
+     top of the page it stays the solid cream of the reviewed design);
+   - the dropdown panels, which hang over the hero photograph;
+   - the mobile drawer, and the page behind it, which blurs as it dims;
+   - Razorpay's cart sidecart backdrop, which is ordinary markup in this page.
+
+   Only inside @supports: a translucent tint without the blur behind it would let
+   text on the page show through text on the bar. Without support everything
+   above stays solid.
+   -------------------------------------------------------------------------- */
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .section-header.scrolled-past-header .tabi-header::before {
+    background-color: var(--tabi-glass);
+    -webkit-backdrop-filter: var(--tabi-glass-filter);
+    backdrop-filter: var(--tabi-glass-filter);
+    /* A light lip along the bottom edge, as on real glass. On the layer
+       itself: an inset shadow on .tabi-header would be painted over by it. */
+    box-shadow: inset 0 -1px 0 var(--tabi-glass-edge);
+  }
+
+  .section-header.scrolled-past-header .tabi-header {
+    box-shadow:
+      0 1px 0 var(--tabi-hairline),
+      0 1.2rem 3.2rem -2rem rgb(20 40 74 / 0.28);
+  }
+
+  .tabi-nav__panel {
+    background-color: var(--tabi-glass-strong);
+    -webkit-backdrop-filter: saturate(170%) blur(24px);
+    backdrop-filter: saturate(170%) blur(24px);
+    border-color: var(--tabi-glass-edge);
+    box-shadow:
+      inset 0 1px 0 var(--tabi-glass-edge),
+      0 2.4rem 4.8rem -2.4rem rgb(20 40 74 / 0.22);
+  }
+
+  .tabi-drawer__panel {
+    background-color: var(--tabi-glass-strong);
+    -webkit-backdrop-filter: saturate(160%) blur(28px);
+    backdrop-filter: saturate(160%) blur(28px);
+    box-shadow:
+      inset -1px 0 0 var(--tabi-glass-edge),
+      0 0 4rem rgb(0 0 0 / 0.12);
+  }
+
+  /* Less dim than the solid version: the blur does part of the separating. */
+  .tabi-drawer__backdrop {
+    background: rgb(16 14 12 / 0.34);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  .tabi-drawer__search-input {
+    background-color: rgb(255 255 255 / 0.45);
+  }
+
+  /* Razorpay draws its own dim; this only adds the blur under it. */
+  .razorpay-sidecart-backdrop {
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+}
+
+/* Visitors who have asked their system for less transparency get the solid
+   surfaces back. */
+@media (prefers-reduced-transparency: reduce) {
+  .section-header.scrolled-past-header .tabi-header::before,
+  .tabi-nav__panel,
+  .tabi-drawer__panel {
+    background-color: var(--tabi-cream);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .tabi-drawer__backdrop {
+    background: rgb(16 14 12 / 0.55);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
