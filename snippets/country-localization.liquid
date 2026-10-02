@@ -3,6 +3,8 @@
 
   Accepts:
     - localPosition: pass in the position in which the form is coming up to create specific IDs
+    - compact: {Boolean} Show a globe and the currency only ("INR ₹") instead of
+      "India | INR ₹". Optional; the country is still read out to screen readers.
 {%- endcomment -%}
 
 {%- liquid
@@ -33,11 +35,23 @@
     aria-controls="{{ localPosition }}-country-results"
     aria-describedby="{{ localPosition }}Label"
   >
-    <span>
-      {{- localization.country.name }} |
-      {{ localization.country.currency.iso_code }}
-      {{ localization.country.currency.symbol -}}
-    </span>
+    {%- if compact -%}
+      <span class="localization-compact">
+        <svg class="localization-compact__globe" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="8.25" />
+          <path d="M3.75 12h16.5M12 3.75c2.2 2.3 3.3 5 3.3 8.25s-1.1 5.95-3.3 8.25c-2.2-2.3-3.3-5-3.3-8.25s1.1-5.95 3.3-8.25z" />
+        </svg>
+        <span class="visually-hidden">{{ localization.country.name }}</span>
+        {{- localization.country.currency.iso_code }}
+        {{ localization.country.currency.symbol -}}
+      </span>
+    {%- else -%}
+      <span>
+        {{- localization.country.name }} |
+        {{ localization.country.currency.iso_code }}
+        {{ localization.country.currency.symbol -}}
+      </span>
+    {%- endif -%}
     {{ 'icon-caret.svg' | inline_asset_content }}
   </button>
   <div class="disclosure__list-wrapper country-selector" hidden>

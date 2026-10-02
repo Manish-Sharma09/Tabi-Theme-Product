@@ -197,7 +197,10 @@
         })
       );
 
-      this.querySelector('.tabi-drawer__close')?.focus({ preventScroll: true });
+      // Focus the panel itself, not the close button: on iOS a script-moved
+      // focus draws the focus ring, which boxed the X on every open. Keyboard
+      // users land on the panel and Tab straight to the first control.
+      this.panel.focus({ preventScroll: true });
     }
 
     close(immediately = false) {

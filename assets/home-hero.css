@@ -28,8 +28,12 @@
   isolation: isolate;
   background: #2b2621;
   color: var(--hero-ink, #fff);
-  height: calc(100vh - var(--tabi-header-h, 8.4rem));
-  height: calc(100svh - var(--tabi-header-h, 8.4rem));
+  /* --tabi-header-overlap is the header's height when the header lies over
+     this banner (sections/header.liquid, home page) and 0 otherwise, so the
+     banner fills the whole screen under a floating bar, or the rest of it
+     under a solid one. */
+  height: calc(100vh - var(--tabi-header-h, 6rem) + var(--tabi-header-overlap, 0px));
+  height: calc(100svh - var(--tabi-header-h, 6rem) + var(--tabi-header-overlap, 0px));
   min-height: 48rem;
   max-height: 110rem;
 }
@@ -170,7 +174,7 @@
   gap: 5rem;
   /* Ranged a little below centre, as drawn: on a portrait screen the face in
      the photograph usually sits in the upper half. */
-  padding: 12rem var(--hero-gutter) 6.5rem;
+  padding: calc(12rem + var(--tabi-header-overlap, 0px)) var(--hero-gutter) 6.5rem;
   text-align: center;
   color: var(--hero-ink, #fff);
 }
@@ -182,8 +186,8 @@
   font-family: var(--hero-font, var(--font-heading-family));
   font-weight: var(--hero-font-weight, 400);
   font-style: var(--hero-font-style, normal);
-  font-size: clamp(3.6rem, 13vw, 5.2rem);
-  line-height: 1.02;
+  font-size: clamp(3.4rem, 11.5vw, 4.8rem);
+  line-height: 1.04;
   letter-spacing: -0.005em;
   text-wrap: balance;
   text-shadow: 0 0.1rem 2.4rem rgb(0 0 0 / 0.22);
@@ -197,7 +201,7 @@
   color: inherit;
   font-family: var(--hero-font, var(--font-heading-family));
   font-weight: var(--hero-font-weight, 400);
-  font-size: clamp(2rem, 5.9vw, 2.3rem);
+  font-size: clamp(1.8rem, 5.2vw, 2.1rem);
   line-height: 1.2;
   letter-spacing: 0.08em;
   text-decoration: none;
@@ -307,17 +311,17 @@
      link close beneath it. */
   .home-hero__content {
     gap: 3rem;
-    padding-top: 10.2rem;
+    padding-top: calc(10.2rem + var(--tabi-header-overlap, 0px));
     padding-bottom: 8rem;
   }
 
   .home-hero__heading {
-    font-size: clamp(4.6rem, 4.95vw, 8rem);
-    line-height: 1.02;
+    font-size: clamp(4.4rem, 4.3vw, 7rem);
+    line-height: 1.04;
   }
 
   .home-hero__link {
-    font-size: clamp(2.2rem, 2vw, 3.2rem);
+    font-size: clamp(2rem, 1.75vw, 2.8rem);
     letter-spacing: 0.08em;
   }
 }
@@ -395,7 +399,8 @@
 }
 
 .home-hero__arrow {
-  top: 50%;
+  /* Centred on the part of the photograph below a floating header. */
+  top: calc(50% + var(--tabi-header-overlap, 0px) / 2);
   display: none;
   width: 5.2rem;
   height: 5.2rem;
