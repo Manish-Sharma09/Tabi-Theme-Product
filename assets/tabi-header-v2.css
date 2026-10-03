@@ -1,0 +1,1629 @@
+/* ==========================================================================
+   tabi-header-v2.css - version: Good Earth layout, 2026-10-03
+   The header (sections/header.liquid): announcement strip, the bar, the
+   desktop mega menu and the mobile sliding menu. Laid out after
+   goodearth.in, measured at 1440px and 390px wide; sizes below are theirs,
+   converted to this theme's rem (1rem = 10.5px at the store's 105% body
+   scale).
+
+   Everything is namespaced `tabi-`. Dawn's own header classes (.header,
+   .header__inline-menu, .menu-drawer) are deliberately not reused: base.css,
+   custom-fixes.css and theme.liquid all carry rules for those, written for the
+   old header, and inheriting them would mean fighting them line by line.
+
+     1. Tokens
+     2. Announcement strip
+     3. Bar layout
+     4. Logo
+     5. Icons, search, currency, cart count
+     6. Desktop menu
+     7. Mega menu panels + picture cards
+     8. Mobile menu: frame and slide
+     9. Mobile menu: level 1
+    10. Mobile menu: level 2 panels
+    11. Sticky behaviour
+    12. Reduced motion
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. TOKENS
+   Defaults for the colours the section's {% style %} block sets on
+   #shopify-section-<id>. That id selector out-ranks this class, so a theme
+   editor change always wins; these only apply if the style block is missing.
+   -------------------------------------------------------------------------- */
+
+.section-header {
+  --tabi-cream: #f9f8f5;
+  --tabi-ink: #191919;
+  --tabi-accent: #9c7d50;
+  --tabi-strip-bg: #253c30;
+  --tabi-strip-ink: #ffffff;
+  --tabi-panel: #fdfdfd;
+  --tabi-paper: #ffffff;
+  --tabi-pane-head: #fcfcfa;
+  --tabi-line: #e6e6e6;
+  --tabi-divider: #d8d8d8;
+  --tabi-soft: #4c4c4c;
+  --tabi-soft: color-mix(in srgb, var(--tabi-ink) 78%, var(--tabi-cream));
+  --tabi-sans: var(--font-body-family);
+  --tabi-display-font: var(--font-heading-family);
+  --tabi-display-weight: var(--font-heading-weight);
+  --tabi-display-style: var(--font-heading-style);
+  --tabi-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --tabi-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --tabi-gutter: 0.6rem;
+}
+
+@media screen and (min-width: 990px) {
+  .section-header {
+    --tabi-gutter: clamp(1.2rem, 1.4vw, 2.4rem);
+  }
+}
+
+.tabi-header-wrapper {
+  background: var(--tabi-cream);
+  color: var(--tabi-ink);
+}
+
+/* --------------------------------------------------------------------------
+   2. ANNOUNCEMENT STRIP
+   [pause]  ...... message, link ......  [envelope] BE IN THE KNOW
+   The messages share one grid cell, so the strip is as tall as the longest
+   one and never jumps as they change. Each slides up and out as the next
+   slides up into place; the ring round the pause button counts down to it.
+   -------------------------------------------------------------------------- */
+
+.tabi-strip {
+  position: relative;
+  z-index: 2;
+  display: block;
+  background: var(--tabi-strip-bg);
+  color: var(--tabi-strip-ink);
+}
+
+.tabi-strip__inner {
+  display: grid;
+  grid-template-columns: 4.4rem minmax(0, 1fr) 4.4rem;
+  grid-template-areas: 'toggle messages aside';
+  align-items: center;
+  min-height: var(--tabi-strip-h, 4rem);
+  padding-inline: 0.8rem;
+}
+
+@media screen and (min-width: 990px) {
+  .tabi-strip__inner {
+    grid-template-columns: minmax(16rem, 1fr) minmax(0, 3fr) minmax(16rem, 1fr);
+    padding-inline: 1.4rem 2rem;
+  }
+}
+
+.tabi-strip__toggle {
+  grid-area: toggle;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.4rem;
+  height: 4rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabi-strip__ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.8rem;
+  height: 2.8rem;
+  margin: -1.4rem 0 0 -1.4rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  /* The countdown starts at twelve o'clock and runs clockwise. */
+  transform: rotate(-90deg);
+}
+
+.tabi-strip__ring-track {
+  opacity: 0.25;
+}
+
+.tabi-strip__ring-progress {
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+
+.tabi-strip.is-counting .tabi-strip__ring-progress {
+  animation: tabi-ring var(--tabi-strip-interval, 5s) linear forwards;
+}
+
+.tabi-strip.is-paused .tabi-strip__ring-progress {
+  animation-play-state: paused;
+}
+
+@keyframes tabi-ring {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.tabi-strip__toggle .tabi-icon {
+  position: relative;
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke-width: 2;
+}
+
+.tabi-strip__toggle .tabi-icon--play,
+.tabi-strip__toggle[aria-pressed='true'] .tabi-icon--pause {
+  display: none;
+}
+
+.tabi-strip__toggle[aria-pressed='true'] .tabi-icon--play {
+  display: block;
+}
+
+.tabi-strip__toggle:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: -0.2rem;
+  box-shadow: none;
+}
+
+.tabi-strip__messages {
+  grid-area: messages;
+  display: grid;
+  overflow: hidden;
+  text-align: center;
+}
+
+.tabi-strip__message {
+  grid-area: 1 / 1;
+  align-self: center;
+  margin: 0;
+  padding: 0.7rem 0;
+  color: inherit;
+  font-family: var(--tabi-sans);
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(100%);
+  transition:
+    transform 0.65s var(--tabi-ease-out),
+    opacity 0.45s var(--tabi-ease),
+    visibility 0s linear 0.65s;
+}
+
+.tabi-strip__message.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    transform 0.65s var(--tabi-ease-out),
+    opacity 0.45s var(--tabi-ease) 0.1s,
+    visibility 0s linear 0s;
+}
+
+.tabi-strip__message.is-leaving {
+  transform: translateY(-100%);
+}
+
+/* Parked below the strip again after leaving, without being seen to move. */
+.tabi-strip__message.is-parking {
+  transition: none;
+}
+
+.tabi-strip__link {
+  margin-inline-start: 0.4rem;
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+  text-decoration-thickness: 1px;
+  white-space: nowrap;
+}
+
+.tabi-strip__link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.tabi-strip__link:focus-visible,
+.tabi-strip__aside:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 0.2rem;
+  box-shadow: none;
+}
+
+.tabi-strip__aside {
+  grid-area: aside;
+  justify-self: end;
+  display: none;
+  align-items: center;
+  gap: 0.7rem;
+  color: inherit;
+  font-family: var(--tabi-sans);
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tabi-strip__aside .tabi-icon {
+  width: 1.7rem;
+  height: 1.7rem;
+  stroke-width: 1.4;
+}
+
+.tabi-strip__aside:hover span {
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+
+@media screen and (min-width: 990px) {
+  .tabi-strip__message {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .tabi-strip__aside {
+    display: inline-flex;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. BAR LAYOUT
+     phone    [menu] ........ [logo] ........ [search][bag]
+     desktop  ...[logo]...  [ HOME  APPAREL  GIFTING ]  [search][INR][acct][bag]
+   On desktop the columns split 1 : 2 : 1 as on the reference site, the logo
+   centred in the left quarter and the menu in the middle half.
+   -------------------------------------------------------------------------- */
+
+.tabi-header {
+  position: relative;
+  z-index: 1;
+  display: block;
+  background: var(--tabi-cream);
+  color: var(--tabi-ink);
+}
+
+.tabi-header__bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas: 'menu logo icons';
+  align-items: center;
+  height: var(--tabi-bar-h, 5.6rem);
+  padding-inline: var(--tabi-gutter);
+}
+
+.tabi-header__menu-button {
+  grid-area: menu;
+  justify-self: start;
+}
+
+.tabi-header__logo {
+  grid-area: logo;
+  justify-self: center;
+  margin: 0;
+  line-height: 1;
+}
+
+.tabi-nav {
+  display: none;
+}
+
+.tabi-header__icons {
+  grid-area: icons;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+}
+
+@media screen and (min-width: 990px) {
+  .tabi-header__bar {
+    grid-template-columns: minmax(0, 1fr) minmax(auto, 2fr) minmax(0, 1fr);
+    grid-template-areas: 'logo nav icons';
+  }
+
+  /* Two classes: .tabi-header__icon (section 5) sets display too, later. */
+  .tabi-header__bar .tabi-header__menu-button {
+    display: none;
+  }
+
+  .tabi-nav {
+    grid-area: nav;
+    justify-self: center;
+    display: block;
+    height: 100%;
+  }
+
+  .tabi-header__icons {
+    gap: 0.2rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. LOGO
+   -------------------------------------------------------------------------- */
+
+.tabi-header__logo-link {
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.3s var(--tabi-ease);
+}
+
+.tabi-header__logo-link:hover {
+  opacity: 0.8;
+}
+
+.tabi-header__logo-link:focus-visible {
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: 0.4rem;
+  box-shadow: none;
+}
+
+.tabi-header__logo-img {
+  display: block;
+  width: var(--tabi-logo-width, 10rem);
+  max-width: 100%;
+  height: auto;
+}
+
+.tabi-wordmark {
+  display: block;
+  font-family: var(--tabi-display-font);
+  font-weight: var(--tabi-display-weight);
+  font-style: var(--tabi-display-style);
+  font-size: 3.2rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--tabi-ink);
+}
+
+/* --------------------------------------------------------------------------
+   5. ICONS, SEARCH, CURRENCY, CART COUNT
+   -------------------------------------------------------------------------- */
+
+.tabi-icon {
+  display: block;
+  width: 2.4rem;
+  height: 2.4rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+
+.tabi-icon--play {
+  fill: currentColor;
+  stroke: none;
+}
+
+.tabi-header__icon,
+.tabi-header .header__search .header__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 4.4rem;
+  height: 4.4rem;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: var(--tabi-ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Dawn sizes any .svg-wrapper inside .header__icon at 44px, which would blow
+   the glyphs up to the size of their hit areas. */
+.tabi-header .header__icon .svg-wrapper,
+.tabi-header__icon .svg-wrapper {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+.tabi-header__icon .tabi-icon,
+.tabi-header .header__search .tabi-icon {
+  transition:
+    transform 0.35s var(--tabi-ease),
+    opacity 0.35s var(--tabi-ease);
+}
+
+@media (hover: hover) {
+  .tabi-header__icon:hover .tabi-icon,
+  .tabi-header .header__search .header__icon:hover .tabi-icon {
+    opacity: 0.65;
+  }
+}
+
+.tabi-header__icon:active .tabi-icon,
+.tabi-header .header__search .header__icon:active .tabi-icon {
+  transform: scale(0.9);
+}
+
+.tabi-header__icon:focus-visible,
+.tabi-header .header__search .header__icon:focus-visible {
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: -0.4rem;
+  box-shadow: none;
+}
+
+/* Menu button: the three lines turn into the X while the menu is open, one
+   crossfading and turning into the other. */
+.tabi-header__menu-button .tabi-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin: -1.3rem 0 0 -1.3rem;
+  transition:
+    opacity 0.3s var(--tabi-ease),
+    transform 0.45s var(--tabi-ease-out);
+}
+
+.tabi-header__menu-button .tabi-icon--close {
+  opacity: 0;
+  transform: rotate(-45deg) scale(0.8);
+}
+
+.tabi-header__menu-button[aria-expanded='true'] .tabi-icon--menu {
+  opacity: 0;
+  transform: rotate(45deg) scale(0.8);
+}
+
+.tabi-header__menu-button[aria-expanded='true'] .tabi-icon--close {
+  opacity: 1;
+  transform: none;
+}
+
+/* Search: icon only on a phone; icon and the word "Search", in the strip's
+   brand colour, on desktop - as the reference draws it. The extra classes
+   out-rank base.css's `.header__icon span { display: flex }`. */
+.tabi-header .header__icon .tabi-search-label {
+  display: none;
+}
+
+.tabi-header .header__search .header__icon {
+  text-decoration: none;
+}
+
+@media screen and (min-width: 990px) {
+  .tabi-header .header__search .header__icon {
+    width: auto;
+    gap: 0.9rem;
+    padding-inline: 0.8rem 1.2rem;
+    color: var(--tabi-strip-bg);
+  }
+
+  .tabi-header .header__search .header__icon > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .tabi-header .header__search .svg-wrapper {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .tabi-header .header__search .tabi-icon {
+    width: 1.9rem;
+    height: 1.9rem;
+    stroke-width: 1.6;
+  }
+
+  /* base.css gives every span in .header__icon `height: 100%`; the word is
+     sized to its text and centred on the icon instead. */
+  .tabi-header .header__icon .tabi-search-label {
+    display: inline-flex;
+    align-items: center;
+    height: auto;
+    font-family: var(--tabi-sans);
+    font-size: 1.25rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* While the search is open Dawn swaps the glyph for an X; the word stays. */
+  .tabi-header details[open] .header__icon .tabi-search-label {
+    display: none;
+  }
+}
+
+/* The account icon is desktop-only; on a phone it is in the menu. */
+.tabi-header__icon--account {
+  display: none;
+}
+
+@media screen and (min-width: 990px) {
+  .tabi-header__icon--account {
+    display: inline-flex;
+  }
+}
+
+/* The item count sits above the bag, small and grey, as on the reference -
+   not in a disc. Its markup comes from snippets/tabi-cart-icon.liquid. */
+.tabi-header__icon--cart .svg-wrapper {
+  margin-top: 0.6rem;
+}
+
+.tabi-header__icon--cart .cart-count-bubble {
+  position: absolute;
+  top: 0.1rem;
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  display: block;
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--tabi-soft);
+  font-family: var(--tabi-sans);
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transform: translateX(-50%);
+  animation: tabi-count-in 0.45s var(--tabi-ease-out);
+}
+
+@keyframes tabi-count-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0.4rem);
+  }
+}
+
+/* Dawn's search modal is positioned over .header-wrapper and painted from the
+   colour scheme; keep it on the header's own cream. */
+.tabi-header-wrapper .search-modal {
+  background: var(--tabi-cream);
+  color: var(--tabi-ink);
+}
+
+/* Desktop currency: "INR ₹" and a caret. */
+.tabi-header__country {
+  display: none;
+}
+
+@media screen and (min-width: 990px) {
+  .tabi-header__country {
+    display: flex;
+    align-items: center;
+    margin-inline: 0.4rem 0.6rem;
+  }
+}
+
+.tabi-header__country .localization-form {
+  margin: 0;
+  padding: 0;
+}
+
+.js .tabi-header .tabi-header__country.header-localization .disclosure .localization-form__select {
+  display: inline-flex;
+  align-items: center;
+  height: 4.4rem;
+  min-height: 0;
+  margin: 0;
+  padding: 0 2.4rem 0 0.8rem;
+  background: none;
+  color: var(--tabi-soft);
+  font-family: var(--tabi-sans);
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.tabi-header__country .localization-form__select::before,
+.tabi-header__country .localization-form__select::after {
+  box-shadow: none;
+}
+
+.tabi-header__country .localization-form__select .icon-caret {
+  right: 0.6rem;
+  width: 1rem;
+}
+
+.tabi-header__country .localization-form__select:hover {
+  color: var(--tabi-ink);
+}
+
+.localization-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.localization-compact__globe {
+  flex: none;
+  width: 1.8rem;
+  height: 1.8rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+}
+
+/* --------------------------------------------------------------------------
+   6. DESKTOP MENU
+   Each item stretches to the full height of the bar, so the pointer never
+   leaves it on the way down into its panel - the panel starts at the bar's
+   bottom edge, which is the item's bottom edge too. Hovered, open and current
+   links take the accent colour; there is no underline, as on the reference.
+
+   A link with children opens its panel on hover (mouse), on a first tap
+   (touch: the second tap follows the link) and from the small toggle button
+   beside it (keyboard - that button is invisible until it takes focus).
+   -------------------------------------------------------------------------- */
+
+.tabi-nav nav,
+.tabi-nav__list {
+  height: 100%;
+}
+
+.tabi-nav__list {
+  display: flex;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tabi-nav__item {
+  display: flex;
+  align-items: center;
+  padding-inline: clamp(1.1rem, 1.05vw, 1.45rem);
+}
+
+.tabi-nav__trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tabi-nav__link {
+  display: inline-flex;
+  align-items: center;
+  padding-block: 0.8rem;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-sans);
+  font-weight: 400;
+  font-style: normal;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.3s var(--tabi-ease);
+}
+
+.tabi-nav__link:hover,
+.tabi-nav__link.is-active,
+.tabi-nav__item.is-open .tabi-nav__link {
+  color: var(--tabi-accent);
+}
+
+.tabi-nav__link:focus-visible {
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: 0.4rem;
+  box-shadow: none;
+}
+
+.tabi-nav__toggle {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  margin: -0.9rem 0 0 0.1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.tabi-nav__toggle .tabi-icon {
+  width: 1.3rem;
+  height: 1.3rem;
+  transition: transform 0.35s var(--tabi-ease);
+}
+
+.tabi-nav__toggle:focus-visible {
+  opacity: 1;
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+.tabi-nav__item.is-open .tabi-nav__toggle {
+  color: var(--tabi-accent);
+}
+
+.tabi-nav__item.is-open .tabi-nav__toggle .tabi-icon {
+  transform: rotate(180deg);
+}
+
+.tabi-nav--arrows .tabi-nav__toggle {
+  position: static;
+  margin: 0 -0.4rem 0 0.2rem;
+  opacity: 0.7;
+}
+
+/* --------------------------------------------------------------------------
+   7. MEGA MENU PANELS + PICTURE CARDS
+   Full-width, near-white, a soft shadow and no dimming of the page, as on the
+   reference. Inside, a six-column grid (five below 1200px): first the link
+   columns, then a divider, then picture cards in the columns left over. The
+   Liquid never lets a card fall past column six; the one in column six is
+   dropped on the five-column grid.
+   -------------------------------------------------------------------------- */
+
+.tabi-mega {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  max-height: var(--tabi-panel-max, 75vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--tabi-panel);
+  border-top: 1px solid var(--tabi-line);
+  box-shadow: 0 1.4rem 2.8rem -0.6rem rgb(0 0 0 / 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-0.6rem);
+  transition:
+    opacity 0.25s var(--tabi-ease),
+    transform 0.35s var(--tabi-ease-out),
+    visibility 0s linear 0.35s;
+}
+
+.tabi-nav__item.is-open > .tabi-mega {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.25s var(--tabi-ease),
+    transform 0.35s var(--tabi-ease-out),
+    visibility 0s linear 0s;
+}
+
+.tabi-mega__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: start;
+  row-gap: 3.2rem;
+  max-width: 136rem;
+  margin: 0 auto;
+  padding: 2.6rem clamp(1.6rem, 5.5vw, 10rem) 4.8rem;
+}
+
+@media screen and (min-width: 1200px) {
+  .tabi-mega__grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 1199px) {
+  .tabi-card--mega[data-col='6'] {
+    display: none;
+  }
+}
+
+/* Panel content arrives a beat after the panel itself. */
+.tabi-mega__grid > * {
+  opacity: 0;
+  transform: translateY(0.6rem);
+  transition:
+    opacity 0.3s var(--tabi-ease),
+    transform 0.45s var(--tabi-ease-out);
+}
+
+.tabi-nav__item.is-open .tabi-mega__grid > * {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.06s;
+}
+
+.tabi-mega__col {
+  min-width: 0;
+  padding-inline: 2rem;
+  /* The body's tall line-height would otherwise set every row's height
+     through the list items' line boxes, whatever the links' own size. */
+  font-size: 1.25rem;
+  line-height: 1.45;
+}
+
+.tabi-mega__heading {
+  display: block;
+  margin-bottom: 1rem;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-sans);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.25s var(--tabi-ease);
+}
+
+/* Childless links stack as headings in one column, a group's height apart. */
+.tabi-mega__col--headings .tabi-mega__heading + .tabi-mega__heading {
+  margin-top: 2.2rem;
+}
+
+.tabi-mega__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tabi-mega__list li + li {
+  margin-top: 0.85rem;
+}
+
+.tabi-mega__link {
+  display: inline-block;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-sans);
+  font-size: 1.25rem;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color 0.25s var(--tabi-ease);
+}
+
+.tabi-mega__heading:hover,
+.tabi-mega__link:hover,
+.tabi-mega__heading[aria-current='page'],
+.tabi-mega__link[aria-current='page'] {
+  color: var(--tabi-accent);
+}
+
+.tabi-mega__heading:focus-visible,
+.tabi-mega__link:focus-visible,
+.tabi-card:focus-visible {
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: 0.3rem;
+  box-shadow: none;
+}
+
+/* Picture cards (snippets/tabi-menu-cards.liquid), shared by the dropdowns
+   and the mobile panels. */
+.tabi-card {
+  display: block;
+  min-width: 0;
+  color: var(--tabi-ink);
+  text-decoration: none;
+}
+
+.tabi-card__title {
+  display: block;
+  margin-bottom: 1rem;
+  font-family: var(--tabi-sans);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tabi-card__media {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 5 / 6;
+  background: color-mix(in srgb, var(--tabi-ink) 5%, var(--tabi-paper));
+}
+
+.tabi-card__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.9s var(--tabi-ease-out);
+}
+
+.tabi-card__caption {
+  display: block;
+  margin-top: 0.9rem;
+  font-family: var(--tabi-sans);
+  font-size: 1.25rem;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  transition: color 0.25s var(--tabi-ease);
+}
+
+@media (hover: hover) {
+  .tabi-card:hover .tabi-card__img {
+    transform: scale(1.04);
+  }
+
+  .tabi-card:hover .tabi-card__caption {
+    color: var(--tabi-accent);
+  }
+}
+
+.tabi-card--mega {
+  padding-inline: 2rem;
+  font-size: 1.25rem;
+  line-height: 1.45;
+}
+
+.tabi-card--mega .tabi-card__media {
+  max-width: 20rem;
+}
+
+/* The divider between the link columns and the pictures runs the full
+   height of the row, as on the reference. */
+.tabi-mega__col + .tabi-card--first {
+  align-self: stretch;
+  border-left: 1px solid var(--tabi-divider);
+}
+
+/* --------------------------------------------------------------------------
+   8. MOBILE MENU: FRAME AND SLIDE
+   The menu hangs from the bottom of the bar and fills the rest of the
+   screen; the strip and the bar stay where they are, the menu button
+   turned into an X. It slides in from the left. Inside it, each level is a
+   pane: tapping a link with children slides its pane in from the right
+   while the list slides out to the left; Back reverses it.
+
+   tabi-header-v2.js sets --tabi-drawer-top to the bar's bottom edge on open,
+   and makes the rest of the page inert while the menu is open.
+   -------------------------------------------------------------------------- */
+
+.tabi-drawer {
+  position: fixed;
+  top: var(--tabi-drawer-top, var(--tabi-header-h, 9.6rem));
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: block;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.tabi-drawer.is-active {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+@media screen and (min-width: 990px) {
+  .tabi-drawer {
+    display: none;
+  }
+}
+
+/* A <span>, not a <div>: base.css hides every empty div (`div:empty {
+   display: none }`). Only seen on tablets, where the menu is narrower than
+   the screen. */
+.tabi-drawer__backdrop {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: rgb(16 14 12 / 0.4);
+  opacity: 0;
+  transition: opacity 0.45s var(--tabi-ease);
+}
+
+.tabi-drawer.is-open .tabi-drawer__backdrop {
+  opacity: 1;
+}
+
+.tabi-drawer__panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  background: var(--tabi-cream);
+  border-top: 1px solid var(--tabi-line);
+  transform: translateX(-100%);
+  transition: transform 0.55s var(--tabi-ease-out);
+}
+
+@media screen and (min-width: 750px) {
+  .tabi-drawer__panel {
+    width: 46rem;
+    box-shadow: 1rem 0 4rem rgb(0 0 0 / 0.12);
+  }
+}
+
+.tabi-drawer.is-open .tabi-drawer__panel {
+  transform: none;
+}
+
+.tabi-drawer__panel:focus,
+.tabi-drawer__pane:focus {
+  outline: none;
+}
+
+.tabi-drawer__pane {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: var(--tabi-paper);
+  visibility: hidden;
+  transition:
+    transform 0.45s var(--tabi-ease-out),
+    visibility 0s linear 0.45s;
+}
+
+.tabi-drawer__pane.is-current {
+  visibility: visible;
+  transform: none;
+  transition:
+    transform 0.45s var(--tabi-ease-out),
+    visibility 0s linear 0s;
+}
+
+.tabi-drawer__pane--root {
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+}
+
+.tabi-drawer__pane--sub {
+  transform: translateX(100%);
+}
+
+/* While the menu itself is sliding in, the panes must not slide too. */
+.tabi-drawer:not(.is-open) .tabi-drawer__pane {
+  transition: none;
+}
+
+/* While the drawer is open the page behind it must not scroll. On <html>
+   only: overflow on <body> as well would make body a scroll container of
+   its own, and the sticky header - stuck relative to body then, which is
+   not scrolled - would jump back to the top of the page, out of view. */
+html.tabi-scroll-lock {
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   9. MOBILE MENU: LEVEL 1
+   White list of the top-level links (50px rows, hairlines between), then the
+   cream lower section: Log in in the accent colour, any extra links, and the
+   currency, which opens in place.
+   -------------------------------------------------------------------------- */
+
+.tabi-drawer__nav {
+  flex: none;
+  padding-inline: 1.5rem;
+  background: var(--tabi-paper);
+}
+
+.tabi-drawer__list,
+.tabi-drawer__lower-list,
+.tabi-drawer__groups,
+.tabi-drawer__sublist,
+.tabi-drawer__countries {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tabi-drawer__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  width: 100%;
+  min-height: 5.2rem;
+  margin: 0;
+  padding: 0 0.2rem 0 2rem;
+  border: 0;
+  border-bottom: 1px solid var(--tabi-line);
+  border-radius: 0;
+  background: none;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-sans);
+  font-size: 1.45rem;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabi-drawer__row .tabi-icon {
+  flex: none;
+  width: 1.8rem;
+  height: 1.8rem;
+  stroke-width: 1.4;
+}
+
+.tabi-drawer__row.is-active {
+  color: var(--tabi-accent);
+}
+
+.tabi-drawer__row:active {
+  background: color-mix(in srgb, var(--tabi-ink) 3%, transparent);
+}
+
+.tabi-drawer__lower {
+  flex: 1 0 auto;
+  padding: 2.4rem 2rem calc(2.4rem + env(safe-area-inset-bottom)) 3rem;
+  background: var(--tabi-cream);
+}
+
+.tabi-drawer__lower-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  width: 100%;
+  min-height: 4.2rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-sans);
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabi-drawer__lower-link--account {
+  color: var(--tabi-accent);
+  letter-spacing: 0.07em;
+}
+
+.tabi-drawer__lower-link .tabi-icon {
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  stroke-width: 1.4;
+}
+
+.tabi-drawer__currency-form {
+  margin: 0;
+}
+
+.tabi-drawer__country-filter {
+  width: 100%;
+  height: 4rem;
+  margin: 0.4rem 0 0.8rem;
+  padding: 0 1.2rem;
+  border: 1px solid var(--tabi-divider);
+  border-radius: 0;
+  background: var(--tabi-paper);
+  color: var(--tabi-ink);
+  font-family: var(--tabi-sans);
+  font-size: 1.6rem; /* 16px+: below that iOS zooms the page on focus. */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tabi-drawer__country-filter:focus {
+  outline: none;
+  border-color: var(--tabi-ink);
+  box-shadow: none;
+}
+
+.tabi-drawer__countries {
+  max-height: 28rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 0.8rem;
+}
+
+.tabi-drawer__country {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  width: 100%;
+  min-height: 4rem;
+  margin: 0;
+  padding: 0 0.4rem 0 1.6rem;
+  border: 0;
+  background: none;
+  color: var(--tabi-soft);
+  font-family: var(--tabi-sans);
+  font-size: 1.3rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tabi-drawer__country-currency {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabi-drawer__country[aria-current='true'] {
+  color: var(--tabi-accent);
+  font-weight: 500;
+}
+
+.tabi-drawer__country[hidden] {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   10. MOBILE MENU: LEVEL 2 PANELS
+   [< Back]   APPAREL   [>>]   - the title and >> both go to the link's own
+   page; then + / - rows for its children (View All first inside each), and
+   the picture cards under a divider.
+   -------------------------------------------------------------------------- */
+
+.tabi-drawer__pane-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  min-height: 5.2rem;
+  padding: 0 1.6rem 0 2.4rem;
+  background: var(--tabi-pane-head);
+}
+
+.tabi-drawer__back {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 4.4rem;
+  margin: 0;
+  padding: 0 0.8rem 0 0;
+  border: 0;
+  background: none;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-sans);
+  font-size: 1.25rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabi-drawer__back .tabi-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  stroke-width: 1.6;
+}
+
+.tabi-drawer__pane-title {
+  padding-inline: 0.8rem;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-sans);
+  font-size: 1.5rem;
+  letter-spacing: 0.07em;
+  text-align: center;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.tabi-drawer__view-all {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.4rem;
+  height: 4.4rem;
+  color: var(--tabi-ink);
+}
+
+.tabi-drawer__view-all .tabi-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+  stroke-width: 1.3;
+}
+
+.tabi-drawer__groups {
+  padding: 1.2rem 3.4rem 0.8rem;
+}
+
+.tabi-drawer__group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  width: 100%;
+  min-height: 4.8rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-sans);
+  font-size: 1.45rem;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabi-drawer__group .tabi-icon {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  stroke-width: 1.7;
+}
+
+.tabi-drawer__group[aria-current='page'] {
+  color: var(--tabi-accent);
+}
+
+.tabi-drawer__sublist {
+  padding: 0 0 1.2rem 2rem;
+}
+
+.tabi-drawer__sublink {
+  display: flex;
+  align-items: center;
+  min-height: 4.4rem;
+  color: var(--tabi-ink);
+  font-family: var(--tabi-sans);
+  font-size: 1.4rem;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.tabi-drawer__sublink[aria-current='page'] {
+  color: var(--tabi-accent);
+}
+
+/* + becomes - : the vertical stroke folds away about its own centre. */
+.tabi-icon__plus-v {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.4s var(--tabi-ease-out);
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] .tabi-icon__plus-v {
+  transform: scaleY(0);
+}
+
+/* Height animates by transitioning a 0fr -> 1fr grid row: the browser
+   measures the content, so there is no script measuring scrollHeight and no
+   max-height guess to clip a long list. `visibility` keeps the links of a
+   closed row out of the tab order, flipping only after the fold finishes. */
+.tabi-drawer__sub {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows 0.45s var(--tabi-ease-out),
+    visibility 0s linear 0.45s;
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] + .tabi-drawer__sub {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition:
+    grid-template-rows 0.45s var(--tabi-ease-out),
+    visibility 0s linear 0s;
+}
+
+.tabi-drawer__sub-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] + .tabi-drawer__sub .tabi-drawer__sublist > li {
+  animation: tabi-rise 0.45s var(--tabi-ease-out) both;
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] + .tabi-drawer__sub .tabi-drawer__sublist > li:nth-child(2) {
+  animation-delay: 0.03s;
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] + .tabi-drawer__sub .tabi-drawer__sublist > li:nth-child(3) {
+  animation-delay: 0.06s;
+}
+
+.tabi-drawer__trigger[aria-expanded='true'] + .tabi-drawer__sub .tabi-drawer__sublist > li:nth-child(n + 4) {
+  animation-delay: 0.09s;
+}
+
+@keyframes tabi-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+}
+
+.tabi-drawer__cards {
+  padding: 0 3.4rem calc(3.2rem + env(safe-area-inset-bottom));
+}
+
+.tabi-card--drawer {
+  padding: 3.2rem 0 3rem;
+  border-top: 1px solid var(--tabi-divider);
+}
+
+.tabi-card--drawer .tabi-card__title {
+  margin-bottom: 1.6rem;
+  font-size: 1.45rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+.tabi-card--drawer .tabi-card__media {
+  width: min(16rem, 48%);
+}
+
+.tabi-card--drawer .tabi-card__caption {
+  margin-top: 1.4rem;
+  font-size: 1.35rem;
+}
+
+/* Rows ease in one after another as the menu slides open, and again in a
+   panel as it slides in. */
+.tabi-drawer__item,
+.tabi-drawer__lower,
+.tabi-drawer__group-item,
+.tabi-drawer__cards {
+  opacity: 0;
+  transform: translateX(-1.2rem);
+  transition:
+    opacity 0.4s var(--tabi-ease),
+    transform 0.6s var(--tabi-ease-out);
+}
+
+.tabi-drawer.is-open .tabi-drawer__pane--root.is-current .tabi-drawer__item {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(0.14s + var(--tabi-i, 0) * 0.05s);
+}
+
+.tabi-drawer.is-open .tabi-drawer__pane--root.is-current .tabi-drawer__lower {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.32s;
+}
+
+.tabi-drawer__pane--sub .tabi-drawer__group-item,
+.tabi-drawer__pane--sub .tabi-drawer__cards {
+  transform: translateX(1.6rem);
+}
+
+.tabi-drawer.is-open .tabi-drawer__pane--sub.is-current .tabi-drawer__group-item,
+.tabi-drawer.is-open .tabi-drawer__pane--sub.is-current .tabi-drawer__cards {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.16s;
+}
+
+.tabi-drawer__row:focus-visible,
+.tabi-drawer__lower-link:focus-visible,
+.tabi-drawer__group:focus-visible,
+.tabi-drawer__sublink:focus-visible,
+.tabi-drawer__back:focus-visible,
+.tabi-drawer__pane-title:focus-visible,
+.tabi-drawer__view-all:focus-visible,
+.tabi-drawer__country:focus-visible {
+  outline: 1px solid var(--tabi-ink);
+  outline-offset: -0.2rem;
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   11. STICKY BEHAVIOUR
+   custom-fixes.css sets `.section-header { position: relative }` for its
+   stacking fix, and loads after base.css - so it silently out-ranks Dawn's
+   `.shopify-section-header-sticky { position: sticky }` and a sticky header
+   would never stick. Two classes put sticky back on top. `top` is left to
+   base.css: it is 0 when shown and minus the header height when hidden, and
+   setting it here would out-rank the hidden value and pin the bar in place.
+   -------------------------------------------------------------------------- */
+
+.section-header.shopify-section-header-sticky {
+  position: sticky;
+}
+
+.section-header.animate {
+  transition: top 0.45s var(--tabi-ease-out);
+}
+
+.section-header.scrolled-past-header .tabi-header {
+  box-shadow: 0 0.6rem 2rem -1.2rem rgb(0 0 0 / 0.18);
+}
+
+/* While the mobile menu is open the header must sit above everything the
+   page stacks over it (the sticky add-to-bag bar, product badges). */
+.section-header.tabi-menu-open {
+  z-index: 40;
+}
+
+/* --------------------------------------------------------------------------
+   12. REDUCED MOTION
+   Movement goes; plain fades stay, quickened, so state changes still read.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .tabi-header *,
+  .tabi-strip *,
+  .tabi-drawer * {
+    animation: none !important;
+  }
+
+  .tabi-strip__message,
+  .tabi-strip__message.is-active,
+  .tabi-strip__message.is-leaving,
+  .tabi-mega,
+  .tabi-nav__item.is-open > .tabi-mega,
+  .tabi-mega__grid > *,
+  .tabi-drawer__item,
+  .tabi-drawer__lower,
+  .tabi-drawer__group-item,
+  .tabi-drawer__cards,
+  .tabi-header__icon .tabi-icon,
+  .tabi-header__menu-button .tabi-icon {
+    transform: none !important;
+  }
+
+  .tabi-strip__ring-progress {
+    stroke-dashoffset: 0;
+  }
+
+  .tabi-drawer__panel,
+  .tabi-drawer__pane {
+    transform: none !important;
+    opacity: 0;
+    transition:
+      opacity 0.2s linear,
+      visibility 0s linear 0.2s;
+  }
+
+  .tabi-drawer.is-open .tabi-drawer__panel,
+  .tabi-drawer__pane.is-current {
+    opacity: 1;
+    transition:
+      opacity 0.2s linear,
+      visibility 0s linear 0s;
+  }
+
+  .tabi-icon__plus-v,
+  .tabi-drawer__sub {
+    transition: none;
+  }
+
+  .section-header.animate {
+    transition: none;
+  }
+}

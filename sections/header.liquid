@@ -31,7 +31,12 @@
     re-renders its contents from sections/cart-icon-bubble.liquid.
 {%- endcomment -%}
 
-{{ 'tabi-header.css' | asset_url | stylesheet_tag }}
+{%- comment -%}
+  The -v2 file names are deliberate. If a sync ever lands the assets but not
+  this file, the previous header keeps loading the unchanged tabi-header.css
+  and .js it was written for, instead of mixing with styles meant for this one.
+{%- endcomment -%}
+{{ 'tabi-header-v2.css' | asset_url | stylesheet_tag }}
 <link rel="stylesheet" href="{{ 'component-search.css' | asset_url }}" media="print" onload="this.media='all'">
 {%- comment -%}
   Not used by this header any more, but Dawn only ever loaded these two from
@@ -47,17 +52,19 @@
   <link rel="stylesheet" href="{{ 'component-cart-notification.css' | asset_url }}" media="print" onload="this.media='all'">
   <script src="{{ 'cart-notification.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
-<script src="{{ 'tabi-header.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'tabi-header-v2.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   assign menu = section.settings.menu
   assign sticky_type = section.settings.sticky_header_type | default: 'none'
 
   comment
-    The logo is the theme's own (Theme settings > Logo), drawn at this
-    section's own widths - one for desktop, one for phones - so it can carry
-    the weight the reference site's logo has in its bar. The text wordmark is
-    only an alternative; it is also what shows if no logo has been uploaded.
+    The logo is the one in Theme settings > Logo, drawn at the widths set in
+    this section - one for desktop, one for phones - so it carries the weight
+    of the logo on the reference site. The text wordmark is only an
+    alternative; it is also what shows if no logo has been uploaded.
+    No apostrophes in comments inside a liquid tag: Shopify reads one as the
+    start of a string and rejects the whole file.
   endcomment
   assign logo_image = settings.logo
   assign logo_w = section.settings.logo_width_desktop | default: 120
@@ -278,7 +285,7 @@
               {%- for link in menu.links -%}
                 {%- liquid
                   comment
-                    Columns this link's dropdown needs: one per child that has
+                    Columns the dropdown of this link needs: one per child that has
                     children of its own, and one for each run of childless
                     children, which stack as headings in a single column.
                   endcomment
