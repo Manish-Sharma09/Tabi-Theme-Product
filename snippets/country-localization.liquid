@@ -4,8 +4,9 @@
   Accepts:
     - localPosition: pass in the position in which the form is coming up to create specific IDs
     - compact: Optional. true shows a globe and the currency only ("INR ₹");
-      'country' shows a globe and the country only ("India"). Either way the
-      full country is still read out to screen readers.
+      'country' shows a globe and the country only ("India"); 'currency'
+      shows the currency alone, no globe ("INR ₹"), as the header does. Each
+      way the full country is still read out to screen readers.
 {%- endcomment -%}
 
 {%- liquid
@@ -36,7 +37,13 @@
     aria-controls="{{ localPosition }}-country-results"
     aria-describedby="{{ localPosition }}Label"
   >
-    {%- if compact == 'country' -%}
+    {%- if compact == 'currency' -%}
+      <span class="localization-compact localization-compact--currency">
+        <span class="visually-hidden">{{ localization.country.name }}</span>
+        {{- localization.country.currency.iso_code }}
+        {{ localization.country.currency.symbol -}}
+      </span>
+    {%- elsif compact == 'country' -%}
       <span class="localization-compact localization-compact--country">
         <svg class="localization-compact__globe" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <circle cx="12" cy="12" r="8.25" />

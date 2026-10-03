@@ -1,0 +1,120 @@
+{% doc %}
+  The picture cards in a top-level link's dropdown (desktop) and in its
+  sliding panel (mobile menu): a title, a portrait image and a short caption,
+  the whole card one link - the layout of the reference site's mega menu.
+
+  Where the pictures come from, first match wins:
+  1. "Menu image" blocks on the header whose Link name is this link's title
+     (set by hand in the theme editor);
+  2. otherwise each child link that points at a collection or product with an
+     image - so the store's own collection photos appear with nothing set up;
+  3. otherwise, for a link that has children (and so a dropdown anyway), the
+     link's own collection or product image. A childless link only gets a
+     dropdown if Menu image blocks are set up for it.
+
+  @param {object} link - The top-level menu link.
+  @param {object[]} blocks - The header section's blocks.
+  @param {number} limit - Most cards to draw.
+  @param {string} caption - Text under each image, e.g. "Discover".
+  @param {string} variant - 'mega' (desktop dropdown) or 'drawer' (mobile panel).
+  @param {number} [start] - Grid column the first card falls in (mega only), so
+    the CSS can drop the cards that would not fit a narrower screen.
+
+  @example
+  {% render 'tabi-menu-cards', link: link, blocks: section.blocks, limit: 3, caption: 'Discover', variant: 'mega', start: 4 %}
+{% enddoc %}
+{%- liquid
+  assign shown = 0
+  assign first_col = start | default: 1
+  if variant == 'mega'
+    assign img_sizes = '(min-width: 1200px) 200px, 170px'
+  else
+    assign img_sizes = '150px'
+  endif
+
+  assign block_cards = 0
+  for block in blocks
+    if block.type == 'menu-image' and block.settings.link_name == link.title and block.settings.link_image != blank
+      assign block_cards = block_cards | plus: 1
+    endif
+  endfor
+-%}
+
+{%- if block_cards > 0 -%}
+  {%- for block in blocks -%}
+    {%- if shown >= limit -%}{%- break -%}{%- endif -%}
+    {%- unless block.type == 'menu-image' and block.settings.link_name == link.title and block.settings.link_image != blank -%}
+      {%- continue -%}
+    {%- endunless -%}
+    {%- liquid
+      assign card_url = block.settings.link_url | default: link.url
+      assign card_title = block.settings.link_title | default: link.title
+      assign card_col = first_col | plus: shown
+    -%}
+    <a
+      href="{{ card_url }}"
+      class="tabi-card tabi-card--{{ variant }}{% if shown == 0 %} tabi-card--first{% endif %}"
+      data-col="{{ card_col }}"
+      {{ block.shopify_attributes }}
+    >
+      <span class="tabi-card__title">{{ card_title | escape }}</span>
+      <span class="tabi-card__media">
+        {{-
+          block.settings.link_image
+          | image_url: width: 600
+          | image_tag: class: 'tabi-card__img', widths: '200, 300, 400, 600', sizes: img_sizes, loading: 'lazy', alt: ''
+        -}}
+      </span>
+      {%- if caption != blank -%}
+        <span class="tabi-card__caption">{{ caption | escape }}</span>
+      {%- endif -%}
+    </a>
+    {%- assign shown = shown | plus: 1 -%}
+  {%- endfor -%}
+{%- else -%}
+  {%- for childlink in link.links -%}
+    {%- if shown >= limit -%}{%- break -%}{%- endif -%}
+    {%- assign card_image = childlink.object.featured_image -%}
+    {%- if card_image == blank -%}{%- continue -%}{%- endif -%}
+    {%- assign card_col = first_col | plus: shown -%}
+    <a
+      href="{{ childlink.url }}"
+      class="tabi-card tabi-card--{{ variant }}{% if shown == 0 %} tabi-card--first{% endif %}"
+      data-col="{{ card_col }}"
+    >
+      <span class="tabi-card__title">{{ childlink.title | escape }}</span>
+      <span class="tabi-card__media">
+        {{-
+          card_image
+          | image_url: width: 600
+          | image_tag: class: 'tabi-card__img', widths: '200, 300, 400, 600', sizes: img_sizes, loading: 'lazy', alt: ''
+        -}}
+      </span>
+      {%- if caption != blank -%}
+        <span class="tabi-card__caption">{{ caption | escape }}</span>
+      {%- endif -%}
+    </a>
+    {%- assign shown = shown | plus: 1 -%}
+  {%- endfor -%}
+
+  {%- assign card_image = link.object.featured_image -%}
+  {%- if shown == 0 and limit > 0 and card_image != blank and link.links != blank -%}
+    <a
+      href="{{ link.url }}"
+      class="tabi-card tabi-card--{{ variant }} tabi-card--first"
+      data-col="{{ first_col }}"
+    >
+      <span class="tabi-card__title">{{ link.title | escape }}</span>
+      <span class="tabi-card__media">
+        {{-
+          card_image
+          | image_url: width: 600
+          | image_tag: class: 'tabi-card__img', widths: '200, 300, 400, 600', sizes: img_sizes, loading: 'lazy', alt: ''
+        -}}
+      </span>
+      {%- if caption != blank -%}
+        <span class="tabi-card__caption">{{ caption | escape }}</span>
+      {%- endif -%}
+    </a>
+  {%- endif -%}
+{%- endif -%}

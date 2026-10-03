@@ -9,7 +9,7 @@
   the theme's cart when a click lands inside `.icon-cart` or `a[href='/cart']`,
   and the class keeps that match independent of the cart URL.
 
-  @param {string} icon - search | account | bag | menu | close | chevron-left | chevron-right | chevron-down | pause | play | plus
+  @param {string} icon - search | account | bag | menu | close | chevron-left | chevron-right | chevron-down | chevrons-right | pause | play | plus | mail
 
   @example
   {% render 'tabi-icon', icon: 'search' %}
@@ -49,6 +49,15 @@
   {%- when 'chevron-down' -%}
     <svg class="tabi-icon tabi-icon--chevron-down" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="m6.5 9.5 5.5 5.5 5.5-5.5" />
+    </svg>
+  {%- when 'chevrons-right' -%}
+    <svg class="tabi-icon tabi-icon--chevrons-right" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m6.5 6.5 5.5 5.5-5.5 5.5M12.5 6.5l5.5 5.5-5.5 5.5" />
+    </svg>
+  {%- when 'mail' -%}
+    <svg class="tabi-icon tabi-icon--mail" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="3.75" y="6" width="16.5" height="12" rx="0.75" />
+      <path d="m4.25 6.75 7.75 6.5 7.75-6.5" />
     </svg>
   {%- when 'pause' -%}
     <svg class="tabi-icon tabi-icon--pause" viewBox="0 0 24 24" aria-hidden="true" focusable="false">

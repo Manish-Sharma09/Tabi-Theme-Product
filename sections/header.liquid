@@ -1,15 +1,23 @@
 {%- comment -%}
   THE HEADER.
 
-  Built to the reviewed header mockup: wordmark left, the menu centred, search /
-  account / bag right on desktop; menu button, centred wordmark, search and bag
-  on a phone, with the menu itself in a drawer that slides in from the left.
+  Laid out after goodearth.in, with the store's own logo, menu and
+  collections:
+  - a coloured announcement strip: a pause button ringed by a countdown on
+    the left, rotating messages in the middle, one link on the right;
+  - a cream bar: logo on the left, the menu centred, search / currency /
+    account / bag on the right; on a phone, menu button - logo - search, bag;
+  - desktop dropdowns that span the screen: a column per child link (its
+    children listed under it), then a divider, then picture cards;
+  - on a phone, a menu that slides in under the bar. Tapping a link with
+    children slides its own panel in from the right (Back, title, view-all),
+    with + / - rows for the next level down and the picture cards below.
 
   Rewritten in place rather than added as a new section, because the store's
   header group points at the `header` type and section-group JSON, like
   templates/*.json, does not reliably reach this store on a push (see
-  PDP-REDESIGN.md, "Third round"). Every new setting therefore carries a
-  default that produces the reviewed design with nothing filled in.
+  PDP-REDESIGN.md, "Third round"). Every setting therefore carries a default
+  that produces the reviewed design with nothing filled in.
 
   What other code expects from this section, and why each is still here:
   - `.section-header` (the schema class) - custom-fixes.css stacking, the
@@ -46,12 +54,14 @@
   assign sticky_type = section.settings.sticky_header_type | default: 'none'
 
   comment
-    The logo is the theme's own (Theme settings > Logo), at the theme's own
-    width, exactly as the previous header drew it. The text wordmark is only
-    an alternative; it is also what shows if no logo has been uploaded.
+    The logo is the theme's own (Theme settings > Logo), drawn at this
+    section's own widths - one for desktop, one for phones - so it can carry
+    the weight the reference site's logo has in its bar. The text wordmark is
+    only an alternative; it is also what shows if no logo has been uploaded.
   endcomment
   assign logo_image = settings.logo
-  assign logo_w = settings.logo_width | default: 90
+  assign logo_w = section.settings.logo_width_desktop | default: 120
+  assign logo_w_mobile = section.settings.logo_width_mobile | default: 100
   assign use_logo_image = false
   if section.settings.logo_style != 'text' and logo_image != blank
     assign use_logo_image = true
@@ -64,41 +74,75 @@
     assign logo_tag = 'div'
   endif
 
+  comment
+    Announcement strip: up to three messages, each with an optional
+    underlined link after it. Blank messages are skipped.
+  endcomment
+  assign strip_count = 0
+  if section.settings.announcement_1 != blank
+    assign strip_count = strip_count | plus: 1
+  endif
+  if section.settings.announcement_2 != blank
+    assign strip_count = strip_count | plus: 1
+  endif
+  if section.settings.announcement_3 != blank
+    assign strip_count = strip_count | plus: 1
+  endif
+
+  assign aside_link = section.settings.announcement_aside_link | default: settings.social_instagram_link
+  assign show_strip = false
+  if section.settings.show_announcement
+    if strip_count > 0 or section.settings.announcement_aside_label != blank
+      assign show_strip = true
+    endif
+  endif
+
+  assign card_limit = section.settings.menu_images_limit
+  assign card_caption = section.settings.menu_image_caption
+
+  if sticky_type == 'none'
+    assign wrapper_tag = 'div'
+  else
+    assign wrapper_tag = 'sticky-header'
+  endif
+
+  assign account_url = routes.account_login_url
+  if customer
+    assign account_url = routes.account_url
+  endif
 -%}
 
 {%- style -%}
   :root {
-    --tabi-header-h: {{ section.settings.header_height_mobile }}px;
+    --tabi-bar-h: {{ section.settings.header_height_mobile }}px;
+    --tabi-strip-h: {% if show_strip %}40px{% else %}0px{% endif %};
+    {%- comment -%}
+      The home banner fills the rest of the screen under the header, so it
+      needs the whole header's height: the strip plus the bar.
+    {%- endcomment %}
+    --tabi-header-h: calc(var(--tabi-bar-h) + var(--tabi-strip-h));
   }
 
   @media screen and (min-width: 990px) {
     :root {
-      --tabi-header-h: {{ section.settings.header_height_desktop }}px;
+      --tabi-bar-h: {{ section.settings.header_height_desktop }}px;
     }
   }
 
   #shopify-section-{{ section.id }} {
     --tabi-cream: {{ section.settings.header_background }};
     --tabi-ink: {{ section.settings.header_text }};
-    --tabi-logo-width: {{ logo_w }}px;
-    --tabi-glass-opacity: {{ section.settings.header_opacity }}%;
+    --tabi-accent: {{ section.settings.header_accent }};
+    --tabi-strip-bg: {{ section.settings.announcement_background }};
+    --tabi-strip-ink: {{ section.settings.announcement_text }};
+    --tabi-logo-width: {{ logo_w_mobile }}px;
   }
 
-  {%- comment -%}
-    On the home page the bar lies over the cover photograph instead of
-    pushing it down: the negative margin lets the next section start at the
-    very top, under the glass. --tabi-header-overlap tells the home hero to
-    fill the whole screen and to centre its copy below the bar.
-  {%- endcomment -%}
-  {%- if request.page_type == 'index' and section.settings.overlay_home_banner %}
+  @media screen and (min-width: 990px) {
     #shopify-section-{{ section.id }} {
-      margin-bottom: calc(-1 * var(--tabi-header-h));
+      --tabi-logo-width: {{ logo_w }}px;
     }
-
-    :root {
-      --tabi-header-overlap: var(--tabi-header-h);
-    }
-  {%- endif %}
+  }
 {%- endstyle -%}
 
 {%- capture logo_markup -%}
@@ -106,9 +150,9 @@
     {%- liquid
       assign logo_alt = logo_image.alt | default: shop.name | escape
       assign logo_h = logo_w | divided_by: logo_image.aspect_ratio | round
-      assign logo_sizes = logo_w | append: 'px'
+      assign logo_sizes = '(min-width: 990px) ' | append: logo_w | append: 'px, ' | append: logo_w_mobile | append: 'px'
     -%}
-    {%- capture logo_widths -%}{{ logo_w }}, {{ logo_w | times: 1.5 | round }}, {{ logo_w | times: 2 }}, {{ logo_w | times: 3 }}{%- endcapture -%}
+    {%- capture logo_widths -%}{{ logo_w_mobile }}, {{ logo_w }}, {{ logo_w | times: 1.5 | round }}, {{ logo_w | times: 2 }}, {{ logo_w | times: 3 }}{%- endcapture -%}
     {{
       logo_image
       | image_url: width: 600
@@ -127,32 +171,88 @@
   {%- endif -%}
 {%- endcapture -%}
 
-{%- liquid
-  if sticky_type == 'none'
-    assign wrapper_tag = 'div'
-  else
-    assign wrapper_tag = 'sticky-header'
-  endif
-
-  comment
-    Transparent over the home page's cover photograph (the reference site's
-    look): white type on a soft dark fade. It turns back into the frosted
-    cream bar once the page scrolls under it or a dropdown opens - see
-    section 10 of tabi-header.css.
-  endcomment
-  assign is_transparent = false
-  if request.page_type == 'index' and section.settings.overlay_home_banner and section.settings.transparent_home
-    assign is_transparent = true
-  endif
--%}
-
 <{{ wrapper_tag }}
   class="header-wrapper tabi-header-wrapper color-{{ section.settings.color_scheme }}"
   {% if sticky_type != 'none' %}
     data-sticky-type="{{ sticky_type }}"
   {% endif %}
 >
-  <header class="tabi-header{% if is_transparent %} tabi-header--transparent{% endif %}">
+  {%- if show_strip -%}
+    <tabi-announcements
+      class="tabi-strip"
+      data-interval="{{ section.settings.announcement_speed | times: 1000 }}"
+      style="--tabi-strip-interval: {{ section.settings.announcement_speed }}s;"
+    >
+      <div class="tabi-strip__inner">
+        {%- if strip_count > 1 -%}
+          <button
+            type="button"
+            class="tabi-strip__toggle"
+            aria-pressed="false"
+            data-label-pause="{{ 'sections.slideshow.pause_slideshow' | t | escape }}"
+            data-label-play="{{ 'sections.slideshow.play_slideshow' | t | escape }}"
+            aria-label="{{ 'sections.slideshow.pause_slideshow' | t | escape }}"
+          >
+            <svg class="tabi-strip__ring" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+              <circle class="tabi-strip__ring-track" cx="14" cy="14" r="12.5" />
+              <circle class="tabi-strip__ring-progress" cx="14" cy="14" r="12.5" pathLength="100" />
+            </svg>
+            {% render 'tabi-icon', icon: 'pause' %}
+            {% render 'tabi-icon', icon: 'play' %}
+          </button>
+        {%- endif -%}
+
+        <div
+          class="tabi-strip__messages"
+          role="region"
+          aria-label="{{ 'sections.announcements.announcement_bar' | t | escape }}"
+        >
+          {%- assign strip_index = 0 -%}
+          {%- for i in (1..3) -%}
+            {%- liquid
+              assign text_key = 'announcement_' | append: i
+              assign label_key = 'announcement_' | append: i | append: '_link_label'
+              assign link_key = 'announcement_' | append: i | append: '_link'
+              assign message = section.settings[text_key]
+              assign message_label = section.settings[label_key]
+              assign message_link = section.settings[link_key]
+            -%}
+            {%- if message == blank -%}{%- continue -%}{%- endif -%}
+            <p class="tabi-strip__message{% if strip_index == 0 %} is-active{% endif %}">
+              <span>{{ message | escape }}</span>
+              {%- if message_link != blank and message_label != blank %}
+                <a href="{{ message_link }}" class="tabi-strip__link">{{ message_label | escape }}</a>
+              {%- endif -%}
+            </p>
+            {%- assign strip_index = strip_index | plus: 1 -%}
+          {%- endfor -%}
+        </div>
+
+        {%- if section.settings.announcement_aside_label != blank and aside_link != blank -%}
+          {%- liquid
+            assign aside_external = false
+            if aside_link contains '://'
+              unless aside_link contains request.host
+                assign aside_external = true
+              endunless
+            endif
+          -%}
+          <a
+            href="{{ aside_link }}"
+            class="tabi-strip__aside"
+            {% if aside_external %}
+              target="_blank" rel="noopener"
+            {% endif %}
+          >
+            {% render 'tabi-icon', icon: 'mail' %}
+            <span>{{ section.settings.announcement_aside_label | escape }}</span>
+          </a>
+        {%- endif -%}
+      </div>
+    </tabi-announcements>
+  {%- endif -%}
+
+  <header class="tabi-header">
     <div class="tabi-header__bar">
       {%- if menu != blank -%}
         <button
@@ -163,6 +263,7 @@
           aria-controls="TabiDrawer-{{ section.id }}"
         >
           {% render 'tabi-icon', icon: 'menu' %}
+          {% render 'tabi-icon', icon: 'close' %}
         </button>
       {%- endif -%}
 
@@ -176,23 +277,51 @@
             <ul class="tabi-nav__list" role="list">
               {%- for link in menu.links -%}
                 {%- liquid
-                  assign card_count = 0
-                  for block in section.blocks
-                    if block.type == 'menu-image' and block.settings.link_name == link.title
-                      assign card_count = card_count | plus: 1
+                  comment
+                    Columns this link's dropdown needs: one per child that has
+                    children of its own, and one for each run of childless
+                    children, which stack as headings in a single column.
+                  endcomment
+                  assign cols = 0
+                  assign in_leaves = false
+                  for childlink in link.links
+                    if childlink.links != blank
+                      assign cols = cols | plus: 1
+                      assign in_leaves = false
+                    elsif in_leaves == false
+                      assign cols = cols | plus: 1
+                      assign in_leaves = true
                     endif
                   endfor
+
+                  comment
+                    The dropdown is a six-column grid, as on the reference site;
+                    cards fill whatever the link columns leave, so none ever
+                    wraps onto a second row.
+                  endcomment
+                  assign mega_limit = 6 | minus: cols | at_most: card_limit | at_least: 0
+                  assign card_start = cols | plus: 1
+                -%}
+                {%- capture mega_cards -%}
+                  {%- if mega_limit > 0 -%}
+                    {%- render 'tabi-menu-cards',
+                      link: link,
+                      blocks: section.blocks,
+                      limit: mega_limit,
+                      caption: card_caption,
+                      variant: 'mega',
+                      start: card_start
+                    -%}
+                  {%- endif -%}
+                {%- endcapture -%}
+                {%- liquid
                   assign has_panel = false
-                  if link.links != blank or card_count > 0
+                  if link.links != blank or mega_cards != blank
                     assign has_panel = true
-                  endif
-                  assign is_mega = false
-                  if link.levels > 1
-                    assign is_mega = true
                   endif
                 -%}
                 <li
-                  class="tabi-nav__item{% if has_panel %} tabi-nav__item--parent{% endif %}{% if is_mega %} tabi-nav__item--mega{% endif %}"
+                  class="tabi-nav__item{% if has_panel %} tabi-nav__item--parent{% endif %}"
                   {% if has_panel %}
                     data-tabi-nav-item
                   {% endif %}
@@ -205,7 +334,7 @@
                         aria-current="page"
                       {% endif %}
                     >
-                      <span class="tabi-nav__label">{{ link.title | escape }}</span>
+                      {{- link.title | escape -}}
                     </a>
                     {%- if has_panel -%}
                       <button
@@ -221,83 +350,65 @@
                   </span>
 
                   {%- if has_panel -%}
-                    <div
-                      id="TabiNavPanel-{{ section.id }}-{{ forloop.index }}"
-                      class="tabi-nav__panel{% if is_mega %} tabi-nav__panel--mega{% endif %}"
-                    >
-                      <div class="tabi-nav__panel-inner">
-                        {%- if is_mega -%}
-                          <div class="tabi-nav__columns">
-                            {%- for childlink in link.links -%}
-                              <div class="tabi-nav__column">
-                                <a
-                                  href="{{ childlink.url }}"
-                                  class="tabi-nav__column-title"
-                                  {% if childlink.current %}
-                                    aria-current="page"
-                                  {% endif %}
-                                >
-                                  {{- childlink.title | escape -}}
-                                </a>
-                                {%- if childlink.links != blank -%}
-                                  <ul class="tabi-nav__sublist" role="list">
-                                    {%- for grandchildlink in childlink.links -%}
-                                      <li>
-                                        <a
-                                          href="{{ grandchildlink.url }}"
-                                          class="tabi-nav__sublink"
-                                          {% if grandchildlink.current %}
-                                            aria-current="page"
-                                          {% endif %}
-                                        >
-                                          {{- grandchildlink.title | escape -}}
-                                        </a>
-                                      </li>
-                                    {%- endfor -%}
-                                  </ul>
-                                {%- endif -%}
-                              </div>
-                            {%- endfor -%}
-                          </div>
-                        {%- elsif link.links != blank -%}
-                          <ul class="tabi-nav__sublist" role="list">
-                            {%- for childlink in link.links -%}
-                              <li>
-                                <a
-                                  href="{{ childlink.url }}"
-                                  class="tabi-nav__sublink"
-                                  {% if childlink.current %}
-                                    aria-current="page"
-                                  {% endif %}
-                                >
-                                  {{- childlink.title | escape -}}
-                                </a>
-                              </li>
-                            {%- endfor -%}
-                          </ul>
+                    <div id="TabiNavPanel-{{ section.id }}-{{ forloop.index }}" class="tabi-mega">
+                      <div class="tabi-mega__grid">
+                        {%- comment -%}
+                          Childless links collect into one column of headings
+                          until a link with children starts a column of its own.
+                        {%- endcomment -%}
+                        {%- assign leaf_html = '' -%}
+                        {%- for childlink in link.links -%}
+                          {%- if childlink.links != blank -%}
+                            {%- if leaf_html != blank -%}
+                              <div class="tabi-mega__col tabi-mega__col--headings">{{ leaf_html }}</div>
+                              {%- assign leaf_html = '' -%}
+                            {%- endif -%}
+                            <div class="tabi-mega__col">
+                              <a
+                                href="{{ childlink.url }}"
+                                class="tabi-mega__heading"
+                                {% if childlink.current %}
+                                  aria-current="page"
+                                {% endif %}
+                              >
+                                {{- childlink.title | escape -}}
+                              </a>
+                              <ul class="tabi-mega__list" role="list">
+                                {%- for grandchildlink in childlink.links -%}
+                                  <li>
+                                    <a
+                                      href="{{ grandchildlink.url }}"
+                                      class="tabi-mega__link"
+                                      {% if grandchildlink.current %}
+                                        aria-current="page"
+                                      {% endif %}
+                                    >
+                                      {{- grandchildlink.title | escape -}}
+                                    </a>
+                                  </li>
+                                {%- endfor -%}
+                              </ul>
+                            </div>
+                          {%- else -%}
+                            {%- capture leaf_one -%}
+                              <a
+                                href="{{ childlink.url }}"
+                                class="tabi-mega__heading"
+                                {% if childlink.current %}
+                                  aria-current="page"
+                                {% endif %}
+                              >
+                                {{- childlink.title | escape -}}
+                              </a>
+                            {%- endcapture -%}
+                            {%- assign leaf_html = leaf_html | append: leaf_one -%}
+                          {%- endif -%}
+                        {%- endfor -%}
+                        {%- if leaf_html != blank -%}
+                          <div class="tabi-mega__col tabi-mega__col--headings">{{ leaf_html }}</div>
                         {%- endif -%}
 
-                        {%- for card in section.blocks -%}
-                          {%- unless card.type == 'menu-image' and card.settings.link_name == link.title -%}
-                            {%- continue -%}
-                          {%- endunless -%}
-                          <a href="{{ card.settings.link_url }}" class="tabi-nav__card" {{ card.shopify_attributes }}>
-                            {%- if card.settings.link_image != blank -%}
-                              {{
-                                card.settings.link_image
-                                | image_url: width: 640
-                                | image_tag:
-                                  class: 'tabi-nav__card-img',
-                                  widths: '320, 480, 640',
-                                  sizes: '240px',
-                                  loading: 'lazy'
-                              }}
-                            {%- endif -%}
-                            {%- if card.settings.link_title != blank -%}
-                              <span class="tabi-nav__card-title">{{ card.settings.link_title | escape }}</span>
-                            {%- endif -%}
-                          </a>
-                        {%- endfor -%}
+                        {{ mega_cards }}
                       </div>
                     </div>
                   {%- endif -%}
@@ -309,26 +420,23 @@
       {%- endif -%}
 
       <div class="tabi-header__icons">
+        {% render 'header-search', input_id: 'Search-In-Modal-Desktop', tabi_icons: true, tabi_label: section.settings.show_search_label %}
+
         {%- if section.settings.show_country_selector and localization.available_countries.size > 1 -%}
           <div class="tabi-header__country header-localization">
             <localization-form data-prevent-hide>
               {%- form 'localization', id: 'HeaderCountryForm', class: 'localization-form' -%}
                 <div>
                   <h2 class="visually-hidden" id="HeaderCountryLabel">{{ 'localization.country_label' | t }}</h2>
-                  {%- render 'country-localization', localPosition: 'HeaderCountry', compact: 'country' -%}
+                  {%- render 'country-localization', localPosition: 'HeaderCountry', compact: 'currency' -%}
                 </div>
               {%- endform -%}
             </localization-form>
           </div>
         {%- endif -%}
 
-        {% render 'header-search', input_id: 'Search-In-Modal-Desktop', tabi_icons: true %}
-
         {%- if shop.customer_accounts_enabled -%}
-          <a
-            href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
-            class="tabi-header__icon tabi-header__icon--account"
-          >
+          <a href="{{ account_url }}" class="tabi-header__icon tabi-header__icon--account">
             {% render 'tabi-icon', icon: 'account' %}
             <span class="visually-hidden">
               {%- liquid
@@ -363,208 +471,251 @@
   </header>
 
   {%- if menu != blank -%}
+    {%- liquid
+      assign show_account = false
+      if section.settings.drawer_show_account and shop.customer_accounts_enabled
+        assign show_account = true
+      endif
+      assign show_currency = false
+      if section.settings.drawer_show_localization and localization.available_countries.size > 1
+        assign show_currency = true
+      endif
+      assign drawer_menu = section.settings.drawer_menu
+    -%}
     <tabi-drawer id="TabiDrawer-{{ section.id }}" class="tabi-drawer">
-      <dialog class="tabi-drawer__dialog" aria-label="{{ 'sections.header.menu' | t }}">
-        <span class="tabi-drawer__backdrop" data-tabi-drawer-close></span>
-        <div class="tabi-drawer__panel" tabindex="-1">
-          <div class="tabi-drawer__head">
-            <a href="{{ routes.root_url }}" class="tabi-drawer__logo">{{ logo_markup }}</a>
-            <button
-              type="button"
-              class="tabi-header__icon tabi-drawer__close"
-              aria-label="{{ 'accessibility.close' | t }}"
-              data-tabi-drawer-close
-            >
-              {% render 'tabi-icon', icon: 'close' %}
-            </button>
-          </div>
+      <span class="tabi-drawer__backdrop" data-tabi-drawer-close></span>
+      <div
+        class="tabi-drawer__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="{{ 'sections.header.menu' | t }}"
+        tabindex="-1"
+      >
+        {%- comment -%} Level 1: the top-level links, then account, extra links and currency. {%- endcomment -%}
+        <div class="tabi-drawer__pane tabi-drawer__pane--root is-current" tabindex="-1">
+          <nav class="tabi-drawer__nav" aria-label="{{ 'sections.header.menu' | t }}">
+            <ul class="tabi-drawer__list" role="list">
+              {%- for link in menu.links -%}
+                <li class="tabi-drawer__item" style="--tabi-i: {{ forloop.index0 }};">
+                  {%- if link.links != blank -%}
+                    <button
+                      type="button"
+                      class="tabi-drawer__row{% if link.active or link.child_active %} is-active{% endif %}"
+                      aria-expanded="false"
+                      aria-controls="TabiDrawerPane-{{ section.id }}-{{ forloop.index }}"
+                      data-tabi-pane-open
+                    >
+                      <span>{{ link.title | escape }}</span>
+                      {% render 'tabi-icon', icon: 'chevron-right' %}
+                    </button>
+                  {%- else -%}
+                    <a
+                      href="{{ link.url }}"
+                      class="tabi-drawer__row{% if link.active %} is-active{% endif %}"
+                      {% if link.current %}
+                        aria-current="page"
+                      {% endif %}
+                    >
+                      <span>{{ link.title | escape }}</span>
+                      {% render 'tabi-icon', icon: 'chevron-right' %}
+                    </a>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </nav>
 
-          <div class="tabi-drawer__body">
-            {%- if section.settings.drawer_show_search -%}
-            <form action="{{ routes.search_url }}" method="get" role="search" class="tabi-drawer__search">
-              <label for="TabiDrawerSearch-{{ section.id }}" class="visually-hidden">
-                {{- 'general.search.search' | t -}}
-              </label>
-              {% render 'tabi-icon', icon: 'search' %}
-              <input
-                id="TabiDrawerSearch-{{ section.id }}"
-                class="tabi-drawer__search-input"
-                type="search"
-                name="q"
-                placeholder="{{ section.settings.drawer_search_placeholder | escape }}"
-                autocomplete="off"
-                autocorrect="off"
-                autocapitalize="off"
-                spellcheck="false"
-                enterkeyhint="search"
-              >
-              <input type="hidden" name="options[prefix]" value="last">
-            </form>
-            {%- endif -%}
+          {%- if show_account or drawer_menu != blank or show_currency -%}
+            <div class="tabi-drawer__lower">
+              <ul class="tabi-drawer__lower-list" role="list">
+                {%- if show_account -%}
+                  <li>
+                    <a href="{{ account_url }}" class="tabi-drawer__lower-link tabi-drawer__lower-link--account">
+                      {%- liquid
+                        if customer
+                          echo 'customer.account_fallback' | t
+                        else
+                          echo 'customer.log_in' | t
+                        endif
+                      -%}
+                    </a>
+                  </li>
+                {%- endif -%}
 
-            <nav class="tabi-drawer__nav" aria-label="{{ 'sections.header.menu' | t }}">
-              <ul class="tabi-drawer__list" role="list">
-                {%- for link in menu.links -%}
-                  <li class="tabi-drawer__item" style="--tabi-i: {{ forloop.index0 }};">
-                    {%- if link.links != blank -%}
+                {%- for extra in drawer_menu.links -%}
+                  <li>
+                    <a
+                      href="{{ extra.url }}"
+                      class="tabi-drawer__lower-link"
+                      {% if extra.current %}
+                        aria-current="page"
+                      {% endif %}
+                    >
+                      {{- extra.title | escape -}}
+                    </a>
+                  </li>
+                {%- endfor -%}
+
+                {%- if show_currency -%}
+                  <li class="tabi-drawer__currency">
+                    {%- comment -%}
+                      A plain localization form: each country is a submit button
+                      carrying its own country_code, so picking one needs no
+                      script. Dawn's <localization-form> is not used here - its
+                      list is a popover, and this one opens in place like the
+                      rows above it.
+                    {%- endcomment -%}
+                    {%- form 'localization', id: 'TabiDrawerCurrencyForm', class: 'tabi-drawer__currency-form' -%}
                       <button
                         type="button"
-                        class="tabi-drawer__link tabi-drawer__trigger"
+                        class="tabi-drawer__lower-link tabi-drawer__trigger"
                         aria-expanded="false"
-                        aria-controls="TabiDrawerSub-{{ section.id }}-{{ forloop.index }}"
+                        aria-controls="TabiDrawerCurrency-{{ section.id }}"
                       >
-                        <span>{{ link.title | escape }}</span>
+                        <span>
+                          {{- section.settings.drawer_currency_label | escape }}:
+                          {{ localization.country.currency.iso_code }}
+                          ({{ localization.country.currency.symbol }})
+                        </span>
                         {% render 'tabi-icon', icon: 'plus' %}
                       </button>
-                      <div class="tabi-drawer__sub" id="TabiDrawerSub-{{ section.id }}-{{ forloop.index }}">
+                      <div class="tabi-drawer__sub" id="TabiDrawerCurrency-{{ section.id }}">
                         <div class="tabi-drawer__sub-inner">
-                          <ul class="tabi-drawer__sublist" role="list">
-                            {%- for childlink in link.links -%}
-                              <li class="tabi-drawer__subitem">
-                                {%- if childlink.links != blank -%}
-                                  {%- assign child_id = forloop.index -%}
-                                  <button
-                                    type="button"
-                                    class="tabi-drawer__sublink tabi-drawer__trigger"
-                                    aria-expanded="false"
-                                    aria-controls="TabiDrawerSub-{{ section.id }}-{{ forloop.parentloop.index }}-{{ child_id }}"
-                                  >
-                                    <span>{{ childlink.title | escape }}</span>
-                                    {% render 'tabi-icon', icon: 'plus' %}
-                                  </button>
-                                  <div
-                                    class="tabi-drawer__sub"
-                                    id="TabiDrawerSub-{{ section.id }}-{{ forloop.parentloop.index }}-{{ child_id }}"
-                                  >
-                                    <div class="tabi-drawer__sub-inner">
-                                      <ul class="tabi-drawer__sublist tabi-drawer__sublist--deep" role="list">
-                                        {%- for grandchildlink in childlink.links -%}
-                                          <li>
-                                            <a
-                                              href="{{ grandchildlink.url }}"
-                                              class="tabi-drawer__sublink"
-                                              {% if grandchildlink.current %}
-                                                aria-current="page"
-                                              {% endif %}
-                                            >
-                                              {{- grandchildlink.title | escape -}}
-                                            </a>
-                                          </li>
-                                        {%- endfor -%}
-                                      </ul>
-                                    </div>
-                                  </div>
-                                {%- else -%}
-                                  <a
-                                    href="{{ childlink.url }}"
-                                    class="tabi-drawer__sublink"
-                                    {% if childlink.current %}
-                                      aria-current="page"
-                                    {% endif %}
-                                  >
-                                    {{- childlink.title | escape -}}
-                                  </a>
-                                {%- endif -%}
+                          {%- if localization.available_countries.size > 9 -%}
+                            <input
+                              type="search"
+                              class="tabi-drawer__country-filter"
+                              placeholder="{{ 'localization.search' | t }}"
+                              aria-label="{{ 'localization.search' | t }}"
+                              autocomplete="off"
+                              autocorrect="off"
+                              autocapitalize="off"
+                              spellcheck="false"
+                              data-tabi-country-filter
+                            >
+                          {%- endif -%}
+                          <ul class="tabi-drawer__countries" role="list">
+                            {%- for country in localization.available_countries -%}
+                              <li>
+                                <button
+                                  type="submit"
+                                  name="country_code"
+                                  value="{{ country.iso_code }}"
+                                  class="tabi-drawer__country"
+                                  {% if country.iso_code == localization.country.iso_code %}
+                                    aria-current="true"
+                                  {% endif %}
+                                >
+                                  <span class="tabi-drawer__country-name">{{ country.name }}</span>
+                                  <span class="tabi-drawer__country-currency">
+                                    {{- country.currency.iso_code }}
+                                    {{ country.currency.symbol -}}
+                                  </span>
+                                </button>
                               </li>
                             {%- endfor -%}
                           </ul>
                         </div>
                       </div>
-                    {%- else -%}
-                      <a
-                        href="{{ link.url }}"
-                        class="tabi-drawer__link"
-                        {% if link.current %}
-                          aria-current="page"
-                        {% endif %}
-                      >
-                        {{- link.title | escape -}}
-                      </a>
-                    {%- endif -%}
-                  </li>
-                {%- endfor -%}
-              </ul>
-            </nav>
-
-            {%- if section.settings.drawer_show_localization and localization.available_languages.size > 1 -%}
-              <div class="tabi-drawer__localization tabi-drawer__localization--language">
-                <localization-form>
-                  {%- form 'localization', id: 'HeaderLanguageMobileForm', class: 'localization-form' -%}
-                    <div>
-                      <h2 class="visually-hidden" id="HeaderLanguageMobileLabel">
-                        {{- 'localization.language_label' | t -}}
-                      </h2>
-                      {%- render 'language-localization', localPosition: 'HeaderLanguageMobile' -%}
-                    </div>
-                  {%- endform -%}
-                </localization-form>
-              </div>
-            {%- endif -%}
-
-            {%- if section.settings.drawer_tagline != blank -%}
-              <p class="tabi-drawer__tagline">{{ section.settings.drawer_tagline | escape }}</p>
-            {%- endif -%}
-          </div>
-          {%- comment -%}
-            Account and currency: one compact row pinned to the bottom of the
-            panel. One row only - the earlier three-row footer took a third
-            of a small phone's height and cut off the last menu rows; the
-            menu above it scrolls on its own.
-
-            The currency list is a localization-form like the footer's, but
-            deliberately without the `header-localization` class: that class
-            makes Dawn open the list downward (`top: 100%`), which from the
-            bottom of the panel put it below the screen. Without it Dawn opens
-            it as a bottom sheet on phones and upward elsewhere.
-          {%- endcomment -%}
-          {%- liquid
-            assign show_account = false
-            if section.settings.drawer_show_account and shop.customer_accounts_enabled
-              assign show_account = true
-            endif
-            assign show_currency = false
-            if section.settings.drawer_show_localization and localization.available_countries.size > 1
-              assign show_currency = true
-            endif
-          -%}
-          {%- if show_account or show_currency -%}
-            <div class="tabi-drawer__foot">
-              {%- if show_account -%}
-                <a
-                  href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
-                  class="tabi-drawer__account"
-                >
-                  {% render 'tabi-icon', icon: 'account' %}
-                  <span>
-                    {%- liquid
-                      if customer
-                        echo 'customer.account_fallback' | t
-                      else
-                        echo 'customer.log_in' | t
-                      endif
-                    -%}
-                  </span>
-                </a>
-              {%- endif -%}
-
-              {%- if show_currency -%}
-                <div class="tabi-drawer__localization">
-                  <localization-form>
-                    {%- form 'localization', id: 'HeaderCountryMobileForm', class: 'localization-form' -%}
-                      <div>
-                        <h2 class="visually-hidden" id="HeaderCountryMobileLabel">
-                          {{- 'localization.country_label' | t -}}
-                        </h2>
-                        {%- render 'country-localization', localPosition: 'HeaderCountryMobile', compact: true -%}
-                      </div>
                     {%- endform -%}
-                  </localization-form>
-                </div>
-              {%- endif -%}
+                  </li>
+                {%- endif -%}
+              </ul>
             </div>
           {%- endif -%}
         </div>
-      </dialog>
+
+        {%- comment -%} Level 2: one panel per top-level link that has children. {%- endcomment -%}
+        {%- for link in menu.links -%}
+          {%- if link.links == blank -%}{%- continue -%}{%- endif -%}
+          {%- assign pane_index = forloop.index -%}
+          <div
+            class="tabi-drawer__pane tabi-drawer__pane--sub"
+            id="TabiDrawerPane-{{ section.id }}-{{ pane_index }}"
+            tabindex="-1"
+          >
+            <div class="tabi-drawer__pane-head">
+              <button type="button" class="tabi-drawer__back" data-tabi-pane-back>
+                {% render 'tabi-icon', icon: 'chevron-left' %}
+                <span>{{ section.settings.drawer_back_label | escape }}</span>
+              </button>
+              <a href="{{ link.url }}" class="tabi-drawer__pane-title">{{ link.title | escape }}</a>
+              <a href="{{ link.url }}" class="tabi-drawer__view-all">
+                {% render 'tabi-icon', icon: 'chevrons-right' %}
+                <span class="visually-hidden">
+                  {{- 'sections.collection_list.view_all' | t }}
+                  {{ link.title | escape -}}
+                </span>
+              </a>
+            </div>
+
+            <ul class="tabi-drawer__groups" role="list">
+              {%- for childlink in link.links -%}
+                <li class="tabi-drawer__group-item">
+                  {%- if childlink.links != blank -%}
+                    <button
+                      type="button"
+                      class="tabi-drawer__group tabi-drawer__trigger"
+                      aria-expanded="false"
+                      aria-controls="TabiDrawerSub-{{ section.id }}-{{ pane_index }}-{{ forloop.index }}"
+                    >
+                      <span>{{ childlink.title | escape }}</span>
+                      {% render 'tabi-icon', icon: 'plus' %}
+                    </button>
+                    <div class="tabi-drawer__sub" id="TabiDrawerSub-{{ section.id }}-{{ pane_index }}-{{ forloop.index }}">
+                      <div class="tabi-drawer__sub-inner">
+                        <ul class="tabi-drawer__sublist" role="list">
+                          <li>
+                            <a href="{{ childlink.url }}" class="tabi-drawer__sublink">
+                              {{- 'sections.collection_list.view_all' | t -}}
+                            </a>
+                          </li>
+                          {%- for grandchildlink in childlink.links -%}
+                            <li>
+                              <a
+                                href="{{ grandchildlink.url }}"
+                                class="tabi-drawer__sublink"
+                                {% if grandchildlink.current %}
+                                  aria-current="page"
+                                {% endif %}
+                              >
+                                {{- grandchildlink.title | escape -}}
+                              </a>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </div>
+                    </div>
+                  {%- else -%}
+                    <a
+                      href="{{ childlink.url }}"
+                      class="tabi-drawer__group"
+                      {% if childlink.current %}
+                        aria-current="page"
+                      {% endif %}
+                    >
+                      {{- childlink.title | escape -}}
+                    </a>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            {%- capture drawer_cards -%}
+              {%- render 'tabi-menu-cards',
+                link: link,
+                blocks: section.blocks,
+                limit: card_limit,
+                caption: card_caption,
+                variant: 'drawer'
+              -%}
+            {%- endcapture -%}
+            {%- if drawer_cards != blank -%}
+              <div class="tabi-drawer__cards">{{ drawer_cards }}</div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
     </tabi-drawer>
   {%- endif -%}
 </{{ wrapper_tag }}>
@@ -724,6 +875,7 @@
   </script>
 {%- endif -%}
 
+
 {% schema %}
 {
   "name": "t:sections.header.name",
@@ -742,7 +894,7 @@
         { "value": "text", "label": "Text wordmark" }
       ],
       "default": "image",
-      "info": "Logo image uses the logo and width set in Theme settings > Logo, as before."
+      "info": "Logo image uses the logo uploaded in Theme settings > Logo, at the widths below."
     },
     {
       "type": "text",
@@ -750,6 +902,124 @@
       "label": "Wordmark",
       "default": "tabi",
       "info": "Only used when Logo style is Text wordmark, or when no logo is uploaded."
+    },
+    {
+      "type": "range",
+      "id": "logo_width_desktop",
+      "min": 60,
+      "max": 240,
+      "step": 5,
+      "unit": "px",
+      "label": "Logo width on desktop",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "logo_width_mobile",
+      "min": 50,
+      "max": 180,
+      "step": 5,
+      "unit": "px",
+      "label": "Logo width on mobile",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Announcement strip"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_announcement",
+      "label": "Show announcement strip",
+      "default": true,
+      "info": "The coloured strip above the bar. With two or more messages they take turns, and a pause button appears."
+    },
+    {
+      "type": "text",
+      "id": "announcement_1",
+      "label": "Message 1",
+      "default": "New here? Get 10% off with code FIRST10"
+    },
+    {
+      "type": "text",
+      "id": "announcement_1_link_label",
+      "label": "Message 1 link text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "announcement_1_link",
+      "label": "Message 1 link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "text",
+      "id": "announcement_2",
+      "label": "Message 2",
+      "default": "Sustainable. Natural. Handcrafted."
+    },
+    {
+      "type": "text",
+      "id": "announcement_2_link_label",
+      "label": "Message 2 link text",
+      "default": "Explore Now"
+    },
+    {
+      "type": "url",
+      "id": "announcement_2_link",
+      "label": "Message 2 link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "text",
+      "id": "announcement_3",
+      "label": "Message 3",
+      "info": "Leave empty for none."
+    },
+    {
+      "type": "text",
+      "id": "announcement_3_link_label",
+      "label": "Message 3 link text"
+    },
+    {
+      "type": "url",
+      "id": "announcement_3_link",
+      "label": "Message 3 link"
+    },
+    {
+      "type": "range",
+      "id": "announcement_speed",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Time per message",
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "announcement_aside_label",
+      "label": "Right-hand link text",
+      "default": "Be in the know",
+      "info": "Desktop only, with an envelope icon. Leave empty to hide."
+    },
+    {
+      "type": "url",
+      "id": "announcement_aside_link",
+      "label": "Right-hand link",
+      "info": "Leave empty to use the Instagram link from Theme settings > Social media."
+    },
+    {
+      "type": "color",
+      "id": "announcement_background",
+      "label": "Strip colour",
+      "default": "#253c30"
+    },
+    {
+      "type": "color",
+      "id": "announcement_text",
+      "label": "Strip text",
+      "default": "#ffffff"
     },
     {
       "type": "header",
@@ -760,14 +1030,7 @@
       "id": "menu",
       "default": "main-menu",
       "label": "t:sections.header.settings.menu.label",
-      "info": "Top-level links show in the bar. A link with sub-links opens a dropdown on desktop and an expanding row in the mobile menu. To give a link a dropdown, nest links under it in Content > Menus."
-    },
-    {
-      "type": "checkbox",
-      "id": "show_dropdown_arrows",
-      "label": "Show dropdown arrows on desktop",
-      "default": true,
-      "info": "A small arrow beside each link that has a dropdown. Clicking it opens the dropdown; hovering the link does too."
+      "info": "Top-level links show in the bar. On desktop, a link's sub-links become columns in its dropdown, with their own sub-links listed under them. On a phone, each opens its own sliding panel."
     },
     {
       "type": "select",
@@ -790,65 +1053,70 @@
       "label": "t:sections.header.settings.sticky_header_type.label"
     },
     {
+      "type": "range",
+      "id": "menu_images_limit",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "label": "Pictures per dropdown",
+      "default": 3,
+      "info": "Taken from Menu image blocks if a link has any, otherwise from the collections its sub-links point to. Desktop shows as many as fit beside the link columns."
+    },
+    {
+      "type": "text",
+      "id": "menu_image_caption",
+      "label": "Picture caption",
+      "default": "Discover"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dropdown_arrows",
+      "label": "Show dropdown arrows on desktop",
+      "default": false,
+      "info": "A small arrow beside each link that has a dropdown. Keyboard users get a focusable arrow either way."
+    },
+    {
       "type": "header",
       "content": "Design"
     },
     {
       "type": "color",
       "id": "header_background",
-      "label": "Background",
-      "default": "#f9f7f4"
-    },
-    {
-      "type": "range",
-      "id": "header_opacity",
-      "min": 30,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
-      "label": "Background opacity",
-      "default": 55,
-      "info": "Below 100% the bar is frosted glass: the page shows through it, blurred. 100% is solid."
-    },
-    {
-      "type": "checkbox",
-      "id": "overlay_home_banner",
-      "label": "Lay the header over the home page banner",
-      "default": true,
-      "info": "The banner then fills the whole screen, with the bar floating on it."
-    },
-    {
-      "type": "checkbox",
-      "id": "transparent_home",
-      "label": "Transparent over the home page banner",
-      "default": true,
-      "info": "White type on a soft dark fade, as on the reference site. The bar turns frosted cream once the page scrolls or a dropdown opens. Off: the frosted bar all the time."
+      "label": "Bar background",
+      "default": "#f9f8f5"
     },
     {
       "type": "color",
       "id": "header_text",
       "label": "Text and icons",
-      "default": "#14284a"
+      "default": "#191919"
+    },
+    {
+      "type": "color",
+      "id": "header_accent",
+      "label": "Accent",
+      "default": "#9c7d50",
+      "info": "The menu link that is hovered, open or current, and the mobile menu's Log in link."
     },
     {
       "type": "range",
       "id": "header_height_desktop",
-      "min": 60,
-      "max": 120,
+      "min": 44,
+      "max": 100,
       "step": 2,
       "unit": "px",
-      "label": "Height on desktop",
-      "default": 68
+      "label": "Bar height on desktop",
+      "default": 52
     },
     {
       "type": "range",
       "id": "header_height_mobile",
-      "min": 48,
+      "min": 44,
       "max": 100,
       "step": 2,
       "unit": "px",
-      "label": "Height on mobile",
-      "default": 60
+      "label": "Bar height on mobile",
+      "default": 56
     },
     {
       "type": "color_scheme",
@@ -858,51 +1126,56 @@
     },
     {
       "type": "header",
+      "content": "Desktop"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search_label",
+      "label": "Write \"Search\" beside the search icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_country_selector",
+      "default": true,
+      "label": "Show currency selector",
+      "info": "The currency, e.g. INR ₹, beside the search. Only appears when the store sells to more than one country."
+    },
+    {
+      "type": "header",
       "content": "Mobile menu"
     },
     {
       "type": "checkbox",
-      "id": "drawer_show_search",
-      "label": "Show search field",
-      "default": false,
-      "info": "Search is already in the bar on every page."
-    },
-    {
-      "type": "text",
-      "id": "drawer_search_placeholder",
-      "label": "Search placeholder",
-      "default": "Search for products…"
-    },
-    {
-      "type": "text",
-      "id": "drawer_tagline",
-      "label": "Tagline",
-      "info": "Optional line under the menu. Leave empty for none."
-    },
-    {
-      "type": "checkbox",
       "id": "drawer_show_account",
-      "label": "Show account icon",
+      "label": "Show Log in / Account link",
       "default": true,
-      "info": "Beside the close button. The account icon is not in the mobile bar, so this is how shoppers on a phone reach their account."
+      "info": "The account icon is not in the mobile bar, so this is how shoppers on a phone reach their account."
+    },
+    {
+      "type": "link_list",
+      "id": "drawer_menu",
+      "label": "Extra links",
+      "info": "Optional. A short menu (e.g. Track order, Contact) listed under Log in."
     },
     {
       "type": "checkbox",
       "id": "drawer_show_localization",
       "label": "Show currency selector",
       "default": true,
-      "info": "Beside the close button, as a globe and the currency. Only appears when the store sells to more than one country."
+      "info": "Only appears when the store sells to more than one country."
     },
     {
-      "type": "header",
-      "content": "Desktop"
+      "type": "text",
+      "id": "drawer_currency_label",
+      "label": "Currency label",
+      "default": "Change Currency"
     },
     {
-      "type": "checkbox",
-      "id": "show_country_selector",
-      "default": true,
-      "label": "Show country selector",
-      "info": "A globe and the country name beside the search icon. Only appears when the store sells to more than one country."
+      "type": "text",
+      "id": "drawer_back_label",
+      "label": "Back button text",
+      "default": "Back"
     }
   ],
   "blocks": [
@@ -917,7 +1190,7 @@
           "label": "Link name",
           "type": "text",
           "id": "link_name",
-          "info": "The name of the top-level link whose dropdown should show this image."
+          "info": "The name of the top-level link whose dropdown should show this picture, e.g. Apparel."
         },
         {
           "label": "Menu image",
@@ -927,7 +1200,8 @@
         {
           "label": "Title",
           "type": "text",
-          "id": "link_title"
+          "id": "link_title",
+          "info": "Shown above the picture. Defaults to the link name."
         },
         {
           "label": "Link",
