@@ -54,60 +54,8 @@
         "enable_language_selector": false
       }
     },
-    "announcement_bar_TxkE8p": {
-      "type": "announcement-bar",
-      "blocks": {
-        "announcement_8pKcN4": {
-          "type": "announcement",
-          "settings": {
-            "text": "Welcome to our store",
-            "link": ""
-          }
-        }
-      },
-      "block_order": [
-        "announcement_8pKcN4"
-      ],
-      "disabled": true,
-      "name": "t:sections.announcement-bar.presets.name",
-      "settings": {
-        "color_scheme": "",
-        "show_line_separator": true,
-        "show_social": false,
-        "auto_rotate": false,
-        "change_slides_speed": 5,
-        "enable_country_selector": false,
-        "enable_language_selector": false
-      }
-    },
     "header": {
       "type": "header",
-      "blocks": {
-        "menu_image_QggKdT": {
-          "type": "menu-image",
-          "disabled": true,
-          "settings": {
-            "link_name": "Home and Living",
-            "link_image": "shopify://shop_images/haldane_table_line_gift_set.jpg",
-            "link_title": "table",
-            "link_url": "shopify://collections/tabi-accessory-collections"
-          }
-        },
-        "menu_image_rQ8bfB": {
-          "type": "menu-image",
-          "disabled": true,
-          "settings": {
-            "link_name": "Kitchen and Dining",
-            "link_image": "shopify://shop_images/haldane_table_line_gift_set.jpg",
-            "link_title": "table",
-            "link_url": "shopify://collections/tabi-accessory-collections"
-          }
-        }
-      },
-      "block_order": [
-        "menu_image_QggKdT",
-        "menu_image_rQ8bfB"
-      ],
       "custom_css": [],
       "settings": {
         "logo_style": "image",
@@ -124,7 +72,6 @@
   },
   "order": [
     "announcement-bar",
-    "announcement_bar_TxkE8p",
     "header"
   ]
 }
