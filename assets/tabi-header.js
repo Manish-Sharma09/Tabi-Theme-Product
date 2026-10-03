@@ -1,5 +1,5 @@
 /* ==========================================================================
-   tabi-header.js
+   tabi-header.js - version: Good Earth layout, 2026-10-03
    Behaviour for sections/header.liquid: the announcement strip
    (<tabi-announcements>), the desktop dropdowns (<tabi-nav>) and the mobile
    sliding menu (<tabi-drawer>).
