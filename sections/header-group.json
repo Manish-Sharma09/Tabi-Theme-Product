@@ -54,22 +54,6 @@
         "enable_language_selector": false
       }
     },
-    "header": {
-      "type": "header",
-      "disabled": true,
-      "custom_css": [],
-      "settings": {
-        "logo_style": "image",
-        "logo_text": "tabi",
-        "menu": "new-menu",
-        "sticky_header_type": "on-scroll-up",
-        "header_background": "#f9f7f4",
-        "color_scheme": "scheme-1",
-        "show_country_selector": true,
-        "drawer_show_account": true,
-        "drawer_show_localization": true
-      }
-    },
     "announcement_bar_v2": {
       "type": "announcement-bar-v2",
       "blocks": {
@@ -99,10 +83,26 @@
         "speed": 5,
         "show_on_mobile": true,
         "aside_label": "Be in the know",
+        "aside_link": "",
         "aside_icon": true,
         "background": "#253c30",
         "text_color": "#ffffff",
         "text_size": 12
+      }
+    },
+    "header": {
+      "type": "header",
+      "custom_css": [],
+      "settings": {
+        "logo_style": "image",
+        "logo_text": "tabi",
+        "menu": "new-menu",
+        "sticky_header_type": "on-scroll-up",
+        "header_background": "#f9f7f4",
+        "show_country_selector": true,
+        "color_scheme": "scheme-1",
+        "drawer_show_account": true,
+        "drawer_show_localization": true
       }
     }
   },
