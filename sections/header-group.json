@@ -68,6 +68,7 @@
       "block_order": [
         "announcement_8pKcN4"
       ],
+      "disabled": true,
       "name": "t:sections.announcement-bar.presets.name",
       "settings": {
         "color_scheme": "",
@@ -112,22 +113,12 @@
         "logo_style": "image",
         "logo_text": "tabi",
         "menu": "new-menu",
-        "show_dropdown_arrows": true,
         "sticky_header_type": "on-scroll-up",
         "header_background": "#f9f7f4",
-        "header_opacity": 55,
-        "overlay_home_banner": true,
-        "transparent_home": true,
-        "header_text": "#14284a",
-        "header_height_desktop": 84,
-        "header_height_mobile": 62,
         "color_scheme": "scheme-1",
-        "drawer_show_search": false,
-        "drawer_search_placeholder": "Search for products…",
-        "drawer_tagline": "",
+        "show_country_selector": true,
         "drawer_show_account": true,
-        "drawer_show_localization": true,
-        "show_country_selector": true
+        "drawer_show_localization": true
       }
     }
   },
