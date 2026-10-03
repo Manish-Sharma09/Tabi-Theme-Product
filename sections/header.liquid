@@ -63,8 +63,6 @@
     this section - one for desktop, one for phones - so it carries the weight
     of the logo on the reference site. The text wordmark is only an
     alternative; it is also what shows if no logo has been uploaded.
-    No apostrophes in comments inside a liquid tag: Shopify reads one as the
-    start of a string and rejects the whole file.
   endcomment
   assign logo_image = settings.logo
   assign logo_w = section.settings.logo_width_desktop | default: 120
@@ -121,7 +119,7 @@
 
 {%- style -%}
   :root {
-    --tabi-bar-h: {{ section.settings.header_height_mobile }}px;
+    --tabi-bar-h: {{ section.settings.bar_height_mobile }}px;
     --tabi-strip-h: {% if show_strip %}40px{% else %}0px{% endif %};
     {%- comment -%}
       The home banner fills the rest of the screen under the header, so it
@@ -132,13 +130,19 @@
 
   @media screen and (min-width: 990px) {
     :root {
-      --tabi-bar-h: {{ section.settings.header_height_desktop }}px;
+      --tabi-bar-h: {{ section.settings.bar_height_desktop }}px;
     }
   }
 
+  {%- comment -%}
+    Text colour, bar heights and dropdown arrows read new setting ids
+    (bar_*, show_nav_arrows). The old ids still hold the previous header's
+    saved values on the store (navy text, an 84px bar, arrows on), which
+    would override this design's defaults.
+  {%- endcomment %}
   #shopify-section-{{ section.id }} {
     --tabi-cream: {{ section.settings.header_background }};
-    --tabi-ink: {{ section.settings.header_text }};
+    --tabi-ink: {{ section.settings.bar_text }};
     --tabi-accent: {{ section.settings.header_accent }};
     --tabi-strip-bg: {{ section.settings.announcement_background }};
     --tabi-strip-ink: {{ section.settings.announcement_text }};
@@ -279,7 +283,7 @@
       </{{ logo_tag }}>
 
       {%- if menu != blank -%}
-        <tabi-nav class="tabi-nav{% if section.settings.show_dropdown_arrows %} tabi-nav--arrows{% endif %}">
+        <tabi-nav class="tabi-nav{% if section.settings.show_nav_arrows %} tabi-nav--arrows{% endif %}">
           <nav aria-label="{{ 'sections.header.menu' | t }}">
             <ul class="tabi-nav__list" role="list">
               {%- for link in menu.links -%}
@@ -487,7 +491,12 @@
       if section.settings.drawer_show_localization and localization.available_countries.size > 1
         assign show_currency = true
       endif
-      assign drawer_menu = section.settings.drawer_menu
+      comment
+        Extra links (Track order, Contact) are "Mobile menu link" blocks, not a
+        second menu picker: Shopify allows one link_list setting per section
+        and rejects the whole file on a second one.
+      endcomment
+      assign extra_links = section.blocks | where: 'type', 'drawer-link'
     -%}
     <tabi-drawer id="TabiDrawer-{{ section.id }}" class="tabi-drawer">
       <span class="tabi-drawer__backdrop" data-tabi-drawer-close></span>
@@ -532,7 +541,7 @@
             </ul>
           </nav>
 
-          {%- if show_account or drawer_menu != blank or show_currency -%}
+          {%- if show_account or extra_links.size > 0 or show_currency -%}
             <div class="tabi-drawer__lower">
               <ul class="tabi-drawer__lower-list" role="list">
                 {%- if show_account -%}
@@ -549,16 +558,17 @@
                   </li>
                 {%- endif -%}
 
-                {%- for extra in drawer_menu.links -%}
-                  <li>
+                {%- for extra in extra_links -%}
+                  {%- if extra.settings.label == blank or extra.settings.link == blank -%}{%- continue -%}{%- endif -%}
+                  <li {{ extra.shopify_attributes }}>
                     <a
-                      href="{{ extra.url }}"
+                      href="{{ extra.settings.link }}"
                       class="tabi-drawer__lower-link"
-                      {% if extra.current %}
+                      {% if extra.settings.link == request.path %}
                         aria-current="page"
                       {% endif %}
                     >
-                      {{- extra.title | escape -}}
+                      {{- extra.settings.label | escape -}}
                     </a>
                   </li>
                 {%- endfor -%}
@@ -1077,7 +1087,7 @@
     },
     {
       "type": "checkbox",
-      "id": "show_dropdown_arrows",
+      "id": "show_nav_arrows",
       "label": "Show dropdown arrows on desktop",
       "default": false,
       "info": "A small arrow beside each link that has a dropdown. Keyboard users get a focusable arrow either way."
@@ -1094,7 +1104,7 @@
     },
     {
       "type": "color",
-      "id": "header_text",
+      "id": "bar_text",
       "label": "Text and icons",
       "default": "#191919"
     },
@@ -1107,7 +1117,7 @@
     },
     {
       "type": "range",
-      "id": "header_height_desktop",
+      "id": "bar_height_desktop",
       "min": 44,
       "max": 100,
       "step": 2,
@@ -1117,7 +1127,7 @@
     },
     {
       "type": "range",
-      "id": "header_height_mobile",
+      "id": "bar_height_mobile",
       "min": 44,
       "max": 100,
       "step": 2,
@@ -1158,12 +1168,6 @@
       "label": "Show Log in / Account link",
       "default": true,
       "info": "The account icon is not in the mobile bar, so this is how shoppers on a phone reach their account."
-    },
-    {
-      "type": "link_list",
-      "id": "drawer_menu",
-      "label": "Extra links",
-      "info": "Optional. A short menu (e.g. Track order, Contact) listed under Log in."
     },
     {
       "type": "checkbox",
@@ -1214,6 +1218,26 @@
           "label": "Link",
           "type": "url",
           "id": "link_url"
+        }
+      ]
+    },
+    {
+      "type": "drawer-link",
+      "name": "Mobile menu link",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "A link listed under Log in in the mobile menu, e.g. Track order or Contact."
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
         }
       ]
     }
