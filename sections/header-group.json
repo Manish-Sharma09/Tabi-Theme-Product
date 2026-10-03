@@ -69,10 +69,46 @@
         "drawer_show_account": true,
         "drawer_show_localization": true
       }
+    },
+    "announcement_bar_v2": {
+      "type": "announcement-bar-v2",
+      "blocks": {
+        "message_first10": {
+          "type": "message",
+          "settings": {
+            "text": "New here? Get 10% off with code FIRST10",
+            "link_label": "Shop Now",
+            "link": "shopify://collections/all"
+          }
+        },
+        "message_handcrafted": {
+          "type": "message",
+          "settings": {
+            "text": "Sustainable. Natural. Handcrafted.",
+            "link_label": "Explore Now",
+            "link": "shopify://collections/all"
+          }
+        }
+      },
+      "block_order": [
+        "message_first10",
+        "message_handcrafted"
+      ],
+      "settings": {
+        "autoplay": true,
+        "speed": 5,
+        "show_on_mobile": true,
+        "aside_label": "Be in the know",
+        "aside_icon": true,
+        "background": "#253c30",
+        "text_color": "#ffffff",
+        "text_size": 12
+      }
     }
   },
   "order": [
     "announcement-bar",
+    "announcement_bar_v2",
     "header"
   ]
 }

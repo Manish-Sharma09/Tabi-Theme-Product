@@ -2,9 +2,8 @@
   THE HEADER. Version: Good Earth layout, 2026-10-03.
 
   Laid out after goodearth.in, with the store's own logo, menu and
-  collections:
-  - a coloured announcement strip: a pause button ringed by a countdown on
-    the left, rotating messages in the middle, one link on the right;
+  collections. The coloured strip above it is its own section,
+  sections/announcement-bar-v2.liquid.
   - a cream bar: logo on the left, the menu centred, search / currency /
     account / bag on the right; on a phone, menu button - logo - search, bag;
   - desktop dropdowns that span the screen: a column per child link (its
@@ -79,29 +78,6 @@
     assign logo_tag = 'div'
   endif
 
-  comment
-    Announcement strip: up to three messages, each with an optional
-    underlined link after it. Blank messages are skipped.
-  endcomment
-  assign strip_count = 0
-  if section.settings.announcement_1 != blank
-    assign strip_count = strip_count | plus: 1
-  endif
-  if section.settings.announcement_2 != blank
-    assign strip_count = strip_count | plus: 1
-  endif
-  if section.settings.announcement_3 != blank
-    assign strip_count = strip_count | plus: 1
-  endif
-
-  assign aside_link = section.settings.announcement_aside_link | default: settings.social_instagram_link
-  assign show_strip = false
-  if section.settings.show_announcement
-    if strip_count > 0 or section.settings.announcement_aside_label != blank
-      assign show_strip = true
-    endif
-  endif
-
   assign card_limit = section.settings.menu_images_limit
   assign card_caption = section.settings.menu_image_caption
 
@@ -120,12 +96,12 @@
 {%- style -%}
   :root {
     --tabi-bar-h: {{ section.settings.bar_height_mobile }}px;
-    --tabi-strip-h: {% if show_strip %}40px{% else %}0px{% endif %};
     {%- comment -%}
       The home banner fills the rest of the screen under the header, so it
-      needs the whole header's height: the strip plus the bar.
+      needs both bars: this one, and the strip, whose height
+      sections/announcement-bar-v2.liquid sets (0 when that section is absent).
     {%- endcomment %}
-    --tabi-header-h: calc(var(--tabi-bar-h) + var(--tabi-strip-h));
+    --tabi-header-h: calc(var(--tabi-bar-h) + var(--tabi-strip-h, 0px));
   }
 
   @media screen and (min-width: 990px) {
@@ -144,8 +120,25 @@
     --tabi-cream: {{ section.settings.header_background }};
     --tabi-ink: {{ section.settings.bar_text }};
     --tabi-accent: {{ section.settings.header_accent }};
-    --tabi-strip-bg: {{ section.settings.announcement_background }};
-    --tabi-strip-ink: {{ section.settings.announcement_text }};
+    --tabi-search: {{ section.settings.search_color }};
+    --tabi-menu-size: {{ section.settings.menu_font_size }}px;
+    --tabi-menu-tracking: {{ section.settings.menu_letter_spacing }}px;
+    --tabi-menu-case: {% if section.settings.menu_uppercase %}uppercase{% else %}none{% endif %};
+    --tabi-menu-gap: {{ section.settings.menu_spacing }}px;
+    --tabi-panel: {{ section.settings.dropdown_background }};
+    --tabi-panel-ink: {{ section.settings.dropdown_text }};
+    --tabi-mega-size: {{ section.settings.dropdown_font_size }}px;
+    {%- case section.settings.menu_image_ratio -%}
+      {%- when 'square' %}
+    --tabi-card-ratio: 1 / 1;
+      {%- when 'landscape' %}
+    --tabi-card-ratio: 4 / 3;
+      {%- else %}
+    --tabi-card-ratio: 5 / 6;
+    {%- endcase %}
+    --tabi-paper: {{ section.settings.drawer_background }};
+    --tabi-drawer-lower: {{ section.settings.drawer_lower_background }};
+    --tabi-drawer-size: {{ section.settings.drawer_font_size }}px;
     --tabi-logo-width: {{ logo_w_mobile }}px;
   }
 
@@ -188,82 +181,7 @@
     data-sticky-type="{{ sticky_type }}"
   {% endif %}
 >
-  {%- if show_strip -%}
-    <tabi-announcements
-      class="tabi-strip"
-      data-interval="{{ section.settings.announcement_speed | times: 1000 }}"
-      style="--tabi-strip-interval: {{ section.settings.announcement_speed }}s;"
-    >
-      <div class="tabi-strip__inner">
-        {%- if strip_count > 1 -%}
-          <button
-            type="button"
-            class="tabi-strip__toggle"
-            aria-pressed="false"
-            data-label-pause="{{ 'sections.slideshow.pause_slideshow' | t | escape }}"
-            data-label-play="{{ 'sections.slideshow.play_slideshow' | t | escape }}"
-            aria-label="{{ 'sections.slideshow.pause_slideshow' | t | escape }}"
-          >
-            <svg class="tabi-strip__ring" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
-              <circle class="tabi-strip__ring-track" cx="14" cy="14" r="12.5" />
-              <circle class="tabi-strip__ring-progress" cx="14" cy="14" r="12.5" pathLength="100" />
-            </svg>
-            {% render 'tabi-icon', icon: 'pause' %}
-            {% render 'tabi-icon', icon: 'play' %}
-          </button>
-        {%- endif -%}
-
-        <div
-          class="tabi-strip__messages"
-          role="region"
-          aria-label="{{ 'sections.announcements.announcement_bar' | t | escape }}"
-        >
-          {%- assign strip_index = 0 -%}
-          {%- for i in (1..3) -%}
-            {%- liquid
-              assign text_key = 'announcement_' | append: i
-              assign label_key = 'announcement_' | append: i | append: '_link_label'
-              assign link_key = 'announcement_' | append: i | append: '_link'
-              assign message = section.settings[text_key]
-              assign message_label = section.settings[label_key]
-              assign message_link = section.settings[link_key]
-            -%}
-            {%- if message == blank -%}{%- continue -%}{%- endif -%}
-            <p class="tabi-strip__message{% if strip_index == 0 %} is-active{% endif %}">
-              <span>{{ message | escape }}</span>
-              {%- if message_link != blank and message_label != blank %}
-                <a href="{{ message_link }}" class="tabi-strip__link">{{ message_label | escape }}</a>
-              {%- endif -%}
-            </p>
-            {%- assign strip_index = strip_index | plus: 1 -%}
-          {%- endfor -%}
-        </div>
-
-        {%- if section.settings.announcement_aside_label != blank and aside_link != blank -%}
-          {%- liquid
-            assign aside_external = false
-            if aside_link contains '://'
-              unless aside_link contains request.host
-                assign aside_external = true
-              endunless
-            endif
-          -%}
-          <a
-            href="{{ aside_link }}"
-            class="tabi-strip__aside"
-            {% if aside_external %}
-              target="_blank" rel="noopener"
-            {% endif %}
-          >
-            {% render 'tabi-icon', icon: 'mail' %}
-            <span>{{ section.settings.announcement_aside_label | escape }}</span>
-          </a>
-        {%- endif -%}
-      </div>
-    </tabi-announcements>
-  {%- endif -%}
-
-  <header class="tabi-header">
+  <header class="tabi-header{% if section.settings.bar_border %} tabi-header--bordered{% endif %}{% unless section.settings.show_cart_count %} tabi-header--no-count{% endunless %}">
     <div class="tabi-header__bar">
       {%- if menu != blank -%}
         <button
@@ -283,7 +201,7 @@
       </{{ logo_tag }}>
 
       {%- if menu != blank -%}
-        <tabi-nav class="tabi-nav{% if section.settings.show_nav_arrows %} tabi-nav--arrows{% endif %}">
+        <tabi-nav class="tabi-nav{% if section.settings.show_nav_arrows %} tabi-nav--arrows{% endif %}{% unless section.settings.dropdown_divider %} tabi-nav--no-divider{% endunless %}">
           <nav aria-label="{{ 'sections.header.menu' | t }}">
             <ul class="tabi-nav__list" role="list">
               {%- for link in menu.links -%}
@@ -446,7 +364,7 @@
           </div>
         {%- endif -%}
 
-        {%- if shop.customer_accounts_enabled -%}
+        {%- if shop.customer_accounts_enabled and section.settings.show_account_icon -%}
           <a href="{{ account_url }}" class="tabi-header__icon tabi-header__icon--account">
             {% render 'tabi-icon', icon: 'account' %}
             <span class="visually-hidden">
@@ -719,6 +637,7 @@
             </ul>
 
             {%- capture drawer_cards -%}
+              {%- if section.settings.drawer_show_images -%}
               {%- render 'tabi-menu-cards',
                 link: link,
                 blocks: section.blocks,
@@ -726,6 +645,7 @@
                 caption: card_caption,
                 variant: 'drawer'
               -%}
+              {%- endif -%}
             {%- endcapture -%}
             {%- if drawer_cards != blank -%}
               <div class="tabi-drawer__cards">{{ drawer_cards }}</div>
@@ -907,8 +827,14 @@
       "id": "logo_style",
       "label": "Logo style",
       "options": [
-        { "value": "image", "label": "Logo image" },
-        { "value": "text", "label": "Text wordmark" }
+        {
+          "value": "image",
+          "label": "Logo image"
+        },
+        {
+          "value": "text",
+          "label": "Text wordmark"
+        }
       ],
       "default": "image",
       "info": "Logo image uses the logo uploaded in Theme settings > Logo, at the widths below."
@@ -942,112 +868,14 @@
     },
     {
       "type": "header",
-      "content": "Announcement strip"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_announcement",
-      "label": "Show announcement strip",
-      "default": true,
-      "info": "The coloured strip above the bar. With two or more messages they take turns, and a pause button appears."
-    },
-    {
-      "type": "text",
-      "id": "announcement_1",
-      "label": "Message 1",
-      "default": "New here? Get 10% off with code FIRST10"
-    },
-    {
-      "type": "text",
-      "id": "announcement_1_link_label",
-      "label": "Message 1 link text",
-      "default": "Shop Now"
-    },
-    {
-      "type": "url",
-      "id": "announcement_1_link",
-      "label": "Message 1 link",
-      "default": "/collections/all"
-    },
-    {
-      "type": "text",
-      "id": "announcement_2",
-      "label": "Message 2",
-      "default": "Sustainable. Natural. Handcrafted."
-    },
-    {
-      "type": "text",
-      "id": "announcement_2_link_label",
-      "label": "Message 2 link text",
-      "default": "Explore Now"
-    },
-    {
-      "type": "url",
-      "id": "announcement_2_link",
-      "label": "Message 2 link",
-      "default": "/collections/all"
-    },
-    {
-      "type": "text",
-      "id": "announcement_3",
-      "label": "Message 3",
-      "info": "Leave empty for none."
-    },
-    {
-      "type": "text",
-      "id": "announcement_3_link_label",
-      "label": "Message 3 link text"
-    },
-    {
-      "type": "url",
-      "id": "announcement_3_link",
-      "label": "Message 3 link"
-    },
-    {
-      "type": "range",
-      "id": "announcement_speed",
-      "min": 3,
-      "max": 10,
-      "step": 1,
-      "unit": "s",
-      "label": "Time per message",
-      "default": 5
-    },
-    {
-      "type": "text",
-      "id": "announcement_aside_label",
-      "label": "Right-hand link text",
-      "default": "Be in the know",
-      "info": "Desktop only, with an envelope icon. Leave empty to hide."
-    },
-    {
-      "type": "url",
-      "id": "announcement_aside_link",
-      "label": "Right-hand link",
-      "info": "Leave empty to use the Instagram link from Theme settings > Social media."
-    },
-    {
-      "type": "color",
-      "id": "announcement_background",
-      "label": "Strip colour",
-      "default": "#253c30"
-    },
-    {
-      "type": "color",
-      "id": "announcement_text",
-      "label": "Strip text",
-      "default": "#ffffff"
-    },
-    {
-      "type": "header",
-      "content": "Navigation"
+      "content": "Menu"
     },
     {
       "type": "link_list",
       "id": "menu",
       "default": "main-menu",
       "label": "t:sections.header.settings.menu.label",
-      "info": "Top-level links show in the bar. On desktop, a link's sub-links become columns in its dropdown, with their own sub-links listed under them. On a phone, each opens its own sliding panel."
+      "info": "Top-level links show in the bar. On desktop, sub-links become columns in a full-width dropdown, with their own sub-links listed under them. On a phone, each opens its own sliding panel."
     },
     {
       "type": "select",
@@ -1071,49 +899,69 @@
     },
     {
       "type": "range",
-      "id": "menu_images_limit",
-      "min": 0,
-      "max": 4,
+      "id": "menu_font_size",
+      "min": 11,
+      "max": 18,
       "step": 1,
-      "label": "Pictures per dropdown",
-      "default": 3,
-      "info": "Taken from Menu image blocks if a link has any, otherwise from the collections its sub-links point to. Desktop shows as many as fit beside the link columns."
+      "unit": "px",
+      "label": "Menu text size",
+      "default": 14
     },
     {
-      "type": "text",
-      "id": "menu_image_caption",
-      "label": "Picture caption",
-      "default": "Discover"
+      "type": "range",
+      "id": "menu_letter_spacing",
+      "min": 0,
+      "max": 3,
+      "step": 0.5,
+      "unit": "px",
+      "label": "Menu letter spacing",
+      "default": 0.5
+    },
+    {
+      "type": "range",
+      "id": "menu_spacing",
+      "min": 16,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "label": "Space between menu links",
+      "default": 30
     },
     {
       "type": "checkbox",
-      "id": "show_nav_arrows",
-      "label": "Show dropdown arrows on desktop",
-      "default": false,
-      "info": "A small arrow beside each link that has a dropdown. Keyboard users get a focusable arrow either way."
+      "id": "menu_uppercase",
+      "label": "Capital letters",
+      "default": true,
+      "info": "For the menu in the bar and the mobile menu."
     },
     {
       "type": "header",
-      "content": "Design"
+      "content": "Bar"
     },
     {
       "type": "color",
       "id": "header_background",
-      "label": "Bar background",
+      "label": "Background",
       "default": "#f9f8f5"
     },
     {
       "type": "color",
       "id": "bar_text",
-      "label": "Text and icons",
+      "label": "Menu text and icons",
       "default": "#191919"
     },
     {
       "type": "color",
       "id": "header_accent",
-      "label": "Accent",
+      "label": "Hover and current link",
       "default": "#9c7d50",
-      "info": "The menu link that is hovered, open or current, and the mobile menu's Log in link."
+      "info": "The menu link that is hovered, open or current, and Log in in the mobile menu."
+    },
+    {
+      "type": "color",
+      "id": "search_color",
+      "label": "Search text",
+      "default": "#253c30"
     },
     {
       "type": "range",
@@ -1136,19 +984,15 @@
       "default": 56
     },
     {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "Search and cart popup colours",
-      "default": "scheme-1"
-    },
-    {
-      "type": "header",
-      "content": "Desktop"
+      "type": "checkbox",
+      "id": "bar_border",
+      "label": "Line under the bar",
+      "default": false
     },
     {
       "type": "checkbox",
       "id": "show_search_label",
-      "label": "Write \"Search\" beside the search icon",
+      "label": "Show the word Search on desktop",
       "default": true
     },
     {
@@ -1159,8 +1003,131 @@
       "info": "The currency, e.g. INR ₹, beside the search. Only appears when the store sells to more than one country."
     },
     {
+      "type": "checkbox",
+      "id": "show_account_icon",
+      "label": "Show account icon on desktop",
+      "default": true,
+      "info": "On a phone the account link is in the menu (Mobile menu settings below)."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cart_count",
+      "label": "Show item count on the bag",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Search and cart popup colours",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Dropdowns (desktop)"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_background",
+      "label": "Background",
+      "default": "#fdfdfd"
+    },
+    {
+      "type": "color",
+      "id": "dropdown_text",
+      "label": "Text",
+      "default": "#191919"
+    },
+    {
+      "type": "range",
+      "id": "dropdown_font_size",
+      "min": 11,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size",
+      "default": 13
+    },
+    {
+      "type": "checkbox",
+      "id": "show_nav_arrows",
+      "label": "Show dropdown arrows on desktop",
+      "default": false,
+      "info": "A small arrow beside each link that has a dropdown. Keyboard users get a focusable arrow either way."
+    },
+    {
+      "type": "checkbox",
+      "id": "dropdown_divider",
+      "label": "Line between links and pictures",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "menu_images_limit",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "label": "Pictures per dropdown",
+      "default": 3,
+      "info": "Taken from Menu image blocks if a link has any, otherwise from the collections its sub-links point to. Desktop shows as many as fit beside the link columns."
+    },
+    {
+      "type": "text",
+      "id": "menu_image_caption",
+      "label": "Picture caption",
+      "default": "Discover"
+    },
+    {
+      "type": "select",
+      "id": "menu_image_ratio",
+      "label": "Picture shape",
+      "default": "portrait",
+      "options": [
+        {
+          "value": "portrait",
+          "label": "Portrait"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "landscape",
+          "label": "Landscape"
+        }
+      ],
+      "info": "Also used in the mobile menu."
+    },
+    {
       "type": "header",
       "content": "Mobile menu"
+    },
+    {
+      "type": "color",
+      "id": "drawer_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "drawer_lower_background",
+      "label": "Log in and currency area",
+      "default": "#f9f8f5"
+    },
+    {
+      "type": "range",
+      "id": "drawer_font_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size",
+      "default": 14
+    },
+    {
+      "type": "checkbox",
+      "id": "drawer_show_images",
+      "label": "Show pictures in menu panels",
+      "default": true
     },
     {
       "type": "checkbox",

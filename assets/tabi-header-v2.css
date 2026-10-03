@@ -1,7 +1,7 @@
 /* ==========================================================================
    tabi-header-v2.css - version: Good Earth layout, 2026-10-03
-   The header (sections/header.liquid): announcement strip, the bar, the
-   desktop mega menu and the mobile sliding menu. Laid out after
+   The header (sections/header.liquid): the bar, the desktop mega menu and
+   the mobile sliding menu. The strip above it is announcement-bar-v2.css. Laid out after
    goodearth.in, measured at 1440px and 390px wide; sizes below are theirs,
    converted to this theme's rem (1rem = 10.5px at the store's 105% body
    scale).
@@ -12,7 +12,7 @@
    old header, and inheriting them would mean fighting them line by line.
 
      1. Tokens
-     2. Announcement strip
+     2. (Announcement strip - now its own section: announcement-bar-v2.css)
      3. Bar layout
      4. Logo
      5. Icons, search, currency, cart count
@@ -27,7 +27,7 @@
 
 /* --------------------------------------------------------------------------
    1. TOKENS
-   Defaults for the colours the section's {% style %} block sets on
+   Defaults for the values the section's {% style %} block sets on
    #shopify-section-<id>. That id selector out-ranks this class, so a theme
    editor change always wins; these only apply if the style block is missing.
    -------------------------------------------------------------------------- */
@@ -36,8 +36,16 @@
   --tabi-cream: #f9f8f5;
   --tabi-ink: #191919;
   --tabi-accent: #9c7d50;
-  --tabi-strip-bg: #253c30;
-  --tabi-strip-ink: #ffffff;
+  --tabi-search: #253c30;
+  --tabi-menu-size: 14px;
+  --tabi-menu-tracking: 0.5px;
+  --tabi-menu-case: uppercase;
+  --tabi-menu-gap: 30px;
+  --tabi-panel-ink: #191919;
+  --tabi-mega-size: 13px;
+  --tabi-card-ratio: 5 / 6;
+  --tabi-drawer-lower: #f9f8f5;
+  --tabi-drawer-size: 14px;
   --tabi-panel: #fdfdfd;
   --tabi-paper: #ffffff;
   --tabi-pane-head: #fcfcfa;
@@ -63,219 +71,6 @@
 .tabi-header-wrapper {
   background: var(--tabi-cream);
   color: var(--tabi-ink);
-}
-
-/* --------------------------------------------------------------------------
-   2. ANNOUNCEMENT STRIP
-   [pause]  ...... message, link ......  [envelope] BE IN THE KNOW
-   The messages share one grid cell, so the strip is as tall as the longest
-   one and never jumps as they change. Each slides up and out as the next
-   slides up into place; the ring round the pause button counts down to it.
-   -------------------------------------------------------------------------- */
-
-.tabi-strip {
-  position: relative;
-  z-index: 2;
-  display: block;
-  background: var(--tabi-strip-bg);
-  color: var(--tabi-strip-ink);
-}
-
-.tabi-strip__inner {
-  display: grid;
-  grid-template-columns: 4.4rem minmax(0, 1fr) 4.4rem;
-  grid-template-areas: 'toggle messages aside';
-  align-items: center;
-  min-height: var(--tabi-strip-h, 4rem);
-  padding-inline: 0.8rem;
-}
-
-@media screen and (min-width: 990px) {
-  .tabi-strip__inner {
-    grid-template-columns: minmax(16rem, 1fr) minmax(0, 3fr) minmax(16rem, 1fr);
-    padding-inline: 1.4rem 2rem;
-  }
-}
-
-.tabi-strip__toggle {
-  grid-area: toggle;
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 4.4rem;
-  height: 4rem;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.tabi-strip__ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 2.8rem;
-  height: 2.8rem;
-  margin: -1.4rem 0 0 -1.4rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  /* The countdown starts at twelve o'clock and runs clockwise. */
-  transform: rotate(-90deg);
-}
-
-.tabi-strip__ring-track {
-  opacity: 0.25;
-}
-
-.tabi-strip__ring-progress {
-  stroke-linecap: round;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-}
-
-.tabi-strip.is-counting .tabi-strip__ring-progress {
-  animation: tabi-ring var(--tabi-strip-interval, 5s) linear forwards;
-}
-
-.tabi-strip.is-paused .tabi-strip__ring-progress {
-  animation-play-state: paused;
-}
-
-@keyframes tabi-ring {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.tabi-strip__toggle .tabi-icon {
-  position: relative;
-  width: 1.5rem;
-  height: 1.5rem;
-  stroke-width: 2;
-}
-
-.tabi-strip__toggle .tabi-icon--play,
-.tabi-strip__toggle[aria-pressed='true'] .tabi-icon--pause {
-  display: none;
-}
-
-.tabi-strip__toggle[aria-pressed='true'] .tabi-icon--play {
-  display: block;
-}
-
-.tabi-strip__toggle:focus-visible {
-  outline: 1px solid currentColor;
-  outline-offset: -0.2rem;
-  box-shadow: none;
-}
-
-.tabi-strip__messages {
-  grid-area: messages;
-  display: grid;
-  overflow: hidden;
-  text-align: center;
-}
-
-.tabi-strip__message {
-  grid-area: 1 / 1;
-  align-self: center;
-  margin: 0;
-  padding: 0.7rem 0;
-  color: inherit;
-  font-family: var(--tabi-sans);
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: 1.45;
-  letter-spacing: 0.02em;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(100%);
-  transition:
-    transform 0.65s var(--tabi-ease-out),
-    opacity 0.45s var(--tabi-ease),
-    visibility 0s linear 0.65s;
-}
-
-.tabi-strip__message.is-active {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  transition:
-    transform 0.65s var(--tabi-ease-out),
-    opacity 0.45s var(--tabi-ease) 0.1s,
-    visibility 0s linear 0s;
-}
-
-.tabi-strip__message.is-leaving {
-  transform: translateY(-100%);
-}
-
-/* Parked below the strip again after leaving, without being seen to move. */
-.tabi-strip__message.is-parking {
-  transition: none;
-}
-
-.tabi-strip__link {
-  margin-inline-start: 0.4rem;
-  color: inherit;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 0.25rem;
-  text-decoration-thickness: 1px;
-  white-space: nowrap;
-}
-
-.tabi-strip__link:hover {
-  text-decoration-thickness: 2px;
-}
-
-.tabi-strip__link:focus-visible,
-.tabi-strip__aside:focus-visible {
-  outline: 1px solid currentColor;
-  outline-offset: 0.2rem;
-  box-shadow: none;
-}
-
-.tabi-strip__aside {
-  grid-area: aside;
-  justify-self: end;
-  display: none;
-  align-items: center;
-  gap: 0.7rem;
-  color: inherit;
-  font-family: var(--tabi-sans);
-  font-size: 1.1rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.tabi-strip__aside .tabi-icon {
-  width: 1.7rem;
-  height: 1.7rem;
-  stroke-width: 1.4;
-}
-
-.tabi-strip__aside:hover span {
-  text-decoration: underline;
-  text-underline-offset: 0.25rem;
-}
-
-@media screen and (min-width: 990px) {
-  .tabi-strip__message {
-    font-size: 1.15rem;
-    font-weight: 600;
-  }
-
-  .tabi-strip__aside {
-    display: inline-flex;
-  }
 }
 
 /* --------------------------------------------------------------------------
@@ -491,8 +286,8 @@
   transform: none;
 }
 
-/* Search: icon only on a phone; icon and the word "Search", in the strip's
-   brand colour, on desktop - as the reference draws it. The extra classes
+/* Search: icon only on a phone; icon and the word "Search", in its own
+   colour (the Search text setting), on desktop - as the reference draws it. The extra classes
    out-rank base.css's `.header__icon span { display: flex }`. */
 .tabi-header .header__icon .tabi-search-label {
   display: none;
@@ -507,7 +302,7 @@
     width: auto;
     gap: 0.9rem;
     padding-inline: 0.8rem 1.2rem;
-    color: var(--tabi-strip-bg);
+    color: var(--tabi-search);
   }
 
   .tabi-header .header__search .header__icon > span {
@@ -553,6 +348,25 @@
   .tabi-header__icon--account {
     display: inline-flex;
   }
+}
+
+/* "Line under the bar". A layer, not a border, so the bar keeps its height. */
+.tabi-header--bordered::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  height: 1px;
+  background: var(--tabi-line);
+  pointer-events: none;
+}
+
+/* "Show item count on the bag" off. Three classes: the count's own rule
+   below sets display with two. */
+.tabi-header.tabi-header--no-count .cart-count-bubble {
+  display: none;
 }
 
 /* The item count sits above the bag, small and grey, as on the reference -
@@ -688,7 +502,10 @@
 .tabi-nav__item {
   display: flex;
   align-items: center;
-  padding-inline: clamp(1.1rem, 1.05vw, 1.45rem);
+  /* Half the "Space between menu links" setting on each side, capped at
+     2.2vw (22px at 990px wide, 32px at 1440px) so a wide setting still
+     leaves the menu room between the logo and the icons on small laptops. */
+  padding-inline: min(calc(var(--tabi-menu-gap) / 2), 2.2vw);
 }
 
 .tabi-nav__trigger {
@@ -705,10 +522,10 @@
   font-family: var(--tabi-sans);
   font-weight: 400;
   font-style: normal;
-  font-size: 1.35rem;
+  font-size: var(--tabi-menu-size);
   line-height: 1.2;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: var(--tabi-menu-tracking);
+  text-transform: var(--tabi-menu-case);
   text-decoration: none;
   white-space: nowrap;
   transition: color 0.3s var(--tabi-ease);
@@ -853,16 +670,16 @@
   padding-inline: 2rem;
   /* The body's tall line-height would otherwise set every row's height
      through the list items' line boxes, whatever the links' own size. */
-  font-size: 1.25rem;
+  font-size: var(--tabi-mega-size);
   line-height: 1.45;
 }
 
 .tabi-mega__heading {
   display: block;
   margin-bottom: 1rem;
-  color: var(--tabi-ink);
+  color: var(--tabi-panel-ink);
   font-family: var(--tabi-sans);
-  font-size: 1.25rem;
+  font-size: var(--tabi-mega-size);
   font-weight: 600;
   line-height: 1.45;
   letter-spacing: 0.05em;
@@ -888,9 +705,9 @@
 
 .tabi-mega__link {
   display: inline-block;
-  color: var(--tabi-ink);
+  color: var(--tabi-panel-ink);
   font-family: var(--tabi-sans);
-  font-size: 1.25rem;
+  font-size: var(--tabi-mega-size);
   line-height: 1.45;
   letter-spacing: 0.02em;
   text-decoration: none;
@@ -935,7 +752,7 @@
 .tabi-card__media {
   display: block;
   overflow: hidden;
-  aspect-ratio: 5 / 6;
+  aspect-ratio: var(--tabi-card-ratio);
   background: color-mix(in srgb, var(--tabi-ink) 5%, var(--tabi-paper));
 }
 
@@ -969,8 +786,14 @@
 
 .tabi-card--mega {
   padding-inline: 2rem;
-  font-size: 1.25rem;
+  color: var(--tabi-panel-ink);
+  font-size: var(--tabi-mega-size);
   line-height: 1.45;
+}
+
+.tabi-card--mega .tabi-card__title,
+.tabi-card--mega .tabi-card__caption {
+  font-size: var(--tabi-mega-size);
 }
 
 .tabi-card--mega .tabi-card__media {
@@ -982,6 +805,11 @@
 .tabi-mega__col + .tabi-card--first {
   align-self: stretch;
   border-left: 1px solid var(--tabi-divider);
+}
+
+/* "Line between links and pictures" off. */
+.tabi-nav--no-divider .tabi-mega__col + .tabi-card--first {
+  border-left: 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -1147,12 +975,12 @@ html.tabi-scroll-lock {
   background: none;
   color: var(--tabi-ink);
   font-family: var(--tabi-sans);
-  font-size: 1.45rem;
+  font-size: var(--tabi-drawer-size);
   font-weight: 400;
   line-height: 1.3;
   letter-spacing: 0.06em;
   text-align: left;
-  text-transform: uppercase;
+  text-transform: var(--tabi-menu-case);
   text-decoration: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -1176,7 +1004,7 @@ html.tabi-scroll-lock {
 .tabi-drawer__lower {
   flex: 1 0 auto;
   padding: 2.4rem 2rem calc(2.4rem + env(safe-area-inset-bottom)) 3rem;
-  background: var(--tabi-cream);
+  background: var(--tabi-drawer-lower);
 }
 
 .tabi-drawer__lower-link {
@@ -1325,10 +1153,10 @@ html.tabi-scroll-lock {
   padding-inline: 0.8rem;
   color: var(--tabi-ink);
   font-family: var(--tabi-sans);
-  font-size: 1.5rem;
+  font-size: calc(var(--tabi-drawer-size) + 0.5px);
   letter-spacing: 0.07em;
   text-align: center;
-  text-transform: uppercase;
+  text-transform: var(--tabi-menu-case);
   text-decoration: none;
 }
 
@@ -1365,12 +1193,12 @@ html.tabi-scroll-lock {
   background: none;
   color: var(--tabi-ink);
   font-family: var(--tabi-sans);
-  font-size: 1.45rem;
+  font-size: var(--tabi-drawer-size);
   font-weight: 400;
   line-height: 1.3;
   letter-spacing: 0.06em;
   text-align: left;
-  text-transform: uppercase;
+  text-transform: var(--tabi-menu-case);
   text-decoration: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -1397,7 +1225,7 @@ html.tabi-scroll-lock {
   min-height: 4.4rem;
   color: var(--tabi-ink);
   font-family: var(--tabi-sans);
-  font-size: 1.4rem;
+  font-size: calc(var(--tabi-drawer-size) - 0.5px);
   line-height: 1.35;
   letter-spacing: 0.04em;
   text-decoration: none;
@@ -1478,7 +1306,7 @@ html.tabi-scroll-lock {
 
 .tabi-card--drawer .tabi-card__title {
   margin-bottom: 1.6rem;
-  font-size: 1.45rem;
+  font-size: var(--tabi-drawer-size);
   font-weight: 400;
   letter-spacing: 0.06em;
 }
@@ -1489,7 +1317,7 @@ html.tabi-scroll-lock {
 
 .tabi-card--drawer .tabi-card__caption {
   margin-top: 1.4rem;
-  font-size: 1.35rem;
+  font-size: calc(var(--tabi-drawer-size) - 0.5px);
 }
 
 /* Rows ease in one after another as the menu slides open, and again in a
@@ -1577,14 +1405,10 @@ html.tabi-scroll-lock {
 
 @media (prefers-reduced-motion: reduce) {
   .tabi-header *,
-  .tabi-strip *,
   .tabi-drawer * {
     animation: none !important;
   }
 
-  .tabi-strip__message,
-  .tabi-strip__message.is-active,
-  .tabi-strip__message.is-leaving,
   .tabi-mega,
   .tabi-nav__item.is-open > .tabi-mega,
   .tabi-mega__grid > *,
@@ -1595,10 +1419,6 @@ html.tabi-scroll-lock {
   .tabi-header__icon .tabi-icon,
   .tabi-header__menu-button .tabi-icon {
     transform: none !important;
-  }
-
-  .tabi-strip__ring-progress {
-    stroke-dashoffset: 0;
   }
 
   .tabi-drawer__panel,
