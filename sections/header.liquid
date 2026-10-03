@@ -6,8 +6,11 @@
   sections/announcement-bar-v2.liquid.
   - a cream bar: logo on the left, the menu centred, search / currency /
     account / bag on the right; on a phone, menu button - logo - search, bag;
-  - desktop dropdowns that span the screen: a column per child link (its
-    children listed under it), then a divider, then picture cards;
+  - desktop dropdowns that span the screen, in two layouts as on the
+    reference (its Home dropdown is large, its Apparel one compact): large -
+    a tall picture and a Featured stack, a divider, then a column per child
+    link; compact - the child links stacked in one column, a divider, then a
+    row of pictures. "Large dropdown for" picks which links get which;
   - on a phone, a menu that slides in under the bar. Tapping a link with
     children slides its own panel in from the right (Back, title, view-all),
     with + / - rows for the next level down and the picture cards below.
@@ -80,6 +83,7 @@
 
   assign card_limit = section.settings.menu_images_limit
   assign card_caption = section.settings.menu_image_caption
+  assign large_names = section.settings.dropdown_large_links | downcase | split: ','
 
   if sticky_type == 'none'
     assign wrapper_tag = 'div'
@@ -128,6 +132,7 @@
     --tabi-panel: {{ section.settings.dropdown_background }};
     --tabi-panel-ink: {{ section.settings.dropdown_text }};
     --tabi-mega-size: {{ section.settings.dropdown_font_size }}px;
+    --tabi-mega-gap: {{ section.settings.dropdown_link_spacing }}px;
     {%- case section.settings.menu_image_ratio -%}
       {%- when 'square' %}
     --tabi-card-ratio: 1 / 1;
@@ -207,13 +212,36 @@
               {%- for link in menu.links -%}
                 {%- liquid
                   comment
-                    Columns the dropdown of this link needs: one per child that has
-                    children of its own, and one for each run of childless
-                    children, which stack as headings in a single column.
+                    Two dropdown layouts, as the reference site has: its Home
+                    dropdown is large and its Apparel one compact. Large -
+                    pictures first (one tall, a Featured stack beside it), a
+                    divider, then a column per sub-link. Compact - every sub-link
+                    and its links in one column, a divider, then a row of
+                    pictures. The links named in the Large dropdown setting get
+                    the large one.
+                  endcomment
+                  assign link_name = link.title | strip | downcase
+                  assign is_large = false
+                  for large_name in large_names
+                    assign large_key = large_name | strip
+                    if large_key != blank and large_key == link_name
+                      assign is_large = true
+                      break
+                    endif
+                  endfor
+
+                  comment
+                    Columns the links need: one per child that has children of
+                    its own, and one for each run of childless children, which
+                    stack as headings in a single column. A compact dropdown
+                    stacks everything in one column instead - unless that would
+                    run past 14 rows, where it falls back to the same columns.
                   endcomment
                   assign cols = 0
+                  assign rows = 0
                   assign in_leaves = false
                   for childlink in link.links
+                    assign rows = rows | plus: 1 | plus: childlink.links.size
                     if childlink.links != blank
                       assign cols = cols | plus: 1
                       assign in_leaves = false
@@ -223,24 +251,60 @@
                     endif
                   endfor
 
+                  assign stacked = false
+                  if is_large == false and link.links != blank and rows <= 14
+                    assign stacked = true
+                    assign cols = 1
+                  endif
+
                   comment
-                    The dropdown is a six-column grid, as on the reference site;
-                    cards fill whatever the link columns leave, so none ever
-                    wraps onto a second row.
+                    The dropdown is a six-column grid, as on the reference site,
+                    five below 1200px wide; pictures fill whatever the link
+                    columns leave, so none ever wraps onto a second row.
                   endcomment
-                  assign mega_limit = 6 | minus: cols | at_most: card_limit | at_least: 0
-                  assign card_start = cols | plus: 1
+                  if is_large
+                    assign pic_cols = 6 | minus: cols | at_most: 2 | at_most: card_limit | at_least: 0
+                    if pic_cols == 2
+                      assign mega_limit = card_limit
+                    else
+                      assign mega_limit = pic_cols
+                    endif
+                    assign narrow = ''
+                    assign total_cols = cols | plus: pic_cols
+                    if total_cols > 5
+                      if pic_cols == 2
+                        assign narrow = 'fold'
+                      else
+                        assign narrow = 'hide'
+                      endif
+                    endif
+                  else
+                    assign mega_limit = 6 | minus: cols | at_most: card_limit | at_least: 0
+                    assign card_start = cols | plus: 1
+                  endif
                 -%}
                 {%- capture mega_cards -%}
                   {%- if mega_limit > 0 -%}
-                    {%- render 'tabi-menu-cards',
-                      link: link,
-                      blocks: section.blocks,
-                      limit: mega_limit,
-                      caption: card_caption,
-                      variant: 'mega',
-                      start: card_start
-                    -%}
+                    {%- if is_large -%}
+                      {%- render 'tabi-menu-cards',
+                        link: link,
+                        blocks: section.blocks,
+                        limit: mega_limit,
+                        caption: card_caption,
+                        variant: 'feature',
+                        heading: section.settings.dropdown_featured_label,
+                        narrow: narrow
+                      -%}
+                    {%- else -%}
+                      {%- render 'tabi-menu-cards',
+                        link: link,
+                        blocks: section.blocks,
+                        limit: mega_limit,
+                        caption: card_caption,
+                        variant: 'mega',
+                        start: card_start
+                      -%}
+                    {%- endif -%}
                   {%- endif -%}
                 {%- endcapture -%}
                 {%- liquid
@@ -279,65 +343,71 @@
                   </span>
 
                   {%- if has_panel -%}
-                    <div id="TabiNavPanel-{{ section.id }}-{{ forloop.index }}" class="tabi-mega">
-                      <div class="tabi-mega__grid">
-                        {%- comment -%}
-                          Childless links collect into one column of headings
-                          until a link with children starts a column of its own.
-                        {%- endcomment -%}
-                        {%- assign leaf_html = '' -%}
-                        {%- for childlink in link.links -%}
+                    {%- capture link_columns -%}
+                      {%- comment -%}
+                        Compact: every child, with its own links, stacked in one
+                        column. Otherwise childless links collect into one column
+                        of headings until a link with children starts a column of
+                        its own.
+                      {%- endcomment -%}
+                      {%- if stacked -%}<div class="tabi-mega__col tabi-mega__col--stacked">{%- endif -%}
+                      {%- assign leaf_html = '' -%}
+                      {%- for childlink in link.links -%}
+                        {%- capture group -%}
+                          <a
+                            href="{{ childlink.url }}"
+                            class="tabi-mega__heading"
+                            {% if childlink.current %}
+                              aria-current="page"
+                            {% endif %}
+                          >
+                            {{- childlink.title | escape -}}
+                          </a>
                           {%- if childlink.links != blank -%}
-                            {%- if leaf_html != blank -%}
-                              <div class="tabi-mega__col tabi-mega__col--headings">{{ leaf_html }}</div>
-                              {%- assign leaf_html = '' -%}
-                            {%- endif -%}
-                            <div class="tabi-mega__col">
-                              <a
-                                href="{{ childlink.url }}"
-                                class="tabi-mega__heading"
-                                {% if childlink.current %}
-                                  aria-current="page"
-                                {% endif %}
-                              >
-                                {{- childlink.title | escape -}}
-                              </a>
-                              <ul class="tabi-mega__list" role="list">
-                                {%- for grandchildlink in childlink.links -%}
-                                  <li>
-                                    <a
-                                      href="{{ grandchildlink.url }}"
-                                      class="tabi-mega__link"
-                                      {% if grandchildlink.current %}
-                                        aria-current="page"
-                                      {% endif %}
-                                    >
-                                      {{- grandchildlink.title | escape -}}
-                                    </a>
-                                  </li>
-                                {%- endfor -%}
-                              </ul>
-                            </div>
-                          {%- else -%}
-                            {%- capture leaf_one -%}
-                              <a
-                                href="{{ childlink.url }}"
-                                class="tabi-mega__heading"
-                                {% if childlink.current %}
-                                  aria-current="page"
-                                {% endif %}
-                              >
-                                {{- childlink.title | escape -}}
-                              </a>
-                            {%- endcapture -%}
-                            {%- assign leaf_html = leaf_html | append: leaf_one -%}
+                            <ul class="tabi-mega__list" role="list">
+                              {%- for grandchildlink in childlink.links -%}
+                                <li>
+                                  <a
+                                    href="{{ grandchildlink.url }}"
+                                    class="tabi-mega__link"
+                                    {% if grandchildlink.current %}
+                                      aria-current="page"
+                                    {% endif %}
+                                  >
+                                    {{- grandchildlink.title | escape -}}
+                                  </a>
+                                </li>
+                              {%- endfor -%}
+                            </ul>
                           {%- endif -%}
-                        {%- endfor -%}
-                        {%- if leaf_html != blank -%}
-                          <div class="tabi-mega__col tabi-mega__col--headings">{{ leaf_html }}</div>
+                        {%- endcapture -%}
+                        {%- if stacked -%}
+                          <div class="tabi-mega__group">{{ group }}</div>
+                        {%- elsif childlink.links != blank -%}
+                          {%- if leaf_html != blank -%}
+                            <div class="tabi-mega__col tabi-mega__col--headings">{{ leaf_html }}</div>
+                            {%- assign leaf_html = '' -%}
+                          {%- endif -%}
+                          <div class="tabi-mega__col">{{ group }}</div>
+                        {%- else -%}
+                          {%- assign leaf_html = leaf_html | append: group -%}
                         {%- endif -%}
+                      {%- endfor -%}
+                      {%- if leaf_html != blank -%}
+                        <div class="tabi-mega__col tabi-mega__col--headings">{{ leaf_html }}</div>
+                      {%- endif -%}
+                      {%- if stacked -%}</div>{%- endif -%}
+                    {%- endcapture -%}
 
-                        {{ mega_cards }}
+                    <div id="TabiNavPanel-{{ section.id }}-{{ forloop.index }}" class="tabi-mega tabi-mega--{% if is_large %}large{% else %}compact{% endif %}">
+                      <div class="tabi-mega__grid">
+                        {%- if is_large -%}
+                          {{ mega_cards }}
+                          {{ link_columns }}
+                        {%- else -%}
+                          {{ link_columns }}
+                          {{ mega_cards }}
+                        {%- endif -%}
                       </div>
                     </div>
                   {%- endif -%}
@@ -894,8 +964,9 @@
           "label": "t:sections.header.settings.sticky_header_type.options__3.label"
         }
       ],
-      "default": "on-scroll-up",
-      "label": "t:sections.header.settings.sticky_header_type.label"
+      "default": "always",
+      "label": "t:sections.header.settings.sticky_header_type.label",
+      "info": "Always keeps the bar pinned to the top of the screen while the page scrolls, as on the reference site. The coloured strip above it scrolls away."
     },
     {
       "type": "range",
@@ -1048,6 +1119,30 @@
       "default": 13
     },
     {
+      "type": "range",
+      "id": "dropdown_link_spacing",
+      "min": 4,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Space between links",
+      "default": 13,
+      "info": "The gap between one line of links and the next. Groups of links get a little more."
+    },
+    {
+      "type": "text",
+      "id": "dropdown_large_links",
+      "label": "Large dropdown for",
+      "default": "Apparel",
+      "info": "Top-level link names, separated by commas. Their dropdown opens with pictures - one tall, a stack beside it - then a column per sub-link. Every other dropdown is compact: its sub-links in one column, then a row of pictures."
+    },
+    {
+      "type": "text",
+      "id": "dropdown_featured_label",
+      "label": "Large dropdown: heading over the picture stack",
+      "default": "Featured"
+    },
+    {
       "type": "checkbox",
       "id": "show_nav_arrows",
       "label": "Show dropdown arrows on desktop",
@@ -1067,8 +1162,8 @@
       "max": 4,
       "step": 1,
       "label": "Pictures per dropdown",
-      "default": 3,
-      "info": "Taken from Menu image blocks if a link has any, otherwise from the collections its sub-links point to. Desktop shows as many as fit beside the link columns."
+      "default": 4,
+      "info": "Taken from Menu image blocks if a link has any, otherwise from the collections its sub-links point to, skipping repeats. In a large dropdown the first is the tall picture and the rest stack beside it. Desktop shows as many as fit beside the link columns; the mobile menu panels use the same number."
     },
     {
       "type": "text",

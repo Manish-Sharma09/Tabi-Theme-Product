@@ -1,122 +1,238 @@
 {% doc %}
-  Version: Good Earth layout, 2026-10-03.
+  Version: Good Earth layout, 2026-10-03 (large / compact dropdowns).
 
   The picture cards in a top-level link's dropdown (desktop) and in its
-  sliding panel (mobile menu): a title, a portrait image and a short caption,
-  the whole card one link - the layout of the reference site's mega menu.
+  sliding panel (mobile menu): a title, a picture and a short caption, the
+  whole card one link - the layout of the reference site's mega menu.
 
   Where the pictures come from, first match wins:
   1. "Menu image" blocks on the header whose Link name is this link's title
      (set by hand in the theme editor);
-  2. otherwise each child link that points at a collection or product with an
-     image - so the store's own collection photos appear with nothing set up;
+  2. otherwise the child links that point at a collection or product with an
+     image, then, if that leaves room, their own children - so the store's
+     collection photos appear with nothing set up. A picture already used is
+     skipped: two collections often open on the same product. In the large
+     dropdown the tall card is the link's own picture, when it has one - the
+     reference opens that spot with New In, not with one of the columns.
   3. otherwise, for a link that has children (and so a dropdown anyway), the
      link's own collection or product image. A childless link only gets a
      dropdown if Menu image blocks are set up for it.
 
+  Three ways of drawing them:
+  - 'mega': the compact dropdown - cards in a row after the link column, a
+    title over each picture and the caption under it;
+  - 'feature': the large dropdown - one tall card, then the rest stacked
+    small in the next column under a heading of their own, each captioned
+    with its own title. Both sit in one wrapper that spans their columns and
+    carries the divider on its right;
+  - 'drawer': the mobile menu panel, one card under another.
+
   @param {object} link - The top-level menu link.
   @param {object[]} blocks - The header section's blocks.
   @param {number} limit - Most cards to draw.
-  @param {string} caption - Text under each image, e.g. "Discover".
-  @param {string} variant - 'mega' (desktop dropdown) or 'drawer' (mobile panel).
-  @param {number} [start] - Grid column the first card falls in (mega only), so
-    the CSS can drop the cards that would not fit a narrower screen.
+  @param {string} caption - Text under each picture, e.g. "Discover".
+  @param {string} variant - 'mega', 'feature' or 'drawer'.
+  @param {number} [start] - 'mega' only: the grid column the first card falls
+    in, so the card in column six can be dropped on the five-column grid of
+    smaller laptops.
+  @param {string} [heading] - 'feature' only: the heading over the stack.
+  @param {string} [narrow] - 'feature' only: what to give up on the
+    five-column grid when the link columns leave no room - 'fold' drops the
+    stack, 'hide' drops the pictures altogether.
 
   @example
-  {% render 'tabi-menu-cards', link: link, blocks: section.blocks, limit: 3, caption: 'Discover', variant: 'mega', start: 4 %}
+  {% render 'tabi-menu-cards', link: link, blocks: section.blocks, limit: 3, caption: 'Discover', variant: 'mega', start: 2 %}
 {% enddoc %}
 {%- liquid
-  assign shown = 0
-  assign first_col = start | default: 1
-  if variant == 'mega'
-    assign img_sizes = '(min-width: 1200px) 200px, 170px'
-  else
-    assign img_sizes = '150px'
-  endif
+  comment
+    Pick the cards first, as keys - b<block index>, c<child index>,
+    g<child index>-<grandchild index>, or s for the link itself - so they are
+    drawn in one place below, whatever their source.
+  endcomment
+  assign picks = ''
+  assign seen = '|'
+  assign found = 0
 
-  assign block_cards = 0
   for block in blocks
+    if found >= limit
+      break
+    endif
     if block.type == 'menu-image' and block.settings.link_name == link.title and block.settings.link_image != blank
-      assign block_cards = block_cards | plus: 1
+      assign picks = picks | append: 'b' | append: forloop.index0 | append: ','
+      assign found = found | plus: 1
     endif
   endfor
+
+  if found == 0
+    if variant == 'feature' and limit > 0 and link.links != blank and link.object.featured_image != blank
+      assign seen = seen | append: link.object.featured_image.src | append: '|'
+      assign picks = 's,'
+      assign found = 1
+    endif
+
+    for childlink in link.links
+      if found >= limit
+        break
+      endif
+      assign pick_image = childlink.object.featured_image
+      if pick_image == blank
+        continue
+      endif
+      assign pick_mark = '|' | append: pick_image.src | append: '|'
+      if seen contains pick_mark
+        continue
+      endif
+      assign seen = seen | append: pick_image.src | append: '|'
+      assign picks = picks | append: 'c' | append: forloop.index0 | append: ','
+      assign found = found | plus: 1
+    endfor
+
+    for childlink in link.links
+      if found >= limit
+        break
+      endif
+      assign child_index = forloop.index0
+      for grandchildlink in childlink.links
+        if found >= limit
+          break
+        endif
+        assign pick_image = grandchildlink.object.featured_image
+        if pick_image == blank
+          continue
+        endif
+        assign pick_mark = '|' | append: pick_image.src | append: '|'
+        if seen contains pick_mark
+          continue
+        endif
+        assign seen = seen | append: pick_image.src | append: '|'
+        assign picks = picks | append: 'g' | append: child_index | append: '-' | append: forloop.index0 | append: ','
+        assign found = found | plus: 1
+      endfor
+    endfor
+
+    if found == 0 and limit > 0 and link.links != blank and link.object.featured_image != blank
+      assign picks = 's,'
+    endif
+  endif
+
+  assign keys = picks | split: ','
+  assign first_col = start | default: 1
+
+  case variant
+    when 'feature'
+      assign img_sizes = '(min-width: 1200px) 170px, 150px'
+    when 'mega'
+      assign img_sizes = '(min-width: 1200px) 200px, 170px'
+    else
+      assign img_sizes = '150px'
+  endcase
 -%}
 
-{%- if block_cards > 0 -%}
-  {%- for block in blocks -%}
-    {%- if shown >= limit -%}{%- break -%}{%- endif -%}
-    {%- unless block.type == 'menu-image' and block.settings.link_name == link.title and block.settings.link_image != blank -%}
-      {%- continue -%}
-    {%- endunless -%}
-    {%- liquid
-      assign card_url = block.settings.link_url | default: link.url
-      assign card_title = block.settings.link_title | default: link.title
-      assign card_col = first_col | plus: shown
-    -%}
-    <a
-      href="{{ card_url }}"
-      class="tabi-card tabi-card--{{ variant }}{% if shown == 0 %} tabi-card--first{% endif %}"
-      data-col="{{ card_col }}"
-      {{ block.shopify_attributes }}
-    >
-      <span class="tabi-card__title">{{ card_title | escape }}</span>
-      <span class="tabi-card__media">
-        {{-
-          block.settings.link_image
-          | image_url: width: 600
-          | image_tag: class: 'tabi-card__img', widths: '200, 300, 400, 600', sizes: img_sizes, loading: 'lazy', alt: ''
-        -}}
-      </span>
-      {%- if caption != blank -%}
-        <span class="tabi-card__caption">{{ caption | escape }}</span>
-      {%- endif -%}
-    </a>
-    {%- assign shown = shown | plus: 1 -%}
-  {%- endfor -%}
-{%- else -%}
-  {%- for childlink in link.links -%}
-    {%- if shown >= limit -%}{%- break -%}{%- endif -%}
-    {%- assign card_image = childlink.object.featured_image -%}
-    {%- if card_image == blank -%}{%- continue -%}{%- endif -%}
-    {%- assign card_col = first_col | plus: shown -%}
-    <a
-      href="{{ childlink.url }}"
-      class="tabi-card tabi-card--{{ variant }}{% if shown == 0 %} tabi-card--first{% endif %}"
-      data-col="{{ card_col }}"
-    >
-      <span class="tabi-card__title">{{ childlink.title | escape }}</span>
-      <span class="tabi-card__media">
-        {{-
-          card_image
-          | image_url: width: 600
-          | image_tag: class: 'tabi-card__img', widths: '200, 300, 400, 600', sizes: img_sizes, loading: 'lazy', alt: ''
-        -}}
-      </span>
-      {%- if caption != blank -%}
-        <span class="tabi-card__caption">{{ caption | escape }}</span>
-      {%- endif -%}
-    </a>
-    {%- assign shown = shown | plus: 1 -%}
-  {%- endfor -%}
+{%- assign stack_html = '' -%}
+{%- capture cards_html -%}
+{%- for key in keys -%}
+  {%- liquid
+    assign kind = key | slice: 0
+    assign ref = key | remove_first: kind
+    assign card_attrs = ''
+    case kind
+      when 'b'
+        assign i = ref | plus: 0
+        assign card_block = blocks[i]
+        assign card_url = card_block.settings.link_url | default: link.url
+        assign card_title = card_block.settings.link_title | default: link.title
+        assign card_image = card_block.settings.link_image
+        assign card_attrs = card_block.shopify_attributes
+      when 'c'
+        assign i = ref | plus: 0
+        assign card_link = link.links[i]
+        assign card_url = card_link.url
+        assign card_title = card_link.title
+        assign card_image = card_link.object.featured_image
+      when 'g'
+        assign ij = ref | split: '-'
+        assign i = ij[0] | plus: 0
+        assign j = ij[1] | plus: 0
+        assign card_link = link.links[i].links[j]
+        assign card_url = card_link.url
+        assign card_title = card_link.title
+        assign card_image = card_link.object.featured_image
+      else
+        assign card_url = link.url
+        assign card_title = link.title
+        assign card_image = link.object.featured_image
+    endcase
 
-  {%- assign card_image = link.object.featured_image -%}
-  {%- if shown == 0 and limit > 0 and card_image != blank and link.links != blank -%}
-    <a
-      href="{{ link.url }}"
-      class="tabi-card tabi-card--{{ variant }} tabi-card--first"
-      data-col="{{ first_col }}"
-    >
-      <span class="tabi-card__title">{{ link.title | escape }}</span>
+    assign card_sizes = img_sizes
+    assign card_class = 'tabi-card tabi-card--' | append: variant
+    if forloop.first
+      assign card_class = card_class | append: ' tabi-card--first'
+    endif
+    if variant == 'mega'
+      assign card_col = first_col | plus: forloop.index0
+      if card_col == 6
+        assign card_class = card_class | append: ' tabi-mega__wide-only'
+      endif
+    endif
+    if variant == 'feature'
+      if forloop.first
+        assign card_class = 'tabi-card tabi-card--mega tabi-card--lead'
+      else
+        assign card_class = 'tabi-card tabi-card--stack'
+        assign card_sizes = '130px'
+      endif
+    endif
+  -%}
+
+  {%- capture card_html -%}
+    <a href="{{ card_url }}" class="{{ card_class }}" {{ card_attrs }}>
+      {%- if variant != 'feature' or forloop.first -%}
+        <span class="tabi-card__title">{{ card_title | escape }}</span>
+      {%- endif -%}
       <span class="tabi-card__media">
         {{-
           card_image
           | image_url: width: 600
-          | image_tag: class: 'tabi-card__img', widths: '200, 300, 400, 600', sizes: img_sizes, loading: 'lazy', alt: ''
+          | image_tag: class: 'tabi-card__img', widths: '200, 300, 400, 600', sizes: card_sizes, loading: 'lazy', alt: ''
         -}}
       </span>
-      {%- if caption != blank -%}
+      {%- if variant == 'feature' and forloop.first == false -%}
+        <span class="tabi-card__caption">{{ card_title | escape }}</span>
+      {%- elsif caption != blank -%}
         <span class="tabi-card__caption">{{ caption | escape }}</span>
       {%- endif -%}
     </a>
+  {%- endcapture -%}
+
+  {%- comment -%} In the large dropdown every card after the first goes in the stack. {%- endcomment -%}
+  {%- if variant == 'feature' and forloop.first == false -%}
+    {%- assign stack_html = stack_html | append: card_html -%}
+  {%- else -%}
+    {{- card_html -}}
   {%- endif -%}
+{%- endfor -%}
+{%- endcapture -%}
+
+{%- if variant == 'feature' -%}
+  {%- if keys.size > 0 -%}
+    <div class="tabi-mega__pics{% if keys.size > 1 %} tabi-mega__pics--2{% endif %}{% if narrow == 'fold' %} tabi-mega__pics--fold{% elsif narrow == 'hide' %} tabi-mega__wide-only{% endif %}">
+      {{- cards_html -}}
+      {%- if stack_html != blank -%}
+        <div class="tabi-mega__stack">
+          {%- comment -%}
+            With no heading, an empty line holds its place, so the stack's
+            first picture still starts level with the tall one.
+          {%- endcomment -%}
+          {%- if heading != blank -%}
+            <p class="tabi-mega__heading tabi-mega__stack-heading">{{ heading | escape }}</p>
+          {%- else -%}
+            <span class="tabi-mega__heading tabi-mega__stack-heading" aria-hidden="true">&nbsp;</span>
+          {%- endif -%}
+          {{- stack_html -}}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+{%- else -%}
+  {{- cards_html -}}
 {%- endif -%}

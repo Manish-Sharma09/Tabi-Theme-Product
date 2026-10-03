@@ -43,6 +43,7 @@
   --tabi-menu-gap: 30px;
   --tabi-panel-ink: #191919;
   --tabi-mega-size: 13px;
+  --tabi-mega-gap: 13px;
   --tabi-card-ratio: 5 / 6;
   --tabi-drawer-lower: #f9f8f5;
   --tabi-drawer-size: 14px;
@@ -370,14 +371,14 @@
 }
 
 /* The item count sits above the bag, small and grey, as on the reference -
-   not in a disc. Its markup comes from snippets/tabi-cart-icon.liquid. */
-.tabi-header__icon--cart .svg-wrapper {
-  margin-top: 0.6rem;
-}
-
+   not in a disc. Its markup comes from snippets/tabi-cart-icon.liquid. The
+   bag itself stays centred on the same line as the search and account
+   icons, count or no count: the count only renders once the cart has
+   something in it, and moving the bag down to make room for it left the bag
+   sitting lower than the search beside it. */
 .tabi-header__icon--cart .cart-count-bubble {
   position: absolute;
-  top: 0.1rem;
+  top: -0.2rem;
   right: auto;
   bottom: auto;
   left: 50%;
@@ -591,10 +592,13 @@
 /* --------------------------------------------------------------------------
    7. MEGA MENU PANELS + PICTURE CARDS
    Full-width, near-white, a soft shadow and no dimming of the page, as on the
-   reference. Inside, a six-column grid (five below 1200px): first the link
-   columns, then a divider, then picture cards in the columns left over. The
-   Liquid never lets a card fall past column six; the one in column six is
-   dropped on the five-column grid.
+   reference. Inside, a six-column grid (five below 1200px), in one of two
+   layouts (sections/header.liquid picks):
+     compact  [links, stacked]  |  [card] [card] [card] [card]
+     large    [tall card] [stack]  |  [links] [links] [links] [links]
+   The Liquid never lets anything fall past column six; what would on the
+   five-column grid is marked .tabi-mega__wide-only (or, in the large layout,
+   .tabi-mega__pics--fold, which gives up the stack).
    -------------------------------------------------------------------------- */
 
 .tabi-mega {
@@ -645,7 +649,7 @@
 }
 
 @media screen and (max-width: 1199px) {
-  .tabi-card--mega[data-col='6'] {
+  .tabi-mega__wide-only {
     display: none;
   }
 }
@@ -674,9 +678,12 @@
   line-height: 1.45;
 }
 
+/* Line spacing: "Space between links" (--tabi-mega-gap) separates every
+   line, heading to first link included; a group of links starts that gap
+   plus a little further down, so groups read as groups. */
 .tabi-mega__heading {
   display: block;
-  margin-bottom: 1rem;
+  margin: 0 0 var(--tabi-mega-gap);
   color: var(--tabi-panel-ink);
   font-family: var(--tabi-sans);
   font-size: var(--tabi-mega-size);
@@ -688,9 +695,11 @@
   transition: color 0.25s var(--tabi-ease);
 }
 
-/* Childless links stack as headings in one column, a group's height apart. */
-.tabi-mega__col--headings .tabi-mega__heading + .tabi-mega__heading {
-  margin-top: 2.2rem;
+/* Childless links stack as headings in one column, and in a compact
+   dropdown every group stacks in one column - a group's gap apart. */
+.tabi-mega__col--headings .tabi-mega__heading + .tabi-mega__heading,
+.tabi-mega__group + .tabi-mega__group {
+  margin-top: calc(var(--tabi-mega-gap) + 1.6rem);
 }
 
 .tabi-mega__list {
@@ -700,7 +709,7 @@
 }
 
 .tabi-mega__list li + li {
-  margin-top: 0.85rem;
+  margin-top: var(--tabi-mega-gap);
 }
 
 .tabi-mega__link {
@@ -807,9 +816,68 @@
   border-left: 1px solid var(--tabi-divider);
 }
 
+/* The large layout's pictures: one wrapper spanning their columns - the
+   tall card, and the stack beside it - with the divider on its right. Its
+   inner columns match the panel's, as neither grid has gaps. */
+.tabi-mega__pics {
+  display: grid;
+  grid-column: span 1;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  align-self: stretch;
+  border-right: 1px solid var(--tabi-divider);
+}
+
+.tabi-mega__pics--2 {
+  grid-column: span 2;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media screen and (max-width: 1199px) {
+  .tabi-mega__pics--fold {
+    grid-column: span 1;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tabi-mega__pics--fold .tabi-mega__stack {
+    display: none;
+  }
+}
+
+/* The stack's heading lines up with the tall card's title beside it, so
+   the first pictures of both start level. */
+.tabi-mega__stack {
+  min-width: 0;
+  padding-inline: 2rem;
+}
+
+.tabi-mega__stack .tabi-mega__stack-heading {
+  margin-bottom: 1rem;
+}
+
+.tabi-card--stack {
+  width: 76%;
+  max-width: 14rem;
+  color: var(--tabi-panel-ink);
+}
+
+.tabi-card--stack + .tabi-card--stack {
+  margin-top: 2rem;
+}
+
+.tabi-card--stack .tabi-card__media {
+  aspect-ratio: 6 / 5;
+}
+
+.tabi-card--stack .tabi-card__caption {
+  font-size: var(--tabi-mega-size);
+}
+
 /* "Line between links and pictures" off. */
-.tabi-nav--no-divider .tabi-mega__col + .tabi-card--first {
+.tabi-nav--no-divider .tabi-mega__col + .tabi-card--first,
+.tabi-nav--no-divider .tabi-mega__pics {
   border-left: 0;
+  border-right: 0;
 }
 
 /* --------------------------------------------------------------------------

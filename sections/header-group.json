@@ -97,7 +97,7 @@
         "logo_style": "image",
         "logo_text": "tabi",
         "menu": "new-menu",
-        "sticky_header_type": "on-scroll-up",
+        "sticky_header_type": "always",
         "header_background": "#f9f7f4",
         "show_country_selector": true,
         "color_scheme": "scheme-1",
