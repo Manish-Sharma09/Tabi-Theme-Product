@@ -18,6 +18,11 @@
   can sit in the lower third - the reference's banner is a video with one
   button below the middle and no heading. With a video on any slide the pause
   button shows even for a single slide, and it stops the video.
+
+  A slide's video is either uploaded to Shopify (Video / Mobile video) or a
+  YouTube or Vimeo link. A linked video is not loaded with the page: the
+  script builds its player when the slide is showing and motion is allowed,
+  over the slide's picture, which stays as the fallback.
 {%- endcomment -%}
 
 {{ 'home-hero.css' | asset_url | stylesheet_tag }}
@@ -35,7 +40,7 @@
 
   assign has_video = false
   for block in section.blocks
-    if block.settings.video != blank or block.settings.video_mobile != blank
+    if block.settings.video != blank or block.settings.video_mobile != blank or block.settings.video_link != blank
       assign has_video = true
     endif
   endfor
@@ -174,6 +179,27 @@
             -%}
             {{ placeholder_name | placeholder_svg_tag: 'home-hero__img home-hero__placeholder' }}
           {%- endif -%}
+
+          {%- if video == blank and block.settings.video_link != blank -%}
+            {%- liquid
+              assign link_video = block.settings.video_link
+              if link_video.type == 'youtube'
+                assign embed_src = 'https://www.youtube-nocookie.com/embed/' | append: link_video.id | append: '?autoplay=1&mute=1&loop=1&playlist=' | append: link_video.id | append: '&controls=0&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&enablejsapi=1'
+              else
+                assign embed_src = 'https://player.vimeo.com/video/' | append: link_video.id | append: '?background=1&autoplay=1&loop=1&muted=1&dnt=1'
+              endif
+            -%}
+            {%- comment -%}
+              The player is built by home-hero.js only while this slide shows;
+              until then, and for visitors who ask for less motion, the
+              picture above is the slide.
+            {%- endcomment -%}
+            <span
+              class="home-hero__embed"
+              data-embed-src="{{ embed_src | escape }}"
+              data-embed-type="{{ link_video.type }}"
+            ></span>
+          {%- endif -%}
         </div>
 
         <span class="home-hero__overlay" aria-hidden="true"></span>
@@ -282,6 +308,14 @@
     },
     {
       "type": "header",
+      "content": "Video"
+    },
+    {
+      "type": "paragraph",
+      "content": "Any slide can play a video instead of its picture: open a slide under this section and choose a Video (uploaded to Shopify) or paste a YouTube or Vimeo link. Videos play silently on a loop, and the pause button stops them."
+    },
+    {
+      "type": "header",
       "content": "Slideshow"
     },
     {
@@ -364,6 +398,10 @@
       "name": "Slide",
       "settings": [
         {
+          "type": "header",
+          "content": "Picture"
+        },
+        {
           "type": "image_picker",
           "id": "image",
           "label": "Desktop image",
@@ -376,16 +414,35 @@
           "info": "Portrait, at least 1100px wide. Without one, phones show a centred crop of the desktop image."
         },
         {
+          "type": "header",
+          "content": "Video"
+        },
+        {
+          "type": "paragraph",
+          "content": "Optional. A video plays silently on a loop in place of the picture. Keep the picture above: it shows while the video loads and for visitors who ask for less motion."
+        },
+        {
           "type": "video",
           "id": "video",
           "label": "Video",
-          "info": "Optional. Plays silently on a loop in place of the images. Keep it short and under 10 MB."
+          "info": "Uploaded to Shopify (Content > Files). Landscape, short, under 20 MB."
         },
         {
           "type": "video",
           "id": "video_mobile",
           "label": "Mobile video",
-          "info": "Optional. A portrait cut for phones."
+          "info": "Optional. A portrait cut for phones. Without one, phones crop the video above."
+        },
+        {
+          "type": "video_url",
+          "id": "video_link",
+          "label": "Or a YouTube or Vimeo link",
+          "accept": ["youtube", "vimeo"],
+          "info": "Used when no video is uploaded above. Plays muted, without controls, cropped to fill the banner."
+        },
+        {
+          "type": "header",
+          "content": "Text and link"
         },
         {
           "type": "textarea",

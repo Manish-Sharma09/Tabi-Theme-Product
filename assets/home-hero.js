@@ -14,7 +14,9 @@
 
    A slide's video plays only while that slide is showing and the banner is on
    screen, and the pause button stops it too - for a single video slide the
-   button is all this file adds.
+   button is all this file adds. A YouTube or Vimeo slide gets its player
+   only when it first shows with motion allowed, and is played and paused
+   through the player's message API.
    ========================================================================== */
 
 (() => {
@@ -29,14 +31,16 @@
       this.index = Math.max(0, this.slides.findIndex((slide) => slide.classList.contains('is-active')));
       this.speed = (parseInt(this.dataset.speed, 10) || 6) * 1000;
       this.videos = Array.from(this.querySelectorAll('video'));
+      this.embeds = Array.from(this.querySelectorAll('[data-embed-src]'));
+      const hasVideo = this.videos.length > 0 || this.embeds.length > 0;
 
-      if (this.slides.length < 2 && this.videos.length === 0) return;
+      if (this.slides.length < 2 && !hasVideo) return;
 
       // Why the slideshow is holding. Autoplay runs only while the set is empty;
       // a video stops for 'user', 'hidden' and 'offscreen' (see syncVideos).
       this.holds = new Set();
       this.autoplay = this.dataset.autoplay === 'true' && this.slides.length > 1;
-      if ((this.autoplay || this.videos.length > 0) && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if ((this.autoplay || hasVideo) && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         this.holds.add('user');
       }
 
@@ -172,7 +176,7 @@
     // Plays the showing slide's visible video, pauses every other one. Hover
     // and focus hold the slideshow but not the video.
     syncVideos() {
-      if (!this.videos?.length) return;
+      if (!this.videos?.length && !this.embeds?.length) return;
       const stopped = ['user', 'hidden', 'offscreen'].some((reason) => this.holds.has(reason));
 
       this.slides.forEach((slide, position) => {
@@ -184,7 +188,50 @@
             video.pause();
           }
         });
+
+        slide.querySelectorAll('[data-embed-src]').forEach((holder) => {
+          const play = position === this.index && !stopped;
+          const frame = holder.querySelector('iframe');
+          // The player autoplays as it is built; a slide never shown, or
+          // shown only with motion held, never loads one.
+          if (play && !frame) {
+            this.buildEmbed(holder);
+          } else if (frame) {
+            this.commandEmbed(holder, frame, play ? 'play' : 'pause');
+          }
+        });
       });
+    }
+
+    buildEmbed(holder) {
+      const frame = document.createElement('iframe');
+      frame.src = holder.dataset.embedSrc;
+      frame.title = this.getAttribute('aria-label') || 'Video';
+      frame.allow = 'autoplay; encrypted-media; picture-in-picture';
+      frame.setAttribute('tabindex', '-1');
+      frame.setAttribute('aria-hidden', 'true');
+      frame.addEventListener('load', () => {
+        frame.dataset.loaded = 'true';
+        // The players show a moment of their own chrome before the video
+        // runs; the picture underneath covers it.
+        setTimeout(() => frame.classList.add('is-ready'), 700);
+        if (frame.dataset.pending) this.commandEmbed(holder, frame, frame.dataset.pending);
+      });
+      holder.append(frame);
+    }
+
+    // YouTube (enablejsapi) and Vimeo both take commands by postMessage.
+    commandEmbed(holder, frame, action) {
+      if (!frame.dataset.loaded) {
+        frame.dataset.pending = action;
+        return;
+      }
+      delete frame.dataset.pending;
+      const message =
+        holder.dataset.embedType === 'youtube'
+          ? { event: 'command', func: action === 'play' ? 'playVideo' : 'pauseVideo', args: '' }
+          : { method: action };
+      frame.contentWindow?.postMessage(JSON.stringify(message), '*');
     }
 
     togglePause() {

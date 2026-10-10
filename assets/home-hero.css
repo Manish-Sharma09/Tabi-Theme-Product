@@ -554,6 +554,35 @@
   display: none;
 }
 
+/* A YouTube or Vimeo slide: the script builds the player over the slide's
+   picture and fades it in once it has loaded, so the player's own loading
+   frames never show. The 16:9 player is cropped to cover the banner the way
+   object-fit covers a picture. */
+.home-hero__embed {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  container-type: size;
+  pointer-events: none;
+}
+
+.home-hero__embed iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100cqw, 177.78cqh);
+  height: max(100cqh, 56.25cqw);
+  border: 0;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.8s var(--hero-ease);
+}
+
+.home-hero__embed iframe.is-ready {
+  opacity: 1;
+}
+
 @media screen and (max-width: 749px) {
   .home-hero__media--split-video .home-hero__video--desktop {
     display: none;
