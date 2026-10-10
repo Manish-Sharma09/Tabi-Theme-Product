@@ -13,16 +13,18 @@
   open on desktop and in the HTML, and assets/tabi-footer.js folds them on
   phones.
 
-  2026-10-10, second pass: Tabi's illustrated meadow (cotton, wheat and
-  birds) runs along the foot in place of the reference's band of clouds,
-  and rises into view the first time it is scrolled to (assets/tabi-motion.*).
+  2026-10-10, second pass: "Illustration strip" blocks run along the foot
+  in place of the reference's band of clouds - Tabi's meadow by default, or
+  any uploaded picture - and rise into view the first time they are
+  scrolled to (assets/tabi-motion.*). The columns loop skips them.
 {%- endcomment -%}
 
 {{ 'tabi-footer.css' | asset_url | stylesheet_tag }}
 {{ 'component-list-social.css' | asset_url | stylesheet_tag }}
 {{ 'component-list-payment.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'tabi-footer.js' | asset_url }}" defer="defer"></script>
-{%- if section.settings.show_meadow -%}
+{%- assign strips = section.blocks | where: 'type', 'decoration' -%}
+{%- if strips.size > 0 -%}
   {{ 'tabi-motion.css' | asset_url | stylesheet_tag }}
   <script src="{{ 'tabi-motion.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
@@ -33,7 +35,7 @@
     assign has_social_icons = false
   endif
 
-  assign column_count = section.blocks.size
+  assign column_count = section.blocks.size | minus: strips.size
   assign rest_columns = column_count | minus: 1 | at_least: 1
 
   assign show_localization = false
@@ -184,6 +186,9 @@
                       {%- render 'social-icons', class: 'tabi-footer__social' -%}
                     {%- endif -%}
                   </div>
+
+                {%- when 'decoration' -%}
+                  {%- comment -%} Drawn along the foot, below. {%- endcomment -%}
 
                 {%- when 'image' -%}
                   <div class="tabi-footer__col tabi-footer__col--image tabi-footer__col--{{ block.settings.alignment | default: 'left' }}" {{ block.shopify_attributes }}>
@@ -345,9 +350,64 @@
       </div>
     {%- endif -%}
 
-    {%- if section.settings.show_meadow -%}
-      <div class="tabi-footer__meadow" aria-hidden="true" data-motion>
-        {% render 'home-decor', name: 'meadow', class: 'tabi-footer__meadow-img', reveal: 'rise-up', sizes: '100vw' %}
+    {%- if strips.size > 0 -%}
+      <div class="tabi-footer__strips" aria-hidden="true" data-motion>
+        {%- for block in strips -%}
+          {%- liquid
+            assign d = block.settings
+            assign reveal = ''
+            case d.animation
+              when 'grow'
+                assign reveal = 'grow-left'
+              when 'unroll'
+                assign reveal = 'unroll'
+              when 'open'
+                assign reveal = 'open'
+              when 'rise'
+                assign reveal = 'rise-up'
+              when 'fade'
+                assign reveal = 'fade'
+            endcase
+            assign strip_class = 'tabi-footer__strip-img'
+            if d.flip
+              assign strip_class = 'tabi-footer__strip-img tabi-footer__strip-img--flip'
+            endif
+          -%}
+          <div
+            class="tabi-footer__strip tabi-footer__strip--{{ d.align }}"
+            style="--strip-w: {{ d.width }}%; --strip-wm: {{ d.width_mobile }}%; --strip-overlap: {{ d.overlap }}px; --strip-opacity: {{ d.opacity }}%;"
+            {{ block.shopify_attributes }}
+          >
+            {%- if d.image != blank -%}
+              {%- capture strip_srcset -%}
+                {%- assign strip_widths = '750,1100,1500,1920,2400' | split: ',' -%}
+                {%- for width_string in strip_widths -%}
+                  {%- assign w = width_string | plus: 0 -%}
+                  {%- if forloop.first or w <= d.image.width -%}
+                    {%- unless forloop.first %}, {% endunless -%}
+                    {{- d.image | image_url: width: w }} {{ w }}w
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endcapture -%}
+              <img
+                src="{{ d.image | image_url: width: 1920 }}"
+                srcset="{{ strip_srcset | strip }}"
+                sizes="100vw"
+                width="{{ d.image.width }}"
+                height="{{ d.image.height }}"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                class="{{ strip_class }}"
+                {% if reveal != blank %}
+                  data-reveal="{{ reveal }}"
+                {% endif %}
+              >
+            {%- else -%}
+              {% render 'home-decor', name: d.illustration, class: strip_class, reveal: reveal, sizes: '100vw' %}
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
       </div>
     {%- endif -%}
   </div>
@@ -503,6 +563,150 @@
           "default": "center"
         }
       ]
+    },
+    {
+      "type": "decoration",
+      "name": "Illustration strip",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "A picture along the foot of the footer, under the columns, like the reference site's band of clouds. Add more strips or delete this one."
+        },
+        {
+          "type": "select",
+          "id": "illustration",
+          "label": "Tabi illustration",
+          "options": [
+            {
+              "value": "spray-left",
+              "label": "Cotton spray, growing right"
+            },
+            {
+              "value": "spray-right",
+              "label": "Cotton spray with bird, growing left"
+            },
+            {
+              "value": "ribbon",
+              "label": "Linen ribbon"
+            },
+            {
+              "value": "sprig",
+              "label": "Flower sprig"
+            },
+            {
+              "value": "meadow",
+              "label": "Meadow border"
+            }
+          ],
+          "default": "meadow"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Or your own picture",
+          "info": "Replaces the illustration above. A wide PNG or WebP with a transparent background."
+        },
+        {
+          "type": "range",
+          "id": "width",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "label": "Width on desktop",
+          "default": 100
+        },
+        {
+          "type": "range",
+          "id": "width_mobile",
+          "min": 10,
+          "max": 200,
+          "step": 5,
+          "unit": "%",
+          "label": "Width on phones",
+          "default": 170,
+          "info": "Over 100% crops into the middle of the picture."
+        },
+        {
+          "type": "select",
+          "id": "align",
+          "label": "Alignment",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Centre"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "overlap",
+          "min": 0,
+          "max": 200,
+          "step": 4,
+          "unit": "px",
+          "label": "Tuck under the columns",
+          "default": 12
+        },
+        {
+          "type": "checkbox",
+          "id": "flip",
+          "label": "Mirror",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "opacity",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "label": "Opacity",
+          "default": 100
+        },
+        {
+          "type": "select",
+          "id": "animation",
+          "label": "Entrance",
+          "options": [
+            {
+              "value": "grow",
+              "label": "Grow from its corner"
+            },
+            {
+              "value": "unroll",
+              "label": "Unroll left to right"
+            },
+            {
+              "value": "open",
+              "label": "Open from the middle"
+            },
+            {
+              "value": "rise",
+              "label": "Rise from below"
+            },
+            {
+              "value": "fade",
+              "label": "Fade in"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            }
+          ],
+          "default": "rise",
+          "info": "Plays once, as it scrolls into view."
+        }
+      ]
     }
   ],
   "settings": [
@@ -527,13 +731,6 @@
       "id": "accent_line",
       "label": "Line along the top",
       "default": "#e2d1a6"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_meadow",
-      "label": "Meadow border",
-      "default": true,
-      "info": "Tabi's illustrated meadow of cotton, wheat and birds along the foot of the footer."
     },
     {
       "type": "image_picker",

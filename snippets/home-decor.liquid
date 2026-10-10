@@ -14,6 +14,8 @@
   @param {number} [parallax] - Drift in pixels, 0 for none
   @param {string} [sizes] - sizes attribute (meadow only; it has two widths)
   @param {string} [loading] - lazy (default) | eager
+  @param {string} [style] - Inline style, for a Decoration block's placement
+  @param {string} [attributes] - Extra attributes, e.g. block.shopify_attributes
 
   @example
   {% render 'home-decor', name: 'ribbon', class: 'home-decor home-decor--ribbon', reveal: 'unroll', parallax: 16 %}
@@ -62,5 +64,9 @@
     {% if parallax > 0 %}
       data-parallax="{{ parallax }}"
     {% endif %}
+    {% if style != blank %}
+      style="{{ style }}"
+    {% endif %}
+    {{ attributes }}
   >
 {%- endif -%}

@@ -17,8 +17,10 @@
   and address.
 
   2026-10-10, second pass: the ornament defaults to Tabi's illustrated
-  flower sprig, the heading can be framed by the illustrated cotton sprays,
-  and the cards rise in a short cascade on scroll (assets/tabi-motion.*).
+  flower sprig and the cards rise in a short cascade on scroll
+  (assets/tabi-motion.*). Decorations beside the heading (the reference's
+  clouds) are "Decoration" blocks, drawn by snippets/home-decorations; the
+  card loop skips them.
 {%- endcomment -%}
 
 {{ 'home-sections.css' | asset_url | stylesheet_tag }}
@@ -28,7 +30,8 @@
 {%- liquid
   assign layout = section.settings.layout
   assign cols = section.settings.columns_desktop
-  assign card_count = section.blocks.size
+  assign cards = section.blocks | where: 'type', 'card'
+  assign card_count = cards.size
   assign heading = section.settings.heading | strip
 
   assign feature_index = 0
@@ -83,17 +86,6 @@
   assign card_sizes = '(min-width: 1440px) ' | append: card_cap | append: 'px, (min-width: 750px) ' | append: card_vw | append: 'vw, ' | append: mobile_vw | append: 'vw'
   assign feature_sizes = '(min-width: 1440px) 346px, (min-width: 750px) 25vw, 78vw'
 
-  assign decor_style = section.settings.decor_style
-  assign has_decor = false
-  case decor_style
-    when 'tabi_left', 'tabi_both'
-      assign has_decor = true
-    when 'custom'
-      if section.settings.decor_left != blank or section.settings.decor_right != blank
-        assign has_decor = true
-      endif
-  endcase
-
   assign show_header = false
   if section.settings.show_ornament or heading != blank or section.settings.text != blank
     assign show_header = true
@@ -140,51 +132,7 @@
     }}
   {%- endif -%}
 
-  {%- if has_decor and decor_style != 'custom' -%}
-    <span class="home-decor-frame" aria-hidden="true">
-      {% render 'home-decor',
-        name: 'spray-left',
-        class: 'home-decor home-decor--spray-left',
-        reveal: 'grow-left',
-        parallax: 16
-      %}
-      {%- if decor_style == 'tabi_both' -%}
-        {% render 'home-decor',
-          name: 'spray-right',
-          class: 'home-decor home-decor--spray-right',
-          reveal: 'grow-right',
-          parallax: 22
-        %}
-      {%- endif -%}
-    </span>
-  {%- elsif has_decor -%}
-    <span class="home-decor-frame" aria-hidden="true">
-      {%- if section.settings.decor_left != blank -%}
-        {{
-          section.settings.decor_left
-          | image_url: width: 800
-          | image_tag:
-            class: 'home-decor home-decor--left',
-            widths: '200, 400, 600, 800',
-            sizes: '(min-width: 750px) 19vw, 35vw',
-            alt: '',
-            loading: 'lazy'
-        }}
-      {%- endif -%}
-      {%- if section.settings.decor_right != blank -%}
-        {{
-          section.settings.decor_right
-          | image_url: width: 600
-          | image_tag:
-            class: 'home-decor home-decor--right',
-            widths: '200, 400, 600',
-            sizes: '(min-width: 750px) 10vw, 18vw',
-            alt: '',
-            loading: 'lazy'
-        }}
-      {%- endif -%}
-    </span>
-  {%- endif -%}
+  {% render 'home-decorations', blocks: section.blocks %}
 
   <div class="home-section__inner">
     {%- if show_header -%}
@@ -219,7 +167,7 @@
       <div class="home-cards__body">
         {%- capture cards -%}
           {%- assign used = '|' -%}
-          {%- for block in section.blocks -%}
+          {%- for block in cards -%}
             {%- liquid
               assign card_collection = block.settings.collection
               assign card_image = block.settings.image
@@ -369,15 +317,21 @@
   "name": "Home: Picture cards",
   "tag": "section",
   "class": "home-cards-section",
-  "max_blocks": 12,
+  "max_blocks": 16,
   "settings": [
     {
       "type": "select",
       "id": "layout",
       "label": "Layout",
       "options": [
-        { "value": "grid", "label": "Grid" },
-        { "value": "carousel", "label": "Carousel" }
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "carousel",
+          "label": "Carousel"
+        }
       ],
       "default": "grid"
     },
@@ -396,8 +350,14 @@
       "id": "columns_mobile",
       "label": "Cards in a row on phones",
       "options": [
-        { "value": "1", "label": "1" },
-        { "value": "2", "label": "2" }
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        }
       ],
       "default": "2",
       "info": "Grid only. The carousel shows two and a half."
@@ -407,11 +367,26 @@
       "id": "ratio",
       "label": "Picture shape",
       "options": [
-        { "value": "square", "label": "Square" },
-        { "value": "portrait", "label": "Portrait 4:5" },
-        { "value": "portrait_tall", "label": "Portrait 3:4" },
-        { "value": "tall", "label": "Tall 2:3" },
-        { "value": "landscape", "label": "Landscape 4:3" }
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "portrait",
+          "label": "Portrait 4:5"
+        },
+        {
+          "value": "portrait_tall",
+          "label": "Portrait 3:4"
+        },
+        {
+          "value": "tall",
+          "label": "Tall 2:3"
+        },
+        {
+          "value": "landscape",
+          "label": "Landscape 4:3"
+        }
       ],
       "default": "portrait_tall"
     },
@@ -420,8 +395,14 @@
       "id": "fit",
       "label": "Picture fit",
       "options": [
-        { "value": "cover", "label": "Fill the card" },
-        { "value": "contain", "label": "Show the whole picture" }
+        {
+          "value": "cover",
+          "label": "Fill the card"
+        },
+        {
+          "value": "contain",
+          "label": "Show the whole picture"
+        }
       ],
       "default": "cover",
       "info": "\"Show the whole picture\" suits products photographed on white."
@@ -431,8 +412,14 @@
       "id": "shape",
       "label": "Card top",
       "options": [
-        { "value": "square", "label": "Square corners" },
-        { "value": "arch", "label": "Arched" }
+        {
+          "value": "square",
+          "label": "Square corners"
+        },
+        {
+          "value": "arch",
+          "label": "Arched"
+        }
       ],
       "default": "square"
     },
@@ -458,8 +445,14 @@
       "id": "ornament_style",
       "label": "Ornament style",
       "options": [
-        { "value": "sprig", "label": "Illustrated flower sprig" },
-        { "value": "drawn", "label": "Block-print flowers" }
+        {
+          "value": "sprig",
+          "label": "Illustrated flower sprig"
+        },
+        {
+          "value": "drawn",
+          "label": "Block-print flowers"
+        }
       ],
       "default": "sprig"
     },
@@ -480,39 +473,6 @@
       "id": "text",
       "label": "Text",
       "default": "<p>Hand block printed linen for every table and every corner of your home.</p>"
-    },
-    {
-      "type": "header",
-      "content": "Decorations"
-    },
-    {
-      "type": "select",
-      "id": "decor_style",
-      "label": "Decorations",
-      "options": [
-        { "value": "none", "label": "None" },
-        { "value": "tabi_left", "label": "Cotton spray, left" },
-        { "value": "tabi_both", "label": "Cotton sprays, both sides" },
-        { "value": "custom", "label": "My pictures below" }
-      ],
-      "default": "none",
-      "info": "Tabi's illustrated cotton sprays beside the heading, like the reference site's clouds."
-    },
-    {
-      "type": "paragraph",
-      "content": "Your own pictures beside the heading. Use PNGs with transparent backgrounds, and choose \"My pictures below\" above."
-    },
-    {
-      "type": "image_picker",
-      "id": "decor_left",
-      "label": "Left",
-      "info": "About 265px wide, against the left edge."
-    },
-    {
-      "type": "image_picker",
-      "id": "decor_right",
-      "label": "Right",
-      "info": "About 135px wide, against the right edge."
     },
     {
       "type": "header",
@@ -652,6 +612,217 @@
           "info": "Leave empty to use the collection."
         }
       ]
+    },
+    {
+      "type": "decoration",
+      "name": "Decoration",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "A picture drawn behind (or in front of) this section, like the reference site's clouds and ribbons. Add as many as you like; delete the block to remove one."
+        },
+        {
+          "type": "select",
+          "id": "illustration",
+          "label": "Tabi illustration",
+          "options": [
+            {
+              "value": "spray-left",
+              "label": "Cotton spray, growing right"
+            },
+            {
+              "value": "spray-right",
+              "label": "Cotton spray with bird, growing left"
+            },
+            {
+              "value": "ribbon",
+              "label": "Linen ribbon"
+            },
+            {
+              "value": "sprig",
+              "label": "Flower sprig"
+            },
+            {
+              "value": "meadow",
+              "label": "Meadow border"
+            }
+          ],
+          "default": "spray-left"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Or your own picture",
+          "info": "Replaces the illustration above. A PNG or WebP with a transparent background."
+        },
+        {
+          "type": "header",
+          "content": "Placement"
+        },
+        {
+          "type": "select",
+          "id": "position",
+          "label": "Position",
+          "options": [
+            {
+              "value": "top-left",
+              "label": "Top left"
+            },
+            {
+              "value": "top-center",
+              "label": "Top centre"
+            },
+            {
+              "value": "top-right",
+              "label": "Top right"
+            },
+            {
+              "value": "middle-left",
+              "label": "Middle left"
+            },
+            {
+              "value": "middle-right",
+              "label": "Middle right"
+            },
+            {
+              "value": "bottom-left",
+              "label": "Bottom left"
+            },
+            {
+              "value": "bottom-center",
+              "label": "Bottom centre"
+            },
+            {
+              "value": "bottom-right",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "top-left"
+        },
+        {
+          "type": "range",
+          "id": "offset_x",
+          "min": -200,
+          "max": 600,
+          "step": 10,
+          "unit": "px",
+          "label": "Distance from the side",
+          "default": 0,
+          "info": "At desktop size. Below zero it hangs past the edge. For the centre positions, moves it right."
+        },
+        {
+          "type": "range",
+          "id": "offset_y",
+          "min": -200,
+          "max": 800,
+          "step": 10,
+          "unit": "px",
+          "label": "Distance from the top or bottom",
+          "default": 0,
+          "info": "For the middle positions, moves it down."
+        },
+        {
+          "type": "range",
+          "id": "width",
+          "min": 40,
+          "max": 1440,
+          "step": 20,
+          "unit": "px",
+          "label": "Width on desktop",
+          "default": 320,
+          "info": "Scales down with the layout on smaller screens."
+        },
+        {
+          "type": "range",
+          "id": "width_mobile",
+          "min": 0,
+          "max": 400,
+          "step": 5,
+          "unit": "px",
+          "label": "Width on phones",
+          "default": 100,
+          "info": "0 hides it on phones."
+        },
+        {
+          "type": "checkbox",
+          "id": "flip",
+          "label": "Mirror",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "opacity",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "label": "Opacity",
+          "default": 100
+        },
+        {
+          "type": "select",
+          "id": "layer",
+          "label": "Layer",
+          "options": [
+            {
+              "value": "back",
+              "label": "Behind the content"
+            },
+            {
+              "value": "front",
+              "label": "In front of the content"
+            }
+          ],
+          "default": "back"
+        },
+        {
+          "type": "header",
+          "content": "Motion"
+        },
+        {
+          "type": "select",
+          "id": "animation",
+          "label": "Entrance",
+          "options": [
+            {
+              "value": "grow",
+              "label": "Grow from its corner"
+            },
+            {
+              "value": "unroll",
+              "label": "Unroll left to right"
+            },
+            {
+              "value": "open",
+              "label": "Open from the middle"
+            },
+            {
+              "value": "rise",
+              "label": "Rise from below"
+            },
+            {
+              "value": "fade",
+              "label": "Fade in"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            }
+          ],
+          "default": "grow",
+          "info": "Plays once, as it scrolls into view, while the section's \"Animate on scroll\" is on."
+        },
+        {
+          "type": "range",
+          "id": "drift",
+          "min": 0,
+          "max": 40,
+          "step": 2,
+          "unit": "px",
+          "label": "Drift on scroll",
+          "default": 16
+        }
+      ]
     }
   ],
   "presets": [
@@ -667,12 +838,42 @@
         "padding_bottom": 10
       },
       "blocks": [
-        { "type": "card", "settings": { "caption": "Table linen" } },
-        { "type": "card", "settings": { "caption": "Table mats" } },
-        { "type": "card", "settings": { "caption": "Napkins" } },
-        { "type": "card", "settings": { "caption": "Cushion covers" } },
-        { "type": "card", "settings": { "caption": "Tea cosies" } },
-        { "type": "card", "settings": { "caption": "Glass covers" } }
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Table linen"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Table mats"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Napkins"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Cushion covers"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Tea cosies"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Glass covers"
+          }
+        }
       ]
     },
     {
@@ -683,16 +884,62 @@
         "columns_mobile": "2",
         "ratio": "portrait_tall",
         "feature_middle": true,
-        "decor_style": "tabi_left",
         "heading": "Dressed for the Season",
         "text": "<p>Easy silhouettes in cotton, printed by hand and made in small batches.</p>",
         "padding_top": 40,
         "padding_bottom": 42
       },
       "blocks": [
-        { "type": "card", "settings": { "caption": "New in" } },
-        { "type": "card", "settings": { "caption": "Dresses & kaftans" } },
-        { "type": "card", "settings": { "caption": "Jackets & shrugs" } }
+        {
+          "type": "card",
+          "settings": {
+            "caption": "New in"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Dresses & kaftans"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Jackets & shrugs"
+          }
+        },
+        {
+          "type": "decoration",
+          "settings": {
+            "illustration": "spray-left",
+            "position": "top-left",
+            "offset_x": 0,
+            "offset_y": 10,
+            "width": 320,
+            "width_mobile": 85,
+            "flip": false,
+            "opacity": 100,
+            "layer": "back",
+            "animation": "grow",
+            "drift": 16
+          }
+        },
+        {
+          "type": "decoration",
+          "settings": {
+            "illustration": "spray-right",
+            "position": "top-right",
+            "offset_x": 0,
+            "offset_y": 10,
+            "width": 320,
+            "width_mobile": 85,
+            "flip": false,
+            "opacity": 100,
+            "layer": "back",
+            "animation": "grow",
+            "drift": 22
+          }
+        }
       ]
     },
     {
@@ -716,10 +963,30 @@
         "padding_bottom": 50
       },
       "blocks": [
-        { "type": "card", "settings": { "caption": "Peetal brass" } },
-        { "type": "card", "settings": { "caption": "Babies" } },
-        { "type": "card", "settings": { "caption": "Scarves" } },
-        { "type": "card", "settings": { "caption": "Scrunchies" } }
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Peetal brass"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Babies"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Scarves"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "caption": "Scrunchies"
+          }
+        }
       ]
     }
   ]

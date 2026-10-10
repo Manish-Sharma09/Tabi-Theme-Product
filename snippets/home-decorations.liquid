@@ -1,0 +1,149 @@
+{% doc %}
+  The decorations of a home section: every "Decoration" block on it. Each
+  block places one picture - the merchant's own upload, or one of Tabi's
+  illustrations stored with the theme - against a side or corner of the
+  section, sized and nudged in reference pixels (the --u scale in
+  assets/home-sections.css), with its own phone size, mirror, transparency,
+  layer, entrance and scroll drift. Add, change or delete them in the theme
+  editor like any block.
+
+  Drawn in a frame the width of the layout; blocks set to "In front" get a
+  second frame above the content. Both are decorative and hidden from
+  assistive technology.
+
+  @param {object[]} blocks - section.blocks; only blocks of type 'decoration' are drawn
+
+  @example
+  {% render 'home-decorations', blocks: section.blocks %}
+{% enddoc %}
+
+{%- liquid
+  assign decorations = blocks | where: 'type', 'decoration'
+  assign layers = 'back,front' | split: ','
+-%}
+
+{%- for layer in layers -%}
+  {%- liquid
+    assign in_layer = 0
+    for block in decorations
+      assign block_layer = block.settings.layer | default: 'back'
+      if block_layer == layer
+        assign in_layer = in_layer | plus: 1
+      endif
+    endfor
+  -%}
+  {%- if in_layer > 0 -%}
+    <span class="home-decor-frame home-decor-frame--{{ layer }}" aria-hidden="true">
+      {%- for block in decorations -%}
+        {%- liquid
+          assign d = block.settings
+          assign block_layer = d.layer | default: 'back'
+          if block_layer != layer
+            continue
+          endif
+
+          assign own = d.image
+          if own != blank
+            assign ratio = own.aspect_ratio
+          else
+            case d.illustration
+              when 'spray-left'
+                assign ratio = 2.102
+              when 'spray-right'
+                assign ratio = 2.003
+              when 'ribbon'
+                assign ratio = 6.515
+              when 'sprig'
+                assign ratio = 3.841
+              else
+                assign ratio = 5.868
+            endcase
+          endif
+
+          assign at = d.position | default: 'top-left'
+          assign reveal = ''
+          case d.animation
+            when 'grow'
+              if at contains 'left'
+                assign reveal = 'grow-left'
+              elsif at contains 'right'
+                assign reveal = 'grow-right'
+              else
+                assign reveal = 'open'
+              endif
+            when 'unroll'
+              assign reveal = 'unroll'
+            when 'open'
+              assign reveal = 'open'
+            when 'rise'
+              assign reveal = 'rise-up'
+            when 'fade'
+              assign reveal = 'fade'
+          endcase
+
+          assign classes = 'home-decor home-decor--at-' | append: at
+          if d.flip
+            assign classes = classes | append: ' home-decor--flip'
+          endif
+          if d.width_mobile == 0
+            assign classes = classes | append: ' home-decor--desktop-only'
+          endif
+
+          capture style
+            echo '--dw: ' | append: d.width | append: '; --dwm: ' | append: d.width_mobile
+            echo '; --dx: ' | append: d.offset_x | append: '; --dy: ' | append: d.offset_y
+            echo '; --dr: ' | append: ratio | append: '; --do: ' | append: d.opacity | append: '%;'
+          endcapture
+
+          comment
+            Shown at its desktop width up to 1440px wide screens, scaled with
+            the layout below that, and at its phone width on phones.
+          endcomment
+          assign desktop_vw = d.width | times: 100 | divided_by: 1434 | plus: 1
+          assign mobile_vw = d.width_mobile | times: 100 | divided_by: 390 | plus: 1
+        -%}
+
+        {%- if own != blank -%}
+          {%- capture own_srcset -%}
+            {%- assign own_widths = '200,400,600,900,1200,1600,2400' | split: ',' -%}
+            {%- for width_string in own_widths -%}
+              {%- assign w = width_string | plus: 0 -%}
+              {%- if forloop.first or w <= own.width -%}
+                {%- unless forloop.first %}, {% endunless -%}
+                {{- own | image_url: width: w }} {{ w }}w
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endcapture -%}
+          <img
+            src="{{ own | image_url: width: 1200 }}"
+            srcset="{{ own_srcset | strip }}"
+            sizes="(min-width: 1440px) {{ d.width }}px, (min-width: 750px) {{ desktop_vw }}vw, {{ mobile_vw }}vw"
+            width="{{ own.width }}"
+            height="{{ own.height }}"
+            alt=""
+            loading="lazy"
+            decoding="async"
+            class="{{ classes }}"
+            style="{{ style | strip }}"
+            {% if reveal != blank %}
+              data-reveal="{{ reveal }}"
+            {% endif %}
+            {% if d.drift > 0 %}
+              data-parallax="{{ d.drift }}"
+            {% endif %}
+            {{ block.shopify_attributes }}
+          >
+        {%- else -%}
+          {% render 'home-decor',
+            name: d.illustration,
+            class: classes,
+            reveal: reveal,
+            parallax: d.drift,
+            style: style,
+            attributes: block.shopify_attributes
+          %}
+        {%- endif -%}
+      {%- endfor -%}
+    </span>
+  {%- endif -%}
+{%- endfor -%}

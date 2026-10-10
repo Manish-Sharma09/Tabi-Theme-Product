@@ -311,20 +311,43 @@
   color: inherit;
 }
 
-/* The illustrated meadow along the foot, where the reference has its band
-   of clouds: full width, its ground line resting on the bottom bar. */
-.tabi-footer__meadow {
+/* "Illustration strip" blocks along the foot, where the reference has its
+   band of clouds: each one in flow under the columns, tucked up under them
+   by its overlap, its ground line resting on the bottom bar. Wider than
+   100% (phones) crops into the middle. */
+.tabi-footer__strips {
   position: relative;
   z-index: 0;
-  margin-top: -12px;
-  line-height: 0;
   pointer-events: none;
 }
 
-.tabi-footer__meadow-img {
+.tabi-footer__strip {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  margin-top: calc(var(--strip-overlap, 12px) * -1);
+  line-height: 0;
+}
+
+.tabi-footer__strip--left {
+  justify-content: flex-start;
+}
+
+.tabi-footer__strip--right {
+  justify-content: flex-end;
+}
+
+.tabi-footer__strip-img {
   display: block;
-  width: 100%;
+  flex: 0 0 auto;
+  width: var(--strip-w, 100%);
+  max-width: none;
   height: auto;
+  opacity: var(--strip-opacity, 100%);
+}
+
+.tabi-footer__strip-img--flip {
+  scale: -1 1;
 }
 
 /* --------------------------------------------------------------------------
@@ -466,18 +489,10 @@
     margin-top: 20px;
   }
 
-  /* The meadow drawn full width is only 66px tall on a phone; at 170% it
-     keeps the middle of the scene (cotton, flowers, one bird) at a size
-     that still reads as an illustration. */
-  .tabi-footer__meadow {
-    overflow: hidden;
-    margin-top: -4px;
-  }
-
-  .tabi-footer__meadow-img {
-    width: 170%;
-    max-width: none;
-    margin-left: -35%;
+  /* A strip drawn full width is short on a phone; the meadow's default 170%
+     keeps the middle of the scene at a size that still reads. */
+  .tabi-footer__strip-img {
+    width: var(--strip-wm, 100%);
   }
 
   .tabi-footer__bottom {

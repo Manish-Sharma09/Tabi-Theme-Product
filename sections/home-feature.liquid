@@ -4,14 +4,13 @@
 
   Built after the reference site's "The Gift of Good Earth" block
   (goodearth.in, 2026-10-10); measurements and the phone layout are in
-  assets/home-sections.css, part 3. Up to three decorative pictures (the
-  reference's cloud, butterfly and ribbon) can be added; with none, nothing
-  is drawn for them.
+  assets/home-sections.css, part 3.
 
-  2026-10-10, second pass: by default the decorations are Tabi's own
-  illustrations - the cotton spray with the bird in the top corner and the
-  linen ribbon unrolling under the story - and the pieces enter on scroll
-  (assets/tabi-motion.*). Both are settings.
+  Decorations (the reference's cloud, butterfly and ribbon) are "Decoration"
+  blocks, drawn by snippets/home-decorations: any number, each one of Tabi's
+  illustrations or an uploaded picture, placed and sized in the editor. The
+  preset starts with the cotton spray in the top corner and the linen ribbon
+  under the story. The pieces enter on scroll (assets/tabi-motion.*).
 {%- endcomment -%}
 
 {{ 'home-sections.css' | asset_url | stylesheet_tag }}
@@ -23,27 +22,6 @@
   assign has_cutout = false
   if section.settings.cutout != blank
     assign has_cutout = true
-  endif
-
-  assign decor_style = section.settings.decor_style
-  assign has_decor = false
-  if decor_style == 'tabi'
-    assign has_decor = true
-  elsif decor_style == 'custom'
-    if section.settings.decor_1 != blank or section.settings.decor_2 != blank or section.settings.decor_3 != blank
-      assign has_decor = true
-    endif
-  endif
-
-  comment
-    With the picture on the right the story sits left, so the spray moves to
-    the left corner and grows from that side.
-  endcomment
-  assign spray_name = 'spray-right'
-  assign spray_reveal = 'grow-right'
-  if section.settings.image_position == 'right'
-    assign spray_name = 'spray-left'
-    assign spray_reveal = 'grow-left'
   endif
 
   comment
@@ -74,44 +52,7 @@
     data-motion
   {% endif %}
 >
-  {%- if has_decor and decor_style == 'tabi' -%}
-    <span class="home-decor-frame" aria-hidden="true">
-      {% render 'home-decor',
-        name: spray_name,
-        class: 'home-decor home-decor--spray',
-        reveal: spray_reveal,
-        parallax: 18
-      %}
-      {% render 'home-decor',
-        name: 'ribbon',
-        class: 'home-decor home-decor--ribbon',
-        reveal: 'unroll',
-        parallax: 10
-      %}
-    </span>
-  {%- elsif has_decor -%}
-    <span class="home-decor-frame" aria-hidden="true">
-      {%- for i in (1..3) -%}
-        {%- liquid
-          assign decor_key = 'decor_' | append: i
-          assign decor = section.settings[decor_key]
-          assign decor_class = 'home-decor home-decor--' | append: i
-        -%}
-        {%- if decor != blank -%}
-          {{
-            decor
-            | image_url: width: 900
-            | image_tag:
-              class: decor_class,
-              widths: '200, 400, 600, 900',
-              sizes: '(min-width: 750px) 30vw, 42vw',
-              alt: '',
-              loading: 'lazy'
-          }}
-        {%- endif -%}
-      {%- endfor -%}
-    </span>
-  {%- endif -%}
+  {% render 'home-decorations', blocks: section.blocks %}
 
   <div class="home-section__inner home-feature__inner">
     <div class="home-feature__media" data-reveal="rise">
@@ -189,14 +130,21 @@
   "name": "Home: Feature story",
   "tag": "section",
   "class": "home-feature-section",
+  "max_blocks": 8,
   "settings": [
     {
       "type": "select",
       "id": "image_position",
       "label": "Picture",
       "options": [
-        { "value": "left", "label": "Left of the story" },
-        { "value": "right", "label": "Right of the story" }
+        {
+          "value": "left",
+          "label": "Left of the story"
+        },
+        {
+          "value": "right",
+          "label": "Right of the story"
+        }
       ],
       "default": "left"
     },
@@ -240,44 +188,6 @@
       "id": "link",
       "label": "Link",
       "info": "The picture links here too."
-    },
-    {
-      "type": "header",
-      "content": "Decorations"
-    },
-    {
-      "type": "select",
-      "id": "decor_style",
-      "label": "Decorations",
-      "options": [
-        { "value": "tabi", "label": "Tabi illustrations" },
-        { "value": "custom", "label": "My pictures below" },
-        { "value": "none", "label": "None" }
-      ],
-      "default": "tabi",
-      "info": "Tabi illustrations: the cotton spray with the bird in the top corner and the linen ribbon under the story."
-    },
-    {
-      "type": "paragraph",
-      "content": "Your own pictures, drawn behind the content like the reference site's clouds and ribbons. Use PNGs with transparent backgrounds, and choose \"My pictures below\" above."
-    },
-    {
-      "type": "image_picker",
-      "id": "decor_1",
-      "label": "Top corner",
-      "info": "About 300px wide on desktop, against the right edge."
-    },
-    {
-      "type": "image_picker",
-      "id": "decor_2",
-      "label": "Beside the heading",
-      "info": "About 90px wide."
-    },
-    {
-      "type": "image_picker",
-      "id": "decor_3",
-      "label": "Lower corner",
-      "info": "About 425px wide, against the right edge."
     },
     {
       "type": "header",
@@ -350,9 +260,256 @@
       "default": 4
     }
   ],
+  "blocks": [
+    {
+      "type": "decoration",
+      "name": "Decoration",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "A picture drawn behind (or in front of) this section, like the reference site's clouds and ribbons. Add as many as you like; delete the block to remove one."
+        },
+        {
+          "type": "select",
+          "id": "illustration",
+          "label": "Tabi illustration",
+          "options": [
+            {
+              "value": "spray-left",
+              "label": "Cotton spray, growing right"
+            },
+            {
+              "value": "spray-right",
+              "label": "Cotton spray with bird, growing left"
+            },
+            {
+              "value": "ribbon",
+              "label": "Linen ribbon"
+            },
+            {
+              "value": "sprig",
+              "label": "Flower sprig"
+            },
+            {
+              "value": "meadow",
+              "label": "Meadow border"
+            }
+          ],
+          "default": "spray-left"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Or your own picture",
+          "info": "Replaces the illustration above. A PNG or WebP with a transparent background."
+        },
+        {
+          "type": "header",
+          "content": "Placement"
+        },
+        {
+          "type": "select",
+          "id": "position",
+          "label": "Position",
+          "options": [
+            {
+              "value": "top-left",
+              "label": "Top left"
+            },
+            {
+              "value": "top-center",
+              "label": "Top centre"
+            },
+            {
+              "value": "top-right",
+              "label": "Top right"
+            },
+            {
+              "value": "middle-left",
+              "label": "Middle left"
+            },
+            {
+              "value": "middle-right",
+              "label": "Middle right"
+            },
+            {
+              "value": "bottom-left",
+              "label": "Bottom left"
+            },
+            {
+              "value": "bottom-center",
+              "label": "Bottom centre"
+            },
+            {
+              "value": "bottom-right",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "top-left"
+        },
+        {
+          "type": "range",
+          "id": "offset_x",
+          "min": -200,
+          "max": 600,
+          "step": 10,
+          "unit": "px",
+          "label": "Distance from the side",
+          "default": 0,
+          "info": "At desktop size. Below zero it hangs past the edge. For the centre positions, moves it right."
+        },
+        {
+          "type": "range",
+          "id": "offset_y",
+          "min": -200,
+          "max": 800,
+          "step": 10,
+          "unit": "px",
+          "label": "Distance from the top or bottom",
+          "default": 0,
+          "info": "For the middle positions, moves it down."
+        },
+        {
+          "type": "range",
+          "id": "width",
+          "min": 40,
+          "max": 1440,
+          "step": 20,
+          "unit": "px",
+          "label": "Width on desktop",
+          "default": 320,
+          "info": "Scales down with the layout on smaller screens."
+        },
+        {
+          "type": "range",
+          "id": "width_mobile",
+          "min": 0,
+          "max": 400,
+          "step": 5,
+          "unit": "px",
+          "label": "Width on phones",
+          "default": 100,
+          "info": "0 hides it on phones."
+        },
+        {
+          "type": "checkbox",
+          "id": "flip",
+          "label": "Mirror",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "opacity",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "label": "Opacity",
+          "default": 100
+        },
+        {
+          "type": "select",
+          "id": "layer",
+          "label": "Layer",
+          "options": [
+            {
+              "value": "back",
+              "label": "Behind the content"
+            },
+            {
+              "value": "front",
+              "label": "In front of the content"
+            }
+          ],
+          "default": "back"
+        },
+        {
+          "type": "header",
+          "content": "Motion"
+        },
+        {
+          "type": "select",
+          "id": "animation",
+          "label": "Entrance",
+          "options": [
+            {
+              "value": "grow",
+              "label": "Grow from its corner"
+            },
+            {
+              "value": "unroll",
+              "label": "Unroll left to right"
+            },
+            {
+              "value": "open",
+              "label": "Open from the middle"
+            },
+            {
+              "value": "rise",
+              "label": "Rise from below"
+            },
+            {
+              "value": "fade",
+              "label": "Fade in"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            }
+          ],
+          "default": "grow",
+          "info": "Plays once, as it scrolls into view, while the section's \"Animate on scroll\" is on."
+        },
+        {
+          "type": "range",
+          "id": "drift",
+          "min": 0,
+          "max": 40,
+          "step": 2,
+          "unit": "px",
+          "label": "Drift on scroll",
+          "default": 16
+        }
+      ]
+    }
+  ],
   "presets": [
     {
-      "name": "Home: Feature story"
+      "name": "Home: Feature story",
+      "blocks": [
+        {
+          "type": "decoration",
+          "settings": {
+            "illustration": "spray-right",
+            "position": "top-right",
+            "offset_x": 0,
+            "offset_y": 20,
+            "width": 340,
+            "width_mobile": 150,
+            "flip": false,
+            "opacity": 100,
+            "layer": "back",
+            "animation": "grow",
+            "drift": 18
+          }
+        },
+        {
+          "type": "decoration",
+          "settings": {
+            "illustration": "ribbon",
+            "position": "bottom-right",
+            "offset_x": 0,
+            "offset_y": 50,
+            "width": 600,
+            "width_mobile": 0,
+            "flip": false,
+            "opacity": 100,
+            "layer": "back",
+            "animation": "unroll",
+            "drift": 10
+          }
+        }
+      ]
     }
   ]
 }

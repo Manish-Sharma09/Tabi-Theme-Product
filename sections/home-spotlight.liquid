@@ -63,6 +63,8 @@
     }}
   {%- endif -%}
 
+  {% render 'home-decorations', blocks: section.blocks %}
+
   <div class="home-section__inner home-spot__inner">
     {%- if section.settings.show_ornament -%}
       {%- if section.settings.ornament_image != blank -%}
@@ -168,6 +170,7 @@
   "name": "Home: Spotlight band",
   "tag": "section",
   "class": "home-spot-section",
+  "max_blocks": 8,
   "settings": [
     {
       "type": "checkbox",
@@ -180,8 +183,14 @@
       "id": "ornament_style",
       "label": "Ornament style",
       "options": [
-        { "value": "sprig", "label": "Illustrated flower sprig" },
-        { "value": "drawn", "label": "Block-print flowers" }
+        {
+          "value": "sprig",
+          "label": "Illustrated flower sprig"
+        },
+        {
+          "value": "drawn",
+          "label": "Block-print flowers"
+        }
       ],
       "default": "sprig"
     },
@@ -224,9 +233,18 @@
       "id": "mobile_ratio",
       "label": "Picture shape on phones",
       "options": [
-        { "value": "square", "label": "Square" },
-        { "value": "portrait", "label": "Portrait 4:5" },
-        { "value": "landscape", "label": "Landscape 4:3" }
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "portrait",
+          "label": "Portrait 4:5"
+        },
+        {
+          "value": "landscape",
+          "label": "Landscape 4:3"
+        }
       ],
       "default": "square"
     },
@@ -377,6 +395,219 @@
       "unit": "px",
       "label": "Space below",
       "default": 78
+    }
+  ],
+  "blocks": [
+    {
+      "type": "decoration",
+      "name": "Decoration",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "A picture drawn behind (or in front of) this section, like the reference site's clouds and ribbons. Add as many as you like; delete the block to remove one."
+        },
+        {
+          "type": "select",
+          "id": "illustration",
+          "label": "Tabi illustration",
+          "options": [
+            {
+              "value": "spray-left",
+              "label": "Cotton spray, growing right"
+            },
+            {
+              "value": "spray-right",
+              "label": "Cotton spray with bird, growing left"
+            },
+            {
+              "value": "ribbon",
+              "label": "Linen ribbon"
+            },
+            {
+              "value": "sprig",
+              "label": "Flower sprig"
+            },
+            {
+              "value": "meadow",
+              "label": "Meadow border"
+            }
+          ],
+          "default": "spray-left"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Or your own picture",
+          "info": "Replaces the illustration above. A PNG or WebP with a transparent background."
+        },
+        {
+          "type": "header",
+          "content": "Placement"
+        },
+        {
+          "type": "select",
+          "id": "position",
+          "label": "Position",
+          "options": [
+            {
+              "value": "top-left",
+              "label": "Top left"
+            },
+            {
+              "value": "top-center",
+              "label": "Top centre"
+            },
+            {
+              "value": "top-right",
+              "label": "Top right"
+            },
+            {
+              "value": "middle-left",
+              "label": "Middle left"
+            },
+            {
+              "value": "middle-right",
+              "label": "Middle right"
+            },
+            {
+              "value": "bottom-left",
+              "label": "Bottom left"
+            },
+            {
+              "value": "bottom-center",
+              "label": "Bottom centre"
+            },
+            {
+              "value": "bottom-right",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "top-left"
+        },
+        {
+          "type": "range",
+          "id": "offset_x",
+          "min": -200,
+          "max": 600,
+          "step": 10,
+          "unit": "px",
+          "label": "Distance from the side",
+          "default": 0,
+          "info": "At desktop size. Below zero it hangs past the edge. For the centre positions, moves it right."
+        },
+        {
+          "type": "range",
+          "id": "offset_y",
+          "min": -200,
+          "max": 800,
+          "step": 10,
+          "unit": "px",
+          "label": "Distance from the top or bottom",
+          "default": 0,
+          "info": "For the middle positions, moves it down."
+        },
+        {
+          "type": "range",
+          "id": "width",
+          "min": 40,
+          "max": 1440,
+          "step": 20,
+          "unit": "px",
+          "label": "Width on desktop",
+          "default": 320,
+          "info": "Scales down with the layout on smaller screens."
+        },
+        {
+          "type": "range",
+          "id": "width_mobile",
+          "min": 0,
+          "max": 400,
+          "step": 5,
+          "unit": "px",
+          "label": "Width on phones",
+          "default": 100,
+          "info": "0 hides it on phones."
+        },
+        {
+          "type": "checkbox",
+          "id": "flip",
+          "label": "Mirror",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "opacity",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "label": "Opacity",
+          "default": 100
+        },
+        {
+          "type": "select",
+          "id": "layer",
+          "label": "Layer",
+          "options": [
+            {
+              "value": "back",
+              "label": "Behind the content"
+            },
+            {
+              "value": "front",
+              "label": "In front of the content"
+            }
+          ],
+          "default": "back"
+        },
+        {
+          "type": "header",
+          "content": "Motion"
+        },
+        {
+          "type": "select",
+          "id": "animation",
+          "label": "Entrance",
+          "options": [
+            {
+              "value": "grow",
+              "label": "Grow from its corner"
+            },
+            {
+              "value": "unroll",
+              "label": "Unroll left to right"
+            },
+            {
+              "value": "open",
+              "label": "Open from the middle"
+            },
+            {
+              "value": "rise",
+              "label": "Rise from below"
+            },
+            {
+              "value": "fade",
+              "label": "Fade in"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            }
+          ],
+          "default": "grow",
+          "info": "Plays once, as it scrolls into view, while the section's \"Animate on scroll\" is on."
+        },
+        {
+          "type": "range",
+          "id": "drift",
+          "min": 0,
+          "max": 40,
+          "step": 2,
+          "unit": "px",
+          "label": "Drift on scroll",
+          "default": 16
+        }
+      ]
     }
   ],
   "presets": [

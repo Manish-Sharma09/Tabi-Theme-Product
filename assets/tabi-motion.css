@@ -40,6 +40,15 @@
   transform: translateY(var(--motion-rise));
 }
 
+/* Fade only, for a decoration that should simply appear. */
+.tabi-motion [data-motion] [data-reveal='fade'] {
+  transition: opacity 1.2s var(--motion-ease) var(--motion-delay);
+}
+
+.tabi-motion [data-motion] [data-reveal='fade']:not(.is-revealed) {
+  opacity: 0;
+}
+
 /* Illustrations draw themselves: a clip that opens from where the plant
    grows, or along the ribbon's length. Both states are inset() so the
    browser can interpolate between them. */

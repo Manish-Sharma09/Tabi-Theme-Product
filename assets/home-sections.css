@@ -308,12 +308,92 @@ a.home-link:focus-visible,
   pointer-events: none;
 }
 
+/* Pictures set to "In front of the content" get a second frame above it. */
+.home-decor-frame--front {
+  z-index: 2;
+}
+
+/* A Decoration block (snippets/home-decorations): pinned to a side or
+   corner, its width and its distance from the edges given in reference
+   pixels, so it keeps its place in the layout from tablet to desktop; on a
+   phone, its own width. --dr is its width / height, for the middle
+   positions. */
 .home-decor {
+  --dw: 320;
+  --dwm: 100;
+  --dx: 0;
+  --dy: 0;
+  --dr: 2;
+
   position: absolute;
   display: block;
+  width: calc(var(--dw) * var(--u));
   max-width: none;
   height: auto;
+  opacity: var(--do, 1);
   user-select: none;
+}
+
+.home-decor--at-top-left,
+.home-decor--at-top-center,
+.home-decor--at-top-right {
+  top: calc(var(--dy) * var(--u));
+}
+
+.home-decor--at-bottom-left,
+.home-decor--at-bottom-center,
+.home-decor--at-bottom-right {
+  bottom: calc(var(--dy) * var(--u));
+}
+
+.home-decor--at-middle-left,
+.home-decor--at-middle-right {
+  top: calc(50% + var(--dy) * var(--u));
+  margin-top: calc(var(--dw) * var(--u) / var(--dr) / -2);
+}
+
+.home-decor--at-top-left,
+.home-decor--at-middle-left,
+.home-decor--at-bottom-left {
+  left: calc(var(--dx) * var(--u));
+}
+
+.home-decor--at-top-right,
+.home-decor--at-middle-right,
+.home-decor--at-bottom-right {
+  right: calc(var(--dx) * var(--u));
+}
+
+.home-decor--at-top-center,
+.home-decor--at-bottom-center {
+  left: calc(50% + var(--dx) * var(--u));
+  margin-left: calc(var(--dw) * var(--u) / -2);
+}
+
+/* `scale`, not transform, so a mirrored picture can still make its
+   entrance (which uses transform) and drift (translate). */
+.home-decor--flip {
+  scale: -1 1;
+}
+
+@media screen and (max-width: 749px) {
+  .home-decor {
+    width: calc(var(--dwm) * var(--u));
+  }
+
+  .home-decor--at-middle-left,
+  .home-decor--at-middle-right {
+    margin-top: calc(var(--dwm) * var(--u) / var(--dr) / -2);
+  }
+
+  .home-decor--at-top-center,
+  .home-decor--at-bottom-center {
+    margin-left: calc(var(--dwm) * var(--u) / -2);
+  }
+
+  .home-decor--desktop-only {
+    display: none;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -404,64 +484,6 @@ a.home-link:focus-visible,
   right: calc(400 * var(--u));
 }
 
-.home-feature .home-decor--1 {
-  top: calc(17 * var(--u));
-  right: 0;
-  width: calc(298 * var(--u));
-}
-
-.home-feature .home-decor--2 {
-  top: calc(125 * var(--u));
-  left: calc(1096 * var(--u));
-  width: calc(89 * var(--u));
-}
-
-.home-feature .home-decor--3 {
-  top: calc(384 * var(--u));
-  right: calc(2 * var(--u));
-  width: calc(425 * var(--u));
-}
-
-/* Tabi's illustrations: the cotton spray in the top corner where the
-   reference has its cloud, the ribbon under the story where it has its
-   ribbon. The spray sits 24px down so its scroll drift never clips. */
-.home-feature .home-decor--spray {
-  top: calc(24 * var(--u));
-  right: 0;
-  width: calc(340 * var(--u));
-}
-
-.home-feature .home-decor--ribbon {
-  top: calc(522 * var(--u));
-  right: 0;
-  width: calc(600 * var(--u));
-}
-
-.home-feature--reverse .home-decor--spray {
-  right: auto;
-  left: 0;
-}
-
-.home-feature--reverse .home-decor--ribbon {
-  right: auto;
-  left: 0;
-  scale: -1 1;
-}
-
-.home-feature--reverse .home-decor--1 {
-  right: auto;
-  left: 0;
-}
-
-.home-feature--reverse .home-decor--2 {
-  left: calc(249 * var(--u));
-}
-
-.home-feature--reverse .home-decor--3 {
-  right: auto;
-  left: calc(2 * var(--u));
-}
-
 /* Phone: the story first, left-aligned, then the picture with the cut-out
    hanging off its right side to the screen edge. */
 @media screen and (max-width: 749px) {
@@ -513,50 +535,6 @@ a.home-link:focus-visible,
     right: calc(206 * var(--u));
   }
 
-  .home-feature .home-decor--1 {
-    top: calc(27 * var(--u));
-    right: auto;
-    left: 0;
-    width: calc(112 * var(--u));
-  }
-
-  .home-feature .home-decor--2 {
-    top: calc(67 * var(--u));
-    left: calc(170 * var(--u));
-    width: calc(45 * var(--u));
-  }
-
-  .home-feature .home-decor--3 {
-    top: calc(110 * var(--u));
-    right: 0;
-    left: auto;
-    width: calc(160 * var(--u));
-  }
-
-  .home-feature--reverse .home-decor--1 {
-    left: auto;
-    right: 0;
-  }
-
-  .home-feature .home-decor--spray {
-    top: calc(6 * var(--u));
-    width: calc(150 * var(--u));
-  }
-
-  /* No room beside the story on a phone. */
-  .home-feature .home-decor--ribbon {
-    display: none;
-  }
-
-  .home-feature--reverse .home-decor--2 {
-    left: auto;
-    right: calc(170 * var(--u));
-  }
-
-  .home-feature--reverse .home-decor--3 {
-    right: auto;
-    left: 0;
-  }
 }
 
 /* --------------------------------------------------------------------------
@@ -687,39 +665,7 @@ a.home-link:focus-visible,
   }
 }
 
-/* Decorations at the sides of the heading, as the reference's clouds:
-   left one flush with the left edge, right one with the right. */
-.home-cards .home-decor--left {
-  top: calc(48 * var(--u));
-  left: 0;
-  width: calc(265 * var(--u));
-}
-
-.home-cards .home-decor--right {
-  top: calc(118 * var(--u));
-  right: 0;
-  width: calc(133 * var(--u));
-}
-
-.home-cards .home-decor--spray-left {
-  top: calc(14 * var(--u));
-  left: 0;
-  width: calc(330 * var(--u));
-}
-
-.home-cards .home-decor--spray-right {
-  top: calc(30 * var(--u));
-  right: 0;
-  width: calc(330 * var(--u));
-}
-
 @media screen and (max-width: 749px) {
-  .home-cards .home-decor--spray-left,
-  .home-cards .home-decor--spray-right {
-    top: 0;
-    width: calc(84 * var(--u));
-  }
-
   .home-cards__header {
     max-width: none;
     padding: 0 calc(30 * var(--u));
@@ -767,15 +713,6 @@ a.home-link:focus-visible,
     margin-top: calc(8 * var(--u));
   }
 
-  .home-cards .home-decor--left {
-    top: calc(75 * var(--u));
-    width: calc(136 * var(--u));
-  }
-
-  .home-cards .home-decor--right {
-    top: calc(57 * var(--u));
-    width: calc(67 * var(--u));
-  }
 }
 
 /* --------------------------------------------------------------------------
