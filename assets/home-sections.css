@@ -126,6 +126,12 @@
   object-fit: contain;
 }
 
+/* The illustrated sprig is wider than the drawn flowers: 176 x 46. */
+.home-ornament--sprig {
+  width: calc(176 * var(--u));
+  height: auto;
+}
+
 .home-heading {
   margin: 0;
   color: var(--home-heading);
@@ -164,20 +170,26 @@
 
 /* The underlined capitals under every picture and story. A <span> when the
    whole card around it is the link, an <a> when it stands alone. */
+/* The underline is a background line rather than text-decoration, so a
+   hover can draw it out to the right and back in from the left (the same
+   gesture as the hero's link). The padding puts it where the reference's
+   underline sits, about 0.3em under the baseline. */
 .home-link {
   display: inline-block;
+  padding: 0.27em 0 0.02em;
   color: var(--home-link);
   font-family: var(--font-body-family);
   font-style: var(--font-body-style);
   font-weight: var(--home-link-weight, 400);
   font-size: max(13px, calc(15.75 * var(--u)));
-  line-height: 1.69;
+  line-height: 1.4;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.28em;
-  transition: opacity 0.3s var(--home-ease);
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
 }
 
 a.home-link:focus-visible,
@@ -193,7 +205,26 @@ a.home-link:focus-visible,
   a.home-link:hover,
   .home-card:hover .home-link,
   .home-band__link:hover .home-link {
-    opacity: 0.72;
+    animation: home-underline 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@keyframes home-underline {
+  0% {
+    background-size: 100% 1px;
+    background-position: 100% 100%;
+  }
+  45% {
+    background-size: 0% 1px;
+    background-position: 100% 100%;
+  }
+  46% {
+    background-size: 0% 1px;
+    background-position: 0 100%;
+  }
+  100% {
+    background-size: 100% 1px;
+    background-position: 0 100%;
   }
 }
 
@@ -238,6 +269,11 @@ a.home-link:focus-visible,
   .home-ornament--image {
     width: auto;
     height: calc(20 * var(--u));
+  }
+
+  .home-ornament--sprig {
+    width: calc(112 * var(--u));
+    height: auto;
   }
 
   .home-heading {
@@ -386,6 +422,32 @@ a.home-link:focus-visible,
   width: calc(425 * var(--u));
 }
 
+/* Tabi's illustrations: the cotton spray in the top corner where the
+   reference has its cloud, the ribbon under the story where it has its
+   ribbon. The spray sits 24px down so its scroll drift never clips. */
+.home-feature .home-decor--spray {
+  top: calc(24 * var(--u));
+  right: 0;
+  width: calc(340 * var(--u));
+}
+
+.home-feature .home-decor--ribbon {
+  top: calc(522 * var(--u));
+  right: 0;
+  width: calc(600 * var(--u));
+}
+
+.home-feature--reverse .home-decor--spray {
+  right: auto;
+  left: 0;
+}
+
+.home-feature--reverse .home-decor--ribbon {
+  right: auto;
+  left: 0;
+  scale: -1 1;
+}
+
 .home-feature--reverse .home-decor--1 {
   right: auto;
   left: 0;
@@ -474,6 +536,16 @@ a.home-link:focus-visible,
   .home-feature--reverse .home-decor--1 {
     left: auto;
     right: 0;
+  }
+
+  .home-feature .home-decor--spray {
+    top: calc(6 * var(--u));
+    width: calc(150 * var(--u));
+  }
+
+  /* No room beside the story on a phone. */
+  .home-feature .home-decor--ribbon {
+    display: none;
   }
 
   .home-feature--reverse .home-decor--2 {
@@ -629,7 +701,25 @@ a.home-link:focus-visible,
   width: calc(133 * var(--u));
 }
 
+.home-cards .home-decor--spray-left {
+  top: calc(14 * var(--u));
+  left: 0;
+  width: calc(330 * var(--u));
+}
+
+.home-cards .home-decor--spray-right {
+  top: calc(30 * var(--u));
+  right: 0;
+  width: calc(330 * var(--u));
+}
+
 @media screen and (max-width: 749px) {
+  .home-cards .home-decor--spray-left,
+  .home-cards .home-decor--spray-right {
+    top: 0;
+    width: calc(84 * var(--u));
+  }
+
   .home-cards__header {
     max-width: none;
     padding: 0 calc(30 * var(--u));
@@ -775,6 +865,26 @@ a.home-link:focus-visible,
   outline: 1px solid #4d4d4f;
   outline-offset: 2px;
   box-shadow: none;
+}
+
+/* A mouse can drag the row (assets/home-sections.js). While it does, snap
+   and smooth scrolling are off so the row follows the pointer exactly, and
+   the cards ignore the pointer so a drag never opens one. */
+@media (hover: hover) and (pointer: fine) {
+  .home-carousel:not(.is-static) .home-carousel__track {
+    cursor: grab;
+  }
+}
+
+.home-carousel.is-dragging .home-carousel__track {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+  user-select: none;
+}
+
+.home-carousel.is-dragging .home-card {
+  pointer-events: none;
 }
 
 /* Nothing to scroll to: the script marks the carousel static. */
@@ -1110,6 +1220,12 @@ a.home-link:focus-visible,
 @media (prefers-reduced-motion: reduce) {
   .home-carousel__track {
     scroll-behavior: auto;
+  }
+
+  a.home-link:hover,
+  .home-card:hover .home-link,
+  .home-band__link:hover .home-link {
+    animation: none;
   }
 
   .home-card__media img,

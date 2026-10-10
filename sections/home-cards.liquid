@@ -15,9 +15,15 @@
   earlier card on this section already shows (two collections often open on
   the same product). Caption and link fall back to the collection's title
   and address.
+
+  2026-10-10, second pass: the ornament defaults to Tabi's illustrated
+  flower sprig, the heading can be framed by the illustrated cotton sprays,
+  and the cards rise in a short cascade on scroll (assets/tabi-motion.*).
 {%- endcomment -%}
 
 {{ 'home-sections.css' | asset_url | stylesheet_tag }}
+{{ 'tabi-motion.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'tabi-motion.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   assign layout = section.settings.layout
@@ -77,10 +83,16 @@
   assign card_sizes = '(min-width: 1440px) ' | append: card_cap | append: 'px, (min-width: 750px) ' | append: card_vw | append: 'vw, ' | append: mobile_vw | append: 'vw'
   assign feature_sizes = '(min-width: 1440px) 346px, (min-width: 750px) 25vw, 78vw'
 
+  assign decor_style = section.settings.decor_style
   assign has_decor = false
-  if section.settings.decor_left != blank or section.settings.decor_right != blank
-    assign has_decor = true
-  endif
+  case decor_style
+    when 'tabi_left', 'tabi_both'
+      assign has_decor = true
+    when 'custom'
+      if section.settings.decor_left != blank or section.settings.decor_right != blank
+        assign has_decor = true
+      endif
+  endcase
 
   assign show_header = false
   if section.settings.show_ornament or heading != blank or section.settings.text != blank
@@ -111,6 +123,9 @@
 
 <div
   class="home-section home-cards home-cards--{{ layout }} home-cards--cols-{{ cols }} home-cards--mobile-{{ section.settings.columns_mobile }}{% if section.settings.fit == 'contain' %} home-cards--fit{% endif %}{% if section.settings.shape == 'arch' %} home-cards--arch{% endif %}{% if section.settings.pattern %} home-section--pattern{% endif %}"
+  {% if section.settings.motion %}
+    data-motion
+  {% endif %}
 >
   {%- if section.settings.background_image != blank -%}
     {{
@@ -125,7 +140,24 @@
     }}
   {%- endif -%}
 
-  {%- if has_decor -%}
+  {%- if has_decor and decor_style != 'custom' -%}
+    <span class="home-decor-frame" aria-hidden="true">
+      {% render 'home-decor',
+        name: 'spray-left',
+        class: 'home-decor home-decor--spray-left',
+        reveal: 'grow-left',
+        parallax: 16
+      %}
+      {%- if decor_style == 'tabi_both' -%}
+        {% render 'home-decor',
+          name: 'spray-right',
+          class: 'home-decor home-decor--spray-right',
+          reveal: 'grow-right',
+          parallax: 22
+        %}
+      {%- endif -%}
+    </span>
+  {%- elsif has_decor -%}
     <span class="home-decor-frame" aria-hidden="true">
       {%- if section.settings.decor_left != blank -%}
         {{
@@ -165,16 +197,20 @@
               | image_tag: class: 'home-ornament home-ornament--image', alt: '', loading: 'lazy'
             }}
           {%- else -%}
-            {% render 'home-ornament' %}
+            {% render 'home-ornament', style: section.settings.ornament_style %}
           {%- endif -%}
         {%- endif -%}
 
         {%- if heading != blank -%}
-          <h2 class="home-heading" id="HomeCards-{{ section.id }}">{{ heading | escape | newline_to_br }}</h2>
+          <h2 class="home-heading" id="HomeCards-{{ section.id }}" data-reveal="rise" style="--reveal-order: 1;">
+            {{- heading | escape | newline_to_br -}}
+          </h2>
         {%- endif -%}
 
         {%- if section.settings.text != blank -%}
-          <div class="home-text home-cards__sub">{{ section.settings.text }}</div>
+          <div class="home-text home-cards__sub" data-reveal="rise" style="--reveal-order: 2;">
+            {{- section.settings.text -}}
+          </div>
         {%- endif -%}
       </div>
     {%- endif -%}
@@ -237,6 +273,12 @@
               elsif is_feature
                 assign item_class = 'home-cards__item home-cards__item--feature'
               endif
+
+              comment
+                Cards follow the heading one step apart; past the fifth they
+                share a step, so a long row never makes anyone wait.
+              endcomment
+              assign reveal_order = forloop.index0 | at_most: 4 | plus: 2
             -%}
 
             {%- capture card_inner -%}
@@ -260,7 +302,12 @@
               {%- endif -%}
             {%- endcapture -%}
 
-            <li class="{{ item_class }}" {{ block.shopify_attributes }}>
+            <li
+              class="{{ item_class }}"
+              data-reveal="rise"
+              style="--reveal-order: {{ reveal_order }};"
+              {{ block.shopify_attributes }}
+            >
               {%- if card_url != blank -%}
                 <a href="{{ card_url }}" class="home-card">{{ card_inner }}</a>
               {%- else -%}
@@ -407,10 +454,20 @@
       "default": false
     },
     {
+      "type": "select",
+      "id": "ornament_style",
+      "label": "Ornament style",
+      "options": [
+        { "value": "sprig", "label": "Illustrated flower sprig" },
+        { "value": "drawn", "label": "Block-print flowers" }
+      ],
+      "default": "sprig"
+    },
+    {
       "type": "image_picker",
       "id": "ornament_image",
       "label": "Ornament picture",
-      "info": "Optional. Replaces the drawn block-print flowers. About 250 x 80."
+      "info": "Optional. Replaces the style above. About 350 x 90."
     },
     {
       "type": "textarea",
@@ -429,8 +486,21 @@
       "content": "Decorations"
     },
     {
+      "type": "select",
+      "id": "decor_style",
+      "label": "Decorations",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "tabi_left", "label": "Cotton spray, left" },
+        { "value": "tabi_both", "label": "Cotton sprays, both sides" },
+        { "value": "custom", "label": "My pictures below" }
+      ],
+      "default": "none",
+      "info": "Tabi's illustrated cotton sprays beside the heading, like the reference site's clouds."
+    },
+    {
       "type": "paragraph",
-      "content": "Optional pictures beside the heading, like the reference site's clouds. Use PNGs with transparent backgrounds."
+      "content": "Your own pictures beside the heading. Use PNGs with transparent backgrounds, and choose \"My pictures below\" above."
     },
     {
       "type": "image_picker",
@@ -505,6 +575,17 @@
       "id": "link_color",
       "label": "Captions",
       "default": "#4d4d4f"
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "checkbox",
+      "id": "motion",
+      "label": "Animate on scroll",
+      "default": true,
+      "info": "The heading and cards rise into place, one after another, the first time they scroll into view. Off for visitors who ask their device for less motion, and in the theme editor."
     },
     {
       "type": "header",
@@ -602,6 +683,7 @@
         "columns_mobile": "2",
         "ratio": "portrait_tall",
         "feature_middle": true,
+        "decor_style": "tabi_left",
         "heading": "Dressed for the Season",
         "text": "<p>Easy silhouettes in cotton, printed by hand and made in small batches.</p>",
         "padding_top": 40,

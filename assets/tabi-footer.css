@@ -311,6 +311,22 @@
   color: inherit;
 }
 
+/* The illustrated meadow along the foot, where the reference has its band
+   of clouds: full width, its ground line resting on the bottom bar. */
+.tabi-footer__meadow {
+  position: relative;
+  z-index: 0;
+  margin-top: -12px;
+  line-height: 0;
+  pointer-events: none;
+}
+
+.tabi-footer__meadow-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* --------------------------------------------------------------------------
    4. BOTTOM BAR
    -------------------------------------------------------------------------- */
@@ -448,6 +464,20 @@
 
   .tabi-footer__localization {
     margin-top: 20px;
+  }
+
+  /* The meadow drawn full width is only 66px tall on a phone; at 170% it
+     keeps the middle of the scene (cotton, flowers, one bird) at a size
+     that still reads as an illustration. */
+  .tabi-footer__meadow {
+    overflow: hidden;
+    margin-top: -4px;
+  }
+
+  .tabi-footer__meadow-img {
+    width: 170%;
+    max-width: none;
+    margin-left: -35%;
   }
 
   .tabi-footer__bottom {

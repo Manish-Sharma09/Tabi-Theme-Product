@@ -12,12 +12,20 @@
   footer's scroll-started accordion is replaced by <details>: the columns are
   open on desktop and in the HTML, and assets/tabi-footer.js folds them on
   phones.
+
+  2026-10-10, second pass: Tabi's illustrated meadow (cotton, wheat and
+  birds) runs along the foot in place of the reference's band of clouds,
+  and rises into view the first time it is scrolled to (assets/tabi-motion.*).
 {%- endcomment -%}
 
 {{ 'tabi-footer.css' | asset_url | stylesheet_tag }}
 {{ 'component-list-social.css' | asset_url | stylesheet_tag }}
 {{ 'component-list-payment.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'tabi-footer.js' | asset_url }}" defer="defer"></script>
+{%- if section.settings.show_meadow -%}
+  {{ 'tabi-motion.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'tabi-motion.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
 
 {%- liquid
   assign has_social_icons = true
@@ -336,6 +344,12 @@
         {%- endif -%}
       </div>
     {%- endif -%}
+
+    {%- if section.settings.show_meadow -%}
+      <div class="tabi-footer__meadow" aria-hidden="true" data-motion>
+        {% render 'home-decor', name: 'meadow', class: 'tabi-footer__meadow-img', reveal: 'rise-up', sizes: '100vw' %}
+      </div>
+    {%- endif -%}
   </div>
 
   <div class="tabi-footer__bottom">
@@ -513,6 +527,13 @@
       "id": "accent_line",
       "label": "Line along the top",
       "default": "#e2d1a6"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_meadow",
+      "label": "Meadow border",
+      "default": true,
+      "info": "Tabi's illustrated meadow of cotton, wheat and birds along the foot of the footer."
     },
     {
       "type": "image_picker",

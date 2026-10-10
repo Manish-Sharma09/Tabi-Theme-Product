@@ -1,39 +1,55 @@
 {% doc %}
-  The small motif over a home page heading: three block-print flowers, the
-  middle one larger - Tabi's stand-in for the reference site's three stars.
-  Drawn in currentColor, so the section's "Ornament" colour paints it.
+  The small motif over a home page heading - Tabi's stand-in for the
+  reference site's three stars. Two styles:
+  - 'sprig' (default): the illustrated flower sprig from the brand's
+    illustration sheet (assets/tabi-sprig.webp). It opens from the middle
+    as it scrolls into view.
+  - 'drawn': three block-print flowers, the middle one larger, drawn in
+    currentColor so the section's "Ornament" colour paints them.
 
   A section can swap in an uploaded picture instead; that case is handled in
   the section, not here.
 
-  @param {string} [class] - Extra classes for the svg
+  @param {string} [style] - sprig | drawn
+  @param {string} [class] - Extra classes
 
   @example
-  {% render 'home-ornament', class: 'home-ornament--band' %}
+  {% render 'home-ornament', style: section.settings.ornament_style %}
 {% enddoc %}
 
-{%- capture flower -%}
-  <path d="M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z"/>
-  <path d="M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z" transform="rotate(90)"/>
-  <path d="M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z" transform="rotate(180)"/>
-  <path d="M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z" transform="rotate(270)"/>
-  <path d="M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z" transform="rotate(45)"/>
-  <path d="M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z" transform="rotate(135)"/>
-  <path d="M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z" transform="rotate(225)"/>
-  <path d="M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z" transform="rotate(315)"/>
-  <circle r="2.4"/>
-{%- endcapture -%}
+{%- if style == 'drawn' -%}
+  {%- capture flower -%}
+    <path d="M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z"/>
+    <path d="M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z" transform="rotate(90)"/>
+    <path d="M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z" transform="rotate(180)"/>
+    <path d="M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z" transform="rotate(270)"/>
+    <path d="M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z" transform="rotate(45)"/>
+    <path d="M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z" transform="rotate(135)"/>
+    <path d="M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z" transform="rotate(225)"/>
+    <path d="M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z" transform="rotate(315)"/>
+    <circle r="2.4"/>
+  {%- endcapture -%}
 
-<svg
-  class="home-ornament{% if class != blank %} {{ class }}{% endif %}"
-  viewBox="0 0 126 40"
-  width="126"
-  height="40"
-  fill="currentColor"
-  aria-hidden="true"
-  focusable="false"
->
-  <g transform="translate(19 20) scale(.6)">{{ flower }}</g>
-  <g transform="translate(63 20)">{{ flower }}</g>
-  <g transform="translate(107 20) scale(.6)">{{ flower }}</g>
-</svg>
+  <svg
+    class="home-ornament{% if class != blank %} {{ class }}{% endif %}"
+    viewBox="0 0 126 40"
+    width="126"
+    height="40"
+    fill="currentColor"
+    aria-hidden="true"
+    focusable="false"
+    data-reveal="open"
+  >
+    <g transform="translate(19 20) scale(.6)">{{ flower }}</g>
+    <g transform="translate(63 20)">{{ flower }}</g>
+    <g transform="translate(107 20) scale(.6)">{{ flower }}</g>
+  </svg>
+{%- else -%}
+  {%- liquid
+    assign sprig_class = 'home-ornament home-ornament--sprig'
+    if class != blank
+      assign sprig_class = sprig_class | append: ' ' | append: class
+    endif
+  -%}
+  {% render 'home-decor', name: 'sprig', class: sprig_class, reveal: 'open' %}
+{%- endif -%}

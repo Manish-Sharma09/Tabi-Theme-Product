@@ -9,6 +9,8 @@
 {%- endcomment -%}
 
 {{ 'home-sections.css' | asset_url | stylesheet_tag }}
+{{ 'tabi-motion.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'tabi-motion.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   assign heading = section.settings.heading | strip
@@ -42,7 +44,12 @@
   }
 {%- endstyle -%}
 
-<div class="home-section home-spot{% if section.settings.frame %} home-spot--framed{% endif %}{% if section.settings.pattern %} home-section--pattern{% endif %}">
+<div
+  class="home-section home-spot{% if section.settings.frame %} home-spot--framed{% endif %}{% if section.settings.pattern %} home-section--pattern{% endif %}"
+  {% if section.settings.motion %}
+    data-motion
+  {% endif %}
+>
   {%- if section.settings.background_image != blank -%}
     {{
       section.settings.background_image
@@ -65,16 +72,20 @@
           | image_tag: class: 'home-ornament home-ornament--image', alt: '', loading: 'lazy'
         }}
       {%- else -%}
-        {% render 'home-ornament' %}
+        {% render 'home-ornament', style: section.settings.ornament_style %}
       {%- endif -%}
     {%- endif -%}
 
     {%- if heading != blank -%}
-      <h2 class="home-heading">{{ heading | escape | newline_to_br }}</h2>
+      <h2 class="home-heading" data-reveal="rise" style="--reveal-order: 1;">
+        {{- heading | escape | newline_to_br -}}
+      </h2>
     {%- endif -%}
 
     {%- if section.settings.text != blank -%}
-      <div class="home-text home-spot__text">{{ section.settings.text }}</div>
+      <div class="home-text home-spot__text" data-reveal="rise" style="--reveal-order: 2;">
+        {{- section.settings.text -}}
+      </div>
     {%- endif -%}
 
     {%- capture spot_picture -%}
@@ -109,7 +120,7 @@
       {%- endif -%}
     {%- endcapture -%}
 
-    <div class="home-spot__media">
+    <div class="home-spot__media" data-reveal="rise" style="--reveal-order: 3;">
       {%- if section.settings.button_link != blank -%}
         <a href="{{ section.settings.button_link }}" class="home-spot__media-link" tabindex="-1" aria-hidden="true">
           {{- spot_picture -}}
@@ -125,7 +136,7 @@
         phrases and drop the bars, which would otherwise start a line.
       {%- endcomment -%}
       {%- assign tagline_parts = tagline | split: '|' -%}
-      <p class="home-spot__tagline">
+      <p class="home-spot__tagline" data-reveal="rise" style="--reveal-order: 4;">
         {%- assign phrase_count = 0 -%}
         {%- for part in tagline_parts -%}
           {%- assign phrase = part | strip -%}
@@ -141,7 +152,7 @@
     {%- endif -%}
 
     {%- if section.settings.button_label != blank -%}
-      <p class="home-spot__actions">
+      <p class="home-spot__actions" data-reveal="rise" style="--reveal-order: 5;">
         {%- if section.settings.button_link != blank -%}
           <a href="{{ section.settings.button_link }}" class="home-button">{{ section.settings.button_label | escape }}</a>
         {%- else -%}
@@ -165,10 +176,20 @@
       "default": true
     },
     {
+      "type": "select",
+      "id": "ornament_style",
+      "label": "Ornament style",
+      "options": [
+        { "value": "sprig", "label": "Illustrated flower sprig" },
+        { "value": "drawn", "label": "Block-print flowers" }
+      ],
+      "default": "sprig"
+    },
+    {
       "type": "image_picker",
       "id": "ornament_image",
       "label": "Ornament picture",
-      "info": "Optional. Replaces the drawn block-print flowers. About 250 x 80."
+      "info": "Optional. Replaces the style above. About 350 x 90."
     },
     {
       "type": "textarea",
@@ -311,6 +332,17 @@
       "id": "text_color",
       "label": "Text and line",
       "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "checkbox",
+      "id": "motion",
+      "label": "Animate on scroll",
+      "default": true,
+      "info": "The heading, picture, line and button rise into place one after another the first time they scroll into view. Off for visitors who ask their device for less motion, and in the theme editor."
     },
     {
       "type": "header",

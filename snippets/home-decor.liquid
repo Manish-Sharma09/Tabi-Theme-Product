@@ -1,0 +1,66 @@
+{% doc %}
+  One of Tabi's illustrations, stored with the theme (assets/tabi-*.webp, cut
+  from the brand's illustration sheet on 2026-10-10): a cotton spray, a linen
+  ribbon, a flower sprig or a meadow border. Decorative, so alt is empty.
+
+  data-reveal names the entrance assets/tabi-motion.css draws when the
+  picture scrolls into view; data-parallax is how many pixels it may drift
+  against the scroll. Both do nothing without the motion script, or for
+  visitors who ask for less motion.
+
+  @param {string} name - spray-left | spray-right | ribbon | sprig | meadow
+  @param {string} [class] - Classes for the img
+  @param {string} [reveal] - Entrance: grow-left | grow-right | unroll | open | rise-up
+  @param {number} [parallax] - Drift in pixels, 0 for none
+  @param {string} [sizes] - sizes attribute (meadow only; it has two widths)
+  @param {string} [loading] - lazy (default) | eager
+
+  @example
+  {% render 'home-decor', name: 'ribbon', class: 'home-decor home-decor--ribbon', reveal: 'unroll', parallax: 16 %}
+{% enddoc %}
+
+{%- liquid
+  case name
+    when 'spray-left'
+      assign width = 763
+      assign height = 363
+    when 'spray-right'
+      assign width = 769
+      assign height = 384
+    when 'ribbon'
+      assign width = 1075
+      assign height = 165
+    when 'sprig'
+      assign width = 580
+      assign height = 151
+    when 'meadow'
+      assign width = 1737
+      assign height = 296
+  endcase
+
+  assign file = 'tabi-' | append: name | append: '.webp'
+-%}
+
+{%- if width -%}
+  <img
+    src="{{ file | asset_url }}"
+    {% if name == 'meadow' %}
+      srcset="{{ 'tabi-meadow-small.webp' | asset_url }} 868w, {{ file | asset_url }} 1737w"
+      sizes="{{ sizes | default: '100vw' }}"
+    {% endif %}
+    width="{{ width }}"
+    height="{{ height }}"
+    alt=""
+    loading="{{ loading | default: 'lazy' }}"
+    decoding="async"
+    {% if class != blank %}
+      class="{{ class }}"
+    {% endif %}
+    {% if reveal != blank %}
+      data-reveal="{{ reveal }}"
+    {% endif %}
+    {% if parallax > 0 %}
+      data-parallax="{{ parallax }}"
+    {% endif %}
+  >
+{%- endif -%}

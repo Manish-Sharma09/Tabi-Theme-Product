@@ -6,6 +6,9 @@
    on a phone and scroll on a trackpad with no script at all. This adds the
    desktop arrows, which step one card and wrap round at either end like the
    reference's endless slider, and the phone dots, one per screenful.
+
+   A mouse can also drag the row. Touch keeps the browser's own swipe; a pen
+   or a mouse drag of more than a few pixels never opens the card under it.
    ========================================================================== */
 
 (() => {
@@ -30,6 +33,8 @@
       this.resizeObserver = new ResizeObserver(() => this.layout());
       this.resizeObserver.observe(this.track);
 
+      this.bindDrag();
+
       // Theme editor: selecting a card's block brings that card into view.
       this.addEventListener('shopify:block:select', (event) => {
         const slide = event.target.closest?.('.home-carousel__slide');
@@ -43,6 +48,61 @@
       this.resizeObserver?.disconnect();
       this.track?.removeEventListener('scroll', this.onScroll);
       cancelAnimationFrame(this.frame);
+      this.endDrag?.();
+    }
+
+    // Mouse drag. The window listeners exist only while a button is down.
+    bindDrag() {
+      const DRAG_START = 6;
+      let start = null;
+      let dragged = false;
+
+      const onMove = (event) => {
+        if (!start) return;
+        const distance = event.clientX - start.x;
+        if (!dragged && Math.abs(distance) > DRAG_START) {
+          dragged = true;
+          this.classList.add('is-dragging');
+        }
+        if (dragged) {
+          event.preventDefault();
+          this.track.scrollLeft = start.left - distance;
+        }
+      };
+
+      this.endDrag = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', this.endDrag);
+        window.removeEventListener('pointercancel', this.endDrag);
+        start = null;
+        // Removing the class turns snapping back on, and the row settles on
+        // the nearest card by itself.
+        this.classList.remove('is-dragging');
+      };
+
+      this.track.addEventListener('pointerdown', (event) => {
+        if (event.pointerType !== 'mouse' || event.button !== 0 || this.classList.contains('is-static')) return;
+        start = { x: event.clientX, left: this.track.scrollLeft };
+        dragged = false;
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', this.endDrag);
+        window.addEventListener('pointercancel', this.endDrag);
+      });
+
+      // The click that ends a drag is not a click on the card.
+      this.track.addEventListener(
+        'click',
+        (event) => {
+          if (!dragged) return;
+          dragged = false;
+          event.preventDefault();
+          event.stopPropagation();
+        },
+        true
+      );
+
+      // Links and pictures would otherwise start the browser's own drag.
+      this.track.addEventListener('dragstart', (event) => event.preventDefault());
     }
 
     maxScroll() {

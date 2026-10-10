@@ -1,0 +1,108 @@
+/* ==========================================================================
+   tabi-motion.css
+   Entrances for the home page sections and the footer's meadow, driven by
+   assets/tabi-motion.js.
+
+   Everything here sits behind `html.tabi-motion`, which the script adds only
+   when the visitor has not asked for less motion and the page is not open in
+   the theme editor. Without it every element is simply shown, so nothing can
+   be stranded invisible. A section opts in with `data-motion` on its root;
+   each moving piece names its entrance in `data-reveal` and its place in the
+   cascade in `--reveal-order`.
+
+   Tuning:
+     --motion-rise      how far text and cards travel up as they appear
+     --motion-step      the delay between one piece and the next
+     durations below    0.9s for text, 1.4-1.8s for illustrations, which
+                        should feel drawn rather than switched on
+   ========================================================================== */
+
+:root {
+  --motion-rise: 18px;
+  --motion-step: 90ms;
+  --motion-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tabi-motion [data-motion] [data-reveal] {
+  --motion-delay: calc(var(--reveal-order, 0) * var(--motion-step));
+}
+
+/* Text, cards, pictures: fade and rise. */
+.tabi-motion [data-motion] [data-reveal='rise'] {
+  transition:
+    opacity 0.9s var(--motion-ease) var(--motion-delay),
+    transform 1.1s var(--motion-ease-out) var(--motion-delay);
+}
+
+.tabi-motion [data-motion] [data-reveal='rise']:not(.is-revealed) {
+  opacity: 0;
+  transform: translateY(var(--motion-rise));
+}
+
+/* Illustrations draw themselves: a clip that opens from where the plant
+   grows, or along the ribbon's length. Both states are inset() so the
+   browser can interpolate between them. */
+.tabi-motion [data-motion] [data-reveal='grow-left'],
+.tabi-motion [data-motion] [data-reveal='grow-right'],
+.tabi-motion [data-motion] [data-reveal='unroll'],
+.tabi-motion [data-motion] [data-reveal='open'],
+.tabi-motion [data-motion] [data-reveal='rise-up'] {
+  clip-path: inset(0 0 0 0);
+  transition:
+    clip-path 1.6s var(--motion-ease-out) var(--motion-delay),
+    opacity 1s var(--motion-ease) var(--motion-delay),
+    transform 1.6s var(--motion-ease-out) var(--motion-delay);
+}
+
+.tabi-motion [data-motion] [data-reveal='grow-left']:not(.is-revealed) {
+  opacity: 0;
+  clip-path: inset(0 100% 70% 0);
+}
+
+.tabi-motion [data-motion] [data-reveal='grow-right']:not(.is-revealed) {
+  opacity: 0;
+  clip-path: inset(0 0 70% 100%);
+}
+
+.tabi-motion [data-motion] [data-reveal='unroll'] {
+  transition-duration: 1.8s, 0.6s, 1.8s;
+}
+
+.tabi-motion [data-motion] [data-reveal='unroll']:not(.is-revealed) {
+  clip-path: inset(0 100% 0 0);
+}
+
+.tabi-motion [data-motion] [data-reveal='open'] {
+  transition-duration: 1.2s, 0.8s, 1.2s;
+}
+
+.tabi-motion [data-motion] [data-reveal='open']:not(.is-revealed) {
+  opacity: 0;
+  clip-path: inset(0 50% 0 50%);
+}
+
+.tabi-motion [data-motion] [data-reveal='rise-up']:not(.is-revealed) {
+  opacity: 0;
+  clip-path: inset(100% 0 0 0);
+  transform: translateY(12px);
+}
+
+/* Scroll drift. The script writes `translate`, a property of its own, so it
+   adds to any transform an entrance or a hover is using. */
+.tabi-motion [data-parallax] {
+  will-change: translate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabi-motion [data-motion] [data-reveal] {
+    opacity: 1;
+    clip-path: none;
+    transform: none;
+    transition: none;
+  }
+
+  .tabi-motion [data-parallax] {
+    translate: none;
+  }
+}

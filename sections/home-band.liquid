@@ -9,6 +9,8 @@
 {%- endcomment -%}
 
 {{ 'home-sections.css' | asset_url | stylesheet_tag }}
+{{ 'tabi-motion.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'tabi-motion.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   assign heading = section.settings.heading | strip
@@ -33,15 +35,19 @@
 {%- capture copy -%}
   <div class="home-band__copy">
     {%- if heading != blank -%}
-      <h2 class="home-heading">{{ heading | escape | newline_to_br }}</h2>
+      <h2 class="home-heading" data-reveal="rise" style="--reveal-order: 1;">
+        {{- heading | escape | newline_to_br -}}
+      </h2>
     {%- endif -%}
 
     {%- if section.settings.text != blank -%}
-      <div class="home-text home-band__text">{{ section.settings.text }}</div>
+      <div class="home-text home-band__text" data-reveal="rise" style="--reveal-order: 2;">
+        {{- section.settings.text -}}
+      </div>
     {%- endif -%}
 
     {%- if section.settings.link_label != blank -%}
-      <p class="home-band__actions">
+      <p class="home-band__actions" data-reveal="rise" style="--reveal-order: 3;">
         {%- if section.settings.link != blank -%}
           <a href="{{ section.settings.link }}" class="home-link">{{ section.settings.link_label | escape }}</a>
         {%- else -%}
@@ -52,7 +58,12 @@
   </div>
 {%- endcapture -%}
 
-<div class="home-section home-band{% if section.settings.pattern %} home-section--pattern{% endif %}">
+<div
+  class="home-section home-band{% if section.settings.pattern %} home-section--pattern{% endif %}"
+  {% if section.settings.motion %}
+    data-motion
+  {% endif %}
+>
   {%- if section.settings.background_image != blank -%}
     {{
       section.settings.background_image
@@ -114,7 +125,12 @@
         {%- endif -%}
       {%- endcapture -%}
 
-      <div class="home-band__figure home-band__figure--{{ side }}{% if arched %} home-band__figure--arch{% endif %}">
+      {%- comment -%} The left picture leads; the arched one follows the story. {%- endcomment -%}
+      <div
+        class="home-band__figure home-band__figure--{{ side }}{% if arched %} home-band__figure--arch{% endif %}"
+        data-reveal="rise"
+        style="--reveal-order: {% if forloop.first %}0{% else %}2{% endif %};"
+      >
         {%- if picture_url != blank -%}
           <a href="{{ picture_url }}" class="home-band__link">{{ picture_inner }}</a>
         {%- else -%}
@@ -282,6 +298,17 @@
       "id": "link_color",
       "label": "Links and captions",
       "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "checkbox",
+      "id": "motion",
+      "label": "Animate on scroll",
+      "default": true,
+      "info": "The pictures and the story rise into place the first time they scroll into view. Off for visitors who ask their device for less motion, and in the theme editor."
     },
     {
       "type": "header",
