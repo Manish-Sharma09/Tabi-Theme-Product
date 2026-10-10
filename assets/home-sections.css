@@ -1,0 +1,1124 @@
+/* ==========================================================================
+   home-sections.css
+   The home page sections built after the reference site's home page
+   (goodearth.in, measured at 1440 and 390 wide on 2026-10-10):
+
+     sections/home-feature.liquid    picture with a cut-out over its corner,
+                                     story beside it ("The Gift of ...")
+     sections/home-cards.liquid      heading over picture cards, as a grid or
+                                     a carousel ("Delightful Decor",
+                                     "Dressed in Celebration", "Indulgent
+                                     Rituals")
+     sections/home-band.liquid       coloured band: picture, story, arched
+                                     picture ("Colour Me Festive")
+     sections/home-spotlight.liquid  coloured band: heading, framed picture,
+                                     a line of words, a button ("Visit Our
+                                     Store")
+
+     1. Scale, colours and the section frame
+     2. Shared pieces: ornament, heading, text, links, button, decorations
+     3. Feature
+     4. Cards: header and grid
+     5. Cards: carousel
+     6. Band
+     7. Spotlight
+     8. Reduced motion
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. SCALE, COLOURS AND THE SECTION FRAME
+   Every length below is the reference's own measurement in its 1434px-wide
+   layout, multiplied by --u: one reference pixel at the current screen
+   width. The reference scales its whole page with the window, so this keeps
+   its proportions from tablet to desktop; past 1440px the content stops
+   growing and the bands' colour runs on to the edges.
+
+   Phones have a layout of their own, measured at 390px, and --u becomes one
+   of those pixels. Type is the exception: the reference shrinks its text
+   with the window down to 8px on a phone, so text sizes here have floors.
+   -------------------------------------------------------------------------- */
+
+.home-section {
+  --u: calc(min(100vw, 1440px) / 1434);
+  --home-bg: #ffffff;
+  --home-heading: #253c30;
+  --home-text: #4d4d4f;
+  --home-link: #4d4d4f;
+  --home-ornament: #253c30;
+  --home-pattern: #ffffff;
+  --home-pattern-opacity: 0;
+  --home-button-bg: #efede9;
+  --home-button-text: #253c30;
+  --home-heading-size: 50;
+  --home-pt: 40;
+  --home-pb: 40;
+  --home-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-top: calc(var(--home-pt) * var(--u));
+  padding-bottom: calc(var(--home-pb) * var(--u));
+  background-color: var(--home-bg);
+  color: var(--home-text);
+}
+
+@media screen and (max-width: 749px) {
+  .home-section {
+    --u: calc(100vw / 390);
+    padding-top: calc(var(--home-pt) * 0.75px);
+    padding-bottom: calc(var(--home-pb) * 0.75px);
+  }
+}
+
+.home-section__inner {
+  position: relative;
+  z-index: 1;
+  max-width: calc(1434 * var(--u));
+  margin: 0 auto;
+}
+
+/* A picture filling the whole band, under the pattern and the content. */
+.home-section__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The band's texture: a half-drop repeat of the block-print flower, painted
+   in the section's pattern colour. The reference's bands carry a faint
+   cloud print in the same way. */
+.home-section--pattern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--home-pattern);
+  opacity: var(--home-pattern-opacity);
+  pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 112 112'%3E%3Cg transform='translate(28 28) scale(0.78)'%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(0)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(90)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(180)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(270)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(45)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(135)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(225)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(315)'/%3E%3Ccircle r='2.4'/%3E%3C/g%3E%3Cg transform='translate(84 84) scale(0.78)'%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(0)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(90)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(180)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(270)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(45)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(135)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(225)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(315)'/%3E%3Ccircle r='2.4'/%3E%3C/g%3E%3C/svg%3E")
+    0 0 / 112px 112px repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 112 112'%3E%3Cg transform='translate(28 28) scale(0.78)'%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(0)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(90)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(180)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(270)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(45)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(135)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(225)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(315)'/%3E%3Ccircle r='2.4'/%3E%3C/g%3E%3Cg transform='translate(84 84) scale(0.78)'%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(0)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(90)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(180)'/%3E%3Cpath d='M0-3C3.6-7.5 3.6-13 0-18-3.6-13-3.6-7.5 0-3Z' transform='rotate(270)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(45)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(135)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(225)'/%3E%3Cpath d='M0-4C2.2-6.6 2.2-9.6 0-12.4-2.2-9.6-2.2-6.6 0-4Z' transform='rotate(315)'/%3E%3Ccircle r='2.4'/%3E%3C/g%3E%3C/svg%3E")
+    0 0 / 112px 112px repeat;
+}
+
+/* --------------------------------------------------------------------------
+   2. SHARED PIECES
+   -------------------------------------------------------------------------- */
+
+.home-ornament {
+  display: block;
+  width: calc(126 * var(--u));
+  height: auto;
+  margin: 0 auto;
+  color: var(--home-ornament);
+}
+
+/* An uploaded ornament keeps its own shape at the drawn one's height. */
+.home-ornament--image {
+  width: auto;
+  height: calc(40 * var(--u));
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.home-heading {
+  margin: 0;
+  color: var(--home-heading);
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-weight: var(--font-heading-weight);
+  font-size: max(30px, calc(var(--home-heading-size) * var(--u)));
+  line-height: 1.21;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.home-text {
+  margin: 0;
+  color: var(--home-text);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--font-body-weight);
+  font-size: max(14px, calc(16.8 * var(--u)));
+  line-height: 1.69;
+  letter-spacing: 0;
+}
+
+.home-text p {
+  margin: 0;
+}
+
+.home-text p + p {
+  margin-top: 0.75em;
+}
+
+.home-text a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+/* The underlined capitals under every picture and story. A <span> when the
+   whole card around it is the link, an <a> when it stands alone. */
+.home-link {
+  display: inline-block;
+  color: var(--home-link);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--home-link-weight, 400);
+  font-size: max(13px, calc(15.75 * var(--u)));
+  line-height: 1.69;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
+  transition: opacity 0.3s var(--home-ease);
+}
+
+a.home-link:focus-visible,
+.home-card:focus-visible,
+.home-band__figure a:focus-visible,
+.home-spot__media-link:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 4px;
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  a.home-link:hover,
+  .home-card:hover .home-link,
+  .home-band__link:hover .home-link {
+    opacity: 0.72;
+  }
+}
+
+.home-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: max(40px, calc(37 * var(--u)));
+  padding: 0 max(18px, calc(15 * var(--u)));
+  border: 0;
+  border-radius: 0;
+  background-color: var(--home-button-bg);
+  color: var(--home-button-text);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: 500;
+  font-size: max(13px, calc(15.75 * var(--u)));
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background-color 0.3s var(--home-ease);
+}
+
+@media (hover: hover) {
+  .home-button:hover {
+    background-color: color-mix(in srgb, var(--home-button-bg) 86%, #000000);
+  }
+}
+
+.home-button:focus-visible {
+  outline: 1px solid var(--home-button-bg);
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
+@media screen and (max-width: 749px) {
+  .home-ornament {
+    width: calc(64 * var(--u));
+  }
+
+  .home-ornament--image {
+    width: auto;
+    height: calc(20 * var(--u));
+  }
+
+  .home-heading {
+    font-size: max(26px, calc(var(--home-heading-size) * 0.56px));
+    line-height: 1.2;
+  }
+
+  .home-text {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .home-link {
+    font-size: 12.5px;
+  }
+
+  .home-button {
+    min-height: 44px;
+    padding: 0 20px;
+    font-size: 13px;
+  }
+}
+
+/* Decorative pictures (the reference's clouds, butterflies and ribbons) sit
+   in a frame the width of the content, behind it, and never take clicks. */
+.home-decor-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  max-width: calc(1434 * var(--u));
+  margin: 0 auto;
+  pointer-events: none;
+}
+
+.home-decor {
+  position: absolute;
+  display: block;
+  max-width: none;
+  height: auto;
+  user-select: none;
+}
+
+/* --------------------------------------------------------------------------
+   3. FEATURE
+   Desktop: picture (591 x 518) at the left margin, the cut-out (314 wide)
+   over its lower right corner and 85px past its foot; the story starts
+   160px to the right of the picture, 106px below its top.
+   -------------------------------------------------------------------------- */
+
+.home-feature__inner {
+  display: grid;
+  grid-template-columns: calc(591 * var(--u)) minmax(0, 1fr);
+  column-gap: calc(160 * var(--u));
+  align-items: start;
+  padding: 0 calc(81 * var(--u));
+}
+
+.home-feature__media {
+  position: relative;
+}
+
+.home-feature--has-cutout .home-feature__media {
+  padding-bottom: calc(85 * var(--u));
+}
+
+.home-feature__main {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 591 / 518;
+  background-color: rgb(0 0 0 / 0.04);
+}
+
+.home-feature__main img,
+.home-feature__main svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Anchored by its foot, 85px below the picture's, so a tall or a square
+   cut-out hangs the same way. The reference's is a transparent PNG and can
+   reach into the text column; Tabi's are photographs, so this one stops
+   51px short of the text. */
+.home-feature__cutout {
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  left: calc(400 * var(--u));
+  width: calc(300 * var(--u));
+}
+
+.home-feature__cutout img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.home-feature__copy {
+  max-width: max(260px, calc(330 * var(--u)));
+  padding-top: calc(106 * var(--u));
+}
+
+.home-feature__text {
+  margin-top: calc(17 * var(--u));
+}
+
+.home-feature__actions {
+  margin: calc(22 * var(--u)) 0 0;
+}
+
+/* Picture on the right: the same layout mirrored. */
+.home-feature--reverse .home-feature__inner {
+  grid-template-columns: minmax(0, 1fr) calc(591 * var(--u));
+}
+
+.home-feature--reverse .home-feature__media {
+  order: 2;
+}
+
+.home-feature--reverse .home-feature__copy {
+  justify-self: end;
+}
+
+.home-feature--reverse .home-feature__cutout {
+  left: auto;
+  right: calc(400 * var(--u));
+}
+
+.home-feature .home-decor--1 {
+  top: calc(17 * var(--u));
+  right: 0;
+  width: calc(298 * var(--u));
+}
+
+.home-feature .home-decor--2 {
+  top: calc(125 * var(--u));
+  left: calc(1096 * var(--u));
+  width: calc(89 * var(--u));
+}
+
+.home-feature .home-decor--3 {
+  top: calc(384 * var(--u));
+  right: calc(2 * var(--u));
+  width: calc(425 * var(--u));
+}
+
+.home-feature--reverse .home-decor--1 {
+  right: auto;
+  left: 0;
+}
+
+.home-feature--reverse .home-decor--2 {
+  left: calc(249 * var(--u));
+}
+
+.home-feature--reverse .home-decor--3 {
+  right: auto;
+  left: calc(2 * var(--u));
+}
+
+/* Phone: the story first, left-aligned, then the picture with the cut-out
+   hanging off its right side to the screen edge. */
+@media screen and (max-width: 749px) {
+  .home-feature__inner {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .home-feature__copy,
+  .home-feature--reverse .home-feature__copy {
+    order: -1;
+    max-width: none;
+    padding: calc(53 * var(--u)) calc(47 * var(--u)) 0;
+  }
+
+  .home-feature__text {
+    margin-top: calc(10 * var(--u));
+  }
+
+  .home-feature__actions {
+    margin-top: calc(9 * var(--u));
+  }
+
+  .home-feature__media {
+    width: calc(244 * var(--u));
+    margin: calc(34 * var(--u)) 0 0 calc(25 * var(--u));
+  }
+
+  .home-feature--has-cutout .home-feature__media {
+    padding-bottom: calc(26 * var(--u));
+  }
+
+  .home-feature__main {
+    aspect-ratio: 244 / 228;
+  }
+
+  .home-feature__cutout {
+    left: calc(206 * var(--u));
+    width: calc(160 * var(--u));
+  }
+
+  .home-feature--reverse .home-feature__media {
+    margin: calc(34 * var(--u)) calc(25 * var(--u)) 0 auto;
+  }
+
+  .home-feature--reverse .home-feature__cutout {
+    left: auto;
+    right: calc(206 * var(--u));
+  }
+
+  .home-feature .home-decor--1 {
+    top: calc(27 * var(--u));
+    right: auto;
+    left: 0;
+    width: calc(112 * var(--u));
+  }
+
+  .home-feature .home-decor--2 {
+    top: calc(67 * var(--u));
+    left: calc(170 * var(--u));
+    width: calc(45 * var(--u));
+  }
+
+  .home-feature .home-decor--3 {
+    top: calc(110 * var(--u));
+    right: 0;
+    left: auto;
+    width: calc(160 * var(--u));
+  }
+
+  .home-feature--reverse .home-decor--1 {
+    left: auto;
+    right: 0;
+  }
+
+  .home-feature--reverse .home-decor--2 {
+    left: auto;
+    right: calc(170 * var(--u));
+  }
+
+  .home-feature--reverse .home-decor--3 {
+    right: auto;
+    left: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. CARDS: HEADER AND GRID
+   The reference's three card rows, measured:
+     3 cards  309 wide, the middle one 344 and arched, 36 apart, bottoms
+              level; captions 16 below.
+     4 cards  303 wide, 34 apart; captions 15 below.
+   -------------------------------------------------------------------------- */
+
+.home-cards {
+  --home-card: 303;
+  --home-card-feature: 303;
+  --home-gap: 34;
+  --home-ratio: 3 / 4;
+  --home-fit: cover;
+}
+
+.home-cards--cols-2 {
+  --home-card: 420;
+  --home-card-feature: 420;
+  --home-gap: 36;
+}
+
+.home-cards--cols-3 {
+  --home-card: 309;
+  --home-card-feature: 344;
+  --home-gap: 36;
+}
+
+.home-cards--cols-5 {
+  --home-card: 244;
+  --home-card-feature: 244;
+  --home-gap: 24;
+}
+
+.home-cards--cols-6 {
+  --home-card: 200;
+  --home-card-feature: 200;
+  --home-gap: 20;
+}
+
+.home-cards__header {
+  position: relative;
+  z-index: 1;
+  max-width: calc(1100 * var(--u));
+  margin: 0 auto;
+  padding: 0 calc(40 * var(--u));
+  text-align: center;
+}
+
+.home-cards__header .home-ornament {
+  margin-bottom: calc(17 * var(--u));
+}
+
+.home-cards__sub {
+  margin-top: calc(15 * var(--u));
+}
+
+.home-cards__header + .home-cards__body {
+  margin-top: calc(22 * var(--u));
+}
+
+.home-cards__grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  column-gap: calc(var(--home-gap) * var(--u));
+  row-gap: calc(40 * var(--u));
+  margin: 0;
+  padding: 0 calc(40 * var(--u));
+  list-style: none;
+}
+
+.home-cards__item {
+  flex: 0 0 calc(var(--home-card) * var(--u));
+  min-width: 0;
+}
+
+.home-cards__item--feature {
+  flex-basis: calc(var(--home-card-feature) * var(--u));
+}
+
+.home-card {
+  display: block;
+  color: inherit;
+  text-align: center;
+  text-decoration: none;
+}
+
+.home-card__media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: var(--home-ratio);
+  background-color: rgb(0 0 0 / 0.04);
+}
+
+.home-card__media img,
+.home-card__media svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: var(--home-fit);
+  transition: transform 0.9s var(--home-ease);
+}
+
+/* "Fit" shows the whole picture: product photographs on white sit on the
+   card's white like the reference's cut-outs. */
+.home-cards--fit .home-card__media {
+  background-color: transparent;
+}
+
+.home-cards--arch .home-card__media,
+.home-cards__item--feature .home-card__media {
+  border-radius: 999px 999px 0 0;
+}
+
+.home-card__caption {
+  display: block;
+  margin-top: calc(16 * var(--u));
+}
+
+@media (hover: hover) {
+  .home-card:hover .home-card__media img {
+    transform: scale(1.03);
+  }
+}
+
+/* Decorations at the sides of the heading, as the reference's clouds:
+   left one flush with the left edge, right one with the right. */
+.home-cards .home-decor--left {
+  top: calc(48 * var(--u));
+  left: 0;
+  width: calc(265 * var(--u));
+}
+
+.home-cards .home-decor--right {
+  top: calc(118 * var(--u));
+  right: 0;
+  width: calc(133 * var(--u));
+}
+
+@media screen and (max-width: 749px) {
+  .home-cards__header {
+    max-width: none;
+    padding: 0 calc(30 * var(--u));
+  }
+
+  .home-cards__header .home-ornament {
+    margin-bottom: calc(8 * var(--u));
+  }
+
+  .home-cards__sub {
+    margin-top: calc(8 * var(--u));
+  }
+
+  .home-cards__header + .home-cards__body {
+    margin-top: calc(18 * var(--u));
+  }
+
+  .home-cards__grid {
+    column-gap: calc(14 * var(--u));
+    row-gap: calc(24 * var(--u));
+    padding: 0 calc(32 * var(--u));
+  }
+
+  .home-cards__item {
+    flex-basis: calc(50% - 7 * var(--u));
+  }
+
+  .home-cards--mobile-1 .home-cards__item {
+    flex-basis: 100%;
+  }
+
+  /* The larger card leads on a phone, on a row of its own. */
+  .home-cards__item--feature {
+    order: -1;
+    flex-basis: 100%;
+  }
+
+  .home-cards__item--feature .home-card {
+    width: calc(302 * var(--u));
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .home-card__caption {
+    margin-top: calc(8 * var(--u));
+  }
+
+  .home-cards .home-decor--left {
+    top: calc(75 * var(--u));
+    width: calc(136 * var(--u));
+  }
+
+  .home-cards .home-decor--right {
+    top: calc(57 * var(--u));
+    width: calc(67 * var(--u));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. CARDS: CAROUSEL
+   Desktop: four cards in view, 296 wide on a 312 pitch, square white arrows
+   60px outside the row. Phone: 140-wide cards on a 148 pitch starting 13px
+   in, so the third shows half; dots instead of arrows.
+   -------------------------------------------------------------------------- */
+
+.home-carousel {
+  --home-visible: 4;
+
+  position: relative;
+  display: block;
+  max-width: calc(312 * var(--home-visible) * var(--u));
+  margin: 0 auto;
+}
+
+.home-carousel__track {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.home-carousel__track::-webkit-scrollbar {
+  display: none;
+}
+
+.home-carousel__slide {
+  flex: 0 0 calc(100% / var(--home-visible));
+  min-width: 0;
+  padding: 0 calc(8 * var(--u));
+  scroll-snap-align: start;
+}
+
+.home-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-top: -20px;
+  padding: 0;
+  border: 1px solid #f0f0f0;
+  border-radius: 0;
+  background-color: #ffffff;
+  color: #4d4d4f;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    border-color 0.3s var(--home-ease),
+    color 0.3s var(--home-ease);
+}
+
+.home-carousel__arrow .tabi-icon {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+.home-carousel__arrow--prev {
+  left: calc(-60 * var(--u));
+}
+
+.home-carousel__arrow--next {
+  right: calc(-60 * var(--u));
+}
+
+@media (hover: hover) {
+  .home-carousel__arrow:hover {
+    border-color: #4d4d4f;
+    color: #191919;
+  }
+}
+
+.home-carousel__arrow:focus-visible,
+.home-carousel__dot:focus-visible {
+  outline: 1px solid #4d4d4f;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* Nothing to scroll to: the script marks the carousel static. */
+.home-carousel.is-static .home-carousel__arrow,
+.home-carousel.is-static .home-carousel__dots {
+  display: none;
+}
+
+.home-carousel__dots {
+  display: none;
+}
+
+/* The track is a list the arrows scroll; with every card in view (wide
+   screens, few cards) it centres instead. */
+.home-carousel.is-static .home-carousel__track {
+  justify-content: center;
+}
+
+@media screen and (max-width: 749px) {
+  .home-carousel {
+    max-width: none;
+  }
+
+  .home-carousel__track {
+    padding: 0 calc(9 * var(--u));
+    scroll-padding-inline: calc(9 * var(--u));
+  }
+
+  .home-carousel__slide {
+    flex-basis: calc(148 * var(--u));
+    padding: 0 calc(4 * var(--u));
+  }
+
+  .home-carousel__arrow {
+    display: none;
+  }
+
+  .home-carousel__dots {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    margin-top: 10px;
+  }
+
+  .home-carousel__dot {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .home-carousel__dot::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 8px;
+    height: 8px;
+    margin: auto;
+    border-radius: 50%;
+    background-color: currentColor;
+    opacity: 0.3;
+    transition: opacity 0.3s var(--home-ease);
+  }
+
+  .home-carousel__dot[aria-current='true']::before {
+    opacity: 1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. BAND
+   Desktop: two 428 x 567 pictures 39px from the band's sides, the right one
+   arched, the story centred between them; captions sit inside the pictures,
+   11px above their foot. Phone: picture, story, arched picture, stacked.
+   -------------------------------------------------------------------------- */
+
+.home-band {
+  --home-shade: 0.3;
+}
+
+.home-band__inner {
+  display: grid;
+  grid-template-columns: calc(428 * var(--u)) minmax(0, 1fr) calc(428 * var(--u));
+  align-items: center;
+  padding: 0 calc(39 * var(--u));
+}
+
+.home-band__figure {
+  position: relative;
+  margin: 0;
+}
+
+.home-band__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-band__media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 428 / 567;
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+.home-band__media img,
+.home-band__media svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.9s var(--home-ease);
+}
+
+.home-band__figure--arch .home-band__media {
+  border-radius: 999px 999px 0 0;
+}
+
+/* A soft dark foot under the caption, so white capitals stay readable on a
+   pale photograph. A span: base.css hides empty divs. */
+.home-band__shade {
+  position: absolute;
+  inset: auto 0 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0), rgb(0 0 0 / var(--home-shade)));
+  pointer-events: none;
+}
+
+.home-band__caption {
+  position: absolute;
+  right: 0;
+  bottom: calc(11 * var(--u));
+  left: 0;
+  z-index: 1;
+  padding: 0 1.2rem;
+  text-align: center;
+}
+
+.home-band__caption .home-link {
+  --home-link-weight: 500;
+}
+
+@media (hover: hover) {
+  .home-band__link:hover .home-band__media img {
+    transform: scale(1.03);
+  }
+}
+
+.home-band__copy {
+  padding: 0 calc(24 * var(--u));
+  text-align: center;
+}
+
+.home-band__text {
+  max-width: max(220px, calc(250 * var(--u)));
+  margin: calc(18 * var(--u)) auto 0;
+}
+
+.home-band__actions {
+  margin: calc(18 * var(--u)) 0 0;
+}
+
+.home-band__actions .home-link {
+  --home-link-weight: 600;
+}
+
+@media screen and (max-width: 749px) {
+  .home-band__inner {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0 calc(44 * var(--u));
+  }
+
+  .home-band__figure--left .home-band__media {
+    aspect-ratio: 301 / 290;
+  }
+
+  .home-band__figure--right .home-band__media {
+    aspect-ratio: 301 / 352;
+  }
+
+  .home-band__caption {
+    bottom: calc(10 * var(--u));
+  }
+
+  .home-band__copy {
+    padding: calc(20 * var(--u)) 0;
+  }
+
+  .home-band__text {
+    max-width: calc(270 * var(--u));
+    margin-top: calc(10 * var(--u));
+  }
+
+  .home-band__actions {
+    margin-top: calc(8 * var(--u));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. SPOTLIGHT
+   Desktop: ornament, heading 13 below it, text 23 below, a 1155 x 465
+   picture in a 4px frame 30 below, the line of words 20 below that, the
+   button 19 below.
+   -------------------------------------------------------------------------- */
+
+.home-spot {
+  --home-frame: #ffffff;
+  --home-frame-width: 4;
+  --home-spot-ratio: 1155 / 465;
+  --home-spot-ratio-mobile: 1 / 1;
+}
+
+.home-spot__inner {
+  padding: 0 calc(40 * var(--u));
+  text-align: center;
+}
+
+.home-spot .home-ornament {
+  margin-bottom: calc(13 * var(--u));
+}
+
+.home-spot__text {
+  max-width: calc(900 * var(--u));
+  margin: calc(23 * var(--u)) auto 0;
+}
+
+.home-spot__media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: calc(1155 * var(--u));
+  max-width: 100%;
+  margin: calc(30 * var(--u)) auto 0;
+  aspect-ratio: var(--home-spot-ratio);
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+.home-spot--framed .home-spot__media {
+  border: max(2px, calc(var(--home-frame-width) * var(--u))) solid var(--home-frame);
+}
+
+.home-spot__media img,
+.home-spot__media svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-spot__media picture,
+.home-spot__media-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+}
+
+.home-spot__tagline {
+  margin: calc(20 * var(--u)) auto 0;
+  color: var(--home-text);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--font-body-weight);
+  font-size: max(13px, calc(16.8 * var(--u)));
+  line-height: 2.5;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.home-spot__phrase,
+.home-spot__bar {
+  white-space: pre;
+}
+
+.home-spot__tagline {
+  text-wrap: balance;
+}
+
+.home-spot__actions {
+  margin: calc(19 * var(--u)) 0 0;
+}
+
+@media screen and (max-width: 749px) {
+  .home-spot__inner {
+    padding: 0 calc(24 * var(--u));
+  }
+
+  .home-spot .home-ornament {
+    margin-bottom: calc(8 * var(--u));
+  }
+
+  .home-spot__text {
+    margin-top: calc(10 * var(--u));
+  }
+
+  .home-spot__media {
+    width: 100%;
+    margin-top: calc(18 * var(--u));
+    aspect-ratio: var(--home-spot-ratio-mobile);
+  }
+
+  .home-spot__tagline {
+    margin-top: calc(14 * var(--u));
+    font-size: 12.5px;
+    line-height: 1.9;
+    letter-spacing: 0.08em;
+  }
+
+  .home-spot__phrase {
+    display: block;
+  }
+
+  .home-spot__bar {
+    display: none;
+  }
+
+  .home-spot__actions {
+    margin-top: calc(14 * var(--u));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. REDUCED MOTION
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .home-carousel__track {
+    scroll-behavior: auto;
+  }
+
+  .home-card__media img,
+  .home-band__media img {
+    transition: none;
+  }
+
+  .home-card:hover .home-card__media img,
+  .home-band__link:hover .home-band__media img {
+    transform: none;
+  }
+}

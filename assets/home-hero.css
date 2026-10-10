@@ -6,6 +6,7 @@
      2. Slides: stacking, crossfade, slow zoom
      3. Overlay and copy
      4. Controls: arrows, dots, pause
+     4b. Video, lower third, filled button
      5. Reduced motion
    ========================================================================== */
 
@@ -51,7 +52,10 @@
     min-height: 52rem;
   }
 
+  /* The minimum height above is for "screen" only: with an aspect ratio it
+     would widen the banner past the screen on tablets instead. */
   .home-hero--image {
+    min-height: 0;
     aspect-ratio: var(--hero-ratio, 16 / 9);
   }
 }
@@ -529,6 +533,93 @@
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+}
+
+/* --------------------------------------------------------------------------
+   4b. VIDEO, LOWER THIRD, FILLED BUTTON
+   The reference's banner (goodearth.in, 2026-10-10): a video edge to edge,
+   no heading, one filled button - 207 x 50 at 1434 wide, 15.75px medium
+   capitals - whose foot sits 18.5% of the banner's height above its bottom
+   (about 21% on a phone).
+   -------------------------------------------------------------------------- */
+
+/* A video fills the frame like the picture, without the stills' slow zoom
+   (three classes, to outrank the active and first-paint zoom rules). */
+.home-hero .home-hero__slide .home-hero__video {
+  transform: none;
+  animation: none;
+}
+
+.home-hero__video--mobile {
+  display: none;
+}
+
+@media screen and (max-width: 749px) {
+  .home-hero__media--split-video .home-hero__video--desktop {
+    display: none;
+  }
+
+  .home-hero__media--split-video .home-hero__video--mobile {
+    display: block;
+  }
+}
+
+.home-hero--content-lower .home-hero__content {
+  inset: auto 0 21% 0;
+  justify-content: flex-end;
+  gap: 2.4rem;
+  padding: 0 var(--hero-gutter);
+}
+
+@media screen and (min-width: 750px) {
+  .home-hero--content-lower .home-hero__content {
+    bottom: 18.5%;
+    gap: 3rem;
+    padding: 0 var(--hero-gutter);
+  }
+}
+
+.home-hero--button .home-hero__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  background-color: var(--hero-button-bg, #253c30);
+  color: var(--hero-button-ink, #f9f7f4);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+
+@media screen and (min-width: 750px) {
+  .home-hero--button .home-hero__link {
+    min-height: clamp(44px, 3.49vw, 50px);
+    padding: 0 clamp(20px, 1.67vw, 24px);
+    font-size: clamp(13px, 1.1vw, 15.75px);
+    letter-spacing: 0.03em;
+  }
+}
+
+.home-hero--button .home-hero__link-text {
+  padding-bottom: 0;
+  background-image: none;
+}
+
+@media (hover: hover) {
+  .home-hero--button .home-hero__link:hover {
+    background-color: color-mix(in srgb, var(--hero-button-bg, #253c30) 86%, #000000);
+  }
+}
+
+.home-hero--button .home-hero__link:focus-visible {
+  outline: 1px solid var(--hero-button-bg, #253c30);
+  outline-offset: 3px;
 }
 
 /* --------------------------------------------------------------------------

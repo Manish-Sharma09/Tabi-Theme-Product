@@ -11,6 +11,10 @@
    has keyboard focus, while it is scrolled out of view, and while the tab is
    hidden; it does not start at all under prefers-reduced-motion. The pause
    button is the shopper's own choice and outranks all of those.
+
+   A slide's video plays only while that slide is showing and the banner is on
+   screen, and the pause button stops it too - for a single video slide the
+   button is all this file adds.
    ========================================================================== */
 
 (() => {
@@ -24,22 +28,44 @@
       this.status = this.querySelector('[data-hero-status]');
       this.index = Math.max(0, this.slides.findIndex((slide) => slide.classList.contains('is-active')));
       this.speed = (parseInt(this.dataset.speed, 10) || 6) * 1000;
+      this.videos = Array.from(this.querySelectorAll('video'));
 
-      if (this.slides.length < 2) return;
+      if (this.slides.length < 2 && this.videos.length === 0) return;
 
-      // Why the slideshow is holding. Autoplay runs only while the set is empty.
+      // Why the slideshow is holding. Autoplay runs only while the set is empty;
+      // a video stops for 'user', 'hidden' and 'offscreen' (see syncVideos).
       this.holds = new Set();
-      this.autoplay = this.dataset.autoplay === 'true';
-      if (this.autoplay && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.autoplay = this.dataset.autoplay === 'true' && this.slides.length > 1;
+      if ((this.autoplay || this.videos.length > 0) && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         this.holds.add('user');
       }
+
+      this.pauseButton?.addEventListener('click', () => this.togglePause());
+
+      this.onVisibility = () => (document.hidden ? this.hold('hidden') : this.release('hidden'));
+      document.addEventListener('visibilitychange', this.onVisibility);
+
+      this.observer = new IntersectionObserver(
+        ([entry]) => (entry.isIntersecting ? this.release('offscreen') : this.hold('offscreen')),
+        { threshold: 0.25 }
+      );
+      this.observer.observe(this);
+
+      // Crossing the phone breakpoint swaps a split desktop/mobile video.
+      this.phoneQuery = window.matchMedia('(max-width: 749px)');
+      this.onBreakpoint = () => this.syncVideos();
+      this.phoneQuery.addEventListener?.('change', this.onBreakpoint);
+
+      this.syncPauseButton();
+      this.syncVideos();
+
+      if (this.slides.length < 2) return;
 
       this.querySelector('[data-hero-prev]')?.addEventListener('click', () => this.step(-1, true));
       this.querySelector('[data-hero-next]')?.addEventListener('click', () => this.step(1, true));
       this.dots.forEach((dot) =>
         dot.addEventListener('click', () => this.go(parseInt(dot.dataset.heroDot, 10), true))
       );
-      this.pauseButton?.addEventListener('click', () => this.togglePause());
 
       this.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowLeft') this.step(-1, true);
@@ -59,15 +85,6 @@
 
       this.bindSwipe();
 
-      this.onVisibility = () => (document.hidden ? this.hold('hidden') : this.release('hidden'));
-      document.addEventListener('visibilitychange', this.onVisibility);
-
-      this.observer = new IntersectionObserver(
-        ([entry]) => (entry.isIntersecting ? this.release('offscreen') : this.hold('offscreen')),
-        { threshold: 0.25 }
-      );
-      this.observer.observe(this);
-
       // Theme editor: selecting a slide's block shows that slide and holds it.
       this.addEventListener('shopify:block:select', (event) => {
         const position = this.slides.indexOf(event.target.closest?.('.home-hero__slide') || event.target);
@@ -76,7 +93,6 @@
       });
       this.addEventListener('shopify:block:deselect', () => this.release('editor'));
 
-      this.syncPauseButton();
       this.schedule();
     }
 
@@ -85,6 +101,7 @@
       clearTimeout(this.leaveTimer);
       this.observer?.disconnect();
       document.removeEventListener('visibilitychange', this.onVisibility);
+      this.phoneQuery?.removeEventListener?.('change', this.onBreakpoint);
     }
 
     step(direction, fromUser) {
@@ -130,6 +147,7 @@
         this.status.textContent = incoming.getAttribute('aria-label') || '';
       }
 
+      this.syncVideos();
       this.schedule();
     }
 
@@ -142,11 +160,31 @@
     hold(reason) {
       this.holds.add(reason);
       clearTimeout(this.timer);
+      this.syncVideos();
     }
 
     release(reason) {
       this.holds.delete(reason);
+      this.syncVideos();
       this.schedule();
+    }
+
+    // Plays the showing slide's visible video, pauses every other one. Hover
+    // and focus hold the slideshow but not the video.
+    syncVideos() {
+      if (!this.videos?.length) return;
+      const stopped = ['user', 'hidden', 'offscreen'].some((reason) => this.holds.has(reason));
+
+      this.slides.forEach((slide, position) => {
+        slide.querySelectorAll('video').forEach((video) => {
+          const shown = video.checkVisibility ? video.checkVisibility() : video.offsetParent !== null;
+          if (position === this.index && shown && !stopped) {
+            video.play()?.catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      });
     }
 
     togglePause() {
@@ -161,6 +199,7 @@
         this.hold('user');
       }
       this.syncPauseButton();
+      this.syncVideos();
     }
 
     syncPauseButton() {

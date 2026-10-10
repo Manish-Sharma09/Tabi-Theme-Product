@@ -1,0 +1,356 @@
+{%- comment -%}
+  HOME SPOTLIGHT - a full-width coloured band, centred: ornament, heading,
+  text, a wide framed picture, one line of spaced capitals and a button.
+
+  Built after the reference site's "Visit Our Store" block (goodearth.in,
+  2026-10-10), where the line of capitals lists its cities; Tabi uses it for
+  the brand's three promises. Measurements are in assets/home-sections.css,
+  part 7.
+{%- endcomment -%}
+
+{{ 'home-sections.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign heading = section.settings.heading | strip
+  assign tagline = section.settings.tagline | strip
+
+  case section.settings.mobile_ratio
+    when 'portrait'
+      assign mobile_ratio = '4 / 5'
+    when 'landscape'
+      assign mobile_ratio = '4 / 3'
+    else
+      assign mobile_ratio = '1 / 1'
+  endcase
+-%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} .home-section {
+    --home-bg: {{ section.settings.background }};
+    --home-heading: {{ section.settings.heading_color }};
+    --home-text: {{ section.settings.text_color }};
+    --home-ornament: {{ section.settings.ornament_color }};
+    --home-pattern: {{ section.settings.pattern_color }};
+    --home-pattern-opacity: {{ section.settings.pattern_opacity | divided_by: 100.0 }};
+    --home-button-bg: {{ section.settings.button_background }};
+    --home-button-text: {{ section.settings.button_text }};
+    --home-frame: {{ section.settings.frame_color }};
+    --home-spot-ratio-mobile: {{ mobile_ratio }};
+    --home-heading-size: {{ section.settings.heading_size }};
+    --home-pt: {{ section.settings.padding_top }};
+    --home-pb: {{ section.settings.padding_bottom }};
+  }
+{%- endstyle -%}
+
+<div class="home-section home-spot{% if section.settings.frame %} home-spot--framed{% endif %}{% if section.settings.pattern %} home-section--pattern{% endif %}">
+  {%- if section.settings.background_image != blank -%}
+    {{
+      section.settings.background_image
+      | image_url: width: 2400
+      | image_tag:
+        class: 'home-section__bg',
+        widths: '750, 1100, 1500, 1920, 2400',
+        sizes: '100vw',
+        alt: '',
+        loading: 'lazy'
+    }}
+  {%- endif -%}
+
+  <div class="home-section__inner home-spot__inner">
+    {%- if section.settings.show_ornament -%}
+      {%- if section.settings.ornament_image != blank -%}
+        {{
+          section.settings.ornament_image
+          | image_url: width: 400
+          | image_tag: class: 'home-ornament home-ornament--image', alt: '', loading: 'lazy'
+        }}
+      {%- else -%}
+        {% render 'home-ornament' %}
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if heading != blank -%}
+      <h2 class="home-heading">{{ heading | escape | newline_to_br }}</h2>
+    {%- endif -%}
+
+    {%- if section.settings.text != blank -%}
+      <div class="home-text home-spot__text">{{ section.settings.text }}</div>
+    {%- endif -%}
+
+    {%- capture spot_picture -%}
+      {%- if section.settings.image != blank -%}
+        {%- assign desktop = section.settings.image -%}
+        {%- assign mobile = section.settings.image_mobile | default: desktop -%}
+        <picture>
+          {%- if section.settings.image_mobile != blank -%}
+            <source
+              media="(max-width: 749px)"
+              srcset="
+                {{ mobile | image_url: width: 500 }} 500w,
+                {{ mobile | image_url: width: 750 }} 750w,
+                {{ mobile | image_url: width: 1100 }} 1100w
+              "
+              sizes="88vw"
+              width="{{ mobile.width }}"
+              height="{{ mobile.height }}"
+            >
+          {%- endif -%}
+          {{
+            desktop
+            | image_url: width: 2400
+            | image_tag:
+              widths: '500, 750, 1100, 1500, 1920, 2400',
+              sizes: '(min-width: 1440px) 1160px, (min-width: 750px) 81vw, 88vw',
+              loading: 'lazy'
+          }}
+        </picture>
+      {%- else -%}
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'home-placeholder' }}
+      {%- endif -%}
+    {%- endcapture -%}
+
+    <div class="home-spot__media">
+      {%- if section.settings.button_link != blank -%}
+        <a href="{{ section.settings.button_link }}" class="home-spot__media-link" tabindex="-1" aria-hidden="true">
+          {{- spot_picture -}}
+        </a>
+      {%- else -%}
+        {{ spot_picture }}
+      {%- endif -%}
+    </div>
+
+    {%- if tagline != blank -%}
+      {%- comment -%}
+        Each phrase between the bars stays on one line. Phones stack the
+        phrases and drop the bars, which would otherwise start a line.
+      {%- endcomment -%}
+      {%- assign tagline_parts = tagline | split: '|' -%}
+      <p class="home-spot__tagline">
+        {%- assign phrase_count = 0 -%}
+        {%- for part in tagline_parts -%}
+          {%- assign phrase = part | strip -%}
+          {%- if phrase != blank -%}
+            {%- if phrase_count > 0 -%}
+              <span class="home-spot__bar"> | </span>
+            {%- endif -%}
+            <span class="home-spot__phrase">{{ phrase | escape }}</span>
+            {%- assign phrase_count = phrase_count | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </p>
+    {%- endif -%}
+
+    {%- if section.settings.button_label != blank -%}
+      <p class="home-spot__actions">
+        {%- if section.settings.button_link != blank -%}
+          <a href="{{ section.settings.button_link }}" class="home-button">{{ section.settings.button_label | escape }}</a>
+        {%- else -%}
+          <span class="home-button">{{ section.settings.button_label | escape }}</span>
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Home: Spotlight band",
+  "tag": "section",
+  "class": "home-spot-section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_ornament",
+      "label": "Show ornament",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "ornament_image",
+      "label": "Ornament picture",
+      "info": "Optional. Replaces the drawn block-print flowers. About 250 x 80."
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "A Little Thread, A Lasting Story"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Tabi began with an appreciation of all things natural, handmade and kind to the planet. We print by hand, make in small batches and often to order, and pack without plastic.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Picture"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Picture",
+      "info": "Wide, at least 2300 x 930. Set a focal point."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobile picture",
+      "info": "Optional. Without one, phones crop the picture above to the shape below."
+    },
+    {
+      "type": "select",
+      "id": "mobile_ratio",
+      "label": "Picture shape on phones",
+      "options": [
+        { "value": "square", "label": "Square" },
+        { "value": "portrait", "label": "Portrait 4:5" },
+        { "value": "landscape", "label": "Landscape 4:3" }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "checkbox",
+      "id": "frame",
+      "label": "Frame the picture",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "frame_color",
+      "label": "Frame",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Line and button"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Line under the picture",
+      "default": "Made to order | Circular living | Ethical packaging",
+      "info": "Shown in spaced capitals."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button text",
+      "default": "Our story"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "info": "The picture links here too."
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Button",
+      "default": "#efede9"
+    },
+    {
+      "type": "color",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "#253c30"
+    },
+    {
+      "type": "header",
+      "content": "Colours and background"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#253c30"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background picture",
+      "info": "Optional. Covers the whole band, under the pattern."
+    },
+    {
+      "type": "checkbox",
+      "id": "pattern",
+      "label": "Block-print pattern",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "pattern_color",
+      "label": "Pattern",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "pattern_opacity",
+      "min": 2,
+      "max": 40,
+      "step": 1,
+      "unit": "%",
+      "label": "Pattern strength",
+      "default": 6
+    },
+    {
+      "type": "color",
+      "id": "ornament_color",
+      "label": "Ornament",
+      "default": "#e2d1a6"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading",
+      "default": "#e2d1a6"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text and line",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Size and spacing"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 36,
+      "max": 64,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size on desktop",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space above",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space below",
+      "default": 78
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home: Spotlight band"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,327 @@
+{%- comment -%}
+  HOME BAND - a full-width coloured band: a picture, a short story in the
+  middle, a second picture with an arched top. Each picture carries its own
+  underlined caption inside its foot and links on its own.
+
+  Built after the reference site's "Colour Me Festive" block (goodearth.in,
+  2026-10-10); measurements and the stacked phone layout are in
+  assets/home-sections.css, part 6.
+{%- endcomment -%}
+
+{{ 'home-sections.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign heading = section.settings.heading | strip
+  assign sides = 'left,right' | split: ','
+-%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} .home-section {
+    --home-bg: {{ section.settings.background }};
+    --home-heading: {{ section.settings.heading_color }};
+    --home-text: {{ section.settings.text_color }};
+    --home-link: {{ section.settings.link_color }};
+    --home-pattern: {{ section.settings.pattern_color }};
+    --home-pattern-opacity: {{ section.settings.pattern_opacity | divided_by: 100.0 }};
+    --home-shade: {{ section.settings.shade | divided_by: 100.0 }};
+    --home-heading-size: {{ section.settings.heading_size }};
+    --home-pt: {{ section.settings.padding_top }};
+    --home-pb: {{ section.settings.padding_bottom }};
+  }
+{%- endstyle -%}
+
+{%- capture copy -%}
+  <div class="home-band__copy">
+    {%- if heading != blank -%}
+      <h2 class="home-heading">{{ heading | escape | newline_to_br }}</h2>
+    {%- endif -%}
+
+    {%- if section.settings.text != blank -%}
+      <div class="home-text home-band__text">{{ section.settings.text }}</div>
+    {%- endif -%}
+
+    {%- if section.settings.link_label != blank -%}
+      <p class="home-band__actions">
+        {%- if section.settings.link != blank -%}
+          <a href="{{ section.settings.link }}" class="home-link">{{ section.settings.link_label | escape }}</a>
+        {%- else -%}
+          <span class="home-link">{{ section.settings.link_label | escape }}</span>
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+  </div>
+{%- endcapture -%}
+
+<div class="home-section home-band{% if section.settings.pattern %} home-section--pattern{% endif %}">
+  {%- if section.settings.background_image != blank -%}
+    {{
+      section.settings.background_image
+      | image_url: width: 2400
+      | image_tag:
+        class: 'home-section__bg',
+        widths: '750, 1100, 1500, 1920, 2400',
+        sizes: '100vw',
+        alt: '',
+        loading: 'lazy'
+    }}
+  {%- endif -%}
+
+  <div class="home-section__inner home-band__inner">
+    {%- for side in sides -%}
+      {%- liquid
+        assign image_key = side | append: '_image'
+        assign caption_key = side | append: '_caption'
+        assign link_key = side | append: '_link'
+
+        assign picture = section.settings[image_key]
+        assign caption = section.settings[caption_key] | strip
+        assign picture_url = section.settings[link_key]
+
+        assign arched = false
+        if section.settings.arch == side or section.settings.arch == 'both'
+          assign arched = true
+        endif
+
+        assign picture_alt = picture.alt
+        if caption != blank
+          assign picture_alt = ''
+        endif
+
+        assign placeholder_name = 'lifestyle-' | append: forloop.index
+      -%}
+
+      {%- capture picture_inner -%}
+        <span class="home-band__media">
+          {%- if picture != blank -%}
+            {{
+              picture
+              | image_url: width: 1200
+              | image_tag:
+                widths: '360, 480, 640, 860, 1000, 1200',
+                sizes: '(min-width: 1440px) 430px, (min-width: 750px) 30vw, 78vw',
+                alt: picture_alt,
+                loading: 'lazy'
+            }}
+          {%- else -%}
+            {{ placeholder_name | placeholder_svg_tag: 'home-placeholder' }}
+          {%- endif -%}
+          {%- if caption != blank and section.settings.shade > 0 -%}
+            <span class="home-band__shade"></span>
+          {%- endif -%}
+        </span>
+        {%- if caption != blank -%}
+          <span class="home-band__caption"><span class="home-link">{{ caption | escape }}</span></span>
+        {%- endif -%}
+      {%- endcapture -%}
+
+      <div class="home-band__figure home-band__figure--{{ side }}{% if arched %} home-band__figure--arch{% endif %}">
+        {%- if picture_url != blank -%}
+          <a href="{{ picture_url }}" class="home-band__link">{{ picture_inner }}</a>
+        {%- else -%}
+          {{ picture_inner }}
+        {%- endif -%}
+      </div>
+
+      {%- if forloop.first -%}
+        {{ copy }}
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Home: Picture band",
+  "tag": "section",
+  "class": "home-band-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Left picture"
+    },
+    {
+      "type": "image_picker",
+      "id": "left_image",
+      "label": "Picture",
+      "info": "Portrait, about 860 x 1140. Phones crop it to almost square, so set a focal point."
+    },
+    {
+      "type": "text",
+      "id": "left_caption",
+      "label": "Caption",
+      "default": "Shop girls"
+    },
+    {
+      "type": "url",
+      "id": "left_link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Right picture"
+    },
+    {
+      "type": "image_picker",
+      "id": "right_image",
+      "label": "Picture",
+      "info": "Portrait, about 860 x 1140."
+    },
+    {
+      "type": "text",
+      "id": "right_caption",
+      "label": "Caption",
+      "default": "Shop boys"
+    },
+    {
+      "type": "url",
+      "id": "right_link",
+      "label": "Link"
+    },
+    {
+      "type": "select",
+      "id": "arch",
+      "label": "Arched top",
+      "options": [
+        { "value": "none", "label": "Neither" },
+        { "value": "left", "label": "Left picture" },
+        { "value": "right", "label": "Right picture" },
+        { "value": "both", "label": "Both" }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "range",
+      "id": "shade",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "%",
+      "label": "Darken behind captions",
+      "default": 30,
+      "info": "Keeps the captions readable on pale photographs."
+    },
+    {
+      "type": "header",
+      "content": "Story"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Little Wonders"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Soft cottons and hand block prints, made for climbing, twirling and growing into.</p>"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link text",
+      "default": "Explore kids"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Colours and background"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#253c30"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background picture",
+      "info": "Optional. Covers the whole band, under the pattern."
+    },
+    {
+      "type": "checkbox",
+      "id": "pattern",
+      "label": "Block-print pattern",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "pattern_color",
+      "label": "Pattern",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "pattern_opacity",
+      "min": 2,
+      "max": 40,
+      "step": 1,
+      "unit": "%",
+      "label": "Pattern strength",
+      "default": 6
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading",
+      "default": "#e2d1a6"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Links and captions",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Size and spacing"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 36,
+      "max": 64,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size on desktop",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space above",
+      "default": 26
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space below",
+      "default": 38
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home: Picture band"
+    }
+  ]
+}
+{% endschema %}

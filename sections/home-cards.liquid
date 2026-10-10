@@ -1,0 +1,645 @@
+{%- comment -%}
+  HOME CARDS - an optional ornament, heading and line of text, then picture
+  cards with an underlined caption under each, as a centred grid or as a
+  carousel.
+
+  One section for three blocks of the reference site's home page
+  (goodearth.in, 2026-10-10), which differ only in settings:
+  - "Delightful Decor": carousel, four in view, white;
+  - "Dressed in Celebration": three cards, the middle one larger and arched;
+  - "Indulgent Rituals": four cards on a coloured band.
+  The theme editor offers each as its own preset.
+
+  A card's picture, first match wins: the card's own picture; the
+  collection's picture; the first product picture in the collection that no
+  earlier card on this section already shows (two collections often open on
+  the same product). Caption and link fall back to the collection's title
+  and address.
+{%- endcomment -%}
+
+{{ 'home-sections.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign layout = section.settings.layout
+  assign cols = section.settings.columns_desktop
+  assign card_count = section.blocks.size
+  assign heading = section.settings.heading | strip
+
+  assign feature_index = 0
+  if layout == 'grid' and section.settings.feature_middle and card_count == 3
+    assign feature_index = 2
+  endif
+
+  case section.settings.ratio
+    when 'square'
+      assign ratio = '1 / 1'
+    when 'portrait'
+      assign ratio = '4 / 5'
+    when 'tall'
+      assign ratio = '2 / 3'
+    when 'landscape'
+      assign ratio = '4 / 3'
+    else
+      assign ratio = '3 / 4'
+  endcase
+
+  comment
+    Rendered widths for the sizes attribute, in the reference's 1434px
+    layout: assets/home-sections.css part 4 and 5.
+  endcomment
+  if layout == 'carousel'
+    assign card_px = 1248 | divided_by: cols | minus: 16
+  else
+    case cols
+      when 2
+        assign card_px = 420
+      when 3
+        assign card_px = 309
+      when 5
+        assign card_px = 244
+      when 6
+        assign card_px = 200
+      else
+        assign card_px = 303
+    endcase
+  endif
+  assign card_vw = card_px | times: 100 | divided_by: 1434 | plus: 1
+  assign card_cap = card_px | plus: 2
+
+  if layout == 'carousel'
+    assign mobile_vw = 37
+  elsif section.settings.columns_mobile == 1
+    assign mobile_vw = 84
+  else
+    assign mobile_vw = 42
+  endif
+
+  assign card_sizes = '(min-width: 1440px) ' | append: card_cap | append: 'px, (min-width: 750px) ' | append: card_vw | append: 'vw, ' | append: mobile_vw | append: 'vw'
+  assign feature_sizes = '(min-width: 1440px) 346px, (min-width: 750px) 25vw, 78vw'
+
+  assign has_decor = false
+  if section.settings.decor_left != blank or section.settings.decor_right != blank
+    assign has_decor = true
+  endif
+
+  assign show_header = false
+  if section.settings.show_ornament or heading != blank or section.settings.text != blank
+    assign show_header = true
+  endif
+-%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} .home-section {
+    --home-bg: {{ section.settings.background }};
+    --home-heading: {{ section.settings.heading_color }};
+    --home-text: {{ section.settings.text_color }};
+    --home-link: {{ section.settings.link_color }};
+    --home-ornament: {{ section.settings.ornament_color }};
+    --home-pattern: {{ section.settings.pattern_color }};
+    --home-pattern-opacity: {{ section.settings.pattern_opacity | divided_by: 100.0 }};
+    --home-heading-size: {{ section.settings.heading_size }};
+    --home-pt: {{ section.settings.padding_top }};
+    --home-pb: {{ section.settings.padding_bottom }};
+    --home-ratio: {{ ratio }};
+    --home-fit: {{ section.settings.fit }};
+  }
+{%- endstyle -%}
+
+{%- if layout == 'carousel' -%}
+  <script src="{{ 'home-sections.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+<div
+  class="home-section home-cards home-cards--{{ layout }} home-cards--cols-{{ cols }} home-cards--mobile-{{ section.settings.columns_mobile }}{% if section.settings.fit == 'contain' %} home-cards--fit{% endif %}{% if section.settings.shape == 'arch' %} home-cards--arch{% endif %}{% if section.settings.pattern %} home-section--pattern{% endif %}"
+>
+  {%- if section.settings.background_image != blank -%}
+    {{
+      section.settings.background_image
+      | image_url: width: 2400
+      | image_tag:
+        class: 'home-section__bg',
+        widths: '750, 1100, 1500, 1920, 2400',
+        sizes: '100vw',
+        alt: '',
+        loading: 'lazy'
+    }}
+  {%- endif -%}
+
+  {%- if has_decor -%}
+    <span class="home-decor-frame" aria-hidden="true">
+      {%- if section.settings.decor_left != blank -%}
+        {{
+          section.settings.decor_left
+          | image_url: width: 800
+          | image_tag:
+            class: 'home-decor home-decor--left',
+            widths: '200, 400, 600, 800',
+            sizes: '(min-width: 750px) 19vw, 35vw',
+            alt: '',
+            loading: 'lazy'
+        }}
+      {%- endif -%}
+      {%- if section.settings.decor_right != blank -%}
+        {{
+          section.settings.decor_right
+          | image_url: width: 600
+          | image_tag:
+            class: 'home-decor home-decor--right',
+            widths: '200, 400, 600',
+            sizes: '(min-width: 750px) 10vw, 18vw',
+            alt: '',
+            loading: 'lazy'
+        }}
+      {%- endif -%}
+    </span>
+  {%- endif -%}
+
+  <div class="home-section__inner">
+    {%- if show_header -%}
+      <div class="home-cards__header">
+        {%- if section.settings.show_ornament -%}
+          {%- if section.settings.ornament_image != blank -%}
+            {{
+              section.settings.ornament_image
+              | image_url: width: 400
+              | image_tag: class: 'home-ornament home-ornament--image', alt: '', loading: 'lazy'
+            }}
+          {%- else -%}
+            {% render 'home-ornament' %}
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if heading != blank -%}
+          <h2 class="home-heading" id="HomeCards-{{ section.id }}">{{ heading | escape | newline_to_br }}</h2>
+        {%- endif -%}
+
+        {%- if section.settings.text != blank -%}
+          <div class="home-text home-cards__sub">{{ section.settings.text }}</div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if card_count > 0 -%}
+      <div class="home-cards__body">
+        {%- capture cards -%}
+          {%- assign used = '|' -%}
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign card_collection = block.settings.collection
+              assign card_image = block.settings.image
+
+              if card_image == blank and card_collection != blank
+                if card_collection.image != blank
+                  assign card_image = card_collection.image
+                else
+                  for product in card_collection.products limit: 8
+                    if product.featured_image != blank
+                      assign key = '|' | append: product.featured_image.src | append: '|'
+                      unless used contains key
+                        assign card_image = product.featured_image
+                        break
+                      endunless
+                    endif
+                  endfor
+                  if card_image == blank
+                    assign card_image = card_collection.featured_image
+                  endif
+                endif
+              endif
+
+              if card_image != blank
+                assign used = used | append: card_image.src | append: '|'
+              endif
+
+              assign caption = block.settings.caption | strip | default: card_collection.title
+              assign card_url = block.settings.link | default: card_collection.url
+
+              assign is_feature = false
+              if forloop.index == feature_index
+                assign is_feature = true
+              endif
+
+              assign sizes = card_sizes
+              if is_feature
+                assign sizes = feature_sizes
+              endif
+
+              assign card_alt = card_image.alt | default: caption
+              if caption != blank
+                assign card_alt = ''
+              endif
+
+              assign placeholder_name = forloop.index0 | modulo: 6 | plus: 1 | prepend: 'collection-'
+
+              assign item_class = 'home-cards__item'
+              if layout == 'carousel'
+                assign item_class = 'home-carousel__slide'
+              elsif is_feature
+                assign item_class = 'home-cards__item home-cards__item--feature'
+              endif
+            -%}
+
+            {%- capture card_inner -%}
+              <span class="home-card__media">
+                {%- if card_image != blank -%}
+                  {{
+                    card_image
+                    | image_url: width: 1000
+                    | image_tag:
+                      widths: '240, 360, 480, 640, 800, 1000',
+                      sizes: sizes,
+                      alt: card_alt,
+                      loading: 'lazy'
+                  }}
+                {%- else -%}
+                  {{ placeholder_name | placeholder_svg_tag: 'home-placeholder' }}
+                {%- endif -%}
+              </span>
+              {%- if caption != blank -%}
+                <span class="home-card__caption"><span class="home-link">{{ caption | escape }}</span></span>
+              {%- endif -%}
+            {%- endcapture -%}
+
+            <li class="{{ item_class }}" {{ block.shopify_attributes }}>
+              {%- if card_url != blank -%}
+                <a href="{{ card_url }}" class="home-card">{{ card_inner }}</a>
+              {%- else -%}
+                <span class="home-card">{{ card_inner }}</span>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        {%- endcapture -%}
+
+        {%- if layout == 'carousel' -%}
+          <home-carousel
+            class="home-carousel"
+            style="--home-visible: {{ cols }};"
+            role="region"
+            aria-roledescription="{{ 'sections.slideshow.carousel' | t }}"
+            {% if heading != blank %}
+              aria-labelledby="HomeCards-{{ section.id }}"
+            {% else %}
+              aria-label="{{ 'sections.slideshow.carousel' | t }}"
+            {% endif %}
+          >
+            <ul class="home-carousel__track" role="list">
+              {{- cards -}}
+            </ul>
+            <button
+              type="button"
+              class="home-carousel__arrow home-carousel__arrow--prev"
+              aria-label="{{ 'general.slider.previous_slide' | t }}"
+              data-carousel-prev
+            >
+              {% render 'tabi-icon', icon: 'chevron-left' %}
+            </button>
+            <button
+              type="button"
+              class="home-carousel__arrow home-carousel__arrow--next"
+              aria-label="{{ 'general.slider.next_slide' | t }}"
+              data-carousel-next
+            >
+              {% render 'tabi-icon', icon: 'chevron-right' %}
+            </button>
+            <span
+              class="home-carousel__dots"
+              data-label="{{ 'sections.slideshow.load_slide' | t | escape }}"
+              data-of="{{ 'general.slider.of' | t | escape }}"
+            ></span>
+          </home-carousel>
+        {%- else -%}
+          <ul class="home-cards__grid" role="list">
+            {{- cards -}}
+          </ul>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Home: Picture cards",
+  "tag": "section",
+  "class": "home-cards-section",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "carousel", "label": "Carousel" }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "label": "Cards in a row on desktop",
+      "default": 4,
+      "info": "For the carousel, how many are in view at once."
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Cards in a row on phones",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" }
+      ],
+      "default": "2",
+      "info": "Grid only. The carousel shows two and a half."
+    },
+    {
+      "type": "select",
+      "id": "ratio",
+      "label": "Picture shape",
+      "options": [
+        { "value": "square", "label": "Square" },
+        { "value": "portrait", "label": "Portrait 4:5" },
+        { "value": "portrait_tall", "label": "Portrait 3:4" },
+        { "value": "tall", "label": "Tall 2:3" },
+        { "value": "landscape", "label": "Landscape 4:3" }
+      ],
+      "default": "portrait_tall"
+    },
+    {
+      "type": "select",
+      "id": "fit",
+      "label": "Picture fit",
+      "options": [
+        { "value": "cover", "label": "Fill the card" },
+        { "value": "contain", "label": "Show the whole picture" }
+      ],
+      "default": "cover",
+      "info": "\"Show the whole picture\" suits products photographed on white."
+    },
+    {
+      "type": "select",
+      "id": "shape",
+      "label": "Card top",
+      "options": [
+        { "value": "square", "label": "Square corners" },
+        { "value": "arch", "label": "Arched" }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_middle",
+      "label": "Larger, arched middle card",
+      "default": false,
+      "info": "Grid with exactly three cards. On phones the middle card leads, on a row of its own."
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_ornament",
+      "label": "Show ornament",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "ornament_image",
+      "label": "Ornament picture",
+      "info": "Optional. Replaces the drawn block-print flowers. About 250 x 80."
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Made for the Home"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Hand block printed linen for every table and every corner of your home.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Decorations"
+    },
+    {
+      "type": "paragraph",
+      "content": "Optional pictures beside the heading, like the reference site's clouds. Use PNGs with transparent backgrounds."
+    },
+    {
+      "type": "image_picker",
+      "id": "decor_left",
+      "label": "Left",
+      "info": "About 265px wide, against the left edge."
+    },
+    {
+      "type": "image_picker",
+      "id": "decor_right",
+      "label": "Right",
+      "info": "About 135px wide, against the right edge."
+    },
+    {
+      "type": "header",
+      "content": "Colours and background"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background picture",
+      "info": "Optional. Covers the whole section, under the pattern."
+    },
+    {
+      "type": "checkbox",
+      "id": "pattern",
+      "label": "Block-print pattern",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "pattern_color",
+      "label": "Pattern",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "pattern_opacity",
+      "min": 2,
+      "max": 40,
+      "step": 1,
+      "unit": "%",
+      "label": "Pattern strength",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "ornament_color",
+      "label": "Ornament",
+      "default": "#253c30"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading",
+      "default": "#253c30"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#4d4d4f"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Captions",
+      "default": "#4d4d4f"
+    },
+    {
+      "type": "header",
+      "content": "Size and spacing"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 36,
+      "max": 64,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size on desktop",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space above",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space below",
+      "default": 44
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection",
+          "info": "Gives the card its link, caption and, with no picture below, a product picture from the collection."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Picture",
+          "info": "Optional when a collection is chosen."
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption",
+          "info": "Leave empty to use the collection's title."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Leave empty to use the collection."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home: Picture carousel",
+      "settings": {
+        "layout": "carousel",
+        "columns_desktop": 4,
+        "ratio": "square",
+        "show_ornament": true,
+        "heading": "Made for the Home",
+        "padding_top": 26,
+        "padding_bottom": 10
+      },
+      "blocks": [
+        { "type": "card", "settings": { "caption": "Table linen" } },
+        { "type": "card", "settings": { "caption": "Table mats" } },
+        { "type": "card", "settings": { "caption": "Napkins" } },
+        { "type": "card", "settings": { "caption": "Cushion covers" } },
+        { "type": "card", "settings": { "caption": "Tea cosies" } },
+        { "type": "card", "settings": { "caption": "Glass covers" } }
+      ]
+    },
+    {
+      "name": "Home: Three pictures, arched middle",
+      "settings": {
+        "layout": "grid",
+        "columns_desktop": 3,
+        "columns_mobile": "2",
+        "ratio": "portrait_tall",
+        "feature_middle": true,
+        "heading": "Dressed for the Season",
+        "text": "<p>Easy silhouettes in cotton, printed by hand and made in small batches.</p>",
+        "padding_top": 40,
+        "padding_bottom": 42
+      },
+      "blocks": [
+        { "type": "card", "settings": { "caption": "New in" } },
+        { "type": "card", "settings": { "caption": "Dresses & kaftans" } },
+        { "type": "card", "settings": { "caption": "Jackets & shrugs" } }
+      ]
+    },
+    {
+      "name": "Home: Picture cards on a band",
+      "settings": {
+        "layout": "grid",
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "ratio": "portrait",
+        "heading": "Small Joys",
+        "text": "<p>Brass for the table, sets for little ones and the finishing touches for every outfit.</p>",
+        "background": "#253c30",
+        "pattern": true,
+        "pattern_color": "#ffffff",
+        "pattern_opacity": 6,
+        "heading_color": "#e2d1a6",
+        "text_color": "#ffffff",
+        "link_color": "#ffffff",
+        "ornament_color": "#e2d1a6",
+        "padding_top": 30,
+        "padding_bottom": 50
+      },
+      "blocks": [
+        { "type": "card", "settings": { "caption": "Peetal brass" } },
+        { "type": "card", "settings": { "caption": "Babies" } },
+        { "type": "card", "settings": { "caption": "Scarves" } },
+        { "type": "card", "settings": { "caption": "Scrunchies" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

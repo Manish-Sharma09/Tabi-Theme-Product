@@ -12,6 +12,12 @@
   The first slide is in the HTML fully visible, and its image is eager with
   fetchpriority=high - it is the page's LCP element, so nothing about it waits
   for JavaScript. Script only adds the slideshow on top.
+
+  2026-10-10, for the Good Earth home page: a slide can play a muted looping
+  video instead of its picture, the link can be a filled button, and the copy
+  can sit in the lower third - the reference's banner is a video with one
+  button below the middle and no heading. With a video on any slide the pause
+  button shows even for a single slide, and it stops the video.
 {%- endcomment -%}
 
 {{ 'home-hero.css' | asset_url | stylesheet_tag }}
@@ -26,6 +32,13 @@
 
   assign first_image = section.blocks.first.settings.image | default: section.blocks.first.settings.image_mobile
   assign first_mobile = section.blocks.first.settings.image_mobile | default: first_image
+
+  assign has_video = false
+  for block in section.blocks
+    if block.settings.video != blank or block.settings.video_mobile != blank
+      assign has_video = true
+    endif
+  endfor
 -%}
 
 {%- style -%}
@@ -35,6 +48,8 @@
     --hero-font-style: var(--font-heading-style);
     --hero-ink: {{ section.settings.text_color }};
     --hero-speed: {{ section.settings.autoplay_speed }}s;
+    --hero-button-bg: {{ section.settings.button_background }};
+    --hero-button-ink: {{ section.settings.button_text }};
     {%- if section.settings.height == 'image' and first_image != blank %}
       --hero-ratio: {{ first_image.aspect_ratio }};
       --hero-ratio-mobile: {{ first_mobile.aspect_ratio }};
@@ -43,7 +58,7 @@
 {%- endstyle -%}
 
 <home-hero
-  class="home-hero home-hero--{{ section.settings.height }}{% unless section.settings.show_pause_mobile %} home-hero--no-mobile-pause{% endunless %}"
+  class="home-hero home-hero--{{ section.settings.height }} home-hero--{{ section.settings.link_style }} home-hero--content-{{ section.settings.content_position }}{% unless section.settings.show_pause_mobile %} home-hero--no-mobile-pause{% endunless %}"
   role="region"
   aria-roledescription="{{ 'sections.slideshow.carousel' | t }}"
   aria-label="{{ section.settings.label | escape }}"
@@ -78,8 +93,44 @@
         {% endunless %}
         {{ block.shopify_attributes }}
       >
-        <div class="home-hero__media">
-          {%- if desktop != blank -%}
+        {%- liquid
+          assign video = block.settings.video | default: block.settings.video_mobile
+          assign video_mobile = block.settings.video_mobile
+        -%}
+        <div class="home-hero__media{% if video_mobile != blank and block.settings.video != blank %} home-hero__media--split-video{% endif %}">
+          {%- if video != blank -%}
+            {%- comment -%}
+              Muted, looped and inline, so phones play it in place. The script
+              pauses it for visitors who ask for less motion and whenever the
+              slide is not the one showing.
+            {%- endcomment -%}
+            {{
+              video
+              | video_tag:
+                class: 'home-hero__img home-hero__video home-hero__video--desktop',
+                autoplay: true,
+                loop: true,
+                muted: true,
+                playsinline: true,
+                controls: false,
+                preload: 'metadata',
+                image_size: '1920x'
+            }}
+            {%- if video_mobile != blank and block.settings.video != blank -%}
+              {{
+                video_mobile
+                | video_tag:
+                  class: 'home-hero__img home-hero__video home-hero__video--mobile',
+                  autoplay: true,
+                  loop: true,
+                  muted: true,
+                  playsinline: true,
+                  controls: false,
+                  preload: 'metadata',
+                  image_size: '1100x'
+              }}
+            {%- endif -%}
+          {%- elsif desktop != blank -%}
             <picture>
               {%- if block.settings.image_mobile != blank and block.settings.image != blank -%}
                 {%- comment -%}
@@ -185,21 +236,23 @@
         ></button>
       {%- endfor -%}
     </div>
+  {%- endif -%}
 
-    {%- if autoplay -%}
-      <button
-        type="button"
-        class="home-hero__pause"
-        aria-label="{{ 'sections.slideshow.pause_slideshow' | t }}"
-        data-pause-label="{{ 'sections.slideshow.pause_slideshow' | t }}"
-        data-play-label="{{ 'sections.slideshow.play_slideshow' | t }}"
-        data-hero-pause
-      >
-        <span class="home-hero__pause-icon">{% render 'tabi-icon', icon: 'pause' %}</span>
-        <span class="home-hero__play-icon">{% render 'tabi-icon', icon: 'play' %}</span>
-      </button>
-    {%- endif -%}
+  {%- if autoplay or has_video -%}
+    <button
+      type="button"
+      class="home-hero__pause"
+      aria-label="{{ 'sections.slideshow.pause_slideshow' | t }}"
+      data-pause-label="{{ 'sections.slideshow.pause_slideshow' | t }}"
+      data-play-label="{{ 'sections.slideshow.play_slideshow' | t }}"
+      data-hero-pause
+    >
+      <span class="home-hero__pause-icon">{% render 'tabi-icon', icon: 'pause' %}</span>
+      <span class="home-hero__play-icon">{% render 'tabi-icon', icon: 'play' %}</span>
+    </button>
+  {%- endif -%}
 
+  {%- if slide_count > 1 -%}
     <span class="visually-hidden" aria-live="polite" aria-atomic="true" data-hero-status></span>
   {%- endif -%}
 </home-hero>
@@ -271,6 +324,38 @@
       "id": "text_color",
       "label": "Text and controls",
       "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Heading and link",
+      "options": [
+        { "value": "middle", "label": "Middle" },
+        { "value": "lower", "label": "Lower third" }
+      ],
+      "default": "middle"
+    },
+    {
+      "type": "select",
+      "id": "link_style",
+      "label": "Link style",
+      "options": [
+        { "value": "link", "label": "Underlined text" },
+        { "value": "button", "label": "Filled button" }
+      ],
+      "default": "link"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Button",
+      "default": "#253c30"
+    },
+    {
+      "type": "color",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "#f9f7f4"
     }
   ],
   "blocks": [
@@ -289,6 +374,18 @@
           "id": "image_mobile",
           "label": "Mobile image",
           "info": "Portrait, at least 1100px wide. Without one, phones show a centred crop of the desktop image."
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video",
+          "info": "Optional. Plays silently on a loop in place of the images. Keep it short and under 10 MB."
+        },
+        {
+          "type": "video",
+          "id": "video_mobile",
+          "label": "Mobile video",
+          "info": "Optional. A portrait cut for phones."
         },
         {
           "type": "textarea",
