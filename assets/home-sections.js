@@ -1,6 +1,7 @@
 /* ==========================================================================
    home-sections.js
-   The carousel layout of sections/home-cards.liquid.
+   The carousel layout of sections/home-cards.liquid, and <home-video>, the
+   framed video of sections/home-spotlight.liquid (end of file).
 
    The cards are a plain scrolling list with scroll snapping, so they swipe
    on a phone and scroll on a trackpad with no script at all. This adds the
@@ -179,4 +180,111 @@
   }
 
   if (!customElements.get('home-carousel')) customElements.define('home-carousel', HomeCarousel);
+
+  /* ------------------------------------------------------------------------
+     <home-video>: a muted, looping video in place of a picture (the
+     spotlight band). An uploaded video plays while at least a third of it is
+     on screen and pauses when it leaves; a YouTube or Vimeo link gets its
+     player only when first needed. Visitors who ask for less motion see the
+     picture or the video's first frame, with the play button. The button is
+     always there: the video loops past five seconds.
+     ------------------------------------------------------------------------ */
+  class HomeVideo extends HTMLElement {
+    connectedCallback() {
+      this.file = this.querySelector('video');
+      this.holder = this.querySelector('[data-embed-src]');
+      this.button = this.querySelector('[data-video-toggle]');
+      if (!this.file && !this.holder) return;
+
+      this.userPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      this.inView = false;
+
+      this.button?.addEventListener('click', () => {
+        this.userPaused = !this.userPaused;
+        this.sync();
+      });
+
+      this.observer = new IntersectionObserver(
+        ([entry]) => {
+          this.inView = entry.isIntersecting;
+          this.sync();
+        },
+        { threshold: 0.33 }
+      );
+      this.observer.observe(this);
+      this.sync();
+    }
+
+    disconnectedCallback() {
+      this.observer?.disconnect();
+    }
+
+    sync() {
+      const play = this.inView && !this.userPaused;
+      this.classList.toggle('is-paused', !play);
+      if (this.button) {
+        this.button.setAttribute(
+          'aria-label',
+          this.userPaused ? this.button.dataset.playLabel : this.button.dataset.pauseLabel
+        );
+      }
+
+      if (this.file) {
+        if (play) {
+          this.file.play()?.catch(() => {});
+        } else {
+          this.file.pause();
+        }
+        return;
+      }
+
+      const frame = this.holder.querySelector('iframe');
+      if (play && !frame) {
+        this.build();
+      } else if (frame) {
+        this.command(frame, play ? 'play' : 'pause');
+      }
+    }
+
+    build() {
+      const frame = document.createElement('iframe');
+      frame.src = this.holder.dataset.embedSrc;
+      frame.title = this.getAttribute('aria-label') || 'Video';
+      frame.allow = 'autoplay; encrypted-media; picture-in-picture';
+      frame.setAttribute('tabindex', '-1');
+      frame.setAttribute('aria-hidden', 'true');
+      frame.addEventListener('load', () => {
+        frame.dataset.loaded = 'true';
+        // YouTube shows its title and controls for a moment as a video
+        // starts; the picture underneath covers that until it clears.
+        frame.revealTimer = setTimeout(() => frame.classList.add('is-ready'), 1600);
+        if (frame.dataset.pending) this.command(frame, frame.dataset.pending);
+      });
+      this.holder.append(frame);
+    }
+
+    // YouTube (enablejsapi) and Vimeo both take commands by postMessage.
+    command(frame, action) {
+      if (!frame.dataset.loaded) {
+        frame.dataset.pending = action;
+        return;
+      }
+      delete frame.dataset.pending;
+      // A paused player shows its own overlay (title, "More videos"), so it
+      // fades out and the picture underneath stands in until it plays again.
+      clearTimeout(frame.revealTimer);
+      if (action === 'pause') {
+        frame.classList.remove('is-ready');
+      } else {
+        frame.revealTimer = setTimeout(() => frame.classList.add('is-ready'), 1200);
+      }
+      const message =
+        this.holder.dataset.embedType === 'youtube'
+          ? { event: 'command', func: action === 'play' ? 'playVideo' : 'pauseVideo', args: '' }
+          : { method: action };
+      frame.contentWindow?.postMessage(JSON.stringify(message), '*');
+    }
+  }
+
+  if (!customElements.get('home-video')) customElements.define('home-video', HomeVideo);
 })();

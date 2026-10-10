@@ -214,7 +214,9 @@
         frame.dataset.loaded = 'true';
         // The players show a moment of their own chrome before the video
         // runs; the picture underneath covers it.
-        setTimeout(() => frame.classList.add('is-ready'), 700);
+        // YouTube shows its title and controls for a moment as a video
+        // starts; the picture underneath covers that until it clears.
+        frame.revealTimer = setTimeout(() => frame.classList.add('is-ready'), 1600);
         if (frame.dataset.pending) this.commandEmbed(holder, frame, frame.dataset.pending);
       });
       holder.append(frame);
@@ -227,6 +229,14 @@
         return;
       }
       delete frame.dataset.pending;
+      // A paused player shows its own overlay (title, "More videos"), so it
+      // fades out and the picture underneath stands in until it plays again.
+      clearTimeout(frame.revealTimer);
+      if (action === 'pause') {
+        frame.classList.remove('is-ready');
+      } else {
+        frame.revealTimer = setTimeout(() => frame.classList.add('is-ready'), 1200);
+      }
       const message =
         holder.dataset.embedType === 'youtube'
           ? { event: 'command', func: action === 'play' ? 'playVideo' : 'pauseVideo', args: '' }

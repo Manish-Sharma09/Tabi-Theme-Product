@@ -92,6 +92,9 @@
           capture style
             echo '--dw: ' | append: d.width | append: '; --dwm: ' | append: d.width_mobile
             echo '; --dx: ' | append: d.offset_x | append: '; --dy: ' | append: d.offset_y
+            assign dxm = d.offset_x_mobile | default: 0
+            assign dym = d.offset_y_mobile | default: 0
+            echo '; --dxm: ' | append: dxm | append: '; --dym: ' | append: dym
             echo '; --dr: ' | append: ratio | append: '; --do: ' | append: d.opacity | append: '%;'
           endcapture
 

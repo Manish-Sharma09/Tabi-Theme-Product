@@ -29,6 +29,8 @@
     --home-heading-size: {{ section.settings.heading_size }};
     --home-pt: {{ section.settings.padding_top }};
     --home-pb: {{ section.settings.padding_bottom }};
+    --home-pt-m: {{ section.settings.padding_top_mobile }};
+    --home-pb-m: {{ section.settings.padding_bottom_mobile }};
   }
 {%- endstyle -%}
 
@@ -358,6 +360,26 @@
       "unit": "px",
       "label": "Space below",
       "default": 38
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space above on phones",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space below on phones",
+      "default": 28
     }
   ],
   "blocks": [
@@ -490,6 +512,26 @@
           "label": "Width on phones",
           "default": 100,
           "info": "0 hides it on phones."
+        },
+        {
+          "type": "range",
+          "id": "offset_x_mobile",
+          "min": -100,
+          "max": 300,
+          "step": 5,
+          "unit": "px",
+          "label": "Distance from the side on phones",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "offset_y_mobile",
+          "min": -100,
+          "max": 300,
+          "step": 5,
+          "unit": "px",
+          "label": "Distance from the top or bottom on phones",
+          "default": 0
         },
         {
           "type": "checkbox",

@@ -274,6 +274,10 @@
     }
   },
   "sections": {
+    "home_video": {
+      "play": "Play video",
+      "pause": "Pause video"
+    },
     "announcements": {
       "previous_announcement": "Previous announcement",
       "next_announcement": "Next announcement",

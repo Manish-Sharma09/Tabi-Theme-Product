@@ -63,11 +63,13 @@
   color: var(--home-text);
 }
 
+/* Phones have spacing settings of their own (--home-pt-m, --home-pb-m);
+   a section without them uses three quarters of its desktop spacing. */
 @media screen and (max-width: 749px) {
   .home-section {
     --u: calc(100vw / 390);
-    padding-top: calc(var(--home-pt) * 0.75px);
-    padding-bottom: calc(var(--home-pb) * 0.75px);
+    padding-top: calc(var(--home-pt-m, calc(var(--home-pt) * 0.75)) * 1px);
+    padding-bottom: calc(var(--home-pb-m, calc(var(--home-pb) * 0.75)) * 1px);
   }
 }
 
@@ -173,10 +175,14 @@
 /* The underline is a background line rather than text-decoration, so a
    hover can draw it out to the right and back in from the left (the same
    gesture as the hero's link). The padding puts it where the reference's
-   underline sits, about 0.3em under the baseline. */
+   underline sits, about 0.3em under the baseline. Inline, with the
+   decoration cloned, so a caption that wraps gets a line under each line
+   of text rather than one rule across the card. */
 .home-link {
-  display: inline-block;
+  display: inline;
   padding: 0.27em 0 0.02em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
   color: var(--home-link);
   font-family: var(--font-body-family);
   font-style: var(--font-body-style);
@@ -376,18 +382,46 @@ a.home-link:focus-visible,
   scale: -1 1;
 }
 
+/* On phones a decoration has its own width and offsets (--dwm, --dxm,
+   --dym), in 390-wide phone pixels. */
 @media screen and (max-width: 749px) {
   .home-decor {
     width: calc(var(--dwm) * var(--u));
   }
 
+  .home-decor--at-top-left,
+  .home-decor--at-top-center,
+  .home-decor--at-top-right {
+    top: calc(var(--dym, 0) * var(--u));
+  }
+
+  .home-decor--at-bottom-left,
+  .home-decor--at-bottom-center,
+  .home-decor--at-bottom-right {
+    bottom: calc(var(--dym, 0) * var(--u));
+  }
+
   .home-decor--at-middle-left,
   .home-decor--at-middle-right {
+    top: calc(50% + var(--dym, 0) * var(--u));
     margin-top: calc(var(--dwm) * var(--u) / var(--dr) / -2);
+  }
+
+  .home-decor--at-top-left,
+  .home-decor--at-middle-left,
+  .home-decor--at-bottom-left {
+    left: calc(var(--dxm, 0) * var(--u));
+  }
+
+  .home-decor--at-top-right,
+  .home-decor--at-middle-right,
+  .home-decor--at-bottom-right {
+    right: calc(var(--dxm, 0) * var(--u));
   }
 
   .home-decor--at-top-center,
   .home-decor--at-bottom-center {
+    left: calc(50% + var(--dxm, 0) * var(--u));
     margin-left: calc(var(--dwm) * var(--u) / -2);
   }
 
@@ -659,6 +693,17 @@ a.home-link:focus-visible,
   margin-top: calc(16 * var(--u));
 }
 
+/* A product card's price, under its caption. */
+.home-card__price {
+  display: block;
+  margin-top: calc(4 * var(--u));
+  color: var(--home-text);
+  font-family: var(--font-body-family);
+  font-size: max(13px, calc(15 * var(--u)));
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
 @media (hover: hover) {
   .home-card:hover .home-card__media img {
     transform: scale(1.03);
@@ -695,6 +740,14 @@ a.home-link:focus-visible,
 
   .home-cards--mobile-1 .home-cards__item {
     flex-basis: 100%;
+  }
+
+  .home-cards--mobile-3 .home-cards__item {
+    flex-basis: calc(33.333% - 28 * var(--u) / 3);
+  }
+
+  .home-card__price {
+    font-size: 12.5px;
   }
 
   /* The larger card leads on a phone, on a row of its own. */
@@ -834,6 +887,16 @@ a.home-link:focus-visible,
   display: none;
 }
 
+/* On desktop the controls wrapper steps aside, so the arrows are placed
+   against the carousel itself. */
+.home-carousel__controls {
+  display: contents;
+}
+
+.home-carousel.is-static .home-carousel__controls {
+  display: none;
+}
+
 /* The track is a list the arrows scroll; with every card in view (wide
    screens, few cards) it centres instead. */
 .home-carousel.is-static .home-carousel__track {
@@ -850,20 +913,39 @@ a.home-link:focus-visible,
     scroll-padding-inline: calc(9 * var(--u));
   }
 
+  /* "Cards in view on phones" sets --home-visible-m (2.5 by default, as
+     the reference: the third card shows half, inviting the swipe). */
   .home-carousel__slide {
-    flex-basis: calc(148 * var(--u));
+    flex-basis: calc(100% / var(--home-visible-m, 2.5));
     padding: 0 calc(4 * var(--u));
   }
 
+  /* Arrows and dots share one row under the cards; "Carousel buttons on
+     phones" can keep either alone. */
+  .home-carousel__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
   .home-carousel__arrow {
-    display: none;
+    position: static;
+    width: 40px;
+    height: 40px;
+    margin: 0;
   }
 
   .home-carousel__dots {
     display: flex;
     justify-content: center;
     gap: 2px;
-    margin-top: 10px;
+  }
+
+  .home-carousel--phone-arrows .home-carousel__dots,
+  .home-carousel--phone-dots .home-carousel__arrow {
+    display: none;
   }
 
   .home-carousel__dot {
@@ -1148,6 +1230,108 @@ a.home-link:focus-visible,
   .home-spot__actions {
     margin-top: calc(14 * var(--u));
   }
+}
+
+/* A video in the frame (<home-video>, assets/home-sections.js): over the
+   picture, cropped to fill like it, with a round pause / play button in the
+   corner. A YouTube or Vimeo player fades in once it has loaded. */
+.home-video {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.home-video__file {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-video__embed {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  container-type: size;
+  pointer-events: none;
+}
+
+.home-video__embed iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100cqw, 177.78cqh);
+  height: max(100cqh, 56.25cqw);
+  border: 0;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.8s var(--home-ease);
+}
+
+.home-video__embed iframe.is-ready {
+  opacity: 1;
+}
+
+/* YouTube has no true background mode: it lays its title along the top and
+   "More videos" along the bottom. Drawing the player a fifth larger than
+   the frame pushes both outside it. */
+.home-video__embed[data-embed-type='youtube'] iframe {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+.home-video__toggle {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 0.8);
+  border-radius: 50%;
+  background-color: rgb(0 0 0 / 0.3);
+  color: #ffffff;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 0.3s var(--home-ease);
+}
+
+.home-video__toggle .tabi-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.home-video__pause-icon,
+.home-video__play-icon {
+  line-height: 0;
+}
+
+.home-video__play-icon,
+.home-video.is-paused .home-video__pause-icon {
+  display: none;
+}
+
+.home-video.is-paused .home-video__play-icon {
+  display: block;
+}
+
+@media (hover: hover) {
+  .home-video__toggle:hover {
+    background-color: rgb(0 0 0 / 0.5);
+  }
+}
+
+.home-video__toggle:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 /* --------------------------------------------------------------------------

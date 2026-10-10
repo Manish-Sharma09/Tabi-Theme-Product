@@ -85,7 +85,9 @@
             "opacity": 100,
             "layer": "back",
             "animation": "grow",
-            "drift": 18
+            "drift": 18,
+            "offset_x_mobile": 0,
+            "offset_y_mobile": 10
           }
         },
         "decoration_ribbon": {
@@ -101,7 +103,9 @@
             "opacity": 100,
             "layer": "back",
             "animation": "unroll",
-            "drift": 10
+            "drift": 10,
+            "offset_x_mobile": 0,
+            "offset_y_mobile": 0
           }
         }
       },
@@ -124,7 +128,9 @@
         "link_color": "#4d4d4f",
         "heading_size": 50,
         "padding_top": 58,
-        "padding_bottom": 4
+        "padding_bottom": 4,
+        "padding_top_mobile": 44,
+        "padding_bottom_mobile": 4
       }
     },
     "home_cards_home": {
@@ -210,7 +216,14 @@
         "motion": true,
         "heading_size": 50,
         "padding_top": 26,
-        "padding_bottom": 10
+        "padding_bottom": 10,
+        "padding_top_mobile": 20,
+        "padding_bottom_mobile": 8,
+        "source": "blocks",
+        "carousel_mobile": "2.5",
+        "mobile_controls": "both",
+        "product_limit": 8,
+        "show_price": false
       }
     },
     "home_band_kids": {
@@ -238,7 +251,9 @@
         "motion": true,
         "heading_size": 50,
         "padding_top": 26,
-        "padding_bottom": 38
+        "padding_bottom": 38,
+        "padding_top_mobile": 20,
+        "padding_bottom_mobile": 28
       }
     },
     "home_cards_women": {
@@ -279,12 +294,14 @@
             "offset_x": 0,
             "offset_y": 10,
             "width": 320,
-            "width_mobile": 85,
+            "width_mobile": 80,
             "flip": false,
             "opacity": 100,
             "layer": "back",
             "animation": "grow",
-            "drift": 16
+            "drift": 16,
+            "offset_x_mobile": 0,
+            "offset_y_mobile": 10
           }
         },
         "decoration_spray_right": {
@@ -295,12 +312,14 @@
             "offset_x": 0,
             "offset_y": 10,
             "width": 320,
-            "width_mobile": 85,
+            "width_mobile": 80,
             "flip": false,
             "opacity": 100,
             "layer": "back",
             "animation": "grow",
-            "drift": 22
+            "drift": 22,
+            "offset_x_mobile": 0,
+            "offset_y_mobile": 10
           }
         }
       },
@@ -334,7 +353,9 @@
         "motion": true,
         "heading_size": 50,
         "padding_top": 40,
-        "padding_bottom": 42
+        "padding_bottom": 42,
+        "padding_top_mobile": 64,
+        "padding_bottom_mobile": 32
       }
     },
     "home_cards_joys": {
@@ -402,7 +423,9 @@
         "motion": true,
         "heading_size": 50,
         "padding_top": 30,
-        "padding_bottom": 50
+        "padding_bottom": 50,
+        "padding_top_mobile": 22,
+        "padding_bottom_mobile": 38
       }
     },
     "home_spotlight_story": {
@@ -431,7 +454,9 @@
         "motion": true,
         "heading_size": 50,
         "padding_top": 14,
-        "padding_bottom": 78
+        "padding_bottom": 78,
+        "padding_top_mobile": 10,
+        "padding_bottom_mobile": 58
       }
     },
     "slideshow_dorec_z7XCH3": {

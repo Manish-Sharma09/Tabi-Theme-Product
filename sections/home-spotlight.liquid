@@ -11,6 +11,9 @@
 {{ 'home-sections.css' | asset_url | stylesheet_tag }}
 {{ 'tabi-motion.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'tabi-motion.js' | asset_url }}" defer="defer"></script>
+{%- if section.settings.video != blank or section.settings.video_link != blank -%}
+  <script src="{{ 'home-sections.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
 
 {%- liquid
   assign heading = section.settings.heading | strip
@@ -41,6 +44,8 @@
     --home-heading-size: {{ section.settings.heading_size }};
     --home-pt: {{ section.settings.padding_top }};
     --home-pb: {{ section.settings.padding_bottom }};
+    --home-pt-m: {{ section.settings.padding_top_mobile }};
+    --home-pb-m: {{ section.settings.padding_bottom_mobile }};
   }
 {%- endstyle -%}
 
@@ -123,7 +128,61 @@
     {%- endcapture -%}
 
     <div class="home-spot__media" data-reveal="rise" style="--reveal-order: 3;">
-      {%- if section.settings.button_link != blank -%}
+      {%- liquid
+        assign spot_video = section.settings.video
+        assign spot_link = section.settings.video_link
+        assign has_video = false
+        if spot_video != blank or spot_link != blank
+          assign has_video = true
+        endif
+      -%}
+      {%- if has_video -%}
+        {%- comment -%}
+          The picture stays underneath: it is what shows before the video
+          has loaded, and for visitors who ask for less motion. The video
+          plays only while on screen (home-video, assets/home-sections.js).
+        {%- endcomment -%}
+        <home-video class="home-video" aria-label="{{ heading | escape }}">
+          {{ spot_picture }}
+          {%- if spot_video != blank -%}
+            {{
+              spot_video
+              | video_tag:
+                class: 'home-video__file',
+                loop: true,
+                muted: true,
+                playsinline: true,
+                controls: false,
+                preload: 'metadata',
+                image_size: '1600x'
+            }}
+          {%- else -%}
+            {%- liquid
+              if spot_link.type == 'youtube'
+                assign embed_src = 'https://www.youtube-nocookie.com/embed/' | append: spot_link.id | append: '?autoplay=1&mute=1&loop=1&playlist=' | append: spot_link.id | append: '&controls=0&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&enablejsapi=1'
+              else
+                assign embed_src = 'https://player.vimeo.com/video/' | append: spot_link.id | append: '?background=1&autoplay=1&loop=1&muted=1&dnt=1'
+              endif
+            -%}
+            <span
+              class="home-video__embed"
+              data-embed-src="{{ embed_src | escape }}"
+              data-embed-type="{{ spot_link.type }}"
+            ></span>
+          {%- endif -%}
+          <button
+            type="button"
+            class="home-video__toggle"
+            aria-label="{{ 'sections.home_video.pause' | t }}"
+            data-pause-label="{{ 'sections.home_video.pause' | t }}"
+            data-play-label="{{ 'sections.home_video.play' | t }}"
+            data-video-toggle
+          >
+            <span class="home-video__pause-icon">{% render 'tabi-icon', icon: 'pause' %}</span>
+            <span class="home-video__play-icon">{% render 'tabi-icon', icon: 'play' %}</span>
+          </button>
+        </home-video>
+      {%- elsif section.settings.button_link != blank -%}
         <a href="{{ section.settings.button_link }}" class="home-spot__media-link" tabindex="-1" aria-hidden="true">
           {{- spot_picture -}}
         </a>
@@ -247,6 +306,30 @@
         }
       ],
       "default": "square"
+    },
+    {
+      "type": "header",
+      "content": "Video"
+    },
+    {
+      "type": "paragraph",
+      "content": "Optional. A video plays silently on a loop in the frame instead of the picture, while it is on screen, with a pause button. Keep the picture: it shows while the video loads and for visitors who ask for less motion."
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video",
+      "info": "Uploaded to Shopify (Content > Files). Short, under 20 MB."
+    },
+    {
+      "type": "video_url",
+      "id": "video_link",
+      "label": "Or a YouTube or Vimeo link",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ],
+      "info": "Used when no video is uploaded above. Plays muted, cropped to fill the frame. YouTube may show its title for a moment; for the cleanest loop, upload the video or use Vimeo."
     },
     {
       "type": "checkbox",
@@ -395,6 +478,26 @@
       "unit": "px",
       "label": "Space below",
       "default": 78
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space above on phones",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space below on phones",
+      "default": 58
     }
   ],
   "blocks": [
@@ -527,6 +630,26 @@
           "label": "Width on phones",
           "default": 100,
           "info": "0 hides it on phones."
+        },
+        {
+          "type": "range",
+          "id": "offset_x_mobile",
+          "min": -100,
+          "max": 300,
+          "step": 5,
+          "unit": "px",
+          "label": "Distance from the side on phones",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "offset_y_mobile",
+          "min": -100,
+          "max": 300,
+          "step": 5,
+          "unit": "px",
+          "label": "Distance from the top or bottom on phones",
+          "default": 0
         },
         {
           "type": "checkbox",

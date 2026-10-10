@@ -583,6 +583,13 @@
   opacity: 1;
 }
 
+/* YouTube has no true background mode: it lays its title along the top and
+   "More videos" along the bottom. Drawing the player a fifth larger than
+   the frame pushes both outside it. */
+.home-hero__embed[data-embed-type='youtube'] iframe {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
 @media screen and (max-width: 749px) {
   .home-hero__media--split-video .home-hero__video--desktop {
     display: none;

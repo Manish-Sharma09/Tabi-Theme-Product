@@ -1,0 +1,72 @@
+{% doc %}
+  One picture card of sections/home-cards: a picture, an underlined caption
+  and, for a product, its price; the whole card one link. Used for cards
+  added as blocks, for a collection's products and for a list of
+  collections alike.
+
+  @param {object} [image] - The picture (blank shows a placeholder)
+  @param {string} [caption] - Caption under the picture
+  @param {string} [url] - Where the card goes
+  @param {string} [price] - Formatted price, for product cards
+  @param {string} sizes - sizes attribute for the picture
+  @param {string} layout - grid | carousel
+  @param {boolean} [is_feature] - The larger, arched middle card
+  @param {number} index - Position in the row (0-based)
+  @param {string} [attributes] - Extra attributes, e.g. block.shopify_attributes
+
+  @example
+  {% render 'home-card', image: product.featured_image, caption: product.title, url: product.url, sizes: card_sizes, layout: 'carousel', index: forloop.index0 %}
+{% enddoc %}
+
+{%- liquid
+  assign card_alt = image.alt | default: caption
+  if caption != blank
+    assign card_alt = ''
+  endif
+  assign placeholder_name = index | modulo: 6 | plus: 1 | prepend: 'collection-'
+
+  assign item_class = 'home-cards__item'
+  if layout == 'carousel'
+    assign item_class = 'home-carousel__slide'
+  elsif is_feature
+    assign item_class = 'home-cards__item home-cards__item--feature'
+  endif
+
+  comment
+    Cards follow the heading one step apart; past the fifth they share a
+    step, so a long row never makes anyone wait.
+  endcomment
+  assign reveal_order = index | at_most: 4 | plus: 2
+-%}
+
+{%- capture card_inner -%}
+  <span class="home-card__media">
+    {%- if image != blank -%}
+      {{
+        image
+        | image_url: width: 1000
+        | image_tag:
+          widths: '240, 360, 480, 640, 800, 1000',
+          sizes: sizes,
+          alt: card_alt,
+          loading: 'lazy'
+      }}
+    {%- else -%}
+      {{ placeholder_name | placeholder_svg_tag: 'home-placeholder' }}
+    {%- endif -%}
+  </span>
+  {%- if caption != blank -%}
+    <span class="home-card__caption"><span class="home-link">{{ caption | escape }}</span></span>
+  {%- endif -%}
+  {%- if price != blank -%}
+    <span class="home-card__price">{{ price }}</span>
+  {%- endif -%}
+{%- endcapture -%}
+
+<li class="{{ item_class }}" data-reveal="rise" style="--reveal-order: {{ reveal_order }};" {{ attributes }}>
+  {%- if url != blank -%}
+    <a href="{{ url }}" class="home-card">{{ card_inner }}</a>
+  {%- else -%}
+    <span class="home-card">{{ card_inner }}</span>
+  {%- endif -%}
+</li>

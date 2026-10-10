@@ -71,16 +71,21 @@
   // Drift is measured against the section (the moving element's own box
   // would include the drift it is given) and written in one pass after all
   // the reads.
+  // The drift runs from its full amount (section entering at the bottom)
+  // to nothing (section leaving at the top), always downward from where the
+  // merchant placed the picture, so a picture pinned to a section's top edge
+  // never slides out past it. Phones get half: less room, more scrolling.
   function drift() {
     frame = 0;
     const half = window.innerHeight / 2;
+    const scale = window.innerWidth < 750 ? 0.5 : 1;
     const moves = [];
 
     drifting.forEach((element) => {
       const frameBox = (element.closest('[data-motion]') || element).getBoundingClientRect();
       const centre = frameBox.top + frameBox.height / 2;
       const progress = Math.max(-1, Math.min(1, (centre - half) / (half + frameBox.height / 2)));
-      moves.push([element, progress * (parseFloat(element.dataset.parallax) || 0)]);
+      moves.push([element, ((progress + 1) / 2) * (parseFloat(element.dataset.parallax) || 0) * scale]);
     });
 
     moves.forEach(([element, offset]) => {

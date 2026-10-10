@@ -405,6 +405,21 @@
   text-decoration: none;
 }
 
+/* Tablets: four columns are too narrow to read (the contact column wraps a
+   word to a line), so the columns pair up two by two. */
+@media screen and (min-width: 750px) and (max-width: 1099px) {
+  .tabi-footer__main {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .tabi-footer__columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+    row-gap: 36px;
+  }
+}
+
 /* --------------------------------------------------------------------------
    5. PHONES
    The columns become rows: the brand column as it is, then each menu or

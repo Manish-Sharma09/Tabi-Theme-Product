@@ -31,8 +31,33 @@
   assign layout = section.settings.layout
   assign cols = section.settings.columns_desktop
   assign cards = section.blocks | where: 'type', 'card'
-  assign card_count = cards.size
   assign heading = section.settings.heading | strip
+
+  comment
+    Where the cards come from: the Card blocks, the products of one
+    collection, or one card per collection in a list. A source left empty
+    falls back to the blocks, so the row is never blank while it is set up.
+  endcomment
+  assign source = section.settings.source | default: 'blocks'
+  assign source_collection = section.settings.source_collection
+  assign source_collections = section.settings.source_collections
+  if source == 'products' and source_collection == blank
+    assign source = 'blocks'
+  endif
+  if source == 'collections' and source_collections == blank
+    assign source = 'blocks'
+  endif
+
+  case source
+    when 'products'
+      assign card_count = source_collection.products_count | at_most: section.settings.product_limit
+    when 'collections'
+      assign card_count = source_collections.size
+    else
+      assign card_count = cards.size
+  endcase
+
+  assign visible_mobile = section.settings.carousel_mobile | default: '2.5' | times: 1.0
 
   assign feature_index = 0
   if layout == 'grid' and section.settings.feature_middle and card_count == 3
@@ -76,11 +101,10 @@
   assign card_cap = card_px | plus: 2
 
   if layout == 'carousel'
-    assign mobile_vw = 37
-  elsif section.settings.columns_mobile == 1
-    assign mobile_vw = 84
+    assign mobile_vw = 96 | divided_by: visible_mobile | ceil
   else
-    assign mobile_vw = 42
+    assign mobile_cols = section.settings.columns_mobile | times: 1
+    assign mobile_vw = 88 | divided_by: mobile_cols | ceil
   endif
 
   assign card_sizes = '(min-width: 1440px) ' | append: card_cap | append: 'px, (min-width: 750px) ' | append: card_vw | append: 'vw, ' | append: mobile_vw | append: 'vw'
@@ -104,6 +128,8 @@
     --home-heading-size: {{ section.settings.heading_size }};
     --home-pt: {{ section.settings.padding_top }};
     --home-pb: {{ section.settings.padding_bottom }};
+    --home-pt-m: {{ section.settings.padding_top_mobile }};
+    --home-pb-m: {{ section.settings.padding_bottom_mobile }};
     --home-ratio: {{ ratio }};
     --home-fit: {{ section.settings.fit }};
   }
@@ -165,110 +191,129 @@
 
     {%- if card_count > 0 -%}
       <div class="home-cards__body">
-        {%- capture cards -%}
+        {%- capture cards_html -%}
           {%- assign used = '|' -%}
-          {%- for block in cards -%}
-            {%- liquid
-              assign card_collection = block.settings.collection
-              assign card_image = block.settings.image
-
-              if card_image == blank and card_collection != blank
-                if card_collection.image != blank
-                  assign card_image = card_collection.image
-                else
-                  for product in card_collection.products limit: 8
-                    if product.featured_image != blank
-                      assign key = '|' | append: product.featured_image.src | append: '|'
-                      unless used contains key
-                        assign card_image = product.featured_image
-                        break
-                      endunless
-                    endif
-                  endfor
-                  if card_image == blank
-                    assign card_image = card_collection.featured_image
+          {%- case source -%}
+            {%- when 'products' -%}
+              {%- for product in source_collection.products limit: section.settings.product_limit -%}
+                {%- liquid
+                  assign is_feature = false
+                  assign sizes = card_sizes
+                  if forloop.index == feature_index
+                    assign is_feature = true
+                    assign sizes = feature_sizes
                   endif
-                endif
-              endif
+                  assign price = ''
+                  if section.settings.show_price
+                    assign price = product.price | money
+                  endif
+                -%}
+                {% render 'home-card',
+                  image: product.featured_image,
+                  caption: product.title,
+                  url: product.url,
+                  price: price,
+                  sizes: sizes,
+                  layout: layout,
+                  is_feature: is_feature,
+                  index: forloop.index0
+                %}
+              {%- endfor -%}
 
-              if card_image != blank
-                assign used = used | append: card_image.src | append: '|'
-              endif
+            {%- when 'collections' -%}
+              {%- for card_collection in source_collections -%}
+                {%- liquid
+                  assign card_image = card_collection.image
+                  if card_image == blank
+                    for product in card_collection.products limit: 8
+                      if product.featured_image != blank
+                        assign key = '|' | append: product.featured_image.src | append: '|'
+                        unless used contains key
+                          assign card_image = product.featured_image
+                          break
+                        endunless
+                      endif
+                    endfor
+                  endif
+                  if card_image != blank
+                    assign used = used | append: card_image.src | append: '|'
+                  endif
 
-              assign caption = block.settings.caption | strip | default: card_collection.title
-              assign card_url = block.settings.link | default: card_collection.url
+                  assign is_feature = false
+                  assign sizes = card_sizes
+                  if forloop.index == feature_index
+                    assign is_feature = true
+                    assign sizes = feature_sizes
+                  endif
+                -%}
+                {% render 'home-card',
+                  image: card_image,
+                  caption: card_collection.title,
+                  url: card_collection.url,
+                  sizes: sizes,
+                  layout: layout,
+                  is_feature: is_feature,
+                  index: forloop.index0
+                %}
+              {%- endfor -%}
 
-              assign is_feature = false
-              if forloop.index == feature_index
-                assign is_feature = true
-              endif
+            {%- else -%}
+              {%- for block in cards -%}
+                {%- liquid
+                  assign card_collection = block.settings.collection
+                  assign card_image = block.settings.image
 
-              assign sizes = card_sizes
-              if is_feature
-                assign sizes = feature_sizes
-              endif
+                  if card_image == blank and card_collection != blank
+                    if card_collection.image != blank
+                      assign card_image = card_collection.image
+                    else
+                      for product in card_collection.products limit: 8
+                        if product.featured_image != blank
+                          assign key = '|' | append: product.featured_image.src | append: '|'
+                          unless used contains key
+                            assign card_image = product.featured_image
+                            break
+                          endunless
+                        endif
+                      endfor
+                      if card_image == blank
+                        assign card_image = card_collection.featured_image
+                      endif
+                    endif
+                  endif
 
-              assign card_alt = card_image.alt | default: caption
-              if caption != blank
-                assign card_alt = ''
-              endif
+                  if card_image != blank
+                    assign used = used | append: card_image.src | append: '|'
+                  endif
 
-              assign placeholder_name = forloop.index0 | modulo: 6 | plus: 1 | prepend: 'collection-'
+                  assign caption = block.settings.caption | strip | default: card_collection.title
+                  assign card_url = block.settings.link | default: card_collection.url
 
-              assign item_class = 'home-cards__item'
-              if layout == 'carousel'
-                assign item_class = 'home-carousel__slide'
-              elsif is_feature
-                assign item_class = 'home-cards__item home-cards__item--feature'
-              endif
-
-              comment
-                Cards follow the heading one step apart; past the fifth they
-                share a step, so a long row never makes anyone wait.
-              endcomment
-              assign reveal_order = forloop.index0 | at_most: 4 | plus: 2
-            -%}
-
-            {%- capture card_inner -%}
-              <span class="home-card__media">
-                {%- if card_image != blank -%}
-                  {{
-                    card_image
-                    | image_url: width: 1000
-                    | image_tag:
-                      widths: '240, 360, 480, 640, 800, 1000',
-                      sizes: sizes,
-                      alt: card_alt,
-                      loading: 'lazy'
-                  }}
-                {%- else -%}
-                  {{ placeholder_name | placeholder_svg_tag: 'home-placeholder' }}
-                {%- endif -%}
-              </span>
-              {%- if caption != blank -%}
-                <span class="home-card__caption"><span class="home-link">{{ caption | escape }}</span></span>
-              {%- endif -%}
-            {%- endcapture -%}
-
-            <li
-              class="{{ item_class }}"
-              data-reveal="rise"
-              style="--reveal-order: {{ reveal_order }};"
-              {{ block.shopify_attributes }}
-            >
-              {%- if card_url != blank -%}
-                <a href="{{ card_url }}" class="home-card">{{ card_inner }}</a>
-              {%- else -%}
-                <span class="home-card">{{ card_inner }}</span>
-              {%- endif -%}
-            </li>
-          {%- endfor -%}
+                  assign is_feature = false
+                  assign sizes = card_sizes
+                  if forloop.index == feature_index
+                    assign is_feature = true
+                    assign sizes = feature_sizes
+                  endif
+                -%}
+                {% render 'home-card',
+                  image: card_image,
+                  caption: caption,
+                  url: card_url,
+                  sizes: sizes,
+                  layout: layout,
+                  is_feature: is_feature,
+                  index: forloop.index0,
+                  attributes: block.shopify_attributes
+                %}
+              {%- endfor -%}
+          {%- endcase -%}
         {%- endcapture -%}
 
         {%- if layout == 'carousel' -%}
           <home-carousel
-            class="home-carousel"
-            style="--home-visible: {{ cols }};"
+            class="home-carousel home-carousel--phone-{{ section.settings.mobile_controls | default: 'both' }}"
+            style="--home-visible: {{ cols }}; --home-visible-m: {{ visible_mobile }};"
             role="region"
             aria-roledescription="{{ 'sections.slideshow.carousel' | t }}"
             {% if heading != blank %}
@@ -278,33 +323,39 @@
             {% endif %}
           >
             <ul class="home-carousel__track" role="list">
-              {{- cards -}}
+              {{- cards_html -}}
             </ul>
-            <button
-              type="button"
-              class="home-carousel__arrow home-carousel__arrow--prev"
-              aria-label="{{ 'general.slider.previous_slide' | t }}"
-              data-carousel-prev
-            >
-              {% render 'tabi-icon', icon: 'chevron-left' %}
-            </button>
-            <button
-              type="button"
-              class="home-carousel__arrow home-carousel__arrow--next"
-              aria-label="{{ 'general.slider.next_slide' | t }}"
-              data-carousel-next
-            >
-              {% render 'tabi-icon', icon: 'chevron-right' %}
-            </button>
-            <span
-              class="home-carousel__dots"
-              data-label="{{ 'sections.slideshow.load_slide' | t | escape }}"
-              data-of="{{ 'general.slider.of' | t | escape }}"
-            ></span>
+            {%- comment -%}
+              Desktop: the arrows sit outside the row's ends. Phones: arrows
+              and dots share one row under the cards (assets/home-sections.css).
+            {%- endcomment -%}
+            <div class="home-carousel__controls">
+              <button
+                type="button"
+                class="home-carousel__arrow home-carousel__arrow--prev"
+                aria-label="{{ 'general.slider.previous_slide' | t }}"
+                data-carousel-prev
+              >
+                {% render 'tabi-icon', icon: 'chevron-left' %}
+              </button>
+              <span
+                class="home-carousel__dots"
+                data-label="{{ 'sections.slideshow.load_slide' | t | escape }}"
+                data-of="{{ 'general.slider.of' | t | escape }}"
+              ></span>
+              <button
+                type="button"
+                class="home-carousel__arrow home-carousel__arrow--next"
+                aria-label="{{ 'general.slider.next_slide' | t }}"
+                data-carousel-next
+              >
+                {% render 'tabi-icon', icon: 'chevron-right' %}
+              </button>
+            </div>
           </home-carousel>
         {%- else -%}
           <ul class="home-cards__grid" role="list">
-            {{- cards -}}
+            {{- cards_html -}}
           </ul>
         {%- endif -%}
       </div>
@@ -336,6 +387,63 @@
       "default": "grid"
     },
     {
+      "type": "header",
+      "content": "Cards"
+    },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Cards come from",
+      "options": [
+        {
+          "value": "blocks",
+          "label": "Cards I add below"
+        },
+        {
+          "value": "products",
+          "label": "Products in a collection"
+        },
+        {
+          "value": "collections",
+          "label": "A card for each collection"
+        }
+      ],
+      "default": "blocks",
+      "info": "Products: every product in the collection you pick, newest order as set on the collection. Collections: one card per collection in your list, with its picture and title."
+    },
+    {
+      "type": "collection",
+      "id": "source_collection",
+      "label": "Collection",
+      "info": "For \"Products in a collection\". Create or edit it under Products > Collections."
+    },
+    {
+      "type": "range",
+      "id": "product_limit",
+      "min": 2,
+      "max": 24,
+      "step": 1,
+      "label": "Number of products",
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show prices",
+      "default": false
+    },
+    {
+      "type": "collection_list",
+      "id": "source_collections",
+      "label": "Collections",
+      "limit": 12,
+      "info": "For \"A card for each collection\"."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
       "type": "range",
       "id": "columns_desktop",
       "min": 2,
@@ -348,7 +456,7 @@
     {
       "type": "select",
       "id": "columns_mobile",
-      "label": "Cards in a row on phones",
+      "label": "Cards in a row on phones (grid)",
       "options": [
         {
           "value": "1",
@@ -357,10 +465,61 @@
         {
           "value": "2",
           "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
         }
       ],
-      "default": "2",
-      "info": "Grid only. The carousel shows two and a half."
+      "default": "2"
+    },
+    {
+      "type": "select",
+      "id": "carousel_mobile",
+      "label": "Cards in view on phones (carousel)",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "1.5",
+          "label": "1 and a half"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "2.5",
+          "label": "2 and a half"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        }
+      ],
+      "default": "2.5"
+    },
+    {
+      "type": "select",
+      "id": "mobile_controls",
+      "label": "Carousel buttons on phones",
+      "options": [
+        {
+          "value": "both",
+          "label": "Arrows and dots"
+        },
+        {
+          "value": "arrows",
+          "label": "Arrows"
+        },
+        {
+          "value": "dots",
+          "label": "Dots"
+        }
+      ],
+      "default": "both"
     },
     {
       "type": "select",
@@ -580,6 +739,26 @@
       "unit": "px",
       "label": "Space below",
       "default": 44
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space above on phones",
+      "default": 22
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Space below on phones",
+      "default": 32
     }
   ],
   "blocks": [
@@ -587,6 +766,10 @@
       "type": "card",
       "name": "Card",
       "settings": [
+        {
+          "type": "paragraph",
+          "content": "Shown when \"Cards come from\" is set to \"Cards I add below\"."
+        },
         {
           "type": "collection",
           "id": "collection",
@@ -742,6 +925,26 @@
           "label": "Width on phones",
           "default": 100,
           "info": "0 hides it on phones."
+        },
+        {
+          "type": "range",
+          "id": "offset_x_mobile",
+          "min": -100,
+          "max": 300,
+          "step": 5,
+          "unit": "px",
+          "label": "Distance from the side on phones",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "offset_y_mobile",
+          "min": -100,
+          "max": 300,
+          "step": 5,
+          "unit": "px",
+          "label": "Distance from the top or bottom on phones",
+          "default": 0
         },
         {
           "type": "checkbox",
