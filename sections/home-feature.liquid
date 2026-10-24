@@ -9,7 +9,8 @@
 
   2026-10-24: the cut-out picture over the corner and the "Decoration"
   blocks (illustrations) were removed with their settings, at the client's
-  request. The picture and text rise into view on scroll
+  request. The story's alignment (left, centre, right) is a setting, with
+  its own value for phones. The picture and text rise into view on scroll
   (assets/tabi-motion.*).
 {%- endcomment -%}
 
@@ -37,6 +38,8 @@
     --home-text: {{ section.settings.text_color }};
     --home-link: {{ section.settings.link_color }};
     --home-heading-size: {{ section.settings.heading_size }};
+    --home-align: {{ section.settings.text_align | default: 'left' }};
+    --home-align-m: {{ section.settings.text_align_mobile | default: 'left' }};
     --home-pt: {{ section.settings.padding_top }};
     --home-pb: {{ section.settings.padding_bottom }};
     --home-pt-m: {{ section.settings.padding_top_mobile }};
@@ -164,6 +167,47 @@
       "id": "link",
       "label": "Link",
       "info": "The picture links here too."
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left",
+      "info": "Heading, text and link, on desktop."
+    },
+    {
+      "type": "select",
+      "id": "text_align_mobile",
+      "label": "Text alignment on phones",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
     },
     {
       "type": "header",

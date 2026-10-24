@@ -311,6 +311,7 @@ a.home-link:focus-visible,
 .home-feature__copy {
   max-width: max(260px, calc(330 * var(--u)));
   padding-top: calc(106 * var(--u));
+  text-align: var(--home-align, left);
 }
 
 .home-feature__text {
@@ -350,6 +351,7 @@ a.home-link:focus-visible,
     order: -1;
     max-width: none;
     padding: 0;
+    text-align: var(--home-align-m, left);
   }
 
   .home-feature__text {
