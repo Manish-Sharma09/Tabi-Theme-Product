@@ -71,52 +71,9 @@
     },
     "home_feature_gift": {
       "type": "home-feature",
-      "blocks": {
-        "decoration_spray": {
-          "type": "decoration",
-          "settings": {
-            "illustration": "spray-right",
-            "position": "top-right",
-            "offset_x": 0,
-            "offset_y": 20,
-            "width": 340,
-            "width_mobile": 150,
-            "flip": false,
-            "opacity": 100,
-            "layer": "back",
-            "animation": "grow",
-            "drift": 18,
-            "offset_x_mobile": 0,
-            "offset_y_mobile": 10
-          }
-        },
-        "decoration_ribbon": {
-          "type": "decoration",
-          "settings": {
-            "illustration": "ribbon",
-            "position": "bottom-right",
-            "offset_x": 0,
-            "offset_y": 50,
-            "width": 600,
-            "width_mobile": 0,
-            "flip": false,
-            "opacity": 100,
-            "layer": "back",
-            "animation": "unroll",
-            "drift": 10,
-            "offset_x_mobile": 0,
-            "offset_y_mobile": 0
-          }
-        }
-      },
-      "block_order": [
-        "decoration_spray",
-        "decoration_ribbon"
-      ],
       "settings": {
         "image_position": "left",
         "image": "shopify://shop_images/8108326_b585bdd7-b646-470f-b8f6-8974f2a66a1a.jpg",
-        "cutout": "shopify://shop_images/2222.png",
         "heading": "The Gift of Tabi",
         "text": "<p>Hand block printed table linen, tea cosies and keepsakes for little ones, made in small batches and packed without plastic.</p>",
         "link_label": "Explore gifting",
@@ -128,9 +85,9 @@
         "link_color": "#4d4d4f",
         "heading_size": 50,
         "padding_top": 58,
-        "padding_bottom": 4,
-        "padding_top_mobile": 44,
-        "padding_bottom_mobile": 4
+        "padding_bottom": 58,
+        "padding_top_mobile": 32,
+        "padding_bottom_mobile": 32
       }
     },
     "home_cards_home": {
@@ -201,15 +158,12 @@
         "fit": "cover",
         "shape": "square",
         "feature_middle": false,
-        "show_ornament": true,
-        "ornament_style": "sprig",
         "heading": "Made for the Home",
         "text": "<p>Hand block printed linen for every table and every corner of your home.</p>",
         "background": "#ffffff",
         "pattern": false,
         "pattern_color": "#ffffff",
         "pattern_opacity": 8,
-        "ornament_color": "#253c30",
         "heading_color": "#253c30",
         "text_color": "#4d4d4f",
         "link_color": "#4d4d4f",
@@ -252,8 +206,8 @@
         "heading_size": 50,
         "padding_top": 26,
         "padding_bottom": 38,
-        "padding_top_mobile": 20,
-        "padding_bottom_mobile": 28
+        "padding_top_mobile": 32,
+        "padding_bottom_mobile": 32
       }
     },
     "home_cards_women": {
@@ -285,50 +239,12 @@
             "caption": "Shirts & tops",
             "link": ""
           }
-        },
-        "decoration_spray_left": {
-          "type": "decoration",
-          "settings": {
-            "illustration": "spray-left",
-            "position": "top-left",
-            "offset_x": 0,
-            "offset_y": 10,
-            "width": 320,
-            "width_mobile": 80,
-            "flip": false,
-            "opacity": 100,
-            "layer": "back",
-            "animation": "grow",
-            "drift": 16,
-            "offset_x_mobile": 0,
-            "offset_y_mobile": 10
-          }
-        },
-        "decoration_spray_right": {
-          "type": "decoration",
-          "settings": {
-            "illustration": "spray-right",
-            "position": "top-right",
-            "offset_x": 0,
-            "offset_y": 10,
-            "width": 320,
-            "width_mobile": 80,
-            "flip": false,
-            "opacity": 100,
-            "layer": "back",
-            "animation": "grow",
-            "drift": 22,
-            "offset_x_mobile": 0,
-            "offset_y_mobile": 10
-          }
         }
       },
       "block_order": [
         "card_women_1",
         "card_women_2",
-        "card_women_3",
-        "decoration_spray_left",
-        "decoration_spray_right"
+        "card_women_3"
       ],
       "settings": {
         "layout": "grid",
@@ -338,15 +254,12 @@
         "fit": "cover",
         "shape": "square",
         "feature_middle": true,
-        "show_ornament": false,
-        "ornament_style": "sprig",
         "heading": "Dressed for the Season",
         "text": "<p>Easy silhouettes in cotton, printed by hand and made in small batches.</p>",
         "background": "#ffffff",
         "pattern": false,
         "pattern_color": "#ffffff",
         "pattern_opacity": 8,
-        "ornament_color": "#253c30",
         "heading_color": "#253c30",
         "text_color": "#4d4d4f",
         "link_color": "#4d4d4f",
@@ -354,7 +267,7 @@
         "heading_size": 50,
         "padding_top": 40,
         "padding_bottom": 42,
-        "padding_top_mobile": 64,
+        "padding_top_mobile": 32,
         "padding_bottom_mobile": 32
       }
     },
@@ -408,15 +321,12 @@
         "fit": "cover",
         "shape": "square",
         "feature_middle": false,
-        "show_ornament": false,
-        "ornament_style": "sprig",
         "heading": "Small Joys",
         "text": "<p>Brass for the table, sets for little ones and the finishing touches for every outfit.</p>",
         "background": "#253c30",
         "pattern": true,
         "pattern_color": "#ffffff",
         "pattern_opacity": 6,
-        "ornament_color": "#e2d1a6",
         "heading_color": "#e2d1a6",
         "text_color": "#ffffff",
         "link_color": "#ffffff",
@@ -424,15 +334,13 @@
         "heading_size": 50,
         "padding_top": 30,
         "padding_bottom": 50,
-        "padding_top_mobile": 22,
-        "padding_bottom_mobile": 38
+        "padding_top_mobile": 32,
+        "padding_bottom_mobile": 32
       }
     },
     "home_spotlight_story": {
       "type": "home-spotlight",
       "settings": {
-        "show_ornament": true,
-        "ornament_style": "sprig",
         "heading": "A Little Thread, A Lasting Story",
         "text": "<p>Tabi began with an appreciation of all things natural, handmade and kind to the planet. We print by hand, make in small batches and often to order, and pack without plastic.</p>",
         "image": "shopify://shop_images/Copy_of_VideoCapture_20250321-170744.jpg",
@@ -448,7 +356,6 @@
         "pattern": true,
         "pattern_color": "#ffffff",
         "pattern_opacity": 6,
-        "ornament_color": "#e2d1a6",
         "heading_color": "#e2d1a6",
         "text_color": "#ffffff",
         "motion": true,

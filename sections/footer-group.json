@@ -40,27 +40,13 @@
             "heading": "Connect with us",
             "subtext": "<p><strong>Call </strong>: +91-9319750031</p><p><strong>Email</strong> : tabi@cactusfashions.com</p><p><strong>Visit</strong> : I-29, DLF Industrial Area Phase-1, Faridabad, Haryana-121003</p><p>Monday - Saturday<br/>9:30 am - 5:30 pm IST</p>"
           }
-        },
-        "decoration_meadow": {
-          "type": "decoration",
-          "settings": {
-            "illustration": "meadow",
-            "width": 100,
-            "width_mobile": 170,
-            "align": "center",
-            "overlap": 12,
-            "flip": false,
-            "opacity": 100,
-            "animation": "rise"
-          }
         }
       },
       "block_order": [
         "brand_information_iLmeEK",
         "link_list_fitVzj",
         "link_list_XL9aMT",
-        "text_kcLj8P",
-        "decoration_meadow"
+        "text_kcLj8P"
       ],
       "settings": {
         "color_scheme": "scheme-b6ad251e-46c9-429e-bb74-da78ee344b9b",
@@ -74,7 +60,16 @@
         "show_policy": false,
         "margin_top": 0,
         "padding_top": 36,
-        "padding_bottom": 0
+        "padding_bottom": 0,
+        "illustration_enable": true,
+        "illustration": "meadow",
+        "illustration_width": 100,
+        "illustration_width_mobile": 170,
+        "illustration_align": "center",
+        "illustration_overlap": 12,
+        "illustration_flip": false,
+        "illustration_opacity": 100,
+        "illustration_animation": "rise"
       }
     }
   },

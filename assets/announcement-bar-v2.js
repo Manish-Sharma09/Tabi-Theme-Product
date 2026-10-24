@@ -11,30 +11,21 @@
      <tabi-announcements>
 
      Shows one message at a time and moves to the next every `data-interval`
-     ms; the ring round the pause button is a CSS animation of the same
-     length, restarted with each message. The pause button stops both, and
-     so - for as long as it lasts - does a pointer or keyboard focus resting
-     on the strip, so nobody has a link move out from under them.
+     ms; the countdown ring is a CSS animation of the same length, restarted
+     with each message. A pointer or keyboard focus resting on the messages
+     stops both for as long as it lasts, so nobody has a link move out from
+     under them. (The pause / play button was removed on 2026-10-24.)
      ------------------------------------------------------------------------ */
 
   class TabiAnnouncements extends HTMLElement {
     connectedCallback() {
       this.messages = Array.from(this.querySelectorAll('.tabi-strip__message'));
-      this.toggle = this.querySelector('.tabi-strip__toggle');
       // "Rotate messages" off, or a single message: the first one just stays.
       if (this.messages.length < 2 || !this.hasAttribute('data-autoplay')) return;
 
       this.interval = Number(this.dataset.interval) || 5000;
       this.index = Math.max(0, this.messages.findIndex((message) => message.classList.contains('is-active')));
-      this.userPaused = false;
       this.holds = new Set();
-
-      this.toggle?.addEventListener('click', () => {
-        this.userPaused = !this.userPaused;
-        this.toggle.setAttribute('aria-pressed', String(this.userPaused));
-        this.toggle.setAttribute('aria-label', this.userPaused ? this.toggle.dataset.labelPlay : this.toggle.dataset.labelPause);
-        this.sync();
-      });
 
       const hold = (reason) => () => {
         this.holds.add(reason);
@@ -65,7 +56,7 @@
     }
 
     get paused() {
-      return this.userPaused || this.holds.size > 0;
+      return this.holds.size > 0;
     }
 
     /* Pause or resume the timer to match the current state. The time left on

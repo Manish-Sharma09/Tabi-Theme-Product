@@ -3,8 +3,8 @@
    The home page sections built after the reference site's home page
    (goodearth.in, measured at 1440 and 390 wide on 2026-10-10):
 
-     sections/home-feature.liquid    picture with a cut-out over its corner,
-                                     story beside it ("The Gift of ...")
+     sections/home-feature.liquid    picture with a story beside it ("The
+                                     Gift of ...")
      sections/home-cards.liquid      heading over picture cards, as a grid or
                                      a carousel ("Delightful Decor",
                                      "Dressed in Celebration", "Indulgent
@@ -16,7 +16,7 @@
                                      Store")
 
      1. Scale, colours and the section frame
-     2. Shared pieces: ornament, heading, text, links, button, decorations
+     2. Shared pieces: heading, text, links, button
      3. Feature
      4. Cards: header and grid
      5. Cards: carousel
@@ -36,6 +36,10 @@
    Phones have a layout of their own, measured at 390px, and --u becomes one
    of those pixels. Type is the exception: the reference shrinks its text
    with the window down to 8px on a phone, so text sizes here have floors.
+
+   2026-10-24: the ornaments over the headings and the "Decoration" blocks
+   (illustrations) were removed from every home section at the client's
+   request; only the footer keeps an illustration (sections/footer.liquid).
    -------------------------------------------------------------------------- */
 
 .home-section {
@@ -44,7 +48,6 @@
   --home-heading: #253c30;
   --home-text: #4d4d4f;
   --home-link: #4d4d4f;
-  --home-ornament: #253c30;
   --home-pattern: #ffffff;
   --home-pattern-opacity: 0;
   --home-button-bg: #efede9;
@@ -64,12 +67,15 @@
 }
 
 /* Phones have spacing settings of their own (--home-pt-m, --home-pb-m);
-   a section without them uses three quarters of its desktop spacing. */
+   a section without them uses three quarters of its desktop spacing. They
+   are phone pixels at 390 wide and scale with the screen like the side
+   margins (--u), so a section set to the same space as its sides stays
+   even all round on any phone. */
 @media screen and (max-width: 749px) {
   .home-section {
     --u: calc(100vw / 390);
-    padding-top: calc(var(--home-pt-m, calc(var(--home-pt) * 0.75)) * 1px);
-    padding-bottom: calc(var(--home-pb-m, calc(var(--home-pb) * 0.75)) * 1px);
+    padding-top: calc(var(--home-pt-m, calc(var(--home-pt) * 0.75)) * var(--u));
+    padding-bottom: calc(var(--home-pb-m, calc(var(--home-pb) * 0.75)) * var(--u));
   }
 }
 
@@ -111,28 +117,6 @@
 /* --------------------------------------------------------------------------
    2. SHARED PIECES
    -------------------------------------------------------------------------- */
-
-.home-ornament {
-  display: block;
-  width: calc(126 * var(--u));
-  height: auto;
-  margin: 0 auto;
-  color: var(--home-ornament);
-}
-
-/* An uploaded ornament keeps its own shape at the drawn one's height. */
-.home-ornament--image {
-  width: auto;
-  height: calc(40 * var(--u));
-  max-width: 100%;
-  object-fit: contain;
-}
-
-/* The illustrated sprig is wider than the drawn flowers: 176 x 46. */
-.home-ornament--sprig {
-  width: calc(176 * var(--u));
-  height: auto;
-}
 
 .home-heading {
   margin: 0;
@@ -268,20 +252,6 @@ a.home-link:focus-visible,
 }
 
 @media screen and (max-width: 749px) {
-  .home-ornament {
-    width: calc(64 * var(--u));
-  }
-
-  .home-ornament--image {
-    width: auto;
-    height: calc(20 * var(--u));
-  }
-
-  .home-ornament--sprig {
-    width: calc(112 * var(--u));
-    height: auto;
-  }
-
   .home-heading {
     font-size: max(26px, calc(var(--home-heading-size) * 0.56px));
     line-height: 1.2;
@@ -303,138 +273,11 @@ a.home-link:focus-visible,
   }
 }
 
-/* Decorative pictures (the reference's clouds, butterflies and ribbons) sit
-   in a frame the width of the content, behind it, and never take clicks. */
-.home-decor-frame {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  max-width: calc(1434 * var(--u));
-  margin: 0 auto;
-  pointer-events: none;
-}
-
-/* Pictures set to "In front of the content" get a second frame above it. */
-.home-decor-frame--front {
-  z-index: 2;
-}
-
-/* A Decoration block (snippets/home-decorations): pinned to a side or
-   corner, its width and its distance from the edges given in reference
-   pixels, so it keeps its place in the layout from tablet to desktop; on a
-   phone, its own width. --dr is its width / height, for the middle
-   positions. */
-.home-decor {
-  --dw: 320;
-  --dwm: 100;
-  --dx: 0;
-  --dy: 0;
-  --dr: 2;
-
-  position: absolute;
-  display: block;
-  width: calc(var(--dw) * var(--u));
-  max-width: none;
-  height: auto;
-  opacity: var(--do, 1);
-  user-select: none;
-}
-
-.home-decor--at-top-left,
-.home-decor--at-top-center,
-.home-decor--at-top-right {
-  top: calc(var(--dy) * var(--u));
-}
-
-.home-decor--at-bottom-left,
-.home-decor--at-bottom-center,
-.home-decor--at-bottom-right {
-  bottom: calc(var(--dy) * var(--u));
-}
-
-.home-decor--at-middle-left,
-.home-decor--at-middle-right {
-  top: calc(50% + var(--dy) * var(--u));
-  margin-top: calc(var(--dw) * var(--u) / var(--dr) / -2);
-}
-
-.home-decor--at-top-left,
-.home-decor--at-middle-left,
-.home-decor--at-bottom-left {
-  left: calc(var(--dx) * var(--u));
-}
-
-.home-decor--at-top-right,
-.home-decor--at-middle-right,
-.home-decor--at-bottom-right {
-  right: calc(var(--dx) * var(--u));
-}
-
-.home-decor--at-top-center,
-.home-decor--at-bottom-center {
-  left: calc(50% + var(--dx) * var(--u));
-  margin-left: calc(var(--dw) * var(--u) / -2);
-}
-
-/* `scale`, not transform, so a mirrored picture can still make its
-   entrance (which uses transform) and drift (translate). */
-.home-decor--flip {
-  scale: -1 1;
-}
-
-/* On phones a decoration has its own width and offsets (--dwm, --dxm,
-   --dym), in 390-wide phone pixels. */
-@media screen and (max-width: 749px) {
-  .home-decor {
-    width: calc(var(--dwm) * var(--u));
-  }
-
-  .home-decor--at-top-left,
-  .home-decor--at-top-center,
-  .home-decor--at-top-right {
-    top: calc(var(--dym, 0) * var(--u));
-  }
-
-  .home-decor--at-bottom-left,
-  .home-decor--at-bottom-center,
-  .home-decor--at-bottom-right {
-    bottom: calc(var(--dym, 0) * var(--u));
-  }
-
-  .home-decor--at-middle-left,
-  .home-decor--at-middle-right {
-    top: calc(50% + var(--dym, 0) * var(--u));
-    margin-top: calc(var(--dwm) * var(--u) / var(--dr) / -2);
-  }
-
-  .home-decor--at-top-left,
-  .home-decor--at-middle-left,
-  .home-decor--at-bottom-left {
-    left: calc(var(--dxm, 0) * var(--u));
-  }
-
-  .home-decor--at-top-right,
-  .home-decor--at-middle-right,
-  .home-decor--at-bottom-right {
-    right: calc(var(--dxm, 0) * var(--u));
-  }
-
-  .home-decor--at-top-center,
-  .home-decor--at-bottom-center {
-    left: calc(50% + var(--dxm, 0) * var(--u));
-    margin-left: calc(var(--dwm) * var(--u) / -2);
-  }
-
-  .home-decor--desktop-only {
-    display: none;
-  }
-}
-
 /* --------------------------------------------------------------------------
    3. FEATURE
-   Desktop: picture (591 x 518) at the left margin, the cut-out (314 wide)
-   over its lower right corner and 85px past its foot; the story starts
-   160px to the right of the picture, 106px below its top.
+   Desktop: picture (591 x 518) at the left margin; the story starts 160px
+   to the right of the picture, 106px below its top. Phone: the story, then
+   the picture the full width of the screen, one even margin all round.
    -------------------------------------------------------------------------- */
 
 .home-feature__inner {
@@ -447,10 +290,6 @@ a.home-link:focus-visible,
 
 .home-feature__media {
   position: relative;
-}
-
-.home-feature--has-cutout .home-feature__media {
-  padding-bottom: calc(85 * var(--u));
 }
 
 .home-feature__main {
@@ -467,24 +306,6 @@ a.home-link:focus-visible,
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-/* Anchored by its foot, 85px below the picture's, so a tall or a square
-   cut-out hangs the same way. The reference's is a transparent PNG and can
-   reach into the text column; Tabi's are photographs, so this one stops
-   51px short of the text. */
-.home-feature__cutout {
-  position: absolute;
-  z-index: 1;
-  bottom: 0;
-  left: calc(400 * var(--u));
-  width: calc(300 * var(--u));
-}
-
-.home-feature__cutout img {
-  display: block;
-  width: 100%;
-  height: auto;
 }
 
 .home-feature__copy {
@@ -513,25 +334,22 @@ a.home-link:focus-visible,
   justify-self: end;
 }
 
-.home-feature--reverse .home-feature__cutout {
-  left: auto;
-  right: calc(400 * var(--u));
-}
-
-/* Phone: the story first, left-aligned, then the picture with the cut-out
-   hanging off its right side to the screen edge. */
+/* Phone: the story first, left-aligned, then the picture across the full
+   width. Story and picture share the 32px side margin, the picture sits
+   32px under the link, and the section's phone spacing (32 above and below
+   by default) closes the square. */
 @media screen and (max-width: 749px) {
   .home-feature__inner {
     display: flex;
     flex-direction: column;
-    padding: 0;
+    padding: 0 calc(32 * var(--u));
   }
 
   .home-feature__copy,
   .home-feature--reverse .home-feature__copy {
     order: -1;
     max-width: none;
-    padding: calc(53 * var(--u)) calc(47 * var(--u)) 0;
+    padding: 0;
   }
 
   .home-feature__text {
@@ -542,33 +360,11 @@ a.home-link:focus-visible,
     margin-top: calc(9 * var(--u));
   }
 
-  .home-feature__media {
-    width: calc(244 * var(--u));
-    margin: calc(34 * var(--u)) 0 0 calc(25 * var(--u));
-  }
-
-  .home-feature--has-cutout .home-feature__media {
-    padding-bottom: calc(26 * var(--u));
-  }
-
-  .home-feature__main {
-    aspect-ratio: 244 / 228;
-  }
-
-  .home-feature__cutout {
-    left: calc(206 * var(--u));
-    width: calc(160 * var(--u));
-  }
-
+  .home-feature__media,
   .home-feature--reverse .home-feature__media {
-    margin: calc(34 * var(--u)) calc(25 * var(--u)) 0 auto;
+    width: 100%;
+    margin: calc(32 * var(--u)) 0 0;
   }
-
-  .home-feature--reverse .home-feature__cutout {
-    left: auto;
-    right: calc(206 * var(--u));
-  }
-
 }
 
 /* --------------------------------------------------------------------------
@@ -618,10 +414,6 @@ a.home-link:focus-visible,
   margin: 0 auto;
   padding: 0 calc(40 * var(--u));
   text-align: center;
-}
-
-.home-cards__header .home-ornament {
-  margin-bottom: calc(17 * var(--u));
 }
 
 .home-cards__sub {
@@ -714,10 +506,6 @@ a.home-link:focus-visible,
   .home-cards__header {
     max-width: none;
     padding: 0 calc(30 * var(--u));
-  }
-
-  .home-cards__header .home-ornament {
-    margin-bottom: calc(8 * var(--u));
   }
 
   .home-cards__sub {
@@ -1076,10 +864,13 @@ a.home-link:focus-visible,
   --home-link-weight: 600;
 }
 
+/* Phone: one even 32px space all round - the sides here, the gaps either
+   side of the story, and the section's phone spacing above and below (32
+   by default). */
 @media screen and (max-width: 749px) {
   .home-band__inner {
     grid-template-columns: minmax(0, 1fr);
-    padding: 0 calc(44 * var(--u));
+    padding: 0 calc(32 * var(--u));
   }
 
   .home-band__figure--left .home-band__media {
@@ -1095,7 +886,7 @@ a.home-link:focus-visible,
   }
 
   .home-band__copy {
-    padding: calc(20 * var(--u)) 0;
+    padding: calc(32 * var(--u)) 0;
   }
 
   .home-band__text {
@@ -1110,9 +901,8 @@ a.home-link:focus-visible,
 
 /* --------------------------------------------------------------------------
    7. SPOTLIGHT
-   Desktop: ornament, heading 13 below it, text 23 below, a 1155 x 465
-   picture in a 4px frame 30 below, the line of words 20 below that, the
-   button 19 below.
+   Desktop: heading, text 23 below, a 1155 x 465 picture in a 4px frame 30
+   below, the line of words 20 below that, the button 19 below.
    -------------------------------------------------------------------------- */
 
 .home-spot {
@@ -1125,10 +915,6 @@ a.home-link:focus-visible,
 .home-spot__inner {
   padding: 0 calc(40 * var(--u));
   text-align: center;
-}
-
-.home-spot .home-ornament {
-  margin-bottom: calc(13 * var(--u));
 }
 
 .home-spot__text {
@@ -1196,10 +982,6 @@ a.home-link:focus-visible,
 @media screen and (max-width: 749px) {
   .home-spot__inner {
     padding: 0 calc(24 * var(--u));
-  }
-
-  .home-spot .home-ornament {
-    margin-bottom: calc(8 * var(--u));
   }
 
   .home-spot__text {

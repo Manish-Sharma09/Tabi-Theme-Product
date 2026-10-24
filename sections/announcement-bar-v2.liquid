@@ -1,9 +1,13 @@
 {%- comment -%}
   ANNOUNCEMENT BAR V2. Version: Good Earth layout, 2026-10-03.
 
-  The coloured strip above the header, after goodearth.in: a pause button
-  ringed by a countdown on the left, messages that take turns in the middle
-  (each slides up and out as the next slides in), one link on the right.
+  The coloured strip above the header, after goodearth.in: a countdown ring
+  on the left, messages that take turns in the middle (each slides up and
+  out as the next slides in), one link on the right.
+
+  2026-10-24: the pause / play button inside the ring was removed at the
+  client's request. The ring stays as a plain timer; a pointer or keyboard
+  focus resting on the messages still holds them (assets/announcement-bar-v2.js).
 
   Its own section in the header group, so it can be hidden, moved or given
   more messages in the theme editor without touching the header. Each
@@ -64,21 +68,12 @@
   >
     <div class="tabi-strip__inner">
       {%- if rotate -%}
-        <button
-          type="button"
-          class="tabi-strip__toggle"
-          aria-pressed="false"
-          data-label-pause="{{ 'sections.slideshow.pause_slideshow' | t | escape }}"
-          data-label-play="{{ 'sections.slideshow.play_slideshow' | t | escape }}"
-          aria-label="{{ 'sections.slideshow.pause_slideshow' | t | escape }}"
-        >
-          <svg class="tabi-strip__ring" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+        <span class="tabi-strip__timer" aria-hidden="true">
+          <svg class="tabi-strip__ring" viewBox="0 0 28 28" focusable="false">
             <circle class="tabi-strip__ring-track" cx="14" cy="14" r="12.5" />
             <circle class="tabi-strip__ring-progress" cx="14" cy="14" r="12.5" pathLength="100" />
           </svg>
-          {% render 'tabi-icon', icon: 'pause' %}
-          {% render 'tabi-icon', icon: 'play' %}
-        </button>
+        </span>
       {%- endif -%}
 
       <div
@@ -140,7 +135,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Messages are blocks: add, reorder or hide them below. With two or more, they take turns and a pause button with a countdown ring appears."
+      "content": "Messages are blocks: add, reorder or hide them below. With two or more, they take turns and a countdown ring on the left times each one."
     },
     {
       "type": "checkbox",

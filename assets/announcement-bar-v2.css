@@ -1,7 +1,7 @@
 /* ==========================================================================
    announcement-bar-v2.css - version: Good Earth layout, 2026-10-03
-   The strip above the header (sections/announcement-bar-v2.liquid): pause
-   button with a countdown ring, rotating messages, one link on the right.
+   The strip above the header (sections/announcement-bar-v2.liquid): a
+   countdown ring, rotating messages, one link on the right.
    Self-contained: its own tokens and icon rules, so it does not depend on
    the header's stylesheet loading first.
    ========================================================================== */
@@ -34,11 +34,6 @@
   overflow: visible;
 }
 
-.tabi-strip .tabi-icon--play {
-  fill: currentColor;
-  stroke: none;
-}
-
 /* "Show on mobile" off. Two classes: .tabi-strip sets display further down. */
 @media screen and (max-width: 989px) {
   .tabi-strip.tabi-strip--desktop-only {
@@ -48,10 +43,10 @@
 
 /* --------------------------------------------------------------------------
    STRIP
-   [pause]  ...... message, link ......  [envelope] BE IN THE KNOW
+   [ring]  ...... message, link ......  [envelope] BE IN THE KNOW
    The messages share one grid cell, so the strip is as tall as the longest
    one and never jumps as they change. Each slides up and out as the next
-   slides up into place; the ring round the pause button counts down to it.
+   slides up into place; the ring counts down to it.
    -------------------------------------------------------------------------- */
 
 .tabi-strip {
@@ -65,7 +60,7 @@
 .tabi-strip__inner {
   display: grid;
   grid-template-columns: 4.4rem minmax(0, 1fr) 4.4rem;
-  grid-template-areas: 'toggle messages aside';
+  grid-template-areas: 'timer messages aside';
   align-items: center;
   min-height: var(--tabi-strip-h, 4rem);
   padding-inline: 0.8rem;
@@ -78,21 +73,12 @@
   }
 }
 
-.tabi-strip__toggle {
-  grid-area: toggle;
+.tabi-strip__timer {
+  grid-area: timer;
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   width: 4.4rem;
   height: 4rem;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .tabi-strip__ring {
@@ -131,28 +117,6 @@
   to {
     stroke-dashoffset: 0;
   }
-}
-
-.tabi-strip__toggle .tabi-icon {
-  position: relative;
-  width: 1.5rem;
-  height: 1.5rem;
-  stroke-width: 2;
-}
-
-.tabi-strip__toggle .tabi-icon--play,
-.tabi-strip__toggle[aria-pressed='true'] .tabi-icon--pause {
-  display: none;
-}
-
-.tabi-strip__toggle[aria-pressed='true'] .tabi-icon--play {
-  display: block;
-}
-
-.tabi-strip__toggle:focus-visible {
-  outline: 1px solid currentColor;
-  outline-offset: -0.2rem;
-  box-shadow: none;
 }
 
 .tabi-strip__messages {

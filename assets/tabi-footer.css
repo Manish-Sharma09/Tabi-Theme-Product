@@ -311,10 +311,10 @@
   color: inherit;
 }
 
-/* "Illustration strip" blocks along the foot, where the reference has its
-   band of clouds: each one in flow under the columns, tucked up under them
-   by its overlap, its ground line resting on the bottom bar. Wider than
-   100% (phones) crops into the middle. */
+/* The illustration along the foot (footer settings "Illustration along the
+   foot"), where the reference has its band of clouds: in flow under the
+   columns, tucked up under them by its overlap, its ground line resting on
+   the bottom bar. Wider than 100% (phones) crops into the middle. */
 .tabi-footer__strips {
   position: relative;
   z-index: 0;
@@ -335,6 +335,12 @@
 
 .tabi-footer__strip--right {
   justify-content: flex-end;
+}
+
+/* The <picture> only swaps in the phone version; the img inside it is the
+   strip's flex item. */
+.tabi-footer__strip picture {
+  display: contents;
 }
 
 .tabi-footer__strip-img {
@@ -508,6 +514,11 @@
      keeps the middle of the scene at a size that still reads. */
   .tabi-footer__strip-img {
     width: var(--strip-wm, 100%);
+  }
+
+  /* "Width on phones" at 0. */
+  .tabi-footer__strip--desktop-only {
+    display: none;
   }
 
   .tabi-footer__bottom {

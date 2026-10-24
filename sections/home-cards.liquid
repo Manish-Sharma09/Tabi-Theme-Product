@@ -1,7 +1,6 @@
 {%- comment -%}
-  HOME CARDS - an optional ornament, heading and line of text, then picture
-  cards with an underlined caption under each, as a centred grid or as a
-  carousel.
+  HOME CARDS - a heading and line of text, then picture cards with an
+  underlined caption under each, as a centred grid or as a carousel.
 
   One section for three blocks of the reference site's home page
   (goodearth.in, 2026-10-10), which differ only in settings:
@@ -16,11 +15,11 @@
   the same product). Caption and link fall back to the collection's title
   and address.
 
-  2026-10-10, second pass: the ornament defaults to Tabi's illustrated
-  flower sprig and the cards rise in a short cascade on scroll
-  (assets/tabi-motion.*). Decorations beside the heading (the reference's
-  clouds) are "Decoration" blocks, drawn by snippets/home-decorations; the
-  card loop skips them.
+  The cards rise in a short cascade on scroll (assets/tabi-motion.*).
+
+  2026-10-24: the ornament over the heading and the "Decoration" blocks
+  (illustrations) were removed with their settings, at the client's
+  request.
 {%- endcomment -%}
 
 {{ 'home-sections.css' | asset_url | stylesheet_tag }}
@@ -111,7 +110,7 @@
   assign feature_sizes = '(min-width: 1440px) 346px, (min-width: 750px) 25vw, 78vw'
 
   assign show_header = false
-  if section.settings.show_ornament or heading != blank or section.settings.text != blank
+  if heading != blank or section.settings.text != blank
     assign show_header = true
   endif
 -%}
@@ -122,7 +121,6 @@
     --home-heading: {{ section.settings.heading_color }};
     --home-text: {{ section.settings.text_color }};
     --home-link: {{ section.settings.link_color }};
-    --home-ornament: {{ section.settings.ornament_color }};
     --home-pattern: {{ section.settings.pattern_color }};
     --home-pattern-opacity: {{ section.settings.pattern_opacity | divided_by: 100.0 }};
     --home-heading-size: {{ section.settings.heading_size }};
@@ -158,23 +156,9 @@
     }}
   {%- endif -%}
 
-  {% render 'home-decorations', blocks: section.blocks %}
-
   <div class="home-section__inner">
     {%- if show_header -%}
       <div class="home-cards__header">
-        {%- if section.settings.show_ornament -%}
-          {%- if section.settings.ornament_image != blank -%}
-            {{
-              section.settings.ornament_image
-              | image_url: width: 400
-              | image_tag: class: 'home-ornament home-ornament--image', alt: '', loading: 'lazy'
-            }}
-          {%- else -%}
-            {% render 'home-ornament', style: section.settings.ornament_style %}
-          {%- endif -%}
-        {%- endif -%}
-
         {%- if heading != blank -%}
           <h2 class="home-heading" id="HomeCards-{{ section.id }}" data-reveal="rise" style="--reveal-order: 1;">
             {{- heading | escape | newline_to_br -}}
@@ -594,34 +578,6 @@
       "content": "Heading"
     },
     {
-      "type": "checkbox",
-      "id": "show_ornament",
-      "label": "Show ornament",
-      "default": false
-    },
-    {
-      "type": "select",
-      "id": "ornament_style",
-      "label": "Ornament style",
-      "options": [
-        {
-          "value": "sprig",
-          "label": "Illustrated flower sprig"
-        },
-        {
-          "value": "drawn",
-          "label": "Block-print flowers"
-        }
-      ],
-      "default": "sprig"
-    },
-    {
-      "type": "image_picker",
-      "id": "ornament_image",
-      "label": "Ornament picture",
-      "info": "Optional. Replaces the style above. About 350 x 90."
-    },
-    {
       "type": "textarea",
       "id": "heading",
       "label": "Heading",
@@ -670,12 +626,6 @@
       "unit": "%",
       "label": "Pattern strength",
       "default": 8
-    },
-    {
-      "type": "color",
-      "id": "ornament_color",
-      "label": "Ornament",
-      "default": "#253c30"
     },
     {
       "type": "color",
@@ -795,237 +745,6 @@
           "info": "Leave empty to use the collection."
         }
       ]
-    },
-    {
-      "type": "decoration",
-      "name": "Decoration",
-      "settings": [
-        {
-          "type": "paragraph",
-          "content": "A picture drawn behind (or in front of) this section, like the reference site's clouds and ribbons. Add as many as you like; delete the block to remove one."
-        },
-        {
-          "type": "select",
-          "id": "illustration",
-          "label": "Tabi illustration",
-          "options": [
-            {
-              "value": "spray-left",
-              "label": "Cotton spray, growing right"
-            },
-            {
-              "value": "spray-right",
-              "label": "Cotton spray with bird, growing left"
-            },
-            {
-              "value": "ribbon",
-              "label": "Linen ribbon"
-            },
-            {
-              "value": "sprig",
-              "label": "Flower sprig"
-            },
-            {
-              "value": "meadow",
-              "label": "Meadow border"
-            }
-          ],
-          "default": "spray-left"
-        },
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Or your own picture",
-          "info": "Replaces the illustration above. A PNG or WebP with a transparent background."
-        },
-        {
-          "type": "header",
-          "content": "Placement"
-        },
-        {
-          "type": "select",
-          "id": "position",
-          "label": "Position",
-          "options": [
-            {
-              "value": "top-left",
-              "label": "Top left"
-            },
-            {
-              "value": "top-center",
-              "label": "Top centre"
-            },
-            {
-              "value": "top-right",
-              "label": "Top right"
-            },
-            {
-              "value": "middle-left",
-              "label": "Middle left"
-            },
-            {
-              "value": "middle-right",
-              "label": "Middle right"
-            },
-            {
-              "value": "bottom-left",
-              "label": "Bottom left"
-            },
-            {
-              "value": "bottom-center",
-              "label": "Bottom centre"
-            },
-            {
-              "value": "bottom-right",
-              "label": "Bottom right"
-            }
-          ],
-          "default": "top-left"
-        },
-        {
-          "type": "range",
-          "id": "offset_x",
-          "min": -200,
-          "max": 600,
-          "step": 10,
-          "unit": "px",
-          "label": "Distance from the side",
-          "default": 0,
-          "info": "At desktop size. Below zero it hangs past the edge. For the centre positions, moves it right."
-        },
-        {
-          "type": "range",
-          "id": "offset_y",
-          "min": -200,
-          "max": 800,
-          "step": 10,
-          "unit": "px",
-          "label": "Distance from the top or bottom",
-          "default": 0,
-          "info": "For the middle positions, moves it down."
-        },
-        {
-          "type": "range",
-          "id": "width",
-          "min": 40,
-          "max": 1440,
-          "step": 20,
-          "unit": "px",
-          "label": "Width on desktop",
-          "default": 320,
-          "info": "Scales down with the layout on smaller screens."
-        },
-        {
-          "type": "range",
-          "id": "width_mobile",
-          "min": 0,
-          "max": 400,
-          "step": 5,
-          "unit": "px",
-          "label": "Width on phones",
-          "default": 100,
-          "info": "0 hides it on phones."
-        },
-        {
-          "type": "range",
-          "id": "offset_x_mobile",
-          "min": -100,
-          "max": 300,
-          "step": 5,
-          "unit": "px",
-          "label": "Distance from the side on phones",
-          "default": 0
-        },
-        {
-          "type": "range",
-          "id": "offset_y_mobile",
-          "min": -100,
-          "max": 300,
-          "step": 5,
-          "unit": "px",
-          "label": "Distance from the top or bottom on phones",
-          "default": 0
-        },
-        {
-          "type": "checkbox",
-          "id": "flip",
-          "label": "Mirror",
-          "default": false
-        },
-        {
-          "type": "range",
-          "id": "opacity",
-          "min": 10,
-          "max": 100,
-          "step": 5,
-          "unit": "%",
-          "label": "Opacity",
-          "default": 100
-        },
-        {
-          "type": "select",
-          "id": "layer",
-          "label": "Layer",
-          "options": [
-            {
-              "value": "back",
-              "label": "Behind the content"
-            },
-            {
-              "value": "front",
-              "label": "In front of the content"
-            }
-          ],
-          "default": "back"
-        },
-        {
-          "type": "header",
-          "content": "Motion"
-        },
-        {
-          "type": "select",
-          "id": "animation",
-          "label": "Entrance",
-          "options": [
-            {
-              "value": "grow",
-              "label": "Grow from its corner"
-            },
-            {
-              "value": "unroll",
-              "label": "Unroll left to right"
-            },
-            {
-              "value": "open",
-              "label": "Open from the middle"
-            },
-            {
-              "value": "rise",
-              "label": "Rise from below"
-            },
-            {
-              "value": "fade",
-              "label": "Fade in"
-            },
-            {
-              "value": "none",
-              "label": "None"
-            }
-          ],
-          "default": "grow",
-          "info": "Plays once, as it scrolls into view, while the section's \"Animate on scroll\" is on."
-        },
-        {
-          "type": "range",
-          "id": "drift",
-          "min": 0,
-          "max": 40,
-          "step": 2,
-          "unit": "px",
-          "label": "Drift on scroll",
-          "default": 16
-        }
-      ]
     }
   ],
   "presets": [
@@ -1035,7 +754,6 @@
         "layout": "carousel",
         "columns_desktop": 4,
         "ratio": "square",
-        "show_ornament": true,
         "heading": "Made for the Home",
         "padding_top": 26,
         "padding_bottom": 10
@@ -1110,38 +828,6 @@
           "settings": {
             "caption": "Jackets & shrugs"
           }
-        },
-        {
-          "type": "decoration",
-          "settings": {
-            "illustration": "spray-left",
-            "position": "top-left",
-            "offset_x": 0,
-            "offset_y": 10,
-            "width": 320,
-            "width_mobile": 85,
-            "flip": false,
-            "opacity": 100,
-            "layer": "back",
-            "animation": "grow",
-            "drift": 16
-          }
-        },
-        {
-          "type": "decoration",
-          "settings": {
-            "illustration": "spray-right",
-            "position": "top-right",
-            "offset_x": 0,
-            "offset_y": 10,
-            "width": 320,
-            "width_mobile": 85,
-            "flip": false,
-            "opacity": 100,
-            "layer": "back",
-            "animation": "grow",
-            "drift": 22
-          }
         }
       ]
     },
@@ -1161,9 +847,10 @@
         "heading_color": "#e2d1a6",
         "text_color": "#ffffff",
         "link_color": "#ffffff",
-        "ornament_color": "#e2d1a6",
         "padding_top": 30,
-        "padding_bottom": 50
+        "padding_bottom": 50,
+        "padding_top_mobile": 32,
+        "padding_bottom_mobile": 32
       },
       "blocks": [
         {
