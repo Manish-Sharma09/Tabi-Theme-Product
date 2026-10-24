@@ -24,14 +24,16 @@
           "type": "link_list",
           "settings": {
             "heading": "Quick links",
-            "menu": "footer-links-menu"
+            "menu": "footer-links-menu",
+            "hidden_links": "Care Guide, Size Guide"
           }
         },
         "link_list_XL9aMT": {
           "type": "link_list",
           "settings": {
             "heading": "Policies",
-            "menu": "footer"
+            "menu": "footer",
+            "hidden_links": "Care Guide, Size Guide"
           }
         },
         "text_kcLj8P": {
@@ -49,19 +51,11 @@
         "text_kcLj8P"
       ],
       "settings": {
+        "footer_background": "#253c30",
+        "footer_text": "#ffffff",
+        "accent_line": "#e2d1a6",
         "color_scheme": "scheme-b6ad251e-46c9-429e-bb74-da78ee344b9b",
-        "newsletter_enable": true,
-        "newsletter_heading": "Be in the know",
-        "enable_follow_on_shop": false,
-        "show_social": false,
-        "enable_country_selector": false,
-        "enable_language_selector": false,
-        "payment_enable": false,
-        "show_policy": false,
-        "margin_top": 0,
-        "padding_top": 36,
-        "padding_bottom": 0,
-        "illustration_enable": true,
+        "illustration_enable": false,
         "illustration": "meadow",
         "illustration_width": 100,
         "illustration_width_mobile": 170,
@@ -69,7 +63,22 @@
         "illustration_overlap": 12,
         "illustration_flip": false,
         "illustration_opacity": 100,
-        "illustration_animation": "rise"
+        "illustration_animation": "rise",
+        "newsletter_enable": true,
+        "newsletter_heading": "Be in the know",
+        "newsletter_text": "<p>Be the first to hear about new prints, restocks and offers. You can unsubscribe at any time.</p>",
+        "enable_follow_on_shop": false,
+        "show_social": false,
+        "enable_country_selector": false,
+        "enable_language_selector": false,
+        "bottom_background": "#1b2b22",
+        "bottom_text": "#ffffff",
+        "notice": "",
+        "payment_enable": false,
+        "show_policy": false,
+        "margin_top": 0,
+        "padding_top": 36,
+        "padding_bottom": 0
       }
     }
   },
