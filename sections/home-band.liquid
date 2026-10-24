@@ -11,6 +11,12 @@
   client's request, and on phones the band has one even space all round:
   32 at the sides, and 32 above and below by default ("Space above / below
   on phones").
+
+  Picture shapes have a setting for desktop and one for phones: arched (the
+  pictures picked under "Arched top"), rounded corners ("Corner roundness")
+  or square. The client asked for rounded corners on desktop and kept the
+  arch on phones (2026-10-24). Captions and the link have a weight setting,
+  regular by default: on the dark band the contrast already carries them.
 {%- endcomment -%}
 
 {{ 'home-sections.css' | asset_url | stylesheet_tag }}
@@ -32,6 +38,8 @@
     --home-pattern-opacity: {{ section.settings.pattern_opacity | divided_by: 100.0 }};
     --home-shade: {{ section.settings.shade | divided_by: 100.0 }};
     --home-heading-size: {{ section.settings.heading_size }};
+    --home-radius: {{ section.settings.corner_radius }};
+    --home-link-weight: {{ section.settings.link_weight }};
     --home-pt: {{ section.settings.padding_top }};
     --home-pb: {{ section.settings.padding_bottom }};
     --home-pt-m: {{ section.settings.padding_top_mobile }};
@@ -100,6 +108,19 @@
           assign arched = true
         endif
 
+        comment
+          The picture's shape on desktop and on phones. "Arched" arches only
+          the pictures picked under "Arched top"; the other one stays square.
+        endcomment
+        assign shape_desktop = section.settings.shape_desktop | default: 'arch'
+        assign shape_mobile = section.settings.shape_mobile | default: 'arch'
+        if shape_desktop == 'arch' and arched == false
+          assign shape_desktop = 'square'
+        endif
+        if shape_mobile == 'arch' and arched == false
+          assign shape_mobile = 'square'
+        endif
+
         assign picture_alt = picture.alt
         if caption != blank
           assign picture_alt = ''
@@ -109,7 +130,7 @@
       -%}
 
       {%- capture picture_inner -%}
-        <span class="home-band__media">
+        <span class="home-band__media home-shape-d-{{ shape_desktop }} home-shape-m-{{ shape_mobile }}">
           {%- if picture != blank -%}
             {{
               picture
@@ -134,7 +155,7 @@
 
       {%- comment -%} The left picture leads; the arched one follows the story. {%- endcomment -%}
       <div
-        class="home-band__figure home-band__figure--{{ side }}{% if arched %} home-band__figure--arch{% endif %}"
+        class="home-band__figure home-band__figure--{{ side }}"
         data-reveal="rise"
         style="--reveal-order: {% if forloop.first %}0{% else %}2{% endif %};"
       >
@@ -222,7 +243,59 @@
           "label": "Both"
         }
       ],
-      "default": "right"
+      "default": "right",
+      "info": "Used where the picture shape below is \"Arched\"."
+    },
+    {
+      "type": "select",
+      "id": "shape_desktop",
+      "label": "Picture shape on desktop",
+      "options": [
+        {
+          "value": "arch",
+          "label": "Arched, as chosen above"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded corners"
+        },
+        {
+          "value": "square",
+          "label": "Square corners"
+        }
+      ],
+      "default": "arch"
+    },
+    {
+      "type": "select",
+      "id": "shape_mobile",
+      "label": "Picture shape on phones",
+      "options": [
+        {
+          "value": "arch",
+          "label": "Arched, as chosen above"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded corners"
+        },
+        {
+          "value": "square",
+          "label": "Square corners"
+        }
+      ],
+      "default": "arch"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Corner roundness",
+      "default": 32,
+      "info": "For \"Rounded corners\". At desktop size; smaller screens scale it."
     },
     {
       "type": "range",
@@ -261,6 +334,31 @@
       "type": "url",
       "id": "link",
       "label": "Link"
+    },
+    {
+      "type": "select",
+      "id": "link_weight",
+      "label": "Link and caption weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi-bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400",
+      "info": "Regular reads well on the dark band; the contrast already makes it stand out."
     },
     {
       "type": "header",

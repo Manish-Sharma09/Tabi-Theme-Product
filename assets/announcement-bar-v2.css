@@ -13,6 +13,7 @@
   --tabi-strip-bg: #253c30;
   --tabi-strip-ink: #ffffff;
   --tabi-strip-size: 12px;
+  --tabi-strip-weight: 400;
   --tabi-strip-interval: 5s;
 }
 
@@ -134,7 +135,7 @@
   color: inherit;
   font-family: var(--tabi-sans);
   font-size: calc(var(--tabi-strip-size, 12px) + 0.5px);
-  font-weight: 500;
+  font-weight: var(--tabi-strip-weight, 400);
   line-height: 1.45;
   letter-spacing: 0.02em;
   opacity: 0;
@@ -168,7 +169,7 @@
 .tabi-strip__link {
   margin-inline-start: 0.4rem;
   color: inherit;
-  font-weight: 600;
+  font-weight: inherit;
   text-decoration: underline;
   text-underline-offset: 0.25rem;
   text-decoration-thickness: 1px;
@@ -215,7 +216,6 @@
 @media screen and (min-width: 990px) {
   .tabi-strip__message {
     font-size: var(--tabi-strip-size, 12px);
-    font-weight: 600;
   }
 
   .tabi-strip__aside {

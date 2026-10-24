@@ -10,7 +10,8 @@
   @param {string} [price] - Formatted price, for product cards
   @param {string} sizes - sizes attribute for the picture
   @param {string} layout - grid | carousel
-  @param {boolean} [is_feature] - The larger, arched middle card
+  @param {boolean} [is_feature] - The larger middle card
+  @param {string} [shape] - Shape classes for the picture, e.g. 'home-shape-d-rounded home-shape-m-square'
   @param {number} index - Position in the row (0-based)
   @param {string} [attributes] - Extra attributes, e.g. block.shopify_attributes
 
@@ -40,7 +41,7 @@
 -%}
 
 {%- capture card_inner -%}
-  <span class="home-card__media">
+  <span class="home-card__media{% if shape != blank %} {{ shape }}{% endif %}">
     {%- if image != blank -%}
       {{
         image

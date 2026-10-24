@@ -8,6 +8,8 @@
   2026-10-24: the pause / play button inside the ring was removed at the
   client's request. The ring stays as a plain timer; a pointer or keyboard
   focus resting on the messages still holds them (assets/announcement-bar-v2.js).
+  Same day: the messages' weight became a setting, regular by default, as
+  the client asked for no bold on the dark strip.
 
   Its own section in the header group, so it can be hidden, moved or given
   more messages in the theme editor without touching the header. Each
@@ -54,6 +56,7 @@
     --tabi-strip-bg: {{ section.settings.background }};
     --tabi-strip-ink: {{ section.settings.text_color }};
     --tabi-strip-size: {{ section.settings.text_size }}px;
+    --tabi-strip-weight: {{ section.settings.text_weight }};
     --tabi-strip-interval: {{ section.settings.speed }}s;
   }
 {%- endstyle -%}
@@ -129,7 +132,9 @@
   "tag": "section",
   "class": "announcement-bar-v2-section",
   "enabled_on": {
-    "groups": ["header"]
+    "groups": [
+      "header"
+    ]
   },
   "max_blocks": 6,
   "settings": [
@@ -208,6 +213,31 @@
       "unit": "px",
       "label": "Text size",
       "default": 12
+    },
+    {
+      "type": "select",
+      "id": "text_weight",
+      "label": "Text weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi-bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400",
+      "info": "Messages and their links. The links stay underlined."
     }
   ],
   "blocks": [

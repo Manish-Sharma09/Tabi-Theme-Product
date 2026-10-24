@@ -9,7 +9,9 @@
 
   2026-10-24: the ornament over the heading and the "Decoration" blocks
   (illustrations) were removed with their settings, at the client's
-  request.
+  request. The line of capitals has its own size for desktop and for
+  phones; the client found it too big on phones, so it is 11px there by
+  default (was 12.5).
 {%- endcomment -%}
 
 {{ 'home-sections.css' | asset_url | stylesheet_tag }}
@@ -45,6 +47,8 @@
     --home-frame: {{ section.settings.frame_color }};
     --home-spot-ratio-mobile: {{ mobile_ratio }};
     --home-heading-size: {{ section.settings.heading_size }};
+    --home-tag: {{ section.settings.tagline_size }};
+    --home-tag-m: {{ section.settings.tagline_size_mobile }};
     --home-pt: {{ section.settings.padding_top }};
     --home-pb: {{ section.settings.padding_bottom }};
     --home-pt-m: {{ section.settings.padding_top_mobile }};
@@ -313,6 +317,27 @@
       "label": "Line under the picture",
       "default": "Made to order | Circular living | Ethical packaging",
       "info": "Shown in spaced capitals."
+    },
+    {
+      "type": "range",
+      "id": "tagline_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Line size on desktop",
+      "default": 17,
+      "info": "At full desktop width; smaller screens scale it."
+    },
+    {
+      "type": "range",
+      "id": "tagline_size_mobile",
+      "min": 9,
+      "max": 18,
+      "step": 0.5,
+      "unit": "px",
+      "label": "Line size on phones",
+      "default": 11
     },
     {
       "type": "text",

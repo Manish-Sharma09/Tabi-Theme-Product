@@ -16,7 +16,7 @@
                                      Store")
 
      1. Scale, colours and the section frame
-     2. Shared pieces: heading, text, links, button
+     2. Shared pieces: heading, text, links, button, picture shapes
      3. Feature
      4. Cards: header and grid
      5. Cards: carousel
@@ -273,6 +273,38 @@ a.home-link:focus-visible,
   }
 }
 
+/* Picture shapes (band and cards). Each picture carries its shape for
+   desktop and for phones as two classes, set by the sections' shape
+   settings; "Rounded corners" uses the section's "Corner roundness"
+   (--home-radius, reference pixels). With no class a picture is square.
+   isolation keeps the corners clipping the hover zoom in Safari. */
+.home-shape-d-rounded,
+.home-shape-d-arch,
+.home-shape-m-rounded,
+.home-shape-m-arch {
+  isolation: isolate;
+}
+
+@media screen and (min-width: 750px) {
+  .home-shape-d-rounded {
+    border-radius: calc(var(--home-radius, 32) * var(--u));
+  }
+
+  .home-shape-d-arch {
+    border-radius: 999px 999px 0 0;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .home-shape-m-rounded {
+    border-radius: calc(var(--home-radius, 32) * var(--u));
+  }
+
+  .home-shape-m-arch {
+    border-radius: 999px 999px 0 0;
+  }
+}
+
 /* --------------------------------------------------------------------------
    3. FEATURE
    Desktop: picture (591 x 518) at the left margin; the story starts 160px
@@ -475,11 +507,6 @@ a.home-link:focus-visible,
    card's white like the reference's cut-outs. */
 .home-cards--fit .home-card__media {
   background-color: transparent;
-}
-
-.home-cards--arch .home-card__media,
-.home-cards__item--feature .home-card__media {
-  border-radius: 999px 999px 0 0;
 }
 
 .home-card__caption {
@@ -814,10 +841,6 @@ a.home-link:focus-visible,
   transition: transform 0.9s var(--home-ease);
 }
 
-.home-band__figure--arch .home-band__media {
-  border-radius: 999px 999px 0 0;
-}
-
 /* A soft dark foot under the caption, so white capitals stay readable on a
    pale photograph. A span: base.css hides empty divs. */
 .home-band__shade {
@@ -838,10 +861,6 @@ a.home-link:focus-visible,
   text-align: center;
 }
 
-.home-band__caption .home-link {
-  --home-link-weight: 500;
-}
-
 @media (hover: hover) {
   .home-band__link:hover .home-band__media img {
     transform: scale(1.03);
@@ -860,10 +879,6 @@ a.home-link:focus-visible,
 
 .home-band__actions {
   margin: calc(18 * var(--u)) 0 0;
-}
-
-.home-band__actions .home-link {
-  --home-link-weight: 600;
 }
 
 /* Phone: one even 32px space all round - the sides here, the gaps either
@@ -962,7 +977,7 @@ a.home-link:focus-visible,
   font-family: var(--font-body-family);
   font-style: var(--font-body-style);
   font-weight: var(--font-body-weight);
-  font-size: max(13px, calc(16.8 * var(--u)));
+  font-size: max(12px, calc(var(--home-tag, 17) * var(--u)));
   line-height: 2.5;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -998,7 +1013,7 @@ a.home-link:focus-visible,
 
   .home-spot__tagline {
     margin-top: calc(14 * var(--u));
-    font-size: 12.5px;
+    font-size: calc(var(--home-tag-m, 11) * 1px);
     line-height: 1.9;
     letter-spacing: 0.08em;
   }

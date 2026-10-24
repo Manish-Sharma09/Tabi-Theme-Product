@@ -211,7 +211,11 @@
         "padding_top": 26,
         "padding_bottom": 38,
         "padding_top_mobile": 32,
-        "padding_bottom_mobile": 32
+        "padding_bottom_mobile": 32,
+        "shape_desktop": "rounded",
+        "shape_mobile": "arch",
+        "corner_radius": 32,
+        "link_weight": "400"
       }
     },
     "home_cards_women": {
@@ -263,7 +267,7 @@
         "mobile_controls": "both",
         "ratio": "portrait_tall",
         "fit": "cover",
-        "shape": "square",
+        "shape": "rounded",
         "feature_middle": true,
         "heading": "Dressed for the Season",
         "text": "<p>Easy silhouettes in cotton, printed by hand and made in small batches.</p>",
@@ -279,7 +283,11 @@
         "padding_top": 40,
         "padding_bottom": 42,
         "padding_top_mobile": 32,
-        "padding_bottom_mobile": 32
+        "padding_bottom_mobile": 32,
+        "shape_mobile": "square",
+        "feature_shape": "rounded",
+        "feature_shape_mobile": "arch",
+        "corner_radius": 32
       }
     },
     "home_cards_joys": {
@@ -382,7 +390,9 @@
         "padding_top": 14,
         "padding_bottom": 78,
         "padding_top_mobile": 10,
-        "padding_bottom_mobile": 58
+        "padding_bottom_mobile": 58,
+        "tagline_size": 17,
+        "tagline_size_mobile": 11
       }
     },
     "slideshow_dorec_z7XCH3": {

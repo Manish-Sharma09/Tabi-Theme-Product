@@ -22,6 +22,10 @@
   the footer's own settings ("Illustration along the foot"), so it is found
   with the rest of the footer's look. It is the only illustration left on
   the site; the home sections' decorations were removed.
+
+  Headings ("Be in the know" and the column headings) have a weight and a
+  size setting; regular by default, as the client asked (2026-10-24): on
+  the dark footer the contrast already makes them stand out.
 {%- endcomment -%}
 
 {{ 'tabi-footer.css' | asset_url | stylesheet_tag }}
@@ -59,6 +63,8 @@
     --footer-bottom-bg: {{ section.settings.bottom_background }};
     --footer-bottom-ink: {{ section.settings.bottom_text }};
     --footer-rest: {{ rest_columns }};
+    --footer-heading-weight: {{ section.settings.heading_weight }};
+    --footer-heading-size: {{ section.settings.heading_size }}px;
     --footer-pt: {{ section.settings.padding_top }}px;
     --footer-pb: {{ section.settings.padding_bottom }}px;
     margin-top: {{ section.settings.margin_top | times: 0.75 | round: 0 }}px;
@@ -635,6 +641,46 @@
       "label": "t:sections.all.colors.label",
       "default": "scheme-1",
       "info": "Used by the country and language lists."
+    },
+    {
+      "type": "header",
+      "content": "Headings"
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi-bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400",
+      "info": "\"Be in the know\" and the column headings. Single words can still be made bold in their own text boxes."
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 11,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size",
+      "default": 14,
+      "info": "\"Be in the know\" is one pixel larger."
     },
     {
       "type": "header",

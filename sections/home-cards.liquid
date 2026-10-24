@@ -19,7 +19,10 @@
 
   2026-10-24: the ornament over the heading and the "Decoration" blocks
   (illustrations) were removed with their settings, at the client's
-  request.
+  request. Card shapes got a setting for desktop and one for phones
+  (square, rounded corners, arched), with the larger middle card set
+  apart; the client asked for rounded corners on desktop and kept phones
+  as they were. Captions have a weight setting.
 {%- endcomment -%}
 
 {{ 'home-sections.css' | asset_url | stylesheet_tag }}
@@ -62,6 +65,17 @@
   if layout == 'grid' and section.settings.feature_middle and card_count == 3
     assign feature_index = 2
   endif
+
+  comment
+    Each card's shape on desktop and on phones, as classes for its picture
+    (assets/home-sections.css, part 2); the larger middle card has its own.
+  endcomment
+  assign shape_desktop = section.settings.shape | default: 'square'
+  assign shape_mobile = section.settings.shape_mobile | default: 'square'
+  assign feature_desktop = section.settings.feature_shape | default: 'arch'
+  assign feature_mobile = section.settings.feature_shape_mobile | default: 'arch'
+  assign card_shape = 'home-shape-d-' | append: shape_desktop | append: ' home-shape-m-' | append: shape_mobile
+  assign feature_shape = 'home-shape-d-' | append: feature_desktop | append: ' home-shape-m-' | append: feature_mobile
 
   case section.settings.ratio
     when 'square'
@@ -130,6 +144,8 @@
     --home-pb-m: {{ section.settings.padding_bottom_mobile }};
     --home-ratio: {{ ratio }};
     --home-fit: {{ section.settings.fit }};
+    --home-radius: {{ section.settings.corner_radius }};
+    --home-link-weight: {{ section.settings.link_weight }};
   }
 {%- endstyle -%}
 
@@ -138,7 +154,7 @@
 {%- endif -%}
 
 <div
-  class="home-section home-cards home-cards--{{ layout }} home-cards--cols-{{ cols }} home-cards--mobile-{{ section.settings.columns_mobile }}{% if section.settings.fit == 'contain' %} home-cards--fit{% endif %}{% if section.settings.shape == 'arch' %} home-cards--arch{% endif %}{% if section.settings.pattern %} home-section--pattern{% endif %}"
+  class="home-section home-cards home-cards--{{ layout }} home-cards--cols-{{ cols }} home-cards--mobile-{{ section.settings.columns_mobile }}{% if section.settings.fit == 'contain' %} home-cards--fit{% endif %}{% if section.settings.pattern %} home-section--pattern{% endif %}"
   {% if section.settings.motion %}
     data-motion
   {% endif %}
@@ -183,9 +199,11 @@
                 {%- liquid
                   assign is_feature = false
                   assign sizes = card_sizes
+                  assign shape = card_shape
                   if forloop.index == feature_index
                     assign is_feature = true
                     assign sizes = feature_sizes
+                    assign shape = feature_shape
                   endif
                   assign price = ''
                   if section.settings.show_price
@@ -200,6 +218,7 @@
                   sizes: sizes,
                   layout: layout,
                   is_feature: is_feature,
+                  shape: shape,
                   index: forloop.index0
                 %}
               {%- endfor -%}
@@ -225,9 +244,11 @@
 
                   assign is_feature = false
                   assign sizes = card_sizes
+                  assign shape = card_shape
                   if forloop.index == feature_index
                     assign is_feature = true
                     assign sizes = feature_sizes
+                    assign shape = feature_shape
                   endif
                 -%}
                 {% render 'home-card',
@@ -237,6 +258,7 @@
                   sizes: sizes,
                   layout: layout,
                   is_feature: is_feature,
+                  shape: shape,
                   index: forloop.index0
                 %}
               {%- endfor -%}
@@ -275,9 +297,11 @@
 
                   assign is_feature = false
                   assign sizes = card_sizes
+                  assign shape = card_shape
                   if forloop.index == feature_index
                     assign is_feature = true
                     assign sizes = feature_sizes
+                    assign shape = feature_shape
                   endif
                 -%}
                 {% render 'home-card',
@@ -287,6 +311,7 @@
                   sizes: sizes,
                   layout: layout,
                   is_feature: is_feature,
+                  shape: shape,
                   index: forloop.index0,
                   attributes: block.shopify_attributes
                 %}
@@ -553,15 +578,39 @@
     {
       "type": "select",
       "id": "shape",
-      "label": "Card top",
+      "label": "Card shape on desktop",
       "options": [
         {
           "value": "square",
           "label": "Square corners"
         },
         {
+          "value": "rounded",
+          "label": "Rounded corners"
+        },
+        {
           "value": "arch",
-          "label": "Arched"
+          "label": "Arched top"
+        }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "select",
+      "id": "shape_mobile",
+      "label": "Card shape on phones",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square corners"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded corners"
+        },
+        {
+          "value": "arch",
+          "label": "Arched top"
         }
       ],
       "default": "square"
@@ -569,9 +618,60 @@
     {
       "type": "checkbox",
       "id": "feature_middle",
-      "label": "Larger, arched middle card",
+      "label": "Larger middle card",
       "default": false,
-      "info": "Grid with exactly three cards. On phones the middle card leads, on a row of its own."
+      "info": "Grid with exactly three cards. On phones it leads, on a row of its own. Its shape is set below."
+    },
+    {
+      "type": "select",
+      "id": "feature_shape",
+      "label": "Middle card shape on desktop",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square corners"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded corners"
+        },
+        {
+          "value": "arch",
+          "label": "Arched top"
+        }
+      ],
+      "default": "arch"
+    },
+    {
+      "type": "select",
+      "id": "feature_shape_mobile",
+      "label": "Middle card shape on phones",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square corners"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded corners"
+        },
+        {
+          "value": "arch",
+          "label": "Arched top"
+        }
+      ],
+      "default": "arch"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Corner roundness",
+      "default": 32,
+      "info": "For \"Rounded corners\". At desktop size; smaller screens scale it."
     },
     {
       "type": "header",
@@ -644,6 +744,30 @@
       "id": "link_color",
       "label": "Captions",
       "default": "#4d4d4f"
+    },
+    {
+      "type": "select",
+      "id": "link_weight",
+      "label": "Caption weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi-bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
     },
     {
       "type": "header",

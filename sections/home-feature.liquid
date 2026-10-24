@@ -39,6 +39,7 @@
     --home-link: {{ section.settings.link_color }};
     --home-heading-size: {{ section.settings.heading_size }};
     --home-align: {{ section.settings.text_align | default: 'left' }};
+    --home-link-weight: {{ section.settings.link_weight }};
     --home-align-m: {{ section.settings.text_align_mobile | default: 'left' }};
     --home-pt: {{ section.settings.padding_top }};
     --home-pb: {{ section.settings.padding_bottom }};
@@ -247,6 +248,30 @@
       "id": "link_color",
       "label": "Link",
       "default": "#4d4d4f"
+    },
+    {
+      "type": "select",
+      "id": "link_weight",
+      "label": "Link weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi-bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
     },
     {
       "type": "range",
