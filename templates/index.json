@@ -78,7 +78,7 @@
         "heading": "The Gift of Tabi",
         "text": "<h3></h3><p>An expression of timeless beauty and thoughtful craftsmanship. Discover our handcrafted brass treasures, perfect for gifting, cherishing, and passing down through generations.</p>",
         "link_label": "Explore gifting",
-        "link": "shopify://collections/christmas-gifting",
+        "link": "shopify://collections/peetal",
         "text_align": "center",
         "text_align_mobile": "center",
         "motion": true,
@@ -110,6 +110,7 @@
           "type": "card",
           "settings": {
             "collection": "relaunch-table-mats",
+            "image": "shopify://shop_images/Copy_of__8106948-2_1.webp",
             "caption": "Table mats",
             "link": ""
           }
@@ -117,8 +118,8 @@
         "card_home_3": {
           "type": "card",
           "settings": {
-            "collection": "relaunch-napkins",
-            "caption": "Napkins",
+            "collection": "relaunch-cushions-covers",
+            "caption": "Cushions",
             "link": ""
           }
         },
@@ -126,6 +127,7 @@
           "type": "card",
           "settings": {
             "collection": "relaunch-bolster-covers",
+            "image": "shopify://shop_images/Terracotta_Bolster_Cover.jpg",
             "caption": "Bolster covers",
             "link": ""
           }
