@@ -41,7 +41,8 @@
         "slide_batches": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/Khwaab_Brand_Image_1.webp",
+            "image": "shopify://shop_images/DSC_6587_1.webp",
+            "image_mobile": "shopify://shop_images/DSC_4881.webp",
             "video_link": "",
             "heading": "",
             "link_label": "Shop Women",
