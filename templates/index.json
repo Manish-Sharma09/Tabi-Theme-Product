@@ -110,9 +110,9 @@
         "card_home_2": {
           "type": "card",
           "settings": {
-            "collection": "relaunch-table-mats",
-            "image": "shopify://shop_images/Copy_of__8106948-2_1.webp",
-            "caption": "Table mats",
+            "collection": "glass-covers",
+            "image": "shopify://shop_images/20023-H12a-dustyrosepearl.jpg",
+            "caption": "Glass Covers",
             "link": ""
           }
         },
@@ -143,6 +143,7 @@
         },
         "card_home_7": {
           "type": "card",
+          "disabled": true,
           "settings": {
             "collection": "glass-covers",
             "caption": "Glass covers",
