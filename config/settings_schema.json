@@ -1465,5 +1465,41 @@
         "default": "scheme-1"
       }
     ]
+  },
+  {
+    "name": "Magic Checkout",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Razorpay Magic Checkout takes every order. These settings stop shoppers landing on Shopify's own checkout while Razorpay is still loading."
+      },
+      {
+        "type": "checkbox",
+        "id": "magic_checkout_only",
+        "label": "Send every checkout to Magic Checkout",
+        "info": "Buy now and Check out wait for Razorpay instead of opening Shopify checkout, and wallet buttons are hidden. Turn off only if Razorpay is down and orders must go through Shopify checkout.",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "magic_checkout_wait_text",
+        "label": "Message while checkout opens",
+        "default": "Opening secure checkout…"
+      },
+      {
+        "type": "text",
+        "id": "magic_checkout_slow_text",
+        "label": "Message on a slow connection",
+        "info": "Shown after 8 seconds.",
+        "default": "Still opening checkout. Please keep this page open."
+      },
+      {
+        "type": "text",
+        "id": "magic_checkout_error_text",
+        "label": "Message if checkout can't open",
+        "info": "Shown after 40 seconds, or if Razorpay refuses the cart.",
+        "default": "We couldn't open checkout. Please check your connection and try again."
+      }
+    ]
   }
 ]

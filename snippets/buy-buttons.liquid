@@ -27,7 +27,8 @@
         The redesign asks for a plain outlined BUY NOW, which Shopify's dynamic
         checkout button cannot become - `form | payment_button` renders wallet
         buttons whose markup Shopify owns. Setting buy_now_style to 'custom'
-        swaps in a button that adds to cart and then redirects to checkout.
+        swaps in a plain button that Razorpay Magic Checkout picks up through
+        the .pdp-buy-now custom selector in its dashboard - keep that class.
 
         The two are mutually exclusive on purpose: showing both would give the
         shopper two "skip the cart" controls that behave differently.

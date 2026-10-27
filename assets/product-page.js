@@ -4,7 +4,7 @@
 
      A. <pdp-delivery-check>  pincode -> dispatch, delivery window, COD
      B. <pdp-carousel>        arrow buttons over a scroll-snap track
-     C. <pdp-buy-now>         add to cart, then straight to checkout
+     C. <pdp-buy-now>         buy this product now, in Magic Checkout
      D. <pdp-info-group>      fold one information column away
      E. <pdp-read-more>       clamp the description, reveal it on demand
      F. <pdp-chart-zoom>      magnify the size chart, and pan it
@@ -377,13 +377,19 @@
 
   /* The design specifies a plain outlined BUY NOW, which Shopify's dynamic
      checkout button cannot be styled into - it renders wallet buttons whose
-     markup is owned by Shopify. So this posts the current variant to
-     /cart/add.js and then sends the shopper to checkout.
+     markup is owned by Shopify.
 
-     Consequence worth knowing: this leaves anything already in the cart in
-     place, so "buy now" checks out the whole cart, not just this product. That
-     matches how Shopify's own dynamic checkout behaves for a cart that is not
-     empty, so it is the less surprising of the two options. */
+     Normally this handler never runs. Razorpay Magic Checkout takes the click
+     first - .pdp-buy-now is the product custom selector in its dashboard - and
+     runs its own buy now: it empties the cart, adds this variant and opens
+     Magic Checkout. Until Razorpay has loaded, snippets/magic-checkout-guard
+     holds the click and replays it once Razorpay is listening.
+
+     Reaching this handler therefore means Razorpay is up but did not take the
+     button (the selector was removed from its dashboard, say). It posts the
+     variant to /cart/add.js and hands the cart to Magic Checkout through the
+     guard, leaving anything already in the cart in place. Only with the guard
+     switched off in theme settings does it go to Shopify's own checkout. */
   var PDPBuyNow = class extends HTMLElement {
     connectedCallback() {
       this.button = this.querySelector('button');
@@ -481,6 +487,11 @@
               this.fail(result.data && result.data.description);
               return;
             }
+            if (window.tabiMagicCheckout) {
+              this.settle();
+              window.tabiMagicCheckout.open();
+              return;
+            }
             window.location.href = this.getAttribute('data-checkout-url') || '/checkout';
           }.bind(this)
         )
@@ -491,11 +502,15 @@
         );
     }
 
+    settle() {
+      this.button.classList.remove('is-loading');
+      this.button.removeAttribute('aria-busy');
+    }
+
     /* Surface the failure through the product form's existing error region so
        there is one error surface on the page, not two competing ones. */
     fail(message) {
-      this.button.classList.remove('is-loading');
-      this.button.removeAttribute('aria-busy');
+      this.settle();
 
       var wrapper = document.querySelector('.product-form__error-message-wrapper');
       var target = wrapper && wrapper.querySelector('.product-form__error-message');

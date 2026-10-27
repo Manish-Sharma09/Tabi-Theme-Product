@@ -1,0 +1,321 @@
+{%- comment -%}
+  Keeps every checkout inside Razorpay Magic Checkout.
+
+  Razorpay takes a checkout over by listening for clicks on checkout buttons,
+  but it only starts listening once magic-shopify.js has downloaded and then
+  fetched a second, store-specific script. It is the last script on the page,
+  so on a slow connection there are seconds in which BUY NOW, the cart page's
+  Check out and the sidecart's hidden /checkout link all still lead to
+  Shopify's own checkout. Razorpay can also send a shopper there itself: its
+  sidecart and its checkout window both have a "redirect to native checkout"
+  path. This guard closes those doors:
+
+  1. A checkout click made before Razorpay is listening is held, the control
+     shows it is busy, and the same click is replayed the moment Razorpay is
+     ready, so Razorpay handles it exactly as if it had been there all along.
+  2. A checkout link or form that Razorpay leaves alone is stopped, and the
+     cart is opened in Magic Checkout instead.
+  3. Script redirects to /checkout - Razorpay's own fallbacks, or an app - are
+     cancelled in browsers that have the Navigation API.
+  4. Wallet buttons render inside Shopify's iframes, where no click can be
+     caught, so they are hidden.
+
+  It never sends anyone to Shopify checkout. If Razorpay cannot be reached the
+  shopper is told so and stays on the page. If Razorpay is down and orders
+  have to go through Shopify checkout, turn it off in Theme settings > Magic
+  Checkout.
+
+  Razorpay only serves INR carts and switches itself off for anything else, so
+  the guard does too.
+
+  Inline in <head> on purpose: it has to be listening before anything on the
+  page can be tapped, and it must not wait on a download of its own.
+{%- endcomment -%}
+{%- if settings.magic_checkout_only and cart.currency.iso_code == 'INR' -%}
+  <style>
+    .shopify-payment-button__button--branded,
+    .shopify-payment-button__more-options,
+    .additional-checkout-buttons {
+      display: none !important;
+    }
+
+    .tabi-magic-wait {
+      opacity: 0.65;
+      cursor: progress;
+      pointer-events: none;
+    }
+
+    .tabi-magic-note {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 2147483000;
+      width: max-content;
+      max-width: calc(100vw - 32px);
+      padding: 12px 18px;
+      border-radius: 4px;
+      background: #253c30;
+      color: #f9f8f5;
+      font-family: var(--font-body-family);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.4;
+      text-align: center;
+      transform: translateX(-50%);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .tabi-magic-note[hidden] {
+      display: none;
+    }
+  </style>
+  <script>
+    (function () {
+      'use strict';
+
+      var TEXT = {
+        wait: {{ settings.magic_checkout_wait_text | default: 'Opening secure checkout…' | json }},
+        slow: {{ settings.magic_checkout_slow_text | default: 'Still opening checkout. Please keep this page open.' | json }},
+        fail: {{ settings.magic_checkout_error_text | default: "We couldn't open checkout. Please check your connection and try again." | json }}
+      };
+      var SLOW_AFTER = 8000;
+      var GIVE_UP_AFTER = 40000;
+      var LOOP_WINDOW = 30000;
+      var PASS = 'data-tabi-magic-pass';
+      var ENTRY = '[name="checkout"], .pdp-buy-now, .shopify-payment-button__button--unbranded, a[href]';
+
+      var pending = null;
+      var proxy = null;
+      var note = null;
+      var noteTimer = 0;
+      var scriptFailed = false;
+      var reloads = 0;
+      var reopenedAt = 0;
+
+      /* Razorpay marks the moment its click listener is attached and sets
+         RazorpayMagicBtnConfig right after it; either means it is listening. */
+      function ready() {
+        if (window.RazorpayMagicBtnConfig) return true;
+        try {
+          return performance.getEntriesByName('listener-attached').length > 0;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      /* /checkout and /cart/checkout, with or without a locale prefix. The
+         order status page Magic Checkout sends a shopper to after paying lives
+         under /orders/ or /checkouts/ and is not matched. */
+      function isCheckoutUrl(href) {
+        var url;
+        try {
+          url = new URL(href, location.href);
+        } catch (e) {
+          return false;
+        }
+        return url.host === location.host && /^(\/[a-z]{2}(-[a-z]{2})?)?(\/cart)?\/checkout\/?$/i.test(url.pathname);
+      }
+
+      function entryFor(target) {
+        var el = target && target.closest ? target.closest(ENTRY) : null;
+        if (el && el.tagName === 'A' && !isCheckoutUrl(el.href)) return null;
+        return el;
+      }
+
+      function busy(el, on) {
+        if (!el || !el.classList) return;
+        el.classList.toggle('tabi-magic-wait', on);
+        if (on) {
+          el.setAttribute('aria-busy', 'true');
+        } else {
+          el.removeAttribute('aria-busy');
+        }
+      }
+
+      function say(text, hideAfter) {
+        if (!document.body) return;
+        if (!note) {
+          note = document.createElement('span');
+          note.className = 'tabi-magic-note';
+          note.setAttribute('role', 'status');
+          note.setAttribute('aria-live', 'polite');
+          note.hidden = true;
+          document.body.appendChild(note);
+        }
+        clearTimeout(noteTimer);
+        if (text && hideAfter) {
+          noteTimer = setTimeout(function () {
+            say('');
+          }, hideAfter);
+        }
+        if (note.textContent === text && note.hidden === !text) return;
+        note.textContent = text;
+        note.hidden = !text;
+      }
+
+      /* el is the control the shopper used, replayed as it is so Razorpay sees
+         the click it would have seen. null opens the cart in Magic Checkout. */
+      function hold(el) {
+        if (pending) {
+          busy(pending.el, false);
+          pending.el = el;
+          busy(el, true);
+          return;
+        }
+        pending = { el: el, since: Date.now() };
+        busy(el, true);
+        wait();
+      }
+
+      function wait() {
+        if (!pending) return;
+        if (ready()) {
+          release();
+          return;
+        }
+        var waited = Date.now() - pending.since;
+        if (waited > GIVE_UP_AFTER) {
+          fail();
+          return;
+        }
+        if (scriptFailed && reloads < 3) reload();
+        say(waited > SLOW_AFTER ? TEXT.slow : TEXT.wait);
+        setTimeout(wait, 150);
+      }
+
+      function release() {
+        var el = pending.el;
+        pending = null;
+        busy(el, false);
+        say('');
+        if (el && el.isConnected) {
+          replay(el);
+        } else {
+          openCart();
+        }
+      }
+
+      function replay(el) {
+        el.setAttribute(PASS, '');
+        try {
+          el.click();
+        } finally {
+          el.removeAttribute(PASS);
+        }
+      }
+
+      /* Razorpay opens the whole cart in Magic Checkout for a click on any
+         button[type="button"][name="checkout"]. This hidden one is ours. */
+      function openCart() {
+        if (!proxy) {
+          proxy = document.createElement('button');
+          proxy.type = 'button';
+          proxy.name = 'checkout';
+          proxy.hidden = true;
+          proxy.tabIndex = -1;
+          proxy.setAttribute('aria-hidden', 'true');
+          document.body.appendChild(proxy);
+        }
+        replay(proxy);
+      }
+
+      function fail() {
+        if (pending) busy(pending.el, false);
+        pending = null;
+        say(TEXT.fail, 6000);
+      }
+
+      /* Only after the browser reported the script as failed, so a slow but
+         healthy download is never doubled up. */
+      function reload() {
+        var old = document.querySelector('script[src*="magic-shopify.js"]');
+        if (!old) return;
+        scriptFailed = false;
+        reloads++;
+        var script = document.createElement('script');
+        script.src = old.src;
+        script.crossOrigin = 'anonymous';
+        document.body.appendChild(script);
+      }
+
+      window.addEventListener(
+        'error',
+        function (event) {
+          var el = event.target;
+          if (el && el.tagName === 'SCRIPT' && /magic-shopify\.js/.test(el.src)) scriptFailed = true;
+        },
+        true
+      );
+
+      /* Window capture runs ahead of Razorpay's listener on document, so until
+         Razorpay is ready the click stops here. Once it is ready this steps
+         aside and Razorpay gets the click first, as it always has. */
+      window.addEventListener(
+        'click',
+        function (event) {
+          var el = entryFor(event.target);
+          if (!el || el.hasAttribute(PASS) || ready()) return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          hold(el);
+        },
+        true
+      );
+
+      /* A checkout click that bubbles back up to the window untouched was left
+         alone by Razorpay. For a link that means Shopify checkout is next; for
+         our own button it means Razorpay is not taking carts at all. */
+      window.addEventListener('click', function (event) {
+        var el = entryFor(event.target);
+        if (!el) return;
+        if (el === proxy) {
+          fail();
+          return;
+        }
+        if (event.defaultPrevented || el.tagName !== 'A') return;
+        event.preventDefault();
+        hold(null);
+      });
+
+      /* A checkout button that Razorpay left alone submits its form next. */
+      window.addEventListener('submit', function (event) {
+        if (event.defaultPrevented) return;
+        var submitter = event.submitter;
+        var action = event.target.getAttribute('action') || '';
+        if (!(submitter && submitter.name === 'checkout') && !isCheckoutUrl(action)) return;
+        event.preventDefault();
+        hold(null);
+      });
+
+      if (window.navigation && typeof window.navigation.addEventListener === 'function') {
+        window.navigation.addEventListener('navigate', function (event) {
+          if (!event.cancelable || event.hashChange || event.navigationType === 'traverse') return;
+          if (!isCheckoutUrl(event.destination.url)) return;
+          event.preventDefault();
+          /* Razorpay redirecting again straight after being reopened will keep
+             doing so - a zero-value cart is one case - so stop, don't loop. */
+          if (Date.now() - reopenedAt < LOOP_WINDOW) {
+            fail();
+            return;
+          }
+          reopenedAt = Date.now();
+          hold(null);
+        });
+      }
+
+      /* Back from Magic Checkout through the back/forward cache. */
+      window.addEventListener('pageshow', function (event) {
+        if (!event.persisted) return;
+        if (pending) busy(pending.el, false);
+        pending = null;
+        say('');
+      });
+
+      window.tabiMagicCheckout = {
+        open: function () {
+          hold(null);
+        },
+      };
+    })();
+  </script>
+{%- endif -%}
