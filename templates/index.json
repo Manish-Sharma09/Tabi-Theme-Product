@@ -74,9 +74,9 @@
       "type": "home-feature",
       "settings": {
         "image_position": "left",
-        "image": "shopify://shop_images/gifting_2.webp",
+        "image": "shopify://shop_images/Uraiyur_Brass_Shell_Bowl_Large..webp",
         "heading": "The Gift of Tabi",
-        "text": "<p>Hand block printed table linen, tea cosies and keepsakes for little ones, made in small batches and packed without plastic.</p>",
+        "text": "<h3></h3><p>An expression of timeless beauty and thoughtful craftsmanship. Discover our handcrafted brass treasures, perfect for gifting, cherishing, and passing down through generations.</p>",
         "link_label": "Explore gifting",
         "link": "shopify://collections/christmas-gifting",
         "text_align": "center",
@@ -100,8 +100,9 @@
         "card_home_1": {
           "type": "card",
           "settings": {
-            "collection": "relaunch-table-linen",
-            "caption": "Table linen",
+            "collection": "tea-cosy",
+            "image": "shopify://shop_images/8106694.jpg",
+            "caption": "Tea Cosy",
             "link": ""
           }
         },
@@ -132,8 +133,8 @@
         "card_home_6": {
           "type": "card",
           "settings": {
-            "collection": "tea-cosy",
-            "caption": "Tea cosies",
+            "collection": "relaunch-table-linen",
+            "caption": "Table Linen",
             "link": ""
           }
         },
