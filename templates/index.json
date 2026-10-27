@@ -28,7 +28,8 @@
         "slide_craft": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/ChatGPT_Image_Sep_5_2026_11_41_10_PM.png",
+            "image": "shopify://shop_images/DSC_4005-2_ea22be4f-ffe6-48ba-bcd1-6e35bd9b6bb4.webp",
+            "image_mobile": "shopify://shop_images/DSC_4005-2.webp",
             "video_link": "",
             "heading": "",
             "link_label": "Shop New Arrivals",
@@ -85,6 +86,7 @@
         "heading_color": "#253c30",
         "text_color": "#4d4d4f",
         "link_color": "#4d4d4f",
+        "link_weight": "400",
         "heading_size": 50,
         "padding_top": 58,
         "padding_bottom": 58,
@@ -166,7 +168,11 @@
         "ratio": "square",
         "fit": "cover",
         "shape": "square",
+        "shape_mobile": "square",
         "feature_middle": false,
+        "feature_shape": "arch",
+        "feature_shape_mobile": "arch",
+        "corner_radius": 32,
         "heading": "Made for the Home",
         "text": "<p>Hand block printed linen for every table and every corner of your home.</p>",
         "background": "#ffffff",
@@ -176,6 +182,7 @@
         "heading_color": "#253c30",
         "text_color": "#4d4d4f",
         "link_color": "#4d4d4f",
+        "link_weight": "400",
         "motion": true,
         "heading_size": 50,
         "padding_top": 26,
@@ -194,11 +201,15 @@
         "right_caption": "Shop boys",
         "right_link": "shopify://collections/boys-clothing",
         "arch": "right",
+        "shape_desktop": "rounded",
+        "shape_mobile": "arch",
+        "corner_radius": 32,
         "shade": 30,
         "heading": "Little Wonders",
         "text": "<p>Soft cottons and hand block prints, made for climbing, twirling and growing into.</p>",
         "link_label": "Explore kids",
         "link": "shopify://collections/kids",
+        "link_weight": "400",
         "background": "#253c30",
         "pattern": true,
         "pattern_color": "#ffffff",
@@ -211,11 +222,7 @@
         "padding_top": 26,
         "padding_bottom": 38,
         "padding_top_mobile": 32,
-        "padding_bottom_mobile": 32,
-        "shape_desktop": "rounded",
-        "shape_mobile": "arch",
-        "corner_radius": 32,
-        "link_weight": "400"
+        "padding_bottom_mobile": 32
       }
     },
     "home_cards_women": {
@@ -234,7 +241,7 @@
           "type": "card",
           "settings": {
             "collection": "vests-jackets",
-            "image": "shopify://shop_images/TABI_27010_2_cropped.webp",
+            "image": "shopify://shop_images/DSC_4881.webp",
             "caption": "Jackets & shrugs",
             "link": ""
           }
@@ -243,7 +250,7 @@
           "type": "card",
           "settings": {
             "collection": "shirts-tops",
-            "image": "shopify://shop_images/8101574.jpg",
+            "image": "shopify://shop_images/DSC_4043.webp",
             "caption": "Shirts & tops",
             "link": ""
           }
@@ -268,7 +275,11 @@
         "ratio": "portrait_tall",
         "fit": "cover",
         "shape": "rounded",
+        "shape_mobile": "square",
         "feature_middle": true,
+        "feature_shape": "rounded",
+        "feature_shape_mobile": "arch",
+        "corner_radius": 32,
         "heading": "Dressed for the Season",
         "text": "<p>Easy silhouettes in cotton, printed by hand and made in small batches.</p>",
         "background": "#ffffff",
@@ -278,16 +289,13 @@
         "heading_color": "#253c30",
         "text_color": "#4d4d4f",
         "link_color": "#4d4d4f",
+        "link_weight": "400",
         "motion": true,
         "heading_size": 50,
         "padding_top": 40,
         "padding_bottom": 42,
         "padding_top_mobile": 32,
-        "padding_bottom_mobile": 32,
-        "shape_mobile": "square",
-        "feature_shape": "rounded",
-        "feature_shape_mobile": "arch",
-        "corner_radius": 32
+        "padding_bottom_mobile": 32
       }
     },
     "home_cards_joys": {
@@ -297,6 +305,7 @@
           "type": "card",
           "settings": {
             "collection": "peetal",
+            "image": "shopify://shop_images/8105494.jpg",
             "caption": "Peetal brass",
             "link": ""
           }
@@ -305,6 +314,7 @@
           "type": "card",
           "settings": {
             "collection": "babies-collection",
+            "image": "shopify://shop_images/Kalaa_cotton_set.webp",
             "caption": "Babies",
             "link": ""
           }
@@ -313,6 +323,7 @@
           "type": "card",
           "settings": {
             "collection": "relaunch-womens-scarves",
+            "image": "shopify://shop_images/tabi_grain_62_of_187_1.webp",
             "caption": "Scarves",
             "link": ""
           }
@@ -321,6 +332,7 @@
           "type": "card",
           "settings": {
             "collection": "relaunch-scrunchies",
+            "image": "shopify://shop_images/Kaapi_brown_strap_dress_paired_with_a_matching_scrunchie._When_your_outfit_feels_as_calm_as_you.jpg",
             "caption": "Scrunchies",
             "link": ""
           }
@@ -346,7 +358,11 @@
         "ratio": "portrait",
         "fit": "cover",
         "shape": "square",
+        "shape_mobile": "square",
         "feature_middle": false,
+        "feature_shape": "arch",
+        "feature_shape_mobile": "arch",
+        "corner_radius": 32,
         "heading": "Small Joys",
         "text": "<p>Brass for the table, sets for little ones and the finishing touches for every outfit.</p>",
         "background": "#253c30",
@@ -356,6 +372,7 @@
         "heading_color": "#e2d1a6",
         "text_color": "#ffffff",
         "link_color": "#ffffff",
+        "link_weight": "400",
         "motion": true,
         "heading_size": 50,
         "padding_top": 30,
@@ -375,6 +392,8 @@
         "frame": true,
         "frame_color": "#ffffff",
         "tagline": "Made to order | Circular living | Ethical packaging",
+        "tagline_size": 17,
+        "tagline_size_mobile": 11,
         "button_label": "Our story",
         "button_link": "shopify://pages/about",
         "button_background": "#efede9",
@@ -390,9 +409,7 @@
         "padding_top": 14,
         "padding_bottom": 78,
         "padding_top_mobile": 10,
-        "padding_bottom_mobile": 58,
-        "tagline_size": 17,
-        "tagline_size_mobile": 11
+        "padding_bottom_mobile": 58
       }
     },
     "slideshow_dorec_z7XCH3": {
