@@ -15,12 +15,12 @@
         "slide_story": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/Final_Website_Banner.jpg",
-            "image_mobile": "shopify://shop_images/Final_Phone_Website_Banner.jpg",
+            "image": "shopify://shop_images/DSC_4005-2_ea22be4f-ffe6-48ba-bcd1-6e35bd9b6bb4.webp",
+            "image_mobile": "shopify://shop_images/DSC_4005-2_ea22be4f-ffe6-48ba-bcd1-6e35bd9b6bb4.webp",
             "video_link": "",
             "heading": "",
-            "link_label": "Discover Tabi",
-            "link": "shopify://pages/about",
+            "link_label": "SHOP NEW ARRIVALS",
+            "link": "shopify://collections/new-arrivals",
             "whole_slide_link": true,
             "overlay_opacity": 15
           }
@@ -28,12 +28,12 @@
         "slide_craft": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/DSC_4005-2_ea22be4f-ffe6-48ba-bcd1-6e35bd9b6bb4.webp",
-            "image_mobile": "shopify://shop_images/DSC_4005-2.webp",
+            "image": "shopify://shop_images/Final_Website_Banner.jpg",
+            "image_mobile": "shopify://shop_images/Ira.jpg",
             "video_link": "",
             "heading": "",
-            "link_label": "Shop New Arrivals",
-            "link": "shopify://collections/new-arrivals",
+            "link_label": "KIDS",
+            "link": "shopify://collections/kids",
             "whole_slide_link": true,
             "overlay_opacity": 20
           }
