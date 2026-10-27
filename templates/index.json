@@ -236,9 +236,9 @@
         "card_women_1": {
           "type": "card",
           "settings": {
-            "collection": "spring-2026-women",
-            "image": "shopify://shop_images/843073857_18121485716487945_457628683630094037_n.jpg",
-            "caption": "New in",
+            "collection": "bottoms",
+            "image": "shopify://shop_images/DSC_6348.jpg",
+            "caption": "BOTTOMS",
             "link": ""
           }
         },
