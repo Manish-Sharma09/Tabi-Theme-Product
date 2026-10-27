@@ -78,6 +78,7 @@
         "message_first10",
         "message_handcrafted"
       ],
+      "disabled": true,
       "settings": {
         "autoplay": true,
         "speed": 5,
@@ -87,7 +88,8 @@
         "aside_icon": true,
         "background": "#253c30",
         "text_color": "#ffffff",
-        "text_size": 12
+        "text_size": 12,
+        "text_weight": "400"
       }
     },
     "header": {
@@ -96,13 +98,45 @@
       "settings": {
         "logo_style": "image",
         "logo_text": "tabi",
+        "logo_width_desktop": 120,
+        "logo_width_mobile": 100,
         "menu": "new-menu",
         "sticky_header_type": "always",
+        "menu_font_size": 14,
+        "menu_letter_spacing": 0.5,
+        "menu_spacing": 30,
+        "menu_uppercase": true,
         "header_background": "#f9f7f4",
+        "bar_text": "#191919",
+        "header_accent": "#9c7d50",
+        "search_color": "#253c30",
+        "bar_height_desktop": 52,
+        "bar_height_mobile": 56,
+        "bar_border": false,
+        "show_search_label": true,
         "show_country_selector": true,
+        "show_account_icon": true,
+        "show_cart_count": true,
         "color_scheme": "scheme-1",
+        "dropdown_background": "#fdfdfd",
+        "dropdown_text": "#191919",
+        "dropdown_font_size": 13,
+        "dropdown_link_spacing": 13,
+        "dropdown_large_links": "Apparel",
+        "dropdown_featured_label": "Featured",
+        "show_nav_arrows": false,
+        "dropdown_divider": true,
+        "menu_images_limit": 4,
+        "menu_image_caption": "Discover",
+        "menu_image_ratio": "portrait",
+        "drawer_background": "#ffffff",
+        "drawer_lower_background": "#f9f8f5",
+        "drawer_font_size": 14,
+        "drawer_show_images": true,
         "drawer_show_account": true,
-        "drawer_show_localization": true
+        "drawer_show_localization": true,
+        "drawer_currency_label": "Change Currency",
+        "drawer_back_label": "Back"
       }
     }
   },
