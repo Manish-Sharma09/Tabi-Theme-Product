@@ -15,15 +15,22 @@
      ready, so Razorpay handles it exactly as if it had been there all along.
   2. A checkout link or form that Razorpay leaves alone is stopped, and the
      cart is opened in Magic Checkout instead.
-  3. Script redirects to /checkout - Razorpay's own fallbacks, or an app - are
-     cancelled in browsers that have the Navigation API.
-  4. Wallet buttons render inside Shopify's iframes, where no click can be
+  3. Razorpay's own fallbacks are switched off. Its checkout window (on a
+     fault, or a shopify.redirect_to_native_checkout event) and its sidecart
+     (an isRedirectToNativeCheckout flag) tell the page by message to go to
+     /checkout. Those messages are caught before Razorpay's page code sees
+     them: the sidecart's is passed on with the flag off, and a failing
+     checkout window is closed and Magic Checkout opened again. This works in
+     every browser.
+  4. Any other script redirect to /checkout - an app, say - is cancelled in
+     browsers that have the Navigation API.
+  5. Wallet buttons render inside Shopify's iframes, where no click can be
      caught, so they are hidden.
 
-  It never sends anyone to Shopify checkout. If Razorpay cannot be reached the
-  shopper is told so and stays on the page. If Razorpay is down and orders
-  have to go through Shopify checkout, turn it off in Theme settings > Magic
-  Checkout.
+  It never sends anyone to Shopify checkout. If Razorpay cannot be reached, or
+  keeps failing after a few fresh tries, the shopper is told so and stays on
+  the page. If Razorpay is down and orders have to go through Shopify
+  checkout, turn it off in Theme settings > Magic Checkout.
 
   Razorpay only serves INR carts and switches itself off for anything else, so
   the guard does too.
@@ -80,9 +87,12 @@
       };
       var SLOW_AFTER = 8000;
       var GIVE_UP_AFTER = 40000;
-      var LOOP_WINDOW = 30000;
+      var MAX_REOPENS = 3;
+      var REOPEN_WINDOW = 60000;
       var PASS = 'data-tabi-magic-pass';
       var ENTRY = '[name="checkout"], .pdp-buy-now, .shopify-payment-button__button--unbranded, a[href]';
+      var CHECKOUT_PATH =
+        /^(\/[a-z]{2}(-[a-z]{2})?)?(\/cart\/checkout|\/checkout|\/checkouts\/cn?\/[^/]+(\/[a-z]{2}(-[a-z]{2})?)?)\/?$/i;
 
       var pending = null;
       var proxy = null;
@@ -90,7 +100,7 @@
       var noteTimer = 0;
       var scriptFailed = false;
       var reloads = 0;
-      var reopenedAt = 0;
+      var reopens = [];
 
       /* Razorpay marks the moment its click listener is attached and sets
          RazorpayMagicBtnConfig right after it; either means it is listening. */
@@ -103,9 +113,10 @@
         }
       }
 
-      /* /checkout and /cart/checkout, with or without a locale prefix. The
-         order status page Magic Checkout sends a shopper to after paying lives
-         under /orders/ or /checkouts/ and is not matched. */
+      /* /checkout, /cart/checkout and the page they redirect to,
+         /checkouts/cn/<token>, with or without a locale. The order status page
+         Magic Checkout sends a shopper to after paying (/<id>/orders/...,
+         .../thank-you) is not matched. */
       function isCheckoutUrl(href) {
         var url;
         try {
@@ -113,7 +124,7 @@
         } catch (e) {
           return false;
         }
-        return url.host === location.host && /^(\/[a-z]{2}(-[a-z]{2})?)?(\/cart)?\/checkout\/?$/i.test(url.pathname);
+        return url.host === location.host && CHECKOUT_PATH.test(url.pathname);
       }
 
       function entryFor(target) {
@@ -163,6 +174,7 @@
           return;
         }
         pending = { el: el, since: Date.now() };
+        reloads = 0;
         busy(el, true);
         wait();
       }
@@ -224,6 +236,91 @@
         pending = null;
         say(TEXT.fail, 6000);
       }
+
+      /* Razorpay wanted to leave Magic Checkout: open it again. A blip on a
+         slow connection clears on a fresh try; a cart Razorpay keeps refusing
+         would flash its window forever, so after a few tries in a minute the
+         shopper is told instead. */
+      function reopen() {
+        var now = Date.now();
+        reopens = reopens.filter(function (at) {
+          return now - at < REOPEN_WINDOW;
+        });
+        if (reopens.length >= MAX_REOPENS) {
+          fail();
+          return;
+        }
+        reopens.push(now);
+        say(TEXT.wait);
+        setTimeout(function () {
+          hold(null);
+        }, 600 * reopens.length);
+      }
+
+      function fromRazorpay(origin) {
+        try {
+          return /(^|\.)razorpay\.(com|in)$/.test(new URL(origin).hostname);
+        } catch (e) {
+          return false;
+        }
+      }
+
+      /* Hand Razorpay's own listeners a message in place of the one that came
+         in, in the format it came in. */
+      function resend(event, message) {
+        window.dispatchEvent(
+          new MessageEvent('message', {
+            data: typeof event.data === 'string' ? JSON.stringify(message) : message,
+            origin: event.origin,
+            source: event.source,
+          })
+        );
+      }
+
+      /* Capture on window, registered before any Razorpay script runs, so this
+         sees each message first and can keep it from Razorpay's page code. */
+      window.addEventListener(
+        'message',
+        function (event) {
+          if (!fromRazorpay(event.origin)) return;
+          var message = event.data;
+          if (typeof message === 'string') {
+            try {
+              message = JSON.parse(message);
+            } catch (e) {
+              return;
+            }
+          }
+          if (!message || typeof message !== 'object') return;
+
+          var payload = message.payload;
+          if (
+            message.source === 'sidecart' &&
+            message.eventType === 'checkout_click' &&
+            payload &&
+            payload.isRedirectToNativeCheckout
+          ) {
+            event.stopImmediatePropagation();
+            payload.isRedirectToNativeCheckout = false;
+            resend(event, message);
+            return;
+          }
+
+          if (message.source !== 'frame') return;
+          var data = message.data || {};
+          var leaving =
+            message.event === 'fault' ||
+            (message.event === 'event' && data.event === 'shopify.redirect_to_native_checkout') ||
+            (message.event === 'redirect_to_page' && isCheckoutUrl(data.url));
+          if (!leaving) return;
+          event.stopImmediatePropagation();
+          /* The same message the window's own close button sends, so Razorpay
+             tidies up after itself before Magic Checkout opens again. */
+          resend(event, { source: 'frame', event: 'dismiss', data: {} });
+          reopen();
+        },
+        true
+      );
 
       /* Only after the browser reported the script as failed, so a slow but
          healthy download is never doubled up. */
@@ -292,14 +389,7 @@
           if (!event.cancelable || event.hashChange || event.navigationType === 'traverse') return;
           if (!isCheckoutUrl(event.destination.url)) return;
           event.preventDefault();
-          /* Razorpay redirecting again straight after being reopened will keep
-             doing so - a zero-value cart is one case - so stop, don't loop. */
-          if (Date.now() - reopenedAt < LOOP_WINDOW) {
-            fail();
-            return;
-          }
-          reopenedAt = Date.now();
-          hold(null);
+          reopen();
         });
       }
 

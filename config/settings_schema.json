@@ -1497,7 +1497,7 @@
         "type": "text",
         "id": "magic_checkout_error_text",
         "label": "Message if checkout can't open",
-        "info": "Shown after 40 seconds, or if Razorpay refuses the cart.",
+        "info": "Shown if Razorpay can't load within 40 seconds, or still fails after 3 fresh tries.",
         "default": "We couldn't open checkout. Please check your connection and try again."
       }
     ]
