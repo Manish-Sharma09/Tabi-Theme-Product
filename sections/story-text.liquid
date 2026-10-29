@@ -50,7 +50,7 @@
 -%}
 
 {%- style -%}
-  {%- if section.settings.text_style == 'lead' -%}
+  {%- if section.settings.text_style == 'lead' or section.settings.text_font == 'heading' -%}
     {% render 'story-heading-italic' %}
   {%- endif %}
 

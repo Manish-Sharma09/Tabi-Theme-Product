@@ -5,10 +5,10 @@
       "settings": {
         "image": "shopify://shop_images/Untitled_Design_30_1.webp",
         "image_mobile": "shopify://shop_images/IMG_7181_1.webp",
-        "eyebrow": "Crafted with care, made to last",
+        "eyebrow": "",
         "title": "The Tabi Journey",
-        "subtitle": "A celebration of people, places and the processes that give fabric a new life.",
-        "subtitle_style": "upright",
+        "subtitle": "A journey towards slower, more mindful living.",
+        "subtitle_style": "italic",
         "show_rule": true,
         "layout": "over",
         "position": "middle_left",
@@ -25,44 +25,19 @@
         "text_color": "#3d3b37",
         "title_size": 74,
         "title_size_mobile": 44,
-        "subtitle_size": 20,
-        "subtitle_size_mobile": 18
+        "subtitle_size": 24,
+        "subtitle_size_mobile": 19
       }
     },
-    "story": {
+    "opening": {
       "type": "story-text",
-      "blocks": {
-        "highlight_fabrics": {
-          "type": "highlight",
-          "settings": {
-            "icon": "leaf",
-            "title": "Natural fabrics",
-            "text": "Thoughtfully chosen, kind to the planet."
-          }
-        },
-        "highlight_artisans": {
-          "type": "highlight",
-          "settings": {
-            "icon": "hands",
-            "title": "Crafted by artisans",
-            "text": "Rooted in traditional techniques and real people."
-          }
-        },
-        "highlight_last": {
-          "type": "highlight",
-          "settings": {
-            "icon": "infinity",
-            "title": "Made to last",
-            "text": "Timeless pieces for everyday life."
-          }
-        }
-      },
-      "block_order": ["highlight_fabrics", "highlight_artisans", "highlight_last"],
+      "blocks": {},
+      "block_order": [],
       "settings": {
         "eyebrow": "Our story",
-        "heading": "A little more meaning\nin every thread",
-        "text": "<p>Tabi began with a love for natural fabrics, the hands that work with them, and the small pleasures of everyday life. We create clothing for women and children that is kind to the planet, rooted in craft and designed to be a part of your story.</p>",
-        "text_style": "body",
+        "heading": "",
+        "text": "<p>Tabi began with a love for natural fabrics, the hands that work with them, and the small pleasures of everyday life.</p><p>Today, we make clothing for women and children, textiles for the home, and objects meant to become part of the way we live.</p><p>Each is a different expression of the same belief: the things we choose to live with deserve a little thought.</p>",
+        "text_style": "lead",
         "text_font": "heading",
         "width": "medium",
         "text_align": "center",
@@ -91,10 +66,12 @@
         "heading_size_mobile": 34,
         "text_size": 21,
         "text_size_mobile": 19,
-        "padding_top": 56,
-        "padding_bottom": 40,
-        "padding_top_mobile": 48,
-        "padding_bottom_mobile": 32
+        "padding_top": 88,
+        "padding_bottom": 56,
+        "padding_top_mobile": 56,
+        "padding_bottom_mobile": 40,
+        "lead_size": 26,
+        "lead_size_mobile": 21
       }
     },
     "moments": {
@@ -125,11 +102,16 @@
           }
         }
       },
-      "block_order": ["moment_tea", "moment_shirt", "moment_children", "moment_tray"],
+      "block_order": [
+        "moment_tea",
+        "moment_shirt",
+        "moment_children",
+        "moment_tray"
+      ],
       "settings": {
         "eyebrow": "",
-        "heading": "",
-        "text": "",
+        "heading": "The things we return to",
+        "text": "<p>Some of the nicest parts of a day are easily overlooked.</p><p>A cup of tea before the house wakes up. A shirt that feels right the moment you put it on. Children running through the last hour of sunlight. The familiar tray you bring out when friends arrive.</p><p>This is the life we design for. It is ordinary, sometimes messy, often beautiful.</p><p>We want the things we make to belong naturally to it.</p>",
         "list_label": "Everyday moments",
         "row_width": "wide",
         "columns": 4,
@@ -145,14 +127,25 @@
         "show_dots": true,
         "motion": true,
         "background": "#f9f7f4",
-        "accent_color": "#253c30",
-        "padding_top": 0,
-        "padding_bottom": 48,
-        "padding_top_mobile": 0,
-        "padding_bottom_mobile": 40
+        "accent_color": "#7f7b74",
+        "padding_top": 24,
+        "padding_bottom": 56,
+        "padding_top_mobile": 16,
+        "padding_bottom_mobile": 40,
+        "text_font": "heading",
+        "width": "medium",
+        "text_align": "center",
+        "text_align_mobile": "center",
+        "header_gap": 48,
+        "heading_color": "#253c30",
+        "text_color": "#3d3b37",
+        "heading_size": 46,
+        "heading_size_mobile": 34,
+        "text_size": 20,
+        "text_size_mobile": 18
       }
     },
-    "artisans": {
+    "roots": {
       "type": "story-split",
       "settings": {
         "image": "shopify://shop_images/Copy_of_VideoCapture_20250321-124119.jpg",
@@ -166,12 +159,12 @@
         "shape_mobile": "rounded",
         "corner_radius": 6,
         "corner_radius_mobile": 6,
-        "eyebrow": "Our artisans",
+        "eyebrow": "Our roots",
         "heading": "A lifetime in textiles",
-        "text": "<p>Our pieces are made by skilled artisans who have spent a lifetime in the world of fabrics, colours and craft.</p><p>From hand-carved blocks to careful printing and stitching, every detail carries years of knowledge, patience and pride.</p><p>We work closely with artisan clusters, supporting traditional techniques and creating meaningful, long-term partnerships that help keep craft alive for future generations.</p>",
+        "text": "<p>Our roots go back decades, to a family garment-making business and a lifetime spent understanding cloth.</p><p>Long before Tabi, there were years of working with fabrics, developing designs, refining fits and making garments for people around the world.</p><p>That experience remains part of how we work today.</p><p>We know how much difference the right fabric can make. How a few changes to a cut can alter the way something feels. How the smallest finishing details can make a piece worth keeping.</p><p>Tabi gives us the freedom to bring that knowledge into collections that feel personally meaningful to us.</p>",
         "text_font": "heading",
-        "button_label": "Meet our artisans",
-        "button_link": "/pages/about#values",
+        "button_label": "",
+        "button_link": "",
         "button_style": "link",
         "link_weight": "600",
         "text_align": "left",
@@ -197,41 +190,45 @@
         "padding_bottom_mobile": 40
       }
     },
-    "approach": {
+    "fabrics": {
       "type": "story-gallery",
       "blocks": {
         "approach_designs": {
           "type": "picture",
           "settings": {
             "image": "shopify://shop_images/DSC_4005-2.webp",
-            "label": "Timeless designs",
-            "caption": "Easy, versatile silhouettes for everyday life."
+            "label": "Natural fabrics",
+            "caption": ""
           }
         },
         "approach_details": {
           "type": "picture",
           "settings": {
             "image": "shopify://shop_images/Copy_of_VideoCapture_20250321-124300.jpg",
-            "label": "Thoughtful details",
-            "caption": "From prints to finishes, every detail is considered."
+            "label": "Block print",
+            "caption": ""
           }
         },
         "approach_last": {
           "type": "picture",
           "settings": {
             "image": "shopify://shop_images/Copy_of_VideoCapture_20250321-171256.jpg",
-            "label": "Crafted to last",
-            "caption": "Quality pieces you can wear, love and live with, season after season."
+            "label": "Embroidery",
+            "caption": ""
           }
         }
       },
-      "block_order": ["approach_designs", "approach_details", "approach_last"],
+      "block_order": [
+        "approach_designs",
+        "approach_details",
+        "approach_last"
+      ],
       "settings": {
         "eyebrow": "Our approach",
         "heading": "Made to be worn.\nMade to be lived with.",
-        "text": "<p>We create versatile silhouettes using natural fabrics and mindful design — pieces that move with you, fit into your everyday moments and only get better with time.</p>",
+        "text": "<p>We have a particular affection for natural fabrics.</p><p>The lightness of cotton cambric. The crisp hand of poplin. The structure of twill. The softness that comes with a well-worn piece of clothing.</p><p>We love handwork, too. The tiny variations in a block print, the character of an embroidered flower, the unexpected charm of patchwork.</p><p>Some of our pieces are quiet and understated. Others have plenty of personality.</p><p>What matters is that they're enjoyable to use, comfortable to live with, and interesting enough to keep coming back to.</p>",
         "text_font": "heading",
-        "width": "wide",
+        "width": "medium",
         "text_align": "center",
         "text_align_mobile": "center",
         "list_label": "Our approach",
@@ -239,7 +236,7 @@
         "columns": 3,
         "ratio": "4 / 3",
         "gap": 28,
-        "header_gap": 40,
+        "header_gap": 48,
         "shape": "rounded",
         "shape_mobile": "rounded",
         "corner_radius": 6,
@@ -266,49 +263,53 @@
         "padding_bottom_mobile": 48
       }
     },
-    "values": {
+    "impact": {
       "type": "story-gallery",
       "blocks": {
-        "value_people": {
+        "pillar_product": {
           "type": "picture",
           "settings": {
             "image": "shopify://shop_images/tabi_grain_62_of_187_1.webp",
-            "label": "People",
-            "caption": "Our garments are made by skilled artisans and small communities who keep traditional craft alive. We believe in fair partnerships, safe working conditions and long-term relationships."
+            "label": "Product",
+            "caption": "A garment's value isn't determined by how green its label looks.\n\nIt's in the fabric you enjoy wearing, the fit you reach for again, the details you continue to appreciate, and the years of use it finds in your wardrobe.\n\nWe choose natural fabrics and explore craft and design with that longer relationship in mind.\n\nBecause the things we value are often the things we take better care of."
           }
         },
-        "value_craft": {
+        "pillar_process": {
           "type": "picture",
           "settings": {
             "image": "shopify://shop_images/Copy_of_VideoCapture_20250321-170744.jpg",
-            "label": "Craft",
-            "caption": "We work with time-honoured techniques like hand block printing, using hand-carved wooden blocks and natural dyes. Each piece carries the unique marks of the human hand, making it special."
+            "label": "Process",
+            "caption": "We believe in making closer to demand and being accountable for what remains.\n\nMuch of our clothing is made after an order is placed, rather than producing large quantities in anticipation of sales.\n\nWe also find new uses for leftover fabrics through patchwork, smaller textile products and other upcycling initiatives.\n\nThere is always room to improve how we work. What matters is being willing to examine the process, not just admire the finished product."
           }
         },
-        "value_planet": {
+        "pillar_people": {
           "type": "picture",
           "settings": {
             "image": "shopify://shop_images/Copy_of_VideoCapture_20250321-124147.jpg",
-            "label": "A kinder planet",
-            "caption": "We choose natural fabrics, create in small batches and design for longevity — reducing waste and giving fabric another life. It's our way of doing a little more for the planet."
+            "label": "People",
+            "caption": "Behind every garment is someone who knows how to make it.\n\nSomeone who understands the fabric, guides it through a sewing machine, finishes a seam, embroiders a flower or makes sure the final piece is ready to wear.\n\nWe believe their working environment should reflect the value of that skill.\n\nNatural daylight, clean and hygienic facilities, comfortable space between workstations, and wages that recognise their contribution are all part of how we operate.\n\nThese might sound like ordinary expectations. In 2026, they should be.\n\nFor us, the people who make Tabi are not simply a part of the production process. They are the people who make everything else possible."
           }
         }
       },
-      "block_order": ["value_people", "value_craft", "value_planet"],
+      "block_order": [
+        "pillar_product",
+        "pillar_process",
+        "pillar_people"
+      ],
       "settings": {
-        "eyebrow": "Our values",
+        "eyebrow": "Our impact",
         "heading": "A little more thought\nbehind what we make",
-        "text": "<p>We value a slower, more thoughtful way of creating — one that respects people, craft and the planet. From natural fabrics to small-batch production, our choices are guided by care and long-term impact.</p>",
+        "text": "<p>We believe the responsibility of making something extends beyond the finished product.</p><p>It matters what we make, how we make it, and the lives of the people who make it.</p><p>At Tabi, we think about this through three connected ideas: Product, Process and People.</p>",
         "text_font": "heading",
-        "width": "wide",
+        "width": "medium",
         "text_align": "center",
         "text_align_mobile": "center",
-        "list_label": "Our values",
+        "list_label": "Product, Process and People",
         "row_width": "content",
         "columns": 3,
         "ratio": "4 / 3",
         "gap": 28,
-        "header_gap": 40,
+        "header_gap": 48,
         "shape": "rounded",
         "shape_mobile": "rounded",
         "corner_radius": 6,
@@ -317,7 +318,7 @@
         "label_weight": "600",
         "caption_size": 18,
         "caption_size_mobile": 17,
-        "mobile_layout": "swipe",
+        "mobile_layout": "stack",
         "mobile_in_view": "82",
         "show_dots": true,
         "motion": true,
@@ -329,56 +330,54 @@
         "heading_size_mobile": 34,
         "text_size": 20,
         "text_size_mobile": 18,
-        "padding_top": 56,
-        "padding_bottom": 64,
-        "padding_top_mobile": 48,
-        "padding_bottom_mobile": 48,
-        "anchor": "values"
+        "padding_top": 80,
+        "padding_bottom": 80,
+        "padding_top_mobile": 56,
+        "padding_bottom_mobile": 56,
+        "anchor": "impact"
       }
     },
-    "impact": {
+    "upcycle": {
       "type": "story-gallery",
       "blocks": {
-        "impact_upcycled": {
+        "upcycle_1": {
           "type": "picture",
           "settings": {
-            "image": "shopify://shop_images/8108413-3.jpg",
-            "label": "Upcycled fabrics",
-            "caption": "Giving new purpose to existing materials."
+            "image": "shopify://shop_images/8108413-3.jpg"
           }
         },
-        "impact_production": {
+        "upcycle_2": {
           "type": "picture",
           "settings": {
-            "image": "shopify://shop_images/Copy_of_VideoCapture_20250321-124134.jpg",
-            "label": "Mindful production",
-            "caption": "Small batches, less waste, more intention."
+            "image": "shopify://shop_images/Terracotta_Bolster_Cover.jpg"
           }
         },
-        "impact_tomorrow": {
+        "upcycle_3": {
           "type": "picture",
           "settings": {
-            "image": "shopify://shop_images/Final_Website_Banner.jpg",
-            "label": "A brighter tomorrow",
-            "caption": "Thoughtful choices for a more circular future."
+            "image": "shopify://shop_images/20024-H12-Shannon.jpg"
           }
         }
       },
-      "block_order": ["impact_upcycled", "impact_production", "impact_tomorrow"],
+      "block_order": [
+        "upcycle_1",
+        "upcycle_2",
+        "upcycle_3"
+      ],
       "settings": {
-        "eyebrow": "Our impact",
+        "eyebrow": "Upcycle by Tabi",
         "heading": "Giving fabric another life",
-        "text": "<p>We explore ways to upcycle, repurpose and give new meaning to textiles. From leftover fabric finding a new form, to timeless pieces that can be worn for years, our goal is to reduce waste and create a more circular future for fashion.</p>",
+        "text": "<p>Making things inevitably leaves things behind.</p><p>And when you have spent a lifetime working with textiles, it becomes difficult to look at a piece of leftover fabric and see only waste.</p><p>Through Upcycle by Tabi, we've explored ways of giving fabric remnants a new purpose.</p><p>Some become patchwork and smaller textile pieces. Others are repurposed as filling for mattresses that find their way to families in our wider community.</p><p>A piece of fabric may have finished one journey, but that doesn't always mean it has nothing left to give.</p><p>It's a small but meaningful part of how we continue learning to make more responsibly.</p>",
         "text_font": "heading",
         "width": "medium",
         "text_align": "center",
         "text_align_mobile": "center",
-        "list_label": "Our impact",
+        "list_label": "Upcycle by Tabi",
         "row_width": "content",
         "columns": 3,
         "ratio": "2 / 1",
         "gap": 28,
-        "header_gap": 40,
+        "header_gap": 48,
         "shape": "rounded",
         "shape_mobile": "rounded",
         "corner_radius": 6,
@@ -399,7 +398,7 @@
         "heading_size_mobile": 34,
         "text_size": 20,
         "text_size_mobile": 18,
-        "padding_top": 64,
+        "padding_top": 80,
         "padding_bottom": 48,
         "padding_top_mobile": 48,
         "padding_bottom_mobile": 40
@@ -410,17 +409,17 @@
       "settings": {
         "eyebrow": "The next chapter",
         "heading": "The journey continues",
-        "text": "<p>This is a story of people, places and a shared love for fabric. We keep learning, exploring and creating — with the same belief that simple, well-made pieces can bring more meaning to everyday life.</p>",
+        "text": "<p>Tabi takes its name from the Japanese word for <em>journey</em>.</p><p>We began with clothing, but our curiosity has always extended to the way we live.</p><p>The fabrics we bring into our homes. The objects we reach for every day. The rituals we share with the people around us.</p><p>As Tabi grows, so will the ways we explore these ideas.</p><p>We don't have a finished picture of everything Tabi will become. And perhaps that's what makes the journey interesting.</p><p>For now, we're glad you're here.</p>",
         "text_style": "body",
         "text_font": "heading",
         "width": "medium",
         "text_align": "center",
         "text_align_mobile": "center",
         "show_rule": false,
-        "button_label_1": "Explore the collection",
+        "button_label_1": "Explore Our Collections",
         "button_link_1": "/collections/all",
-        "button_label_2": "Our craft & values",
-        "button_link_2": "/pages/about#values",
+        "button_label_2": "Meet Our Founder",
+        "button_link_2": "shopify://pages/founders-note",
         "button_color": "#253c30",
         "button_text_color": "#f9f7f4",
         "button_weight": "400",
@@ -430,7 +429,7 @@
         "decor_width": 230,
         "decor_color": "#dbc2a6",
         "decor_mobile": false,
-        "side_words": "Slower\nKinder\nBrighter",
+        "side_words": "",
         "side_color": "#c9ae94",
         "motion": true,
         "background": "#f9f7f4",
@@ -448,5 +447,14 @@
       }
     }
   },
-  "order": ["hero", "story", "moments", "artisans", "approach", "values", "impact", "closing"]
+  "order": [
+    "hero",
+    "opening",
+    "moments",
+    "roots",
+    "fabrics",
+    "impact",
+    "upcycle",
+    "closing"
+  ]
 }
