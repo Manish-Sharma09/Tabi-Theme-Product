@@ -1,0 +1,459 @@
+{%- comment -%}
+  STORY TEXT - one column of words at a comfortable reading width: a small
+  label, a heading, the text and up to two buttons. The text is either the
+  body font ("Regular") or the heading font, larger ("Lead"), for an
+  opening or a pull quote.
+
+  On the About page this is the opening under the hero and the closing
+  "The journey continues" with its two buttons. Styles in
+  assets/story-sections.css, parts 2 and 5.
+{%- endcomment -%}
+
+{{ 'story-sections.css' | asset_url | stylesheet_tag }}
+{{ 'tabi-motion.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'tabi-motion.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign eyebrow = section.settings.eyebrow | strip
+  assign heading = section.settings.heading | strip
+  assign label_1 = section.settings.button_label_1 | strip
+  assign label_2 = section.settings.button_label_2 | strip
+
+  case section.settings.width
+    when 'narrow'
+      assign measure = '560px'
+    when 'wide'
+      assign measure = '860px'
+    else
+      assign measure = '680px'
+  endcase
+
+  assign justify = 'center'
+  if section.settings.text_align == 'left'
+    assign justify = 'flex-start'
+  elsif section.settings.text_align == 'right'
+    assign justify = 'flex-end'
+  endif
+
+  assign justify_m = 'center'
+  if section.settings.text_align_mobile == 'left'
+    assign justify_m = 'flex-start'
+  elsif section.settings.text_align_mobile == 'right'
+    assign justify_m = 'flex-end'
+  endif
+
+  assign reveal_order = 0
+-%}
+
+{%- style -%}
+  {%- if section.settings.text_style == 'lead' -%}
+    {% render 'story-heading-italic' %}
+  {%- endif %}
+
+  #shopify-section-{{ section.id }} .story-section {
+    --story-bg: {{ section.settings.background }};
+    --story-heading: {{ section.settings.heading_color }};
+    --story-text: {{ section.settings.text_color }};
+    --story-accent: {{ section.settings.accent_color }};
+    --story-button-bg: {{ section.settings.button_color }};
+    --story-button-text: {{ section.settings.button_text_color }};
+    --story-button-weight: {{ section.settings.button_weight }};
+    --story-measure: {{ measure }};
+    --story-align: {{ section.settings.text_align }};
+    --story-align-m: {{ section.settings.text_align_mobile }};
+    --story-justify: {{ justify }};
+    --story-justify-m: {{ justify_m }};
+    --story-heading-size: {{ section.settings.heading_size }};
+    --story-heading-size-m: {{ section.settings.heading_size_mobile }};
+    --story-text-size: {{ section.settings.text_size }};
+    --story-text-size-m: {{ section.settings.text_size_mobile }};
+    --story-lead-size: {{ section.settings.lead_size }};
+    --story-lead-size-m: {{ section.settings.lead_size_mobile }};
+    --story-pt: {{ section.settings.padding_top }};
+    --story-pb: {{ section.settings.padding_bottom }};
+    --story-pt-m: {{ section.settings.padding_top_mobile }};
+    --story-pb-m: {{ section.settings.padding_bottom_mobile }};
+  }
+{%- endstyle -%}
+
+<div
+  class="story-section story-text-section"
+  {% if section.settings.motion %}
+    data-motion
+  {% endif %}
+>
+  <div class="story-section__inner">
+    <div class="story-column">
+      {%- if eyebrow != blank -%}
+        {%- assign reveal_order = reveal_order | plus: 1 -%}
+        <p class="story-eyebrow" data-reveal="rise" style="--reveal-order: {{ reveal_order }};">
+          {{- eyebrow | escape -}}
+        </p>
+      {%- endif -%}
+
+      {%- if heading != blank -%}
+        {%- assign reveal_order = reveal_order | plus: 1 -%}
+        <h2 class="story-heading" data-reveal="rise" style="--reveal-order: {{ reveal_order }};">
+          {{- heading | escape | newline_to_br -}}
+        </h2>
+      {%- endif -%}
+
+      {%- if section.settings.text != blank -%}
+        {%- assign reveal_order = reveal_order | plus: 1 -%}
+        <div
+          class="story-text{% if section.settings.text_style == 'lead' %} story-text--lead{% endif %}"
+          data-reveal="rise"
+          style="--reveal-order: {{ reveal_order }};"
+        >
+          {{- section.settings.text -}}
+        </div>
+      {%- endif -%}
+
+      {%- if label_1 != blank or label_2 != blank -%}
+        {%- assign reveal_order = reveal_order | plus: 1 -%}
+        <p class="story-actions" data-reveal="rise" style="--reveal-order: {{ reveal_order }};">
+          {%- if label_1 != blank -%}
+            <a
+              {% if section.settings.button_link_1 != blank %}
+                href="{{ section.settings.button_link_1 }}"
+              {% else %}
+                role="link" aria-disabled="true"
+              {% endif %}
+              class="story-button"
+            >
+              {{- label_1 | escape -}}
+            </a>
+          {%- endif -%}
+          {%- if label_2 != blank -%}
+            <a
+              {% if section.settings.button_link_2 != blank %}
+                href="{{ section.settings.button_link_2 }}"
+              {% else %}
+                role="link" aria-disabled="true"
+              {% endif %}
+              class="story-button story-button--outline"
+            >
+              {{- label_2 | escape -}}
+            </a>
+          {%- endif -%}
+        </p>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Story: Text",
+  "tag": "section",
+  "class": "story-text-shopify-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Small label above the heading",
+      "info": "Optional. Shown in small capitals."
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The journey continues",
+      "info": "Each new line starts a new line on the page."
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Tabi takes its name from the Japanese word for <em>journey</em>.</p><p>For now, we're glad you're here.</p>"
+    },
+    {
+      "type": "select",
+      "id": "text_style",
+      "label": "Text style",
+      "options": [
+        {
+          "value": "body",
+          "label": "Regular"
+        },
+        {
+          "value": "lead",
+          "label": "Lead (heading font, larger)"
+        }
+      ],
+      "default": "body",
+      "info": "\"Lead\" suits an opening or a quote of a few lines."
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Column width",
+      "options": [
+        {
+          "value": "narrow",
+          "label": "Narrow"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "text_align_mobile",
+      "label": "Text alignment on phones",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "text",
+      "id": "button_label_1",
+      "label": "First button",
+      "info": "Filled. Leave empty for no button."
+    },
+    {
+      "type": "url",
+      "id": "button_link_1",
+      "label": "First button link"
+    },
+    {
+      "type": "text",
+      "id": "button_label_2",
+      "label": "Second button",
+      "info": "Outlined. Leave empty for no button."
+    },
+    {
+      "type": "url",
+      "id": "button_link_2",
+      "label": "Second button link"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button colour",
+      "default": "#253c30"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text on the filled button",
+      "default": "#f9f7f4"
+    },
+    {
+      "type": "select",
+      "id": "button_weight",
+      "label": "Button text weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi-bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "checkbox",
+      "id": "motion",
+      "label": "Animate on scroll",
+      "default": true,
+      "info": "The words rise into place the first time they scroll into view. Off for visitors who ask their device for less motion, and in the theme editor."
+    },
+    {
+      "type": "header",
+      "content": "Colours"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#f9f7f4"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading and lead text",
+      "default": "#253c30"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#3d3b37"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Small label",
+      "default": "#253c30"
+    },
+    {
+      "type": "header",
+      "content": "Sizes"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 28,
+      "max": 72,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size on desktop",
+      "default": 44
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 22,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size on phones",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 14,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "label": "Regular text size on desktop",
+      "default": 17
+    },
+    {
+      "type": "range",
+      "id": "text_size_mobile",
+      "min": 13,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Regular text size on phones",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "lead_size",
+      "min": 18,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Lead text size on desktop",
+      "default": 26
+    },
+    {
+      "type": "range",
+      "id": "lead_size_mobile",
+      "min": 16,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Lead text size on phones",
+      "default": 21
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Space above",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Space below",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Space above on phones",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Space below on phones",
+      "default": 56
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story: Text"
+    }
+  ]
+}
+{% endschema %}

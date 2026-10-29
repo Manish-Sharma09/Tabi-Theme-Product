@@ -1,0 +1,608 @@
+{%- comment -%}
+  STORY PILLARS - an introduction, then a few columns joined by one line:
+  each column opens with a dot and its label, the line running on to the
+  next dot, then a picture, a lead line and the text (one "Column" block
+  each). Drawn after Tabi's "Three Part Impact Model" slide: Product,
+  Process, People. Phones stack the columns, picture above text.
+
+  Styles in assets/story-sections.css, parts 3 and 8. The line draws
+  itself in from the left as it scrolls into view (assets/tabi-motion.*).
+{%- endcomment -%}
+
+{{ 'story-sections.css' | asset_url | stylesheet_tag }}
+{{ 'tabi-motion.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'tabi-motion.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign eyebrow = section.settings.eyebrow | strip
+  assign heading = section.settings.heading | strip
+  assign has_header = false
+  if eyebrow != blank or heading != blank or section.settings.text != blank
+    assign has_header = true
+  endif
+
+  case section.settings.width
+    when 'narrow'
+      assign measure = '560px'
+    when 'wide'
+      assign measure = '860px'
+    else
+      assign measure = '680px'
+  endcase
+
+  assign cols = section.settings.columns
+  assign item_px = 1200 | divided_by: cols
+  assign item_vw = 90 | divided_by: cols
+  assign sizes = '(min-width: 1328px) ' | append: item_px | append: 'px, (min-width: 750px) ' | append: item_vw | append: 'vw, calc(100vw - 48px)'
+-%}
+
+{%- style -%}
+  {% render 'story-heading-italic' %}
+
+  #shopify-section-{{ section.id }} .story-section {
+    --story-bg: {{ section.settings.background }};
+    --story-heading: {{ section.settings.heading_color }};
+    --story-text: {{ section.settings.text_color }};
+    --story-accent: {{ section.settings.accent_color }};
+    --story-measure: {{ measure }};
+    --story-align: {{ section.settings.text_align }};
+    --story-align-m: {{ section.settings.text_align_mobile }};
+    --story-pillar-align: {{ section.settings.column_align }};
+    --story-pillar-align-m: {{ section.settings.column_align_mobile }};
+    --story-cols: {{ cols }};
+    --story-ratio: {{ section.settings.ratio }};
+    --story-radius: {{ section.settings.corner_radius }};
+    --story-radius-m: {{ section.settings.corner_radius_mobile }};
+    --story-heading-size: {{ section.settings.heading_size }};
+    --story-heading-size-m: {{ section.settings.heading_size_mobile }};
+    --story-text-size: {{ section.settings.text_size }};
+    --story-text-size-m: {{ section.settings.text_size_mobile }};
+    --story-lead-size: {{ section.settings.lead_size }};
+    --story-lead-size-m: {{ section.settings.lead_size_mobile }};
+    --story-eyebrow-weight: {{ section.settings.label_weight }};
+    --story-pt: {{ section.settings.padding_top }};
+    --story-pb: {{ section.settings.padding_bottom }};
+    --story-pt-m: {{ section.settings.padding_top_mobile }};
+    --story-pb-m: {{ section.settings.padding_bottom_mobile }};
+  }
+{%- endstyle -%}
+
+<div
+  class="story-section story-pillars"
+  {% if section.settings.motion %}
+    data-motion
+  {% endif %}
+>
+  <div class="story-section__inner">
+    {%- if has_header -%}
+      <div class="story-column story-pillars__header">
+        {%- if eyebrow != blank -%}
+          <p class="story-eyebrow" data-reveal="rise">{{ eyebrow | escape }}</p>
+        {%- endif -%}
+        {%- if heading != blank -%}
+          <h2 class="story-heading" data-reveal="rise" style="--reveal-order: 1;">
+            {{- heading | escape | newline_to_br -}}
+          </h2>
+        {%- endif -%}
+        {%- if section.settings.text != blank -%}
+          <div class="story-text" data-reveal="rise" style="--reveal-order: 2;">
+            {{- section.settings.text -}}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <ul class="story-pillars__list" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign image = block.settings.image
+            assign label = block.settings.label | strip
+            assign lead = block.settings.lead | strip
+            assign row_end = forloop.index | modulo: cols
+          -%}
+          <li
+            class="story-pillar{% if row_end == 0 or forloop.last %} story-pillar--row-end{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if section.settings.show_line or label != blank -%}
+              <p class="story-pillar__mark">
+                {%- if section.settings.show_line -%}
+                  <span class="story-pillar__dot" aria-hidden="true" data-reveal="fade" style="--reveal-order: {{ forloop.index }};"></span>
+                {%- endif -%}
+                {%- if label != blank -%}
+                  <span class="story-eyebrow story-pillar__label" data-reveal="fade" style="--reveal-order: {{ forloop.index }};">
+                    {{- label | escape -}}
+                  </span>
+                {%- endif -%}
+                {%- if section.settings.show_line -%}
+                  <span class="story-pillar__line" aria-hidden="true" data-reveal="unroll" style="--reveal-order: {{ forloop.index }};"></span>
+                {%- endif -%}
+              </p>
+            {%- endif -%}
+
+            {%- if image != blank or section.settings.placeholders -%}
+              <span
+                class="story-media story-pillar__media story-shape-d-{{ section.settings.shape }} story-shape-m-{{ section.settings.shape_mobile }}"
+                data-reveal="rise"
+                style="--reveal-order: {{ forloop.index }};"
+              >
+                {%- if image != blank -%}
+                  {{
+                    image
+                    | image_url: width: 1200
+                    | image_tag: widths: '400, 600, 800, 1000, 1200', sizes: sizes, loading: 'lazy'
+                  }}
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag: 'story-placeholder' }}
+                {%- endif -%}
+              </span>
+            {%- endif -%}
+
+            {%- if lead != blank -%}
+              <p
+                class="story-text story-text--lead story-pillar__lead"
+                data-reveal="rise"
+                style="--reveal-order: {{ forloop.index | plus: 1 }};"
+              >
+                {{- lead | escape | newline_to_br -}}
+              </p>
+            {%- endif -%}
+
+            {%- if block.settings.text != blank -%}
+              <div class="story-text story-pillar__text" data-reveal="rise" style="--reveal-order: {{ forloop.index | plus: 1 }};">
+                {{- block.settings.text -}}
+              </div>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Story: Connected columns",
+  "tag": "section",
+  "class": "story-pillars-section",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Small label above the heading",
+      "info": "Optional. Shown in small capitals."
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "A little more thought behind what we make"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Introduction",
+      "info": "Optional. Shown above the columns."
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Introduction width",
+      "options": [
+        {
+          "value": "narrow",
+          "label": "Narrow"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Introduction alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "text_align_mobile",
+      "label": "Introduction alignment on phones",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Columns"
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "label": "Columns in a row on desktop",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "show_line",
+      "label": "Join the columns with a line and dots",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "label_weight",
+      "label": "Label weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi-bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "select",
+      "id": "column_align",
+      "label": "Column text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "column_align_mobile",
+      "label": "Column text alignment on phones",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Pictures"
+    },
+    {
+      "type": "checkbox",
+      "id": "placeholders",
+      "label": "Show a placeholder where a column has no picture",
+      "default": true,
+      "info": "Untick to leave out the picture space instead."
+    },
+    {
+      "type": "select",
+      "id": "ratio",
+      "label": "Picture shape",
+      "options": [
+        {
+          "value": "4 / 5",
+          "label": "Portrait (4:5)"
+        },
+        {
+          "value": "2 / 3",
+          "label": "Tall portrait (2:3)"
+        },
+        {
+          "value": "1 / 1",
+          "label": "Square"
+        },
+        {
+          "value": "4 / 3",
+          "label": "Landscape (4:3)"
+        }
+      ],
+      "default": "4 / 5"
+    },
+    {
+      "type": "select",
+      "id": "shape",
+      "label": "Corners on desktop",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        }
+      ],
+      "default": "rounded"
+    },
+    {
+      "type": "select",
+      "id": "shape_mobile",
+      "label": "Corners on phones",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        },
+        {
+          "value": "arch",
+          "label": "Arch"
+        }
+      ],
+      "default": "rounded"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Corner roundness on desktop",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "corner_radius_mobile",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Corner roundness on phones",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "checkbox",
+      "id": "motion",
+      "label": "Animate on scroll",
+      "default": true,
+      "info": "The line draws in from the left and each column rises in turn. Off for visitors who ask their device for less motion, and in the theme editor."
+    },
+    {
+      "type": "header",
+      "content": "Colours"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#f3eee3"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading and lead lines",
+      "default": "#253c30"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#3d3b37"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Line, dots and labels",
+      "default": "#253c30"
+    },
+    {
+      "type": "header",
+      "content": "Sizes"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 28,
+      "max": 72,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size on desktop",
+      "default": 44
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 22,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size on phones",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "lead_size",
+      "min": 16,
+      "max": 34,
+      "step": 1,
+      "unit": "px",
+      "label": "Lead line size on desktop",
+      "default": 23
+    },
+    {
+      "type": "range",
+      "id": "lead_size_mobile",
+      "min": 15,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "label": "Lead line size on phones",
+      "default": 21
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 14,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size on desktop",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "text_size_mobile",
+      "min": 13,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size on phones",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Space above",
+      "default": 104
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Space below",
+      "default": 104
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Space above on phones",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Space below on phones",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Column",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Product",
+          "info": "Shown in small capitals beside the dot."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Picture"
+        },
+        {
+          "type": "textarea",
+          "id": "lead",
+          "label": "Lead line",
+          "info": "Optional. The column's first line, set in the heading font."
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story: Connected columns",
+      "blocks": [
+        {
+          "type": "column",
+          "settings": {
+            "label": "Product"
+          }
+        },
+        {
+          "type": "column",
+          "settings": {
+            "label": "Process"
+          }
+        },
+        {
+          "type": "column",
+          "settings": {
+            "label": "People"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

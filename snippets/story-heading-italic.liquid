@@ -1,0 +1,13 @@
+{%- comment -%}
+  The italic of the theme's heading font, for the story sections' italic
+  lines (the hero's line under the title, emphasis in "Lead" text). The
+  layout loads only the upright heading font, and a browser's slanted copy
+  of Cormorant reads as a mistake. Render it inside a section's style tag;
+  nothing is output when the font has no italic.
+{%- endcomment -%}
+{%- liquid
+  assign heading_italic = settings.type_header_font | font_modify: 'style', 'italic'
+  if heading_italic
+    echo heading_italic | font_face: font_display: 'swap'
+  endif
+-%}

@@ -1,0 +1,584 @@
+{%- comment -%}
+  STORY GALLERY - a heading and text over a row of pictures, each with an
+  optional caption and link (one "Picture" block each). Desktop shows them
+  side by side, columns a setting; phones show a swipe row with the next
+  picture peeking in (dots underneath), two columns, or one.
+
+  On the About page: the everyday moments (tea, a shirt, children, a
+  tray), the fabric close-ups, the People strip and the Upcycle strip.
+  Styles in assets/story-sections.css, parts 3 and 7; the swipe row's dots
+  in assets/story-sections.js.
+{%- endcomment -%}
+
+{{ 'story-sections.css' | asset_url | stylesheet_tag }}
+{{ 'tabi-motion.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'tabi-motion.js' | asset_url }}" defer="defer"></script>
+{%- if section.settings.mobile_layout == 'swipe' -%}
+  <script src="{{ 'story-sections.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- liquid
+  assign eyebrow = section.settings.eyebrow | strip
+  assign heading = section.settings.heading | strip
+  assign has_header = false
+  if eyebrow != blank or heading != blank or section.settings.text != blank
+    assign has_header = true
+  endif
+
+  case section.settings.width
+    when 'narrow'
+      assign measure = '560px'
+    when 'wide'
+      assign measure = '860px'
+    else
+      assign measure = '680px'
+  endcase
+
+  assign cols = section.settings.columns
+
+  comment
+    Rendered picture widths for the browser to choose a file size.
+  endcomment
+  assign item_px = 1200 | divided_by: cols
+  assign item_vw = 90 | divided_by: cols
+  case section.settings.mobile_layout
+    when 'swipe'
+      assign phone_vw = section.settings.mobile_in_view
+    when 'grid'
+      assign phone_vw = 45
+    else
+      assign phone_vw = 90
+  endcase
+  assign sizes = '(min-width: 1328px) ' | append: item_px | append: 'px, (min-width: 750px) ' | append: item_vw | append: 'vw, ' | append: phone_vw | append: 'vw'
+
+  assign list_label = heading | default: section.settings.list_label | default: 'Pictures'
+-%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} .story-section {
+    --story-bg: {{ section.settings.background }};
+    --story-heading: {{ section.settings.heading_color }};
+    --story-text: {{ section.settings.text_color }};
+    --story-accent: {{ section.settings.accent_color }};
+    --story-measure: {{ measure }};
+    --story-align: {{ section.settings.text_align }};
+    --story-align-m: {{ section.settings.text_align_mobile }};
+    --story-cols: {{ cols }};
+    --story-gap: {{ section.settings.gap }}px;
+    --story-ratio: {{ section.settings.ratio }};
+    --story-radius: {{ section.settings.corner_radius }};
+    --story-radius-m: {{ section.settings.corner_radius_mobile }};
+    --story-slide: {{ section.settings.mobile_in_view }};
+    --story-heading-size: {{ section.settings.heading_size }};
+    --story-heading-size-m: {{ section.settings.heading_size_mobile }};
+    --story-text-size: {{ section.settings.text_size }};
+    --story-text-size-m: {{ section.settings.text_size_mobile }};
+    --story-pt: {{ section.settings.padding_top }};
+    --story-pb: {{ section.settings.padding_bottom }};
+    --story-pt-m: {{ section.settings.padding_top_mobile }};
+    --story-pb-m: {{ section.settings.padding_bottom_mobile }};
+  }
+{%- endstyle -%}
+
+<div
+  class="story-section story-gallery story-gallery--m-{{ section.settings.mobile_layout }}{% if section.settings.caption_align == 'center' %} story-gallery--captions-centre{% endif %}"
+  {% if section.settings.motion %}
+    data-motion
+  {% endif %}
+>
+  <div class="story-section__inner">
+    {%- if has_header -%}
+      <div class="story-column story-gallery__header">
+        {%- if eyebrow != blank -%}
+          <p class="story-eyebrow" data-reveal="rise">{{ eyebrow | escape }}</p>
+        {%- endif -%}
+        {%- if heading != blank -%}
+          <h2 class="story-heading" data-reveal="rise" style="--reveal-order: 1;">
+            {{- heading | escape | newline_to_br -}}
+          </h2>
+        {%- endif -%}
+        {%- if section.settings.text != blank -%}
+          <div class="story-text" data-reveal="rise" style="--reveal-order: 2;">
+            {{- section.settings.text -}}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      {%- if section.settings.mobile_layout == 'swipe' -%}
+        <story-swipe class="story-gallery__body" data-reveal="rise" style="--reveal-order: 1;">
+      {%- else -%}
+        <div class="story-gallery__body" data-reveal="rise" style="--reveal-order: 1;">
+      {%- endif -%}
+      <ul class="story-gallery__list" role="list" aria-label="{{ list_label | escape }}" data-swipe-track>
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign image = block.settings.image
+            assign caption = block.settings.caption | strip
+          -%}
+          <li class="story-gallery__item" {{ block.shopify_attributes }}>
+            {%- if block.settings.link != blank -%}
+              <a href="{{ block.settings.link }}" class="story-gallery__link">
+            {%- endif -%}
+            <span class="story-media story-shape-d-{{ section.settings.shape }} story-shape-m-{{ section.settings.shape_mobile }}">
+              {%- if image != blank -%}
+                {{
+                  image
+                  | image_url: width: 1200
+                  | image_tag: widths: '300, 400, 500, 600, 800, 1000, 1200', sizes: sizes, loading: 'lazy'
+                }}
+              {%- else -%}
+                {{ 'image' | placeholder_svg_tag: 'story-placeholder' }}
+              {%- endif -%}
+            </span>
+            {%- if caption != blank -%}
+              <span class="story-caption">{{ caption | escape }}</span>
+            {%- endif -%}
+            {%- if block.settings.link != blank -%}
+              </a>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+      {%- if section.settings.mobile_layout == 'swipe' -%}
+        {%- if section.settings.show_dots -%}
+          <div class="story-dots" data-swipe-dots data-label="Picture" data-of="of"></div>
+        {%- endif -%}
+        </story-swipe>
+      {%- else -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Story: Picture row",
+  "tag": "section",
+  "class": "story-gallery-section",
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Small label above the heading",
+      "info": "Optional. Shown in small capitals."
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The things we return to",
+      "info": "Optional. Each new line starts a new line on the page."
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "info": "Optional. Shown above the pictures."
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Text column width",
+      "options": [
+        {
+          "value": "narrow",
+          "label": "Narrow"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "text_align_mobile",
+      "label": "Text alignment on phones",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "text",
+      "id": "list_label",
+      "label": "Name of the row for screen readers",
+      "default": "Pictures",
+      "info": "Used when there is no heading."
+    },
+    {
+      "type": "header",
+      "content": "Pictures"
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "label": "Pictures in a row on desktop",
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "ratio",
+      "label": "Picture shape",
+      "options": [
+        {
+          "value": "4 / 5",
+          "label": "Portrait (4:5)"
+        },
+        {
+          "value": "2 / 3",
+          "label": "Tall portrait (2:3)"
+        },
+        {
+          "value": "1 / 1",
+          "label": "Square"
+        },
+        {
+          "value": "4 / 3",
+          "label": "Landscape (4:3)"
+        }
+      ],
+      "default": "4 / 5",
+      "info": "Every picture is cropped to this shape; set a focal point on each to keep its subject."
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "min": 8,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Space between pictures on desktop",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "shape",
+      "label": "Corners on desktop",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        }
+      ],
+      "default": "rounded"
+    },
+    {
+      "type": "select",
+      "id": "shape_mobile",
+      "label": "Corners on phones",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        },
+        {
+          "value": "arch",
+          "label": "Arch"
+        }
+      ],
+      "default": "rounded"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Corner roundness on desktop",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "corner_radius_mobile",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Corner roundness on phones",
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "caption_align",
+      "label": "Captions",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Phones"
+    },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "Pictures on phones",
+      "options": [
+        {
+          "value": "swipe",
+          "label": "Swipe row"
+        },
+        {
+          "value": "grid",
+          "label": "Two columns"
+        },
+        {
+          "value": "stack",
+          "label": "One column"
+        }
+      ],
+      "default": "swipe"
+    },
+    {
+      "type": "select",
+      "id": "mobile_in_view",
+      "label": "Swipe row: pictures in view",
+      "options": [
+        {
+          "value": "82",
+          "label": "One, with the next peeking in"
+        },
+        {
+          "value": "64",
+          "label": "One and a half"
+        },
+        {
+          "value": "44",
+          "label": "Two, with the next peeking in"
+        }
+      ],
+      "default": "64"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Swipe row: dots under the pictures",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "checkbox",
+      "id": "motion",
+      "label": "Animate on scroll",
+      "default": true,
+      "info": "The words and the row of pictures rise into place the first time they scroll into view. Off for visitors who ask their device for less motion, and in the theme editor."
+    },
+    {
+      "type": "header",
+      "content": "Colours"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#f9f7f4"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading",
+      "default": "#253c30"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text and captions",
+      "default": "#3d3b37"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Small label and dots",
+      "default": "#253c30"
+    },
+    {
+      "type": "header",
+      "content": "Sizes"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 28,
+      "max": 72,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size on desktop",
+      "default": 44
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 22,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size on phones",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 14,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size on desktop",
+      "default": 17
+    },
+    {
+      "type": "range",
+      "id": "text_size_mobile",
+      "min": 13,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size on phones",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Space above",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Space below",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Space above on phones",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Space below on phones",
+      "default": 56
+    }
+  ],
+  "blocks": [
+    {
+      "type": "picture",
+      "name": "Picture",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Picture"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption",
+          "info": "Optional. A few words under the picture."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Optional. The picture and caption link here."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story: Picture row",
+      "blocks": [
+        {
+          "type": "picture"
+        },
+        {
+          "type": "picture"
+        },
+        {
+          "type": "picture"
+        },
+        {
+          "type": "picture"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,388 @@
+{%- comment -%}
+  STORY HERO - the opening of a story page (About, Founder's Note): one
+  picture the full width of the screen with the page title and a line
+  under it, over the picture or under it. Phones can have a picture of
+  their own, and every size, colour and position has a phone setting.
+
+  Built for the About page brief ("Hero: warm daylight, hands and cloth.
+  Title: The Tabi Journey", draft of 24 Oct 2026). Styles in
+  assets/story-sections.css, part 4.
+{%- endcomment -%}
+
+{{ 'story-sections.css' | asset_url | stylesheet_tag }}
+{{ 'tabi-motion.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'tabi-motion.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign image = section.settings.image
+  assign image_mobile = section.settings.image_mobile
+  assign title = section.settings.title | strip
+  assign subtitle = section.settings.subtitle | strip
+
+  comment
+    Position: the title block's row in the frame and its alignment.
+  endcomment
+  assign align = 'end'
+  assign text_align = 'left'
+  case section.settings.position
+    when 'bottom_center'
+      assign text_align = 'center'
+    when 'center'
+      assign align = 'center'
+      assign text_align = 'center'
+  endcase
+
+  assign align_m = 'end'
+  assign text_align_m = 'left'
+  case section.settings.position_mobile
+    when 'bottom_center'
+      assign text_align_m = 'center'
+    when 'center'
+      assign align_m = 'center'
+      assign text_align_m = 'center'
+  endcase
+
+  comment
+    Eager only as the first section of the page, where it is the largest
+    thing on screen.
+  endcomment
+  assign loading = 'lazy'
+  assign priority = 'auto'
+  if section.index == 1
+    assign loading = 'eager'
+    assign priority = 'high'
+  endif
+-%}
+
+{%- style -%}
+  {% render 'story-heading-italic' %}
+
+  #shopify-section-{{ section.id }} .story-hero {
+    --story-bg: {{ section.settings.background }};
+    --story-heading: {{ section.settings.heading_color }};
+    --story-text: {{ section.settings.text_color }};
+    --story-hero-ink: {{ section.settings.ink }};
+    --story-hero-overlay: {{ section.settings.overlay | divided_by: 100.0 }};
+    --story-hero-h: {{ section.settings.height }};
+    --story-hero-h-m: {{ section.settings.height_mobile }};
+    --story-hero-title-size: {{ section.settings.title_size }};
+    --story-hero-title-size-m: {{ section.settings.title_size_mobile }};
+    --story-hero-sub-size: {{ section.settings.subtitle_size }};
+    --story-hero-sub-size-m: {{ section.settings.subtitle_size_mobile }};
+    --story-hero-align: {{ align }};
+    --story-hero-text-align: {{ text_align }};
+    --story-hero-align-m: {{ align_m }};
+    --story-hero-text-align-m: {{ text_align_m }};
+  }
+
+  {%- if image_mobile != blank %}
+    @media screen and (max-width: 749px) {
+      #shopify-section-{{ section.id }} .story-hero__media img {
+        object-position: {{ image_mobile.presentation.focal_point | default: 'center' }} !important;
+      }
+    }
+  {%- endif %}
+{%- endstyle -%}
+
+<div
+  class="story-section story-hero story-hero--{{ section.settings.layout }}{% if section.settings.position == 'center' %} story-hero--centre{% endif %}"
+  {% if section.settings.motion %}
+    data-motion
+  {% endif %}
+>
+  <div class="story-hero__frame">
+    <picture class="story-hero__media">
+      {%- if image != blank -%}
+        {%- if image_mobile != blank -%}
+          <source
+            media="(max-width: 749px)"
+            srcset="
+              {{ image_mobile | image_url: width: 400 }} 400w,
+              {{ image_mobile | image_url: width: 600 }} 600w,
+              {{ image_mobile | image_url: width: 800 }} 800w,
+              {{ image_mobile | image_url: width: 1000 }} 1000w,
+              {{ image_mobile | image_url: width: 1200 }} 1200w
+            "
+            sizes="100vw"
+            width="{{ image_mobile.width }}"
+            height="{{ image_mobile.height }}"
+          >
+        {%- endif -%}
+        {{
+          image
+          | image_url: width: 3200
+          | image_tag:
+            widths: '750, 1100, 1500, 1800, 2200, 2800, 3200',
+            sizes: '100vw',
+            loading: loading,
+            fetchpriority: priority
+        }}
+      {%- elsif image_mobile != blank -%}
+        {{
+          image_mobile
+          | image_url: width: 1200
+          | image_tag: widths: '400, 600, 800, 1000, 1200', sizes: '100vw', loading: loading, fetchpriority: priority
+        }}
+      {%- else -%}
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'story-placeholder' }}
+      {%- endif -%}
+    </picture>
+
+    {%- if section.settings.layout == 'over' -%}
+      <span class="story-hero__shade" aria-hidden="true"></span>
+      {%- if title != blank or subtitle != blank -%}
+        <div class="story-hero__content">
+          <div class="story-hero__copy">
+            {%- if title != blank -%}
+              <h1 class="story-hero__title" data-reveal="rise" style="--reveal-order: 1;">
+                {{- title | escape | newline_to_br -}}
+              </h1>
+            {%- endif -%}
+            {%- if subtitle != blank -%}
+              <p class="story-hero__sub" data-reveal="rise" style="--reveal-order: 2;">
+                {{- subtitle | escape | newline_to_br -}}
+              </p>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+
+  {%- if section.settings.layout == 'under' -%}
+    {%- if title != blank or subtitle != blank -%}
+      <div class="story-hero__content">
+        <div class="story-hero__copy">
+          {%- if title != blank -%}
+            <h1 class="story-hero__title" data-reveal="rise" style="--reveal-order: 1;">
+              {{- title | escape | newline_to_br -}}
+            </h1>
+          {%- endif -%}
+          {%- if subtitle != blank -%}
+            <p class="story-hero__sub" data-reveal="rise" style="--reveal-order: 2;">
+              {{- subtitle | escape | newline_to_br -}}
+            </p>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Story: Hero",
+  "tag": "section",
+  "class": "story-hero-section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Picture",
+      "info": "Fills the width of the screen. Landscape, at least 2400px wide. Set a focal point so the crop keeps the subject."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Picture on phones",
+      "info": "Optional. Portrait works best. Without one, phones show the main picture cropped to fit."
+    },
+    {
+      "type": "header",
+      "content": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Title",
+      "default": "The Tabi Journey",
+      "info": "The page's main heading. Each new line starts a new line on the page."
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Line under the title",
+      "default": "A journey towards slower, more mindful living.",
+      "info": "Set in italics."
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Title",
+      "options": [
+        {
+          "value": "over",
+          "label": "Over the picture"
+        },
+        {
+          "value": "under",
+          "label": "Under the picture"
+        }
+      ],
+      "default": "over"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Title position",
+      "options": [
+        {
+          "value": "bottom_left",
+          "label": "Bottom left"
+        },
+        {
+          "value": "bottom_center",
+          "label": "Bottom centre"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "bottom_left",
+      "info": "Under the picture, \"Centre\" works like \"Bottom centre\"."
+    },
+    {
+      "type": "select",
+      "id": "position_mobile",
+      "label": "Title position on phones",
+      "options": [
+        {
+          "value": "bottom_left",
+          "label": "Bottom left"
+        },
+        {
+          "value": "bottom_center",
+          "label": "Bottom centre"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "bottom_left"
+    },
+    {
+      "type": "header",
+      "content": "Height"
+    },
+    {
+      "type": "range",
+      "id": "height",
+      "min": 40,
+      "max": 100,
+      "step": 2,
+      "unit": "%",
+      "label": "Height on desktop",
+      "default": 78,
+      "info": "Share of the screen height below the header."
+    },
+    {
+      "type": "range",
+      "id": "height_mobile",
+      "min": 40,
+      "max": 100,
+      "step": 2,
+      "unit": "%",
+      "label": "Height on phones",
+      "default": 72
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "checkbox",
+      "id": "motion",
+      "label": "Animate on scroll",
+      "default": true,
+      "info": "The title rises into place as the page opens. Off for visitors who ask their device for less motion, and in the theme editor."
+    },
+    {
+      "type": "header",
+      "content": "Colours and size"
+    },
+    {
+      "type": "color",
+      "id": "ink",
+      "label": "Title over the picture",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "overlay",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "label": "Shade behind the title",
+      "default": 35,
+      "info": "Darkens the picture under the title so it stays readable."
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#f9f7f4",
+      "info": "Behind the title when it is under the picture, and while the picture loads."
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Title under the picture",
+      "default": "#253c30"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Line under the title, under the picture",
+      "default": "#3d3b37"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 40,
+      "max": 110,
+      "step": 2,
+      "unit": "px",
+      "label": "Title size on desktop",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "title_size_mobile",
+      "min": 28,
+      "max": 64,
+      "step": 1,
+      "unit": "px",
+      "label": "Title size on phones",
+      "default": 44
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size",
+      "min": 16,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Line size on desktop",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size_mobile",
+      "min": 14,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Line size on phones",
+      "default": 19
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story: Hero"
+    }
+  ]
+}
+{% endschema %}

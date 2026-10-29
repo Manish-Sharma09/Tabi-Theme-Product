@@ -1,0 +1,846 @@
+/* ==========================================================================
+   story-sections.css
+   The long-form sections that tell Tabi's story, built for the About page
+   (brief "Tabi About and Founder's Note", draft of 24 Oct 2026) and meant
+   to be reused on the Founder's Note and any other story page:
+
+     sections/story-hero.liquid     full-width picture with the page title
+     sections/story-text.liquid     heading, text and up to two buttons
+     sections/story-split.liquid    a picture beside a heading and text
+     sections/story-gallery.liquid  heading and text over a row of pictures;
+                                    a swipe row on phones
+     sections/story-pillars.liquid  an introduction, then three columns
+                                    joined by one line (Product, Process,
+                                    People)
+
+   The brief asks for a warm off-white ground, deep ink text and one muted
+   accent, serif headlines and a clean sans body: the theme's heading font
+   (Cormorant Garamond) and body font (Jost), with Tabi green as the accent.
+   Every colour, size and space below is a section setting, written into the
+   custom properties at the top of each section.
+
+     1. Section frame
+     2. Type: eyebrow, heading, text, lead, buttons, captions
+     3. Pictures: frame, shapes, placeholders
+     4. Hero
+     5. Text
+     6. Split
+     7. Gallery and the phone swipe row
+     8. Pillars
+     9. Reduced motion
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. SECTION FRAME
+   Desktop lengths are plain pixels; headings scale down with the window
+   between 1280px and the phone layout. Phones (under 750px) have spacing
+   and type settings of their own; without them a section uses about two
+   thirds of its desktop spacing.
+   -------------------------------------------------------------------------- */
+
+.story-section {
+  --story-bg: #f9f7f4;
+  --story-heading: #253c30;
+  --story-text: #3d3b37;
+  --story-accent: #253c30;
+  --story-pt: 96;
+  --story-pb: 96;
+  --story-heading-size: 44;
+  --story-heading-size-m: 32;
+  --story-text-size: 17;
+  --story-text-size-m: 16;
+  --story-gutter: clamp(24px, 5vw, 64px);
+  --story-content: 1200px;
+  --story-radius: 16;
+  --story-radius-m: 12;
+  --story-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  position: relative;
+  padding-top: calc(var(--story-pt) * 1px);
+  padding-bottom: calc(var(--story-pb) * 1px);
+  background-color: var(--story-bg);
+  color: var(--story-text);
+}
+
+.story-section__inner {
+  max-width: calc(var(--story-content) + 2 * var(--story-gutter));
+  margin: 0 auto;
+  padding: 0 var(--story-gutter);
+}
+
+@media screen and (max-width: 749px) {
+  .story-section {
+    --story-gutter: 24px;
+
+    padding-top: calc(var(--story-pt-m, calc(var(--story-pt) * 0.6)) * 1px);
+    padding-bottom: calc(var(--story-pb-m, calc(var(--story-pb) * 0.6)) * 1px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. TYPE
+   -------------------------------------------------------------------------- */
+
+/* Small capitals over a heading, and the Product / Process / People labels. */
+.story-eyebrow {
+  margin: 0;
+  color: var(--story-accent);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--story-eyebrow-weight, 400);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.story-heading {
+  margin: 0;
+  color: var(--story-heading);
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-weight: var(--font-heading-weight);
+  font-size: max(30px, min(calc(var(--story-heading-size) * 1px), calc(var(--story-heading-size) * 100vw / 1280)));
+  line-height: 1.14;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.story-text {
+  margin: 0;
+  color: var(--story-text);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--font-body-weight);
+  font-size: calc(var(--story-text-size) * 1px);
+  line-height: 1.75;
+  letter-spacing: 0;
+  text-wrap: pretty;
+}
+
+/* :where() keeps the reset as weak as the spacing rule after it. */
+.story-text :where(p, ul, ol) {
+  margin: 0;
+}
+
+.story-text > * + * {
+  margin-top: 1em;
+}
+
+.story-text a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.story-text strong {
+  font-weight: var(--font-body-weight-bold);
+}
+
+/* "Lead": the text set in the heading font, larger, in the heading colour.
+   The About page opens with it; each pillar starts with one line of it. */
+.story-text--lead {
+  color: var(--story-heading);
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-weight: var(--font-heading-weight);
+  font-size: max(19px, min(calc(var(--story-lead-size, 26) * 1px), calc(var(--story-lead-size, 26) * 100vw / 1280)));
+  line-height: 1.45;
+}
+
+.story-text--lead > * + * {
+  margin-top: 0.7em;
+}
+
+.story-text--lead strong {
+  font-weight: 700;
+}
+
+/* Buttons. Labels are regular weight by default: the client asked for no
+   bold type on Tabi green, where the contrast already carries it. */
+.story-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: var(--story-justify, center);
+  gap: 12px 16px;
+  margin: 0;
+}
+
+.story-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 28px;
+  border: 1px solid var(--story-button-bg, #253c30);
+  border-radius: calc(var(--story-button-radius, 0) * 1px);
+  background-color: var(--story-button-bg, #253c30);
+  color: var(--story-button-text, #f9f7f4);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--story-button-weight, 400);
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background-color 0.3s var(--story-ease),
+    color 0.3s var(--story-ease),
+    border-color 0.3s var(--story-ease);
+}
+
+.story-button--outline {
+  background-color: transparent;
+  color: var(--story-button-bg, #253c30);
+}
+
+@media (hover: hover) {
+  .story-button:hover {
+    border-color: color-mix(in srgb, var(--story-button-bg, #253c30) 82%, #000000);
+    background-color: color-mix(in srgb, var(--story-button-bg, #253c30) 82%, #000000);
+  }
+
+  .story-button--outline:hover {
+    border-color: var(--story-button-bg, #253c30);
+    background-color: var(--story-button-bg, #253c30);
+    color: var(--story-button-text, #f9f7f4);
+  }
+}
+
+.story-button:focus-visible {
+  outline: 1px solid var(--story-button-bg, #253c30);
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
+/* A short line under a picture. */
+.story-caption {
+  display: block;
+  margin-top: 12px;
+  color: color-mix(in srgb, var(--story-text) 82%, var(--story-bg));
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--font-body-weight);
+  font-size: 14px;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+}
+
+@media screen and (max-width: 749px) {
+  .story-heading {
+    font-size: calc(var(--story-heading-size-m) * 1px);
+    line-height: 1.16;
+  }
+
+  .story-text {
+    font-size: calc(var(--story-text-size-m) * 1px);
+    line-height: 1.7;
+  }
+
+  .story-text--lead {
+    font-size: calc(var(--story-lead-size-m, 21) * 1px);
+    line-height: 1.45;
+  }
+
+  .story-eyebrow {
+    font-size: 11px;
+  }
+
+  .story-caption {
+    margin-top: 10px;
+    font-size: 13px;
+  }
+
+  .story-button {
+    flex: 1 1 auto;
+    min-height: 48px;
+    padding: 0 20px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. PICTURES
+   Each picture sits in a frame of a fixed shape (--story-ratio), so a row
+   stays level whatever was uploaded; the focal point set on the picture
+   decides the crop. Corners are a setting for desktop and for phones: the
+   client prefers rounded rectangles to arches on desktop, so arches are a
+   phone-only shape.
+   -------------------------------------------------------------------------- */
+
+.story-media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: var(--story-ratio, 4 / 5);
+  background-color: color-mix(in srgb, var(--story-heading) 7%, var(--story-bg));
+}
+
+.story-media img,
+.story-media .story-placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* No picture chosen yet: Shopify's line drawing, faint, on the warm tint. */
+.story-media .story-placeholder {
+  background-color: transparent;
+  fill: color-mix(in srgb, var(--story-heading) 26%, transparent);
+}
+
+.story-shape-d-rounded,
+.story-shape-m-rounded,
+.story-shape-m-arch {
+  isolation: isolate;
+}
+
+@media screen and (min-width: 750px) {
+  .story-shape-d-rounded {
+    border-radius: calc(var(--story-radius) * 1px);
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .story-shape-m-rounded {
+    border-radius: calc(var(--story-radius-m) * 1px);
+  }
+
+  .story-shape-m-arch {
+    border-radius: 999px 999px 0 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. HERO
+   The picture fills the width at a height set as a share of the screen
+   below the header. The title sits over it, on a soft shade rising from the
+   foot of the picture, or under it on the page colour.
+   -------------------------------------------------------------------------- */
+
+.story-hero {
+  --story-hero-h: 78;
+  --story-hero-h-m: 72;
+  --story-hero-overlay: 0.35;
+  --story-hero-ink: #ffffff;
+  --story-hero-title-size: 72;
+  --story-hero-title-size-m: 44;
+  --story-hero-sub-size: 24;
+  --story-hero-sub-size-m: 19;
+  --story-hero-align: end;
+  --story-hero-text-align: left;
+  --story-hero-align-m: end;
+  --story-hero-text-align-m: left;
+
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.story-hero__frame {
+  position: relative;
+  display: grid;
+  min-height: max(320px, calc(var(--story-hero-h) * 1svh - var(--tabi-header-h, 0px)));
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--story-heading) 7%, var(--story-bg));
+}
+
+.story-hero__media {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.story-hero__media img,
+.story-hero__media .story-placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-hero__media .story-placeholder {
+  fill: color-mix(in srgb, var(--story-heading) 22%, transparent);
+}
+
+.story-hero__shade {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / var(--story-hero-overlay)) 0%,
+    rgb(0 0 0 / calc(var(--story-hero-overlay) * 0.45)) 38%,
+    rgb(0 0 0 / 0) 72%
+  );
+  pointer-events: none;
+}
+
+.story-hero--centre .story-hero__shade {
+  background: rgb(0 0 0 / calc(var(--story-hero-overlay) * 0.7));
+}
+
+.story-hero__content {
+  position: relative;
+  z-index: 1;
+  align-self: var(--story-hero-align);
+  width: 100%;
+  max-width: calc(var(--story-content) + 2 * var(--story-gutter));
+  margin: 0 auto;
+  padding: 64px var(--story-gutter) 72px;
+  text-align: var(--story-hero-text-align);
+}
+
+.story-hero__copy {
+  display: inline-block;
+  max-width: 760px;
+}
+
+.story-hero__title {
+  margin: 0;
+  color: var(--story-hero-ink);
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-weight: var(--font-heading-weight);
+  font-size: max(40px, min(calc(var(--story-hero-title-size) * 1px), calc(var(--story-hero-title-size) * 100vw / 1280)));
+  line-height: 1.04;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.story-hero__sub {
+  margin: 18px 0 0;
+  color: var(--story-hero-ink);
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-style: italic;
+  font-size: max(19px, min(calc(var(--story-hero-sub-size) * 1px), calc(var(--story-hero-sub-size) * 100vw / 1280)));
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+/* Title under the picture: the picture keeps its height, the words sit on
+   the page colour beneath it in the heading colours. */
+.story-hero--under .story-hero__content {
+  padding-top: 56px;
+  padding-bottom: 0;
+}
+
+.story-hero--under .story-hero__title {
+  color: var(--story-heading);
+}
+
+.story-hero--under .story-hero__sub {
+  color: var(--story-text);
+}
+
+@media screen and (max-width: 749px) {
+  .story-hero__frame {
+    min-height: max(300px, calc(var(--story-hero-h-m) * 1svh - var(--tabi-header-h, 0px)));
+  }
+
+  .story-hero__content {
+    align-self: var(--story-hero-align-m);
+    padding: 40px var(--story-gutter) 44px;
+    text-align: var(--story-hero-text-align-m);
+  }
+
+  .story-hero__title {
+    font-size: calc(var(--story-hero-title-size-m) * 1px);
+    line-height: 1.06;
+  }
+
+  .story-hero__sub {
+    margin-top: 12px;
+    font-size: calc(var(--story-hero-sub-size-m) * 1px);
+  }
+
+  .story-hero--under .story-hero__content {
+    padding-top: 32px;
+    padding-bottom: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. TEXT
+   One column of reading width, centred on the page; the text inside it
+   can be left-aligned or centred (its own setting on phones).
+   -------------------------------------------------------------------------- */
+
+.story-column {
+  max-width: var(--story-measure, 680px);
+  margin: 0 auto;
+  text-align: var(--story-align, center);
+}
+
+.story-column > * + * {
+  margin-top: 24px;
+}
+
+.story-column > .story-eyebrow + .story-heading {
+  margin-top: 14px;
+}
+
+.story-column > .story-actions {
+  margin-top: 40px;
+}
+
+@media screen and (max-width: 749px) {
+  .story-column {
+    text-align: var(--story-align-m, var(--story-align, center));
+  }
+
+  .story-column > * + * {
+    margin-top: 18px;
+  }
+
+  .story-column > .story-actions {
+    justify-content: var(--story-justify-m, var(--story-justify, center));
+    margin-top: 32px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. SPLIT
+   Picture and words side by side, the picture's share of the width a
+   setting. Phones stack them, words first or picture first.
+   -------------------------------------------------------------------------- */
+
+.story-split__inner {
+  display: grid;
+  grid-template-columns: minmax(0, calc(var(--story-media-share, 45) * 1%)) minmax(0, 1fr);
+  column-gap: clamp(40px, 7vw, 112px);
+  align-items: center;
+}
+
+.story-split--reverse .story-split__inner {
+  grid-template-columns: minmax(0, 1fr) minmax(0, calc(var(--story-media-share, 45) * 1%));
+}
+
+.story-split--reverse .story-split__media {
+  order: 2;
+}
+
+.story-split__copy {
+  max-width: 560px;
+  text-align: var(--story-align, left);
+}
+
+.story-split--reverse .story-split__copy {
+  justify-self: end;
+}
+
+.story-split__copy > * + * {
+  margin-top: 24px;
+}
+
+.story-split__copy > .story-eyebrow + .story-heading {
+  margin-top: 14px;
+}
+
+.story-split__copy > .story-actions {
+  margin-top: 36px;
+}
+
+@media screen and (max-width: 749px) {
+  .story-split__inner,
+  .story-split--reverse .story-split__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .story-split__media,
+  .story-split--reverse .story-split__media {
+    order: 0;
+    width: 100%;
+  }
+
+  .story-split--text-first .story-split__media {
+    order: 2;
+  }
+
+  .story-split__copy,
+  .story-split--reverse .story-split__copy {
+    max-width: none;
+    justify-self: auto;
+    text-align: var(--story-align-m, left);
+  }
+
+  .story-split__copy > * + * {
+    margin-top: 18px;
+  }
+
+  .story-split__copy > .story-actions {
+    justify-content: var(--story-justify-m, flex-start);
+    margin-top: 28px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. GALLERY AND THE PHONE SWIPE ROW
+   Desktop: the pictures share one row (or more), columns a setting. Phones:
+   a swipe row with the next picture peeking in, two columns, or one.
+   -------------------------------------------------------------------------- */
+
+.story-gallery__header + .story-gallery__body {
+  margin-top: 56px;
+}
+
+.story-gallery__list {
+  display: grid;
+  grid-template-columns: repeat(var(--story-cols, 4), minmax(0, 1fr));
+  gap: 40px var(--story-gap, 24px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-gallery__item {
+  min-width: 0;
+}
+
+.story-gallery__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.story-gallery__link:focus-visible {
+  outline: 1px solid var(--story-accent);
+  outline-offset: 4px;
+  box-shadow: none;
+}
+
+.story-gallery__link .story-media img {
+  transition: transform 0.9s var(--story-ease);
+}
+
+@media (hover: hover) {
+  .story-gallery__link:hover .story-media img {
+    transform: scale(1.03);
+  }
+}
+
+.story-gallery--captions-centre .story-caption {
+  text-align: center;
+}
+
+story-swipe {
+  display: block;
+}
+
+.story-dots {
+  display: none;
+}
+
+@media screen and (max-width: 749px) {
+  .story-gallery__header + .story-gallery__body {
+    margin-top: 32px;
+  }
+
+  .story-gallery__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 12px;
+  }
+
+  .story-gallery--m-stack .story-gallery__list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  /* The swipe row runs to the screen edges and snaps each picture to the
+     side margin, so the next one always shows at the right. */
+  .story-gallery--m-swipe .story-gallery__list {
+    display: flex;
+    gap: 12px;
+    margin: 0 calc(-1 * var(--story-gutter));
+    padding: 0 var(--story-gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 var(--story-gutter);
+    scrollbar-width: none;
+  }
+
+  .story-gallery--m-swipe .story-gallery__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .story-gallery--m-swipe .story-gallery__item {
+    flex: 0 0 calc(var(--story-slide, 64) * 1%);
+    scroll-snap-align: start;
+  }
+
+  .story-gallery--m-swipe .story-gallery__list:focus-visible {
+    outline: 1px solid var(--story-accent);
+    outline-offset: 4px;
+  }
+
+  .story-gallery--m-swipe .story-dots:not(:empty) {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    margin-top: 16px;
+  }
+}
+
+/* One dot per picture, a 24px tap target around a 6px mark. */
+.story-dot {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.story-dot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background-color: var(--story-accent);
+  opacity: 0.25;
+  transition:
+    opacity 0.3s var(--story-ease),
+    transform 0.3s var(--story-ease);
+}
+
+.story-dot[aria-current='true']::before {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.story-dot:focus-visible {
+  outline: 1px solid var(--story-accent);
+  outline-offset: -2px;
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   8. PILLARS
+   An introduction, then three columns. Each column opens with a dot and
+   its label on one line that runs on across the gap to the next dot, so
+   the three read as one connected idea (after Tabi's "Three Part Impact
+   Model" slide). Under the line: picture, a lead line, the text.
+   On phones the columns stack and each line runs to the screen edge.
+   -------------------------------------------------------------------------- */
+
+.story-pillars {
+  --story-pillar-gap: clamp(28px, 3.75vw, 48px);
+}
+
+.story-pillars__header + .story-pillars__list {
+  margin-top: 72px;
+}
+
+.story-pillars__list {
+  display: grid;
+  grid-template-columns: repeat(var(--story-cols, 3), minmax(0, 1fr));
+  column-gap: var(--story-pillar-gap);
+  row-gap: 64px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-pillar {
+  min-width: 0;
+  text-align: var(--story-pillar-align, left);
+}
+
+.story-pillar__mark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.story-pillar__dot {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background-color: var(--story-accent);
+}
+
+.story-pillar__label {
+  flex: none;
+}
+
+.story-pillar__line {
+  flex: 1 1 auto;
+  height: 1px;
+  margin-right: calc(-1 * var(--story-pillar-gap));
+  background-color: var(--story-accent);
+  opacity: 0.4;
+}
+
+/* The last line on a row stops at its column's edge. */
+.story-pillar--row-end .story-pillar__line {
+  margin-right: 0;
+}
+
+.story-pillar__media + * {
+  margin-top: 28px;
+}
+
+.story-pillar__lead + .story-pillar__text {
+  margin-top: 16px;
+}
+
+@media screen and (max-width: 749px) {
+  .story-pillars__header + .story-pillars__list {
+    margin-top: 44px;
+  }
+
+  .story-pillars__list {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 56px;
+  }
+
+  .story-pillar {
+    text-align: var(--story-pillar-align-m, left);
+  }
+
+  .story-pillar__mark {
+    margin-bottom: 20px;
+  }
+
+  .story-pillar .story-pillar__line {
+    margin-right: calc(-1 * var(--story-gutter));
+  }
+
+  .story-pillar__media + * {
+    margin-top: 22px;
+  }
+
+  .story-pillar__lead + .story-pillar__text {
+    margin-top: 12px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   9. REDUCED MOTION
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .story-button,
+  .story-dot::before {
+    transition: none;
+  }
+
+  .story-gallery--m-swipe .story-gallery__list {
+    scroll-behavior: auto;
+  }
+}
