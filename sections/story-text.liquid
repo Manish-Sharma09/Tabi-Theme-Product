@@ -89,7 +89,7 @@
   {% if anchor != blank %}
     id="{{ anchor }}"
   {% endif %}
-  class="story-section story-text-section{% if section.settings.text_font == 'heading' %} story-section--serif{% endif %}"
+  class="story-section story-text-section{% if section.settings.text_font == 'heading' %} story-section--serif{% endif %}{% if section.settings.heading_breaks_mobile == false %} story-section--m-flow{% endif %}"
   {% if section.settings.motion %}
     data-motion
   {% endif %}
@@ -215,6 +215,13 @@
       "label": "Heading",
       "default": "The journey continues",
       "info": "Each new line starts a new line on the page."
+    },
+    {
+      "type": "checkbox",
+      "id": "heading_breaks_mobile",
+      "label": "Keep the heading's line breaks on phones",
+      "default": true,
+      "info": "Untick when a long first line leaves a short word alone on phones; the heading then wraps evenly."
     },
     {
       "type": "richtext",

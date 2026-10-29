@@ -89,6 +89,7 @@
 @media screen and (max-width: 749px) {
   .story-section {
     --story-gutter: 24px;
+    --motion-rise: 12px;
 
     padding-top: calc(var(--story-pt-m, calc(var(--story-pt) * 0.6)) * 1px);
     padding-bottom: calc(var(--story-pb-m, calc(var(--story-pb) * 0.6)) * 1px);
@@ -325,6 +326,12 @@
   .story-heading {
     font-size: calc(var(--story-heading-size-m) * 1px);
     line-height: 1.16;
+  }
+
+  /* "Keep the heading's line breaks on phones" off: the heading wraps
+     evenly instead (the line break still counts as a space). */
+  .story-section--m-flow .story-heading br {
+    display: none;
   }
 
   .story-text {
@@ -872,7 +879,26 @@ story-swipe {
 
   .story-gallery--m-stack .story-gallery__list {
     grid-template-columns: minmax(0, 1fr);
-    gap: 32px;
+    gap: 48px;
+  }
+
+  /* Paragraph captions in one column read at full strength. */
+  .story-gallery--m-stack .story-gallery__item .story-caption {
+    max-width: none;
+    color: color-mix(in srgb, var(--story-text) 94%, var(--story-bg));
+  }
+
+  /* Captions on phones, when set apart from desktop. */
+  .story-gallery--m-captions-left .story-gallery__item .story-label,
+  .story-gallery--m-captions-left .story-gallery__item .story-caption {
+    margin-inline: 0;
+    text-align: left;
+  }
+
+  .story-gallery--m-captions-center .story-gallery__item .story-label,
+  .story-gallery--m-captions-center .story-gallery__item .story-caption {
+    margin-inline: auto;
+    text-align: center;
   }
 
   /* The swipe row runs to the screen edges and snaps each picture to the
@@ -1138,26 +1164,53 @@ story-swipe {
     margin-top: 32px;
   }
 
+  /* One under another: a compact list, the icon at the left of its title
+     and line, a fine rule between the rows. */
   .story-highlights--m-stack {
     grid-template-columns: minmax(0, 1fr);
-    row-gap: 24px;
+    max-width: 420px;
   }
 
   .story-highlights--m-stack .story-highlight {
-    padding: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 18px;
+    align-items: center;
+    padding: 16px 0;
+    text-align: left;
   }
 
-  .story-highlights--m-stack.story-highlights--lines .story-highlight + .story-highlight {
-    padding-top: 24px;
+  .story-highlights--m-stack .story-highlight__icon {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+    width: calc(var(--story-icon-size, 30) * 0.75px);
+    height: calc(var(--story-icon-size, 30) * 0.75px);
+    margin: 0;
+  }
+
+  .story-highlights--m-stack .story-label,
+  .story-highlights--m-stack .story-highlight__text {
+    grid-column: 2;
+  }
+
+  .story-highlights--m-stack .story-label {
+    align-self: end;
+  }
+
+  .story-highlights--m-stack .story-highlight__text {
+    align-self: start;
+    max-width: none;
+    margin-top: 4px;
+    text-wrap: pretty;
   }
 
   .story-highlights--m-stack.story-highlights--lines .story-highlight + .story-highlight::before {
     top: 0;
+    right: 0;
     bottom: auto;
-    left: 50%;
-    width: 40px;
+    left: 0;
+    width: auto;
     height: 1px;
-    margin-left: -20px;
   }
 
   .story-highlights--m-row .story-highlight {

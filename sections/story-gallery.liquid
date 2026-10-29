@@ -97,7 +97,7 @@
   {% if anchor != blank %}
     id="{{ anchor }}"
   {% endif %}
-  class="story-section story-gallery story-gallery--m-{{ section.settings.mobile_layout }}{% if section.settings.row_width == 'wide' %} story-gallery--wide{% endif %}{% if section.settings.caption_align == 'center' %} story-gallery--captions-centre{% endif %}{% if section.settings.text_font == 'heading' %} story-section--serif{% endif %}"
+  class="story-section story-gallery story-gallery--m-{{ section.settings.mobile_layout }}{% if section.settings.row_width == 'wide' %} story-gallery--wide{% endif %}{% if section.settings.caption_align == 'center' %} story-gallery--captions-centre{% endif %}{% if section.settings.caption_align_mobile != 'desktop' %} story-gallery--m-captions-{{ section.settings.caption_align_mobile }}{% endif %}{% if section.settings.text_font == 'heading' %} story-section--serif{% endif %}"
   {% if section.settings.motion %}
     data-motion
   {% endif %}
@@ -125,7 +125,7 @@
       {%- if section.settings.mobile_layout == 'swipe' -%}
         <story-swipe class="story-gallery__body" data-reveal="rise" style="--reveal-order: 1;">
       {%- else -%}
-        <div class="story-gallery__body" data-reveal="rise" style="--reveal-order: 1;">
+        <div class="story-gallery__body">
       {%- endif -%}
       <ul class="story-gallery__list" role="list" aria-label="{{ list_label | escape }}" data-swipe-track>
         {%- for block in section.blocks -%}
@@ -134,7 +134,13 @@
             assign label = block.settings.label | strip
             assign caption = block.settings.caption | strip
           -%}
-          <li class="story-gallery__item" {{ block.shopify_attributes }}>
+          <li
+            class="story-gallery__item"
+            {% if section.settings.mobile_layout != 'swipe' %}
+              data-reveal="rise" style="--reveal-order: {{ forloop.index0 | modulo: section.settings.columns | plus: 1 }};"
+            {% endif %}
+            {{ block.shopify_attributes }}
+          >
             {%- if block.settings.link != blank -%}
               <a href="{{ block.settings.link }}" class="story-gallery__link">
             {%- endif -%}
@@ -446,6 +452,26 @@
         }
       ],
       "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "caption_align_mobile",
+      "label": "Captions on phones",
+      "options": [
+        {
+          "value": "desktop",
+          "label": "As on desktop"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "desktop"
     },
     {
       "type": "select",

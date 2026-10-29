@@ -70,7 +70,7 @@
         "text_font": "heading",
         "width": "medium",
         "text_align": "center",
-        "text_align_mobile": "center",
+        "text_align_mobile": "left",
         "show_rule": true,
         "highlight_lines": true,
         "highlights_mobile": "stack",
@@ -95,7 +95,8 @@
         "padding_top_mobile": 32,
         "padding_bottom_mobile": 32,
         "lead_size": 26,
-        "lead_size_mobile": 21
+        "lead_size_mobile": 21,
+        "heading_breaks_mobile": false
       }
     },
     "moments": {
@@ -167,7 +168,7 @@
         "text_font": "heading",
         "width": "medium",
         "text_align": "center",
-        "text_align_mobile": "center",
+        "text_align_mobile": "left",
         "header_gap": 40,
         "heading_color": "#253c30",
         "text_color": "#3d3b37",
@@ -177,7 +178,8 @@
         "text_size_mobile": 18,
         "footer_text": "<p>This is the life we design for. It is ordinary, sometimes messy, often beautiful. We want the things we make to belong naturally to it.</p>",
         "caption_size": 18,
-        "caption_size_mobile": 17
+        "caption_size_mobile": 17,
+        "caption_align_mobile": "left"
       }
     },
     "roots": {
@@ -260,7 +262,7 @@
         "text_font": "heading",
         "width": "medium",
         "text_align": "center",
-        "text_align_mobile": "center",
+        "text_align_mobile": "left",
         "list_label": "Our approach",
         "row_width": "content",
         "columns": 3,
@@ -291,7 +293,8 @@
         "padding_bottom": 56,
         "padding_top_mobile": 32,
         "padding_bottom_mobile": 32,
-        "footer_text": "<p>Some of our pieces are quiet and understated. Others have plenty of personality. What matters is that they're enjoyable to use, comfortable to live with, and interesting enough to keep coming back to.</p>"
+        "footer_text": "<p>Some of our pieces are quiet and understated. Others have plenty of personality. What matters is that they're enjoyable to use, comfortable to live with, and interesting enough to keep coming back to.</p>",
+        "caption_align_mobile": "left"
       }
     },
     "impact": {
@@ -334,7 +337,7 @@
         "text_font": "heading",
         "width": "wide",
         "text_align": "center",
-        "text_align_mobile": "center",
+        "text_align_mobile": "left",
         "list_label": "Product, Process and People",
         "row_width": "content",
         "columns": 3,
@@ -365,7 +368,8 @@
         "padding_bottom": 64,
         "padding_top_mobile": 32,
         "padding_bottom_mobile": 32,
-        "anchor": "impact"
+        "anchor": "impact",
+        "caption_align_mobile": "left"
       }
     },
     "upcycle": {
@@ -402,7 +406,7 @@
         "text_font": "heading",
         "width": "wide",
         "text_align": "center",
-        "text_align_mobile": "center",
+        "text_align_mobile": "left",
         "list_label": "Upcycle by Tabi",
         "row_width": "content",
         "columns": 3,
@@ -433,7 +437,8 @@
         "padding_bottom": 56,
         "padding_top_mobile": 32,
         "padding_bottom_mobile": 32,
-        "footer_text": "<p>Some become patchwork and smaller textile pieces. Others are repurposed as filling for mattresses that find their way to families in our wider community. A piece of fabric may have finished one journey, but that doesn't always mean it has nothing left to give. It's a small but meaningful part of how we continue learning to make more responsibly.</p>"
+        "footer_text": "<p>Some become patchwork and smaller textile pieces. Others are repurposed as filling for mattresses that find their way to families in our wider community. A piece of fabric may have finished one journey, but that doesn't always mean it has nothing left to give. It's a small but meaningful part of how we continue learning to make more responsibly.</p>",
+        "caption_align_mobile": "left"
       }
     },
     "closing": {
@@ -446,7 +451,7 @@
         "text_font": "heading",
         "width": "medium",
         "text_align": "center",
-        "text_align_mobile": "center",
+        "text_align_mobile": "left",
         "show_rule": false,
         "button_label_1": "Explore Our Collections",
         "button_link_1": "/collections/all",
