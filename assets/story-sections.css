@@ -13,11 +13,17 @@
                                     joined by one line (Product, Process,
                                     People)
 
+   Snippets: story-icon (the highlights' line icons) and story-decor (the
+   leaf sprig at a section's side).
+
    The brief asks for a warm off-white ground, deep ink text and one muted
    accent, serif headlines and a clean sans body: the theme's heading font
    (Cormorant Garamond) and body font (Jost), with Tabi green as the accent.
-   Every colour, size and space below is a section setting, written into the
-   custom properties at the top of each section.
+   The client's About mockup (29 Oct 2026) sets the running text in the
+   serif too, so each section can choose its text font, and adds a
+   terracotta for icons and short lines (--story-mark). Every colour, size
+   and space below is a section setting, written into the custom properties
+   at the top of each section.
 
      1. Section frame
      2. Type: eyebrow, heading, text, lead, buttons, captions
@@ -27,7 +33,9 @@
      6. Split
      7. Gallery and the phone swipe row
      8. Pillars
-     9. Reduced motion
+     9. Highlights: icon, title and a line, side by side
+    10. Decoration: the leaf sprig and the words at the side
+    11. Reduced motion
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -43,6 +51,7 @@
   --story-heading: #253c30;
   --story-text: #3d3b37;
   --story-accent: #253c30;
+  --story-mark: #c46a50;
   --story-pt: 96;
   --story-pb: 96;
   --story-heading-size: 44;
@@ -60,12 +69,26 @@
   padding-bottom: calc(var(--story-pb) * 1px);
   background-color: var(--story-bg);
   color: var(--story-text);
+  scroll-margin-top: var(--tabi-header-h, 0px);
 }
 
+/* Over the leaf sprig, which sits in the section's own layer. */
 .story-section__inner {
+  position: relative;
+  z-index: 1;
   max-width: calc(var(--story-content) + 2 * var(--story-gutter));
   margin: 0 auto;
   padding: 0 var(--story-gutter);
+}
+
+/* "Heading font" for the text: the serif the mockup sets everything in.
+   Cormorant is small on its body, so these sections' serif text sizes
+   run about four pixels larger than their sans ones. */
+.story-section--serif {
+  --story-copy-family: var(--font-heading-family);
+  --story-copy-style: var(--font-heading-style);
+  --story-copy-weight: var(--font-heading-weight);
+  --story-copy-lh: 1.5;
 }
 
 @media screen and (max-width: 749px) {
@@ -87,10 +110,24 @@
   color: var(--story-accent);
   font-family: var(--font-body-family);
   font-style: var(--font-body-style);
-  font-weight: var(--story-eyebrow-weight, 400);
+  font-weight: var(--story-eyebrow-weight, 500);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+/* The bold small capitals that title a picture or a highlight. */
+.story-label {
+  display: block;
+  margin: 0;
+  color: var(--story-heading);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--story-label-weight, 600);
   font-size: 12px;
   line-height: 1.4;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
 
@@ -109,11 +146,11 @@
 .story-text {
   margin: 0;
   color: var(--story-text);
-  font-family: var(--font-body-family);
-  font-style: var(--font-body-style);
-  font-weight: var(--font-body-weight);
+  font-family: var(--story-copy-family, var(--font-body-family));
+  font-style: var(--story-copy-style, var(--font-body-style));
+  font-weight: var(--story-copy-weight, var(--font-body-weight));
   font-size: calc(var(--story-text-size) * 1px);
-  line-height: 1.75;
+  line-height: var(--story-copy-lh, 1.75);
   letter-spacing: 0;
   text-wrap: pretty;
 }
@@ -172,7 +209,7 @@
   align-items: center;
   justify-content: center;
   min-height: 48px;
-  padding: 0 28px;
+  padding: 0 calc(var(--story-button-px, 28) * 1px);
   border: 1px solid var(--story-button-bg, #253c30);
   border-radius: calc(var(--story-button-radius, 0) * 1px);
   background-color: var(--story-button-bg, #253c30);
@@ -180,9 +217,9 @@
   font-family: var(--font-body-family);
   font-style: var(--font-body-style);
   font-weight: var(--story-button-weight, 400);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.2;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   text-align: center;
   text-transform: uppercase;
   text-decoration: none;
@@ -192,9 +229,68 @@
     border-color 0.3s var(--story-ease);
 }
 
+/* The outline is a softer tint of the button colour, as in the mockup. */
 .story-button--outline {
+  border-color: color-mix(in srgb, var(--story-button-bg, #253c30) 50%, transparent);
   background-color: transparent;
   color: var(--story-button-bg, #253c30);
+}
+
+/* A text link with an arrow, over a fine line ("Meet our artisans"). */
+.story-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 0 9px;
+  border-bottom: 1px solid color-mix(in srgb, var(--story-heading) 28%, transparent);
+  color: var(--story-heading);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--story-label-weight, 600);
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color 0.3s var(--story-ease);
+}
+
+.story-link svg {
+  flex: none;
+  width: 16px;
+  height: 10px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  transition: transform 0.3s var(--story-ease);
+}
+
+@media (hover: hover) {
+  .story-link:hover {
+    border-color: currentColor;
+  }
+
+  .story-link:hover svg {
+    transform: translateX(4px);
+  }
+}
+
+.story-link:focus-visible {
+  outline: 1px solid var(--story-heading);
+  outline-offset: 4px;
+  box-shadow: none;
+}
+
+/* A short terracotta line under a block of text. */
+.story-rule-row {
+  line-height: 0;
+}
+
+.story-rule {
+  display: inline-block;
+  width: 48px;
+  height: 2px;
+  background-color: var(--story-mark);
 }
 
 @media (hover: hover) {
@@ -221,12 +317,13 @@
   display: block;
   margin-top: 12px;
   color: color-mix(in srgb, var(--story-text) 82%, var(--story-bg));
-  font-family: var(--font-body-family);
-  font-style: var(--font-body-style);
-  font-weight: var(--font-body-weight);
-  font-size: 14px;
+  font-family: var(--story-copy-family, var(--font-body-family));
+  font-style: var(--story-copy-style, var(--font-body-style));
+  font-weight: var(--story-copy-weight, var(--font-body-weight));
+  font-size: calc(var(--story-caption-size, 14) * 1px);
   line-height: 1.45;
   letter-spacing: 0.01em;
+  text-wrap: pretty;
 }
 
 @media screen and (max-width: 749px) {
@@ -237,7 +334,7 @@
 
   .story-text {
     font-size: calc(var(--story-text-size-m) * 1px);
-    line-height: 1.7;
+    line-height: var(--story-copy-lh, 1.7);
   }
 
   .story-text--lead {
@@ -246,12 +343,17 @@
   }
 
   .story-eyebrow {
+    letter-spacing: 0.24em;
+  }
+
+  .story-label {
     font-size: 11px;
+    letter-spacing: 0.2em;
   }
 
   .story-caption {
     margin-top: 10px;
-    font-size: 13px;
+    font-size: calc(var(--story-caption-size-m, 13) * 1px);
   }
 
   .story-button {
@@ -318,7 +420,9 @@
    4. HERO
    The picture fills the width at a height set as a share of the screen
    below the header. The title sits over it, on a soft shade rising from the
-   foot of the picture, or under it on the page colour.
+   foot of the picture (or from the left, beside a title in the middle on
+   the left), or under it on the page colour. A small label can sit above
+   the title and a short line under the words.
    -------------------------------------------------------------------------- */
 
 .story-hero {
@@ -378,8 +482,34 @@
   pointer-events: none;
 }
 
-.story-hero--centre .story-hero__shade {
-  background: rgb(0 0 0 / calc(var(--story-hero-overlay) * 0.7));
+@media screen and (min-width: 750px) {
+  .story-hero--d-center .story-hero__shade {
+    background: rgb(0 0 0 / calc(var(--story-hero-overlay) * 0.7));
+  }
+
+  .story-hero--d-middle_left .story-hero__shade {
+    background: linear-gradient(
+      to right,
+      rgb(0 0 0 / var(--story-hero-overlay)) 0%,
+      rgb(0 0 0 / calc(var(--story-hero-overlay) * 0.5)) 36%,
+      rgb(0 0 0 / 0) 66%
+    );
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .story-hero--m-center .story-hero__shade {
+    background: rgb(0 0 0 / calc(var(--story-hero-overlay) * 0.7));
+  }
+
+  .story-hero--m-middle_left .story-hero__shade {
+    background: linear-gradient(
+      to right,
+      rgb(0 0 0 / var(--story-hero-overlay)) 0%,
+      rgb(0 0 0 / calc(var(--story-hero-overlay) * 0.55)) 50%,
+      rgb(0 0 0 / 0.1) 100%
+    );
+  }
 }
 
 .story-hero__content {
@@ -398,6 +528,18 @@
   max-width: 760px;
 }
 
+.story-hero__eyebrow {
+  margin: 0 0 18px;
+  color: var(--story-hero-ink);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--story-hero-eyebrow-weight, 500);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
 .story-hero__title {
   margin: 0;
   color: var(--story-hero-ink);
@@ -411,14 +553,32 @@
 }
 
 .story-hero__sub {
+  max-width: 22em;
   margin: 18px 0 0;
   color: var(--story-hero-ink);
   font-family: var(--font-heading-family);
   font-weight: var(--font-heading-weight);
   font-style: italic;
-  font-size: max(19px, min(calc(var(--story-hero-sub-size) * 1px), calc(var(--story-hero-sub-size) * 100vw / 1280)));
+  font-size: max(17px, min(calc(var(--story-hero-sub-size) * 1px), calc(var(--story-hero-sub-size) * 100vw / 1280)));
   line-height: 1.35;
   text-wrap: balance;
+}
+
+.story-hero--sub-upright .story-hero__sub {
+  font-style: var(--font-heading-style);
+}
+
+.story-hero__copy .story-rule-row {
+  margin-top: 32px;
+}
+
+.story-hero__copy .story-rule {
+  background-color: var(--story-hero-rule, var(--story-mark));
+}
+
+/* A centred title keeps its line centred under it. */
+.story-hero__sub {
+  margin-inline: var(--story-hero-mx, 0);
 }
 
 /* Title under the picture: the picture keeps its height, the words sit on
@@ -432,7 +592,8 @@
   color: var(--story-heading);
 }
 
-.story-hero--under .story-hero__sub {
+.story-hero--under .story-hero__sub,
+.story-hero--under .story-hero__eyebrow {
   color: var(--story-text);
 }
 
@@ -454,7 +615,18 @@
 
   .story-hero__sub {
     margin-top: 12px;
+    margin-inline: var(--story-hero-mx-m, 0);
     font-size: calc(var(--story-hero-sub-size-m) * 1px);
+  }
+
+  .story-hero__eyebrow {
+    margin-bottom: 12px;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+  }
+
+  .story-hero__copy .story-rule-row {
+    margin-top: 22px;
   }
 
   .story-hero--under .story-hero__content {
@@ -487,6 +659,10 @@
   margin-top: 40px;
 }
 
+.story-column > .story-rule-row {
+  margin-top: 28px;
+}
+
 @media screen and (max-width: 749px) {
   .story-column {
     text-align: var(--story-align-m, var(--story-align, center));
@@ -500,6 +676,10 @@
     justify-content: var(--story-justify-m, var(--story-justify, center));
     margin-top: 32px;
   }
+
+  .story-column > .story-rule-row {
+    margin-top: 22px;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -511,7 +691,7 @@
 .story-split__inner {
   display: grid;
   grid-template-columns: minmax(0, calc(var(--story-media-share, 45) * 1%)) minmax(0, 1fr);
-  column-gap: clamp(40px, 7vw, 112px);
+  column-gap: clamp(32px, calc(var(--story-split-gap, 96) * 100vw / 1440), calc(var(--story-split-gap, 96) * 1px));
   align-items: center;
 }
 
@@ -542,6 +722,10 @@
 
 .story-split__copy > .story-actions {
   margin-top: 36px;
+}
+
+.story-split__copy > .story-actions--link {
+  margin-top: 32px;
 }
 
 @media screen and (max-width: 749px) {
@@ -581,12 +765,46 @@
 
 /* --------------------------------------------------------------------------
    7. GALLERY AND THE PHONE SWIPE ROW
-   Desktop: the pictures share one row (or more), columns a setting. Phones:
-   a swipe row with the next picture peeking in, two columns, or one.
+   Desktop: the pictures share one row (or more), columns a setting, within
+   the content width or nearly the full window ("wide"). Each picture can
+   carry a small bold title and a line of text. Phones: a swipe row with
+   the next picture peeking in, two columns, or one.
    -------------------------------------------------------------------------- */
 
 .story-gallery__header + .story-gallery__body {
-  margin-top: 56px;
+  margin-top: calc(var(--story-header-gap, 56) * 1px);
+}
+
+@media screen and (min-width: 750px) {
+  .story-gallery--wide .story-section__inner {
+    max-width: none;
+    padding: 0 clamp(24px, 3.4vw, 56px);
+  }
+}
+
+.story-gallery__item > .story-label,
+.story-gallery__link > .story-label {
+  margin-top: 22px;
+}
+
+.story-gallery__item .story-label + .story-caption {
+  margin-top: 8px;
+}
+
+.story-gallery--captions-centre .story-label {
+  text-align: center;
+}
+
+/* Captions keep a short measure, as in the mockup: a paragraph under a
+   picture reads in lines of a few words, a centred one in two even lines. */
+.story-gallery__item .story-caption {
+  max-width: 20.5em;
+}
+
+.story-gallery--captions-centre .story-gallery__item .story-caption {
+  max-width: 16em;
+  margin-inline: auto;
+  text-wrap: balance;
 }
 
 .story-gallery__list {
@@ -639,6 +857,15 @@ story-swipe {
 @media screen and (max-width: 749px) {
   .story-gallery__header + .story-gallery__body {
     margin-top: 32px;
+  }
+
+  .story-gallery__item > .story-label,
+  .story-gallery__link > .story-label {
+    margin-top: 16px;
+  }
+
+  .story-gallery__item .story-label + .story-caption {
+    margin-top: 6px;
   }
 
   .story-gallery__list {
@@ -831,11 +1058,258 @@ story-swipe {
 }
 
 /* --------------------------------------------------------------------------
-   9. REDUCED MOTION
+   9. HIGHLIGHTS
+   Up to four short points under a Text section's words, side by side with
+   a fine line between them: an icon in the terracotta, a bold title, a
+   line of text. Phones stack them (a short line between) or keep a row.
+   -------------------------------------------------------------------------- */
+
+.story-highlights {
+  display: grid;
+  grid-template-columns: repeat(var(--story-hl-cols, 3), minmax(0, 1fr));
+  max-width: var(--story-content);
+  margin: 40px auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-highlight {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  padding: 4px 24px;
+  text-align: center;
+}
+
+.story-highlights--lines .story-highlight + .story-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background-color: color-mix(in srgb, var(--story-text) 16%, transparent);
+}
+
+.story-highlight__icon {
+  display: block;
+  width: calc(var(--story-icon-size, 30) * 1px);
+  height: calc(var(--story-icon-size, 30) * 1px);
+  margin-bottom: 18px;
+  color: var(--story-mark);
+}
+
+.story-highlight__icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* One stroke weight whatever the icon size. */
+.story-highlight__icon svg * {
+  vector-effect: non-scaling-stroke;
+}
+
+.story-highlight__icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.story-highlight__text {
+  max-width: 15em;
+  margin: 8px 0 0;
+  color: color-mix(in srgb, var(--story-text) 88%, var(--story-bg));
+  font-family: var(--story-copy-family, var(--font-body-family));
+  font-style: var(--story-copy-style, var(--font-body-style));
+  font-weight: var(--story-copy-weight, var(--font-body-weight));
+  font-size: calc(var(--story-hl-size, 15) * 1px);
+  line-height: 1.45;
+  text-wrap: balance;
+}
+
+@media screen and (max-width: 749px) {
+  .story-highlights {
+    margin-top: 32px;
+  }
+
+  .story-highlights--m-stack {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 24px;
+  }
+
+  .story-highlights--m-stack .story-highlight {
+    padding: 0;
+  }
+
+  .story-highlights--m-stack.story-highlights--lines .story-highlight + .story-highlight {
+    padding-top: 24px;
+  }
+
+  .story-highlights--m-stack.story-highlights--lines .story-highlight + .story-highlight::before {
+    top: 0;
+    bottom: auto;
+    left: 50%;
+    width: 40px;
+    height: 1px;
+    margin-left: -20px;
+  }
+
+  .story-highlights--m-row .story-highlight {
+    padding: 0 8px;
+  }
+
+  .story-highlights--m-row .story-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+  }
+
+  .story-highlight__icon {
+    width: calc(var(--story-icon-size, 30) * 0.85px);
+    height: calc(var(--story-icon-size, 30) * 0.85px);
+    margin-bottom: 12px;
+  }
+
+  .story-highlight__text {
+    font-size: calc(var(--story-hl-size-m, 14) * 1px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   10. DECORATION
+   The leaf sprig (snippets/story-decor.liquid): a fine line drawing, or the
+   merchant's own picture, at the left or right edge of a section (or both,
+   mirrored), behind the words. Its width is a setting, scaled down with the
+   window below 1440px; phones show it only when asked. The words at the
+   side ("Slower / Kinder / Brighter") sit at the right of the content,
+   level with its foot, on wide screens only.
+   -------------------------------------------------------------------------- */
+
+.story-section--decor {
+  overflow: clip;
+}
+
+.story-decor {
+  position: absolute;
+  z-index: 0;
+  display: block;
+  width: min(calc(var(--story-decor-w, 240) * 1px), calc(var(--story-decor-w, 240) * 100vw / 1440));
+  color: var(--story-decor-color, #d9bfa3);
+  line-height: 0;
+  pointer-events: none;
+}
+
+.story-decor svg,
+.story-decor img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.story-decor svg {
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.story-decor svg path {
+  vector-effect: non-scaling-stroke;
+}
+
+.story-decor--left {
+  left: 0;
+}
+
+.story-decor--right {
+  right: 0;
+  transform: scaleX(-1);
+}
+
+.story-decor--top {
+  top: 16px;
+}
+
+.story-decor--middle {
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.story-decor--bottom {
+  bottom: 0;
+}
+
+.story-aside {
+  display: none;
+}
+
+@media screen and (min-width: 1100px) {
+  .story-aside {
+    position: absolute;
+    right: max(var(--story-gutter), calc((100% - var(--story-content)) / 2));
+    bottom: calc(var(--story-pb) * 1px);
+    z-index: 1;
+    display: block;
+    width: 150px;
+    margin: 0;
+    color: var(--story-aside-color, #c9ae94);
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: 500;
+    font-size: 11px;
+    line-height: 2.2;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  .story-aside::after {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 2px;
+    margin-top: 12px;
+    background-color: currentColor;
+    opacity: 0.6;
+  }
+}
+
+/* Beside a split the words run close to the edge: tablets leave the sprig
+   out rather than set it behind the text. */
+@media screen and (min-width: 750px) and (max-width: 1199px) {
+  .story-split .story-decor {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .story-decor {
+    display: none;
+  }
+
+  .story-decor.story-decor--m {
+    display: block;
+    width: calc(var(--story-decor-w-m, 120) * 1px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   11. REDUCED MOTION
    -------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   .story-button,
+  .story-link,
+  .story-link svg,
   .story-dot::before {
     transition: none;
   }

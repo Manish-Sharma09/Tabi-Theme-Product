@@ -1,8 +1,9 @@
 {%- comment -%}
   STORY HERO - the opening of a story page (About, Founder's Note): one
-  picture the full width of the screen with the page title and a line
-  under it, over the picture or under it. Phones can have a picture of
-  their own, and every size, colour and position has a phone setting.
+  picture the full width of the screen with the page title, a small label
+  above it and a line and a short rule under it, over the picture or under
+  it. Phones can have a picture of their own, and every size, colour and
+  position has a phone setting.
 
   Built for the About page brief ("Hero: warm daylight, hands and cloth.
   Title: The Tabi Journey", draft of 24 Oct 2026). Styles in
@@ -16,30 +17,46 @@
 {%- liquid
   assign image = section.settings.image
   assign image_mobile = section.settings.image_mobile
+  assign eyebrow = section.settings.eyebrow | strip
   assign title = section.settings.title | strip
   assign subtitle = section.settings.subtitle | strip
+  assign has_copy = false
+  if eyebrow != blank or title != blank or subtitle != blank
+    assign has_copy = true
+  endif
 
   comment
-    Position: the title block's row in the frame and its alignment.
+    Position: the title block's row in the frame and its alignment; a
+    centred title also centres the line under it.
   endcomment
   assign align = 'end'
   assign text_align = 'left'
+  assign mx = '0'
   case section.settings.position
     when 'bottom_center'
       assign text_align = 'center'
+      assign mx = 'auto'
     when 'center'
       assign align = 'center'
       assign text_align = 'center'
+      assign mx = 'auto'
+    when 'middle_left'
+      assign align = 'center'
   endcase
 
   assign align_m = 'end'
   assign text_align_m = 'left'
+  assign mx_m = '0'
   case section.settings.position_mobile
     when 'bottom_center'
       assign text_align_m = 'center'
+      assign mx_m = 'auto'
     when 'center'
       assign align_m = 'center'
       assign text_align_m = 'center'
+      assign mx_m = 'auto'
+    when 'middle_left'
+      assign align_m = 'center'
   endcase
 
   comment
@@ -73,6 +90,10 @@
     --story-hero-text-align: {{ text_align }};
     --story-hero-align-m: {{ align_m }};
     --story-hero-text-align-m: {{ text_align_m }};
+    --story-hero-mx: {{ mx }};
+    --story-hero-mx-m: {{ mx_m }};
+    --story-hero-rule: {{ section.settings.rule_color }};
+    --story-hero-eyebrow-weight: {{ section.settings.eyebrow_weight }};
   }
 
   {%- if image_mobile != blank %}
@@ -84,8 +105,33 @@
   {%- endif %}
 {%- endstyle -%}
 
+{%- capture copy -%}
+  <div class="story-hero__content">
+    <div class="story-hero__copy">
+      {%- if eyebrow != blank -%}
+        <p class="story-hero__eyebrow" data-reveal="rise">{{ eyebrow | escape }}</p>
+      {%- endif -%}
+      {%- if title != blank -%}
+        <h1 class="story-hero__title" data-reveal="rise" style="--reveal-order: 1;">
+          {{- title | escape | newline_to_br -}}
+        </h1>
+      {%- endif -%}
+      {%- if subtitle != blank -%}
+        <p class="story-hero__sub" data-reveal="rise" style="--reveal-order: 2;">
+          {{- subtitle | escape | newline_to_br -}}
+        </p>
+      {%- endif -%}
+      {%- if section.settings.show_rule -%}
+        <div class="story-rule-row" aria-hidden="true" data-reveal="fade" style="--reveal-order: 3;">
+          <span class="story-rule"></span>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endcapture -%}
+
 <div
-  class="story-section story-hero story-hero--{{ section.settings.layout }}{% if section.settings.position == 'center' %} story-hero--centre{% endif %}"
+  class="story-section story-hero story-hero--{{ section.settings.layout }} story-hero--d-{{ section.settings.position }} story-hero--m-{{ section.settings.position_mobile }}{% if section.settings.subtitle_style == 'upright' %} story-hero--sub-upright{% endif %}"
   {% if section.settings.motion %}
     data-motion
   {% endif %}
@@ -130,42 +176,14 @@
 
     {%- if section.settings.layout == 'over' -%}
       <span class="story-hero__shade" aria-hidden="true"></span>
-      {%- if title != blank or subtitle != blank -%}
-        <div class="story-hero__content">
-          <div class="story-hero__copy">
-            {%- if title != blank -%}
-              <h1 class="story-hero__title" data-reveal="rise" style="--reveal-order: 1;">
-                {{- title | escape | newline_to_br -}}
-              </h1>
-            {%- endif -%}
-            {%- if subtitle != blank -%}
-              <p class="story-hero__sub" data-reveal="rise" style="--reveal-order: 2;">
-                {{- subtitle | escape | newline_to_br -}}
-              </p>
-            {%- endif -%}
-          </div>
-        </div>
+      {%- if has_copy -%}
+        {{ copy }}
       {%- endif -%}
     {%- endif -%}
   </div>
 
-  {%- if section.settings.layout == 'under' -%}
-    {%- if title != blank or subtitle != blank -%}
-      <div class="story-hero__content">
-        <div class="story-hero__copy">
-          {%- if title != blank -%}
-            <h1 class="story-hero__title" data-reveal="rise" style="--reveal-order: 1;">
-              {{- title | escape | newline_to_br -}}
-            </h1>
-          {%- endif -%}
-          {%- if subtitle != blank -%}
-            <p class="story-hero__sub" data-reveal="rise" style="--reveal-order: 2;">
-              {{- subtitle | escape | newline_to_br -}}
-            </p>
-          {%- endif -%}
-        </div>
-      </div>
-    {%- endif -%}
+  {%- if section.settings.layout == 'under' and has_copy -%}
+    {{ copy }}
   {%- endif -%}
 </div>
 
@@ -192,6 +210,12 @@
       "content": "Title"
     },
     {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Small label above the title",
+      "info": "Optional. Shown in small capitals."
+    },
+    {
       "type": "textarea",
       "id": "title",
       "label": "Title",
@@ -202,8 +226,29 @@
       "type": "textarea",
       "id": "subtitle",
       "label": "Line under the title",
-      "default": "A journey towards slower, more mindful living.",
-      "info": "Set in italics."
+      "default": "A journey towards slower, more mindful living."
+    },
+    {
+      "type": "select",
+      "id": "subtitle_style",
+      "label": "Style of the line under the title",
+      "options": [
+        {
+          "value": "italic",
+          "label": "Italic"
+        },
+        {
+          "value": "upright",
+          "label": "Upright"
+        }
+      ],
+      "default": "italic"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rule",
+      "label": "Short line under the words",
+      "default": false
     },
     {
       "type": "select",
@@ -237,10 +282,14 @@
         {
           "value": "center",
           "label": "Centre"
+        },
+        {
+          "value": "middle_left",
+          "label": "Middle left"
         }
       ],
       "default": "bottom_left",
-      "info": "Under the picture, \"Centre\" works like \"Bottom centre\"."
+      "info": "Under the picture, \"Centre\" works like \"Bottom centre\" and \"Middle left\" like \"Bottom left\"."
     },
     {
       "type": "select",
@@ -258,6 +307,10 @@
         {
           "value": "center",
           "label": "Centre"
+        },
+        {
+          "value": "middle_left",
+          "label": "Middle left"
         }
       ],
       "default": "bottom_left"
@@ -305,8 +358,34 @@
     {
       "type": "color",
       "id": "ink",
-      "label": "Title over the picture",
+      "label": "Words over the picture",
       "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "rule_color",
+      "label": "Short line",
+      "default": "#d7845f"
+    },
+    {
+      "type": "select",
+      "id": "eyebrow_weight",
+      "label": "Small label weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi-bold"
+        }
+      ],
+      "default": "500"
     },
     {
       "type": "range",
