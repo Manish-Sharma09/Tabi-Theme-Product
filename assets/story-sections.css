@@ -13,8 +13,7 @@
                                     joined by one line (Product, Process,
                                     People)
 
-   Snippets: story-icon (the highlights' line icons) and story-decor (the
-   leaf sprig at a section's side).
+   Snippet: story-icon, the highlights' line icons.
 
    The brief asks for a warm off-white ground, deep ink text and one muted
    accent, serif headlines and a clean sans body: the theme's heading font
@@ -34,8 +33,7 @@
      7. Gallery and the phone swipe row
      8. Pillars
      9. Highlights: icon, title and a line, side by side
-    10. Decoration: the leaf sprig and the words at the side
-    11. Reduced motion
+    10. Reduced motion
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -72,10 +70,7 @@
   scroll-margin-top: var(--tabi-header-h, 0px);
 }
 
-/* Over the leaf sprig, which sits in the section's own layer. */
 .story-section__inner {
-  position: relative;
-  z-index: 1;
   max-width: calc(var(--story-content) + 2 * var(--story-gutter));
   margin: 0 auto;
   padding: 0 var(--story-gutter);
@@ -1186,126 +1181,7 @@ story-swipe {
 }
 
 /* --------------------------------------------------------------------------
-   10. DECORATION
-   The leaf sprig (snippets/story-decor.liquid): a fine line drawing, or the
-   merchant's own picture, at the left or right edge of a section (or both,
-   mirrored), behind the words. Its width is a setting, scaled down with the
-   window below 1440px; phones show it only when asked. The words at the
-   side ("Slower / Kinder / Brighter") sit at the right of the content,
-   level with its foot, on wide screens only.
-   -------------------------------------------------------------------------- */
-
-.story-section--decor {
-  overflow: clip;
-}
-
-.story-decor {
-  position: absolute;
-  z-index: 0;
-  display: block;
-  width: min(calc(var(--story-decor-w, 240) * 1px), calc(var(--story-decor-w, 240) * 100vw / 1440));
-  color: var(--story-decor-color, #d9bfa3);
-  line-height: 0;
-  pointer-events: none;
-}
-
-.story-decor svg,
-.story-decor img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.story-decor svg {
-  overflow: visible;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.story-decor svg path {
-  vector-effect: non-scaling-stroke;
-}
-
-.story-decor--left {
-  left: 0;
-}
-
-.story-decor--right {
-  right: 0;
-  transform: scaleX(-1);
-}
-
-.story-decor--top {
-  top: 16px;
-}
-
-.story-decor--middle {
-  top: 50%;
-  translate: 0 -50%;
-}
-
-.story-decor--bottom {
-  bottom: 0;
-}
-
-.story-aside {
-  display: none;
-}
-
-@media screen and (min-width: 1100px) {
-  .story-aside {
-    position: absolute;
-    right: max(var(--story-gutter), calc((100% - var(--story-content)) / 2));
-    bottom: calc(var(--story-pb) * 1px);
-    z-index: 1;
-    display: block;
-    width: 150px;
-    margin: 0;
-    color: var(--story-aside-color, #c9ae94);
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: 500;
-    font-size: 11px;
-    line-height: 2.2;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-  }
-
-  .story-aside::after {
-    content: '';
-    display: block;
-    width: 32px;
-    height: 2px;
-    margin-top: 12px;
-    background-color: currentColor;
-    opacity: 0.6;
-  }
-}
-
-/* Beside a split the words run close to the edge: tablets leave the sprig
-   out rather than set it behind the text. */
-@media screen and (min-width: 750px) and (max-width: 1199px) {
-  .story-split .story-decor {
-    display: none;
-  }
-}
-
-@media screen and (max-width: 749px) {
-  .story-decor {
-    display: none;
-  }
-
-  .story-decor.story-decor--m {
-    display: block;
-    width: calc(var(--story-decor-w-m, 120) * 1px);
-  }
-}
-
-/* --------------------------------------------------------------------------
-   11. REDUCED MOTION
+   10. REDUCED MOTION
    -------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {

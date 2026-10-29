@@ -2,11 +2,11 @@
   STORY SPLIT - a picture beside a heading and text, with an optional
   button or text link. The picture's share of the width, its shape, its
   side and the space beside it are settings. Phones stack the two, words
-  first or picture first. A leaf sprig can sit at the section's edge.
+  first or picture first.
 
   On the About page this is "A lifetime in textiles" beside the artisan
   at his block, with "Meet our artisans". Styles in
-  assets/story-sections.css, parts 2, 3, 6 and 10.
+  assets/story-sections.css, parts 2, 3 and 6.
 {%- endcomment -%}
 
 {{ 'story-sections.css' | asset_url | stylesheet_tag }}
@@ -73,9 +73,6 @@
     --story-pb-m: {{ section.settings.padding_bottom_mobile }};
     --story-split-gap: {{ section.settings.gap }};
     --story-label-weight: {{ section.settings.link_weight }};
-    --story-decor-w: {{ section.settings.decor_width }};
-    --story-decor-w-m: {{ section.settings.decor_width_mobile }};
-    --story-decor-color: {{ section.settings.decor_color }};
   }
 {%- endstyle -%}
 
@@ -83,12 +80,11 @@
   {% if anchor != blank %}
     id="{{ anchor }}"
   {% endif %}
-  class="story-section story-split{% if section.settings.image_position == 'right' %} story-split--reverse{% endif %}{% if section.settings.mobile_order == 'text_first' %} story-split--text-first{% endif %}{% if section.settings.text_font == 'heading' %} story-section--serif{% endif %}{% if section.settings.decor != 'none' %} story-section--decor{% endif %}"
+  class="story-section story-split{% if section.settings.image_position == 'right' %} story-split--reverse{% endif %}{% if section.settings.mobile_order == 'text_first' %} story-split--text-first{% endif %}{% if section.settings.text_font == 'heading' %} story-section--serif{% endif %}"
   {% if section.settings.motion %}
     data-motion
   {% endif %}
 >
-  {% render 'story-decor', settings: section.settings %}
   <div class="story-section__inner story-split__inner">
     <div class="story-split__media" data-reveal="rise">
       <span class="story-media story-shape-d-{{ section.settings.shape }} story-shape-m-{{ section.settings.shape_mobile }}">
@@ -312,7 +308,7 @@
       "step": 2,
       "unit": "px",
       "label": "Corner roundness on desktop",
-      "default": 16
+      "default": 32
     },
     {
       "type": "range",
@@ -456,95 +452,6 @@
       "label": "Animate on scroll",
       "default": true,
       "info": "The picture and words rise into place the first time they scroll into view. Off for visitors who ask their device for less motion, and in the theme editor."
-    },
-    {
-      "type": "header",
-      "content": "Leaf sprig"
-    },
-    {
-      "type": "select",
-      "id": "decor",
-      "label": "Sprig",
-      "options": [
-        {
-          "value": "none",
-          "label": "None"
-        },
-        {
-          "value": "left",
-          "label": "Left"
-        },
-        {
-          "value": "right",
-          "label": "Right"
-        },
-        {
-          "value": "both",
-          "label": "Both sides"
-        }
-      ],
-      "default": "none",
-      "info": "A fine line drawing of a branch at the edge of the section, behind the words. On the right it is mirrored."
-    },
-    {
-      "type": "image_picker",
-      "id": "decor_image",
-      "label": "Own drawing",
-      "info": "Optional. Replaces the line sprig. A transparent PNG or WebP works best."
-    },
-    {
-      "type": "select",
-      "id": "decor_position",
-      "label": "Sprig height",
-      "options": [
-        {
-          "value": "top",
-          "label": "Top"
-        },
-        {
-          "value": "middle",
-          "label": "Middle"
-        },
-        {
-          "value": "bottom",
-          "label": "Bottom"
-        }
-      ],
-      "default": "top"
-    },
-    {
-      "type": "range",
-      "id": "decor_width",
-      "min": 80,
-      "max": 400,
-      "step": 10,
-      "unit": "px",
-      "label": "Sprig width on desktop",
-      "default": 240,
-      "info": "Smaller on narrower windows."
-    },
-    {
-      "type": "color",
-      "id": "decor_color",
-      "label": "Sprig colour",
-      "default": "#d9bfa3",
-      "info": "For the line sprig."
-    },
-    {
-      "type": "checkbox",
-      "id": "decor_mobile",
-      "label": "Show the sprig on phones",
-      "default": false
-    },
-    {
-      "type": "range",
-      "id": "decor_width_mobile",
-      "min": 60,
-      "max": 240,
-      "step": 10,
-      "unit": "px",
-      "label": "Sprig width on phones",
-      "default": 120
     },
     {
       "type": "header",
