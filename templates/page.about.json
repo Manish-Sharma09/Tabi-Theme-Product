@@ -5,10 +5,10 @@
       "settings": {
         "image": "shopify://shop_images/Untitled_Design_30_1.webp",
         "image_mobile": "shopify://shop_images/IMG_7181_1.webp",
-        "eyebrow": "",
+        "eyebrow": "About Tabi",
         "title": "The Tabi Journey",
         "subtitle": "A journey towards slower, more mindful living.",
-        "subtitle_style": "italic",
+        "subtitle_style": "upright",
         "show_rule": true,
         "layout": "over",
         "position": "middle_left",
@@ -25,19 +25,48 @@
         "text_color": "#3d3b37",
         "title_size": 74,
         "title_size_mobile": 44,
-        "subtitle_size": 24,
-        "subtitle_size_mobile": 19
+        "subtitle_size": 20,
+        "subtitle_size_mobile": 18
       }
     },
     "opening": {
       "type": "story-text",
-      "blocks": {},
-      "block_order": [],
+      "blocks": {
+        "highlight_fabrics": {
+          "type": "highlight",
+          "settings": {
+            "icon": "leaf",
+            "title": "Natural fabrics",
+            "text": "Cotton cambric, poplin and twill."
+          }
+        },
+        "highlight_handwork": {
+          "type": "highlight",
+          "settings": {
+            "icon": "hands",
+            "title": "Handwork",
+            "text": "Block print, embroidery and patchwork."
+          }
+        },
+        "highlight_order": {
+          "type": "highlight",
+          "settings": {
+            "icon": "needle",
+            "title": "Made to order",
+            "text": "Much of our clothing is made after an order is placed."
+          }
+        }
+      },
+      "block_order": [
+        "highlight_fabrics",
+        "highlight_handwork",
+        "highlight_order"
+      ],
       "settings": {
         "eyebrow": "Our story",
-        "heading": "",
-        "text": "<p>Tabi began with a love for natural fabrics, the hands that work with them, and the small pleasures of everyday life.</p><p>Today, we make clothing for women and children, textiles for the home, and objects meant to become part of the way we live.</p><p>Each is a different expression of the same belief: the things we choose to live with deserve a little thought.</p>",
-        "text_style": "lead",
+        "heading": "The things we choose to live with\ndeserve a little thought",
+        "text": "<p>Tabi began with a love for natural fabrics, the hands that work with them, and the small pleasures of everyday life. Today, we make clothing for women and children, textiles for the home, and objects meant to become part of the way we live. Each is a different expression of the same belief.</p>",
+        "text_style": "body",
         "text_font": "heading",
         "width": "medium",
         "text_align": "center",
@@ -66,10 +95,10 @@
         "heading_size_mobile": 34,
         "text_size": 21,
         "text_size_mobile": 19,
-        "padding_top": 88,
-        "padding_bottom": 56,
-        "padding_top_mobile": 56,
-        "padding_bottom_mobile": 40,
+        "padding_top": 56,
+        "padding_bottom": 40,
+        "padding_top_mobile": 48,
+        "padding_bottom_mobile": 32,
         "lead_size": 26,
         "lead_size_mobile": 21
       }
@@ -80,25 +109,33 @@
         "moment_tea": {
           "type": "picture",
           "settings": {
-            "image": "shopify://shop_images/8106694.jpg"
+            "image": "shopify://shop_images/8106694.jpg",
+            "label": "",
+            "caption": "A cup of tea before the house wakes up."
           }
         },
         "moment_shirt": {
           "type": "picture",
           "settings": {
-            "image": "shopify://shop_images/DSC_4043.webp"
+            "image": "shopify://shop_images/DSC_4043.webp",
+            "label": "",
+            "caption": "A shirt that feels right the moment you put it on."
           }
         },
         "moment_children": {
           "type": "picture",
           "settings": {
-            "image": "shopify://shop_images/Ira.jpg"
+            "image": "shopify://shop_images/Ira.jpg",
+            "label": "",
+            "caption": "Children running through the last hour of sunlight."
           }
         },
         "moment_tray": {
           "type": "picture",
           "settings": {
-            "image": "shopify://shop_images/Uraiyur_Brass_Shell_Bowl_Large..webp"
+            "image": "shopify://shop_images/Uraiyur_Brass_Shell_Bowl_Large..webp",
+            "label": "",
+            "caption": "The familiar tray you bring out when friends arrive."
           }
         }
       },
@@ -109,9 +146,9 @@
         "moment_tray"
       ],
       "settings": {
-        "eyebrow": "",
+        "eyebrow": "Everyday moments",
         "heading": "The things we return to",
-        "text": "<p>Some of the nicest parts of a day are easily overlooked.</p><p>A cup of tea before the house wakes up. A shirt that feels right the moment you put it on. Children running through the last hour of sunlight. The familiar tray you bring out when friends arrive.</p><p>This is the life we design for. It is ordinary, sometimes messy, often beautiful.</p><p>We want the things we make to belong naturally to it.</p>",
+        "text": "<p>Some of the nicest parts of a day are easily overlooked.</p>",
         "list_label": "Everyday moments",
         "row_width": "wide",
         "columns": 4,
@@ -121,28 +158,31 @@
         "shape_mobile": "rounded",
         "corner_radius": 8,
         "corner_radius_mobile": 8,
-        "caption_align": "left",
+        "caption_align": "center",
         "mobile_layout": "swipe",
         "mobile_in_view": "64",
         "show_dots": true,
         "motion": true,
         "background": "#f9f7f4",
         "accent_color": "#7f7b74",
-        "padding_top": 24,
+        "padding_top": 56,
         "padding_bottom": 56,
-        "padding_top_mobile": 16,
+        "padding_top_mobile": 40,
         "padding_bottom_mobile": 40,
         "text_font": "heading",
         "width": "medium",
         "text_align": "center",
         "text_align_mobile": "center",
-        "header_gap": 48,
+        "header_gap": 40,
         "heading_color": "#253c30",
         "text_color": "#3d3b37",
         "heading_size": 46,
         "heading_size_mobile": 34,
         "text_size": 20,
-        "text_size_mobile": 18
+        "text_size_mobile": 18,
+        "footer_text": "<p>This is the life we design for. It is ordinary, sometimes messy, often beautiful. We want the things we make to belong naturally to it.</p>",
+        "caption_size": 18,
+        "caption_size_mobile": 17
       }
     },
     "roots": {
@@ -163,8 +203,8 @@
         "heading": "A lifetime in textiles",
         "text": "<p>Our roots go back decades, to a family garment-making business and a lifetime spent understanding cloth.</p><p>Long before Tabi, there were years of working with fabrics, developing designs, refining fits and making garments for people around the world.</p><p>That experience remains part of how we work today.</p><p>We know how much difference the right fabric can make. How a few changes to a cut can alter the way something feels. How the smallest finishing details can make a piece worth keeping.</p><p>Tabi gives us the freedom to bring that knowledge into collections that feel personally meaningful to us.</p>",
         "text_font": "heading",
-        "button_label": "",
-        "button_link": "",
+        "button_label": "Meet Our Founder",
+        "button_link": "shopify://pages/founders-note",
         "button_style": "link",
         "link_weight": "600",
         "text_align": "left",
@@ -198,7 +238,7 @@
           "settings": {
             "image": "shopify://shop_images/DSC_4005-2.webp",
             "label": "Natural fabrics",
-            "caption": ""
+            "caption": "The lightness of cotton cambric. The crisp hand of poplin. The structure of twill. The softness that comes with a well-worn piece of clothing."
           }
         },
         "approach_details": {
@@ -206,7 +246,7 @@
           "settings": {
             "image": "shopify://shop_images/Copy_of_VideoCapture_20250321-124300.jpg",
             "label": "Block print",
-            "caption": ""
+            "caption": "We love handwork, too. The tiny variations in a block print."
           }
         },
         "approach_last": {
@@ -214,7 +254,7 @@
           "settings": {
             "image": "shopify://shop_images/Copy_of_VideoCapture_20250321-171256.jpg",
             "label": "Embroidery",
-            "caption": ""
+            "caption": "The character of an embroidered flower, the unexpected charm of patchwork."
           }
         }
       },
@@ -226,7 +266,7 @@
       "settings": {
         "eyebrow": "Our approach",
         "heading": "Made to be worn.\nMade to be lived with.",
-        "text": "<p>We have a particular affection for natural fabrics.</p><p>The lightness of cotton cambric. The crisp hand of poplin. The structure of twill. The softness that comes with a well-worn piece of clothing.</p><p>We love handwork, too. The tiny variations in a block print, the character of an embroidered flower, the unexpected charm of patchwork.</p><p>Some of our pieces are quiet and understated. Others have plenty of personality.</p><p>What matters is that they're enjoyable to use, comfortable to live with, and interesting enough to keep coming back to.</p>",
+        "text": "<p>We have a particular affection for natural fabrics.</p>",
         "text_font": "heading",
         "width": "medium",
         "text_align": "center",
@@ -236,7 +276,7 @@
         "columns": 3,
         "ratio": "4 / 3",
         "gap": 28,
-        "header_gap": 48,
+        "header_gap": 40,
         "shape": "rounded",
         "shape_mobile": "rounded",
         "corner_radius": 6,
@@ -260,7 +300,8 @@
         "padding_top": 64,
         "padding_bottom": 64,
         "padding_top_mobile": 48,
-        "padding_bottom_mobile": 48
+        "padding_bottom_mobile": 48,
+        "footer_text": "<p>Some of our pieces are quiet and understated. Others have plenty of personality. What matters is that they're enjoyable to use, comfortable to live with, and interesting enough to keep coming back to.</p>"
       }
     },
     "impact": {
@@ -297,11 +338,11 @@
         "pillar_people"
       ],
       "settings": {
-        "eyebrow": "Our impact",
+        "eyebrow": "Our values",
         "heading": "A little more thought\nbehind what we make",
-        "text": "<p>We believe the responsibility of making something extends beyond the finished product.</p><p>It matters what we make, how we make it, and the lives of the people who make it.</p><p>At Tabi, we think about this through three connected ideas: Product, Process and People.</p>",
+        "text": "<p>We believe the responsibility of making something extends beyond the finished product. It matters what we make, how we make it, and the lives of the people who make it. At Tabi, we think about this through three connected ideas: Product, Process and People.</p>",
         "text_font": "heading",
-        "width": "medium",
+        "width": "wide",
         "text_align": "center",
         "text_align_mobile": "center",
         "list_label": "Product, Process and People",
@@ -309,7 +350,7 @@
         "columns": 3,
         "ratio": "4 / 3",
         "gap": 28,
-        "header_gap": 48,
+        "header_gap": 40,
         "shape": "rounded",
         "shape_mobile": "rounded",
         "corner_radius": 6,
@@ -330,8 +371,8 @@
         "heading_size_mobile": 34,
         "text_size": 20,
         "text_size_mobile": 18,
-        "padding_top": 80,
-        "padding_bottom": 80,
+        "padding_top": 56,
+        "padding_bottom": 64,
         "padding_top_mobile": 56,
         "padding_bottom_mobile": 56,
         "anchor": "impact"
@@ -365,11 +406,11 @@
         "upcycle_3"
       ],
       "settings": {
-        "eyebrow": "Upcycle by Tabi",
+        "eyebrow": "Our impact",
         "heading": "Giving fabric another life",
-        "text": "<p>Making things inevitably leaves things behind.</p><p>And when you have spent a lifetime working with textiles, it becomes difficult to look at a piece of leftover fabric and see only waste.</p><p>Through Upcycle by Tabi, we've explored ways of giving fabric remnants a new purpose.</p><p>Some become patchwork and smaller textile pieces. Others are repurposed as filling for mattresses that find their way to families in our wider community.</p><p>A piece of fabric may have finished one journey, but that doesn't always mean it has nothing left to give.</p><p>It's a small but meaningful part of how we continue learning to make more responsibly.</p>",
+        "text": "<p>Making things inevitably leaves things behind. And when you have spent a lifetime working with textiles, it becomes difficult to look at a piece of leftover fabric and see only waste. Through Upcycle by Tabi, we've explored ways of giving fabric remnants a new purpose.</p>",
         "text_font": "heading",
-        "width": "medium",
+        "width": "wide",
         "text_align": "center",
         "text_align_mobile": "center",
         "list_label": "Upcycle by Tabi",
@@ -377,7 +418,7 @@
         "columns": 3,
         "ratio": "2 / 1",
         "gap": 28,
-        "header_gap": 48,
+        "header_gap": 40,
         "shape": "rounded",
         "shape_mobile": "rounded",
         "corner_radius": 6,
@@ -398,10 +439,11 @@
         "heading_size_mobile": 34,
         "text_size": 20,
         "text_size_mobile": 18,
-        "padding_top": 80,
+        "padding_top": 64,
         "padding_bottom": 48,
         "padding_top_mobile": 48,
-        "padding_bottom_mobile": 40
+        "padding_bottom_mobile": 40,
+        "footer_text": "<p>Some become patchwork and smaller textile pieces. Others are repurposed as filling for mattresses that find their way to families in our wider community. A piece of fabric may have finished one journey, but that doesn't always mean it has nothing left to give. It's a small but meaningful part of how we continue learning to make more responsibly.</p>"
       }
     },
     "closing": {
@@ -409,7 +451,7 @@
       "settings": {
         "eyebrow": "The next chapter",
         "heading": "The journey continues",
-        "text": "<p>Tabi takes its name from the Japanese word for <em>journey</em>.</p><p>We began with clothing, but our curiosity has always extended to the way we live.</p><p>The fabrics we bring into our homes. The objects we reach for every day. The rituals we share with the people around us.</p><p>As Tabi grows, so will the ways we explore these ideas.</p><p>We don't have a finished picture of everything Tabi will become. And perhaps that's what makes the journey interesting.</p><p>For now, we're glad you're here.</p>",
+        "text": "<p>Tabi takes its name from the Japanese word for <em>journey</em>. We began with clothing, but our curiosity has always extended to the way we live. The fabrics we bring into our homes. The objects we reach for every day. The rituals we share with the people around us.</p><p>As Tabi grows, so will the ways we explore these ideas. We don't have a finished picture of everything Tabi will become. And perhaps that's what makes the journey interesting.</p><p>For now, we're glad you're here.</p>",
         "text_style": "body",
         "text_font": "heading",
         "width": "medium",

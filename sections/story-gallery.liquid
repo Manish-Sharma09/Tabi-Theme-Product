@@ -5,9 +5,9 @@
   nearly the full window; phones show a swipe row with the next picture
   peeking in (dots underneath), two columns, or one.
 
-  On the About page: the everyday moments (tea, a shirt, children, a
-  tray), "Made to be worn", the values (People, Craft, A kinder planet)
-  and "Giving fabric another life". Styles in assets/story-sections.css,
+  Text can also close the section under the pictures. On the About page:
+  "The things we return to" (tea, a shirt, children, a tray), "Made to be
+  worn", Product, Process and People, and "Giving fabric another life". Styles in assets/story-sections.css,
   parts 2, 3, 7 and 10; the swipe row's dots in assets/story-sections.js.
 {%- endcomment -%}
 
@@ -174,6 +174,14 @@
         </div>
       {%- endif -%}
     {%- endif -%}
+
+    {%- if section.settings.footer_text != blank -%}
+      <div class="story-column story-gallery__footer">
+        <div class="story-text" data-reveal="rise">
+          {{- section.settings.footer_text -}}
+        </div>
+      </div>
+    {%- endif -%}
   </div>
 </div>
 
@@ -202,6 +210,12 @@
       "id": "text",
       "label": "Text",
       "info": "Optional. Shown above the pictures."
+    },
+    {
+      "type": "richtext",
+      "id": "footer_text",
+      "label": "Text under the pictures",
+      "info": "Optional. Closes the section, after the pictures, in the same column as the text above."
     },
     {
       "type": "select",

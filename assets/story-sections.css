@@ -771,7 +771,8 @@
    the next picture peeking in, two columns, or one.
    -------------------------------------------------------------------------- */
 
-.story-gallery__header + .story-gallery__body {
+.story-gallery__header + .story-gallery__body,
+.story-gallery__body + .story-gallery__footer {
   margin-top: calc(var(--story-header-gap, 56) * 1px);
 }
 
@@ -855,7 +856,8 @@ story-swipe {
 }
 
 @media screen and (max-width: 749px) {
-  .story-gallery__header + .story-gallery__body {
+  .story-gallery__header + .story-gallery__body,
+  .story-gallery__body + .story-gallery__footer {
     margin-top: 32px;
   }
 
