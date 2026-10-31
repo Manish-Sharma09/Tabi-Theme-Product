@@ -82,6 +82,7 @@
     --story-icon-size: {{ section.settings.icon_size }};
     --story-hl-size: {{ section.settings.highlight_text_size }};
     --story-hl-size-m: {{ section.settings.highlight_text_size_mobile }};
+    {%- render 'story-palette', palette: section.settings.palette %}
   }
 {%- endstyle -%}
 
@@ -491,6 +492,31 @@
     {
       "type": "header",
       "content": "Colours"
+    },
+    {
+      "type": "select",
+      "id": "palette",
+      "label": "Colour set",
+      "options": [
+        {
+          "value": "light",
+          "label": "Off-white"
+        },
+        {
+          "value": "sand",
+          "label": "Sand"
+        },
+        {
+          "value": "green",
+          "label": "Tabi green"
+        },
+        {
+          "value": "custom",
+          "label": "Custom - the colours below"
+        }
+      ],
+      "default": "custom",
+      "info": "Off-white, sand and Tabi green (as on the home page) set the background, headings, text, labels and buttons together, in colours that read on it. Custom uses the colours below."
     },
     {
       "type": "color",

@@ -1,0 +1,34 @@
+{% doc %}
+  The colour sets behind a story section's "Colour set" setting: a
+  background with the heading, text, label, icon and button colours that
+  read on it. Rendered at the end of the section's style block, after its
+  own colour pickers, so a set overrides them; 'custom' leaves the pickers
+  in charge.
+
+  Off-white and sand are the About page's light grounds; Tabi green is the
+  home page's green bands - gold-cream headings, white text, and a light
+  button so it doesn't vanish into the green.
+
+  @param {string} palette - 'light', 'sand', 'green' or 'custom'.
+
+  @example
+  {% render 'story-palette', palette: section.settings.palette %}
+{% enddoc %}
+{%- case palette -%}
+  {%- when 'light', 'sand' %}
+    --story-bg: {% if palette == 'sand' %}#f5efe3{% else %}#f9f7f4{% endif %};
+    --story-heading: #253c30;
+    --story-text: #3d3b37;
+    --story-accent: #7f7b74;
+    --story-mark: #c46a50;
+    --story-button-bg: #253c30;
+    --story-button-text: #f9f7f4;
+  {%- when 'green' %}
+    --story-bg: #253c30;
+    --story-heading: #e2d1a6;
+    --story-text: #ffffff;
+    --story-accent: #e2d1a6;
+    --story-mark: #e2d1a6;
+    --story-button-bg: #efede9;
+    --story-button-text: #253c30;
+{%- endcase -%}

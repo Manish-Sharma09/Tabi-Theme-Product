@@ -133,6 +133,7 @@
     --tabi-panel-ink: {{ section.settings.dropdown_text }};
     --tabi-mega-size: {{ section.settings.dropdown_font_size }}px;
     --tabi-mega-gap: {{ section.settings.dropdown_link_spacing }}px;
+    --tabi-mega-pb: {{ section.settings.dropdown_space_below }}px;
     {%- case section.settings.menu_image_ratio -%}
       {%- when 'square' %}
     --tabi-card-ratio: 1 / 1;
@@ -206,7 +207,7 @@
       </{{ logo_tag }}>
 
       {%- if menu != blank -%}
-        <tabi-nav class="tabi-nav{% if section.settings.show_nav_arrows %} tabi-nav--arrows{% endif %}{% unless section.settings.dropdown_divider %} tabi-nav--no-divider{% endunless %}">
+        <tabi-nav class="tabi-nav{% if section.settings.show_nav_arrows %} tabi-nav--arrows{% endif %}{% unless section.settings.dropdown_divider %} tabi-nav--no-divider{% endunless %}{% if section.settings.dropdown_featured_style == 'list' %} tabi-nav--stack-list{% endif %}{% if section.settings.dropdown_align == 'start' %} tabi-nav--mega-start{% endif %}">
           <nav aria-label="{{ 'sections.header.menu' | t }}">
             <ul class="tabi-nav__list" role="list">
               {%- for link in menu.links -%}
@@ -1141,6 +1142,50 @@
       "id": "dropdown_featured_label",
       "label": "Large dropdown: heading over the picture stack",
       "default": "Featured"
+    },
+    {
+      "type": "select",
+      "id": "dropdown_featured_style",
+      "label": "Large dropdown: picture stack",
+      "options": [
+        {
+          "value": "list",
+          "label": "Small pictures beside their names"
+        },
+        {
+          "value": "stack",
+          "label": "Larger pictures, one under another"
+        }
+      ],
+      "default": "list",
+      "info": "Small pictures keep the dropdown about as tall as its longest column of links. Larger ones make it taller."
+    },
+    {
+      "type": "select",
+      "id": "dropdown_align",
+      "label": "Dropdown content",
+      "options": [
+        {
+          "value": "center",
+          "label": "Centred"
+        },
+        {
+          "value": "start",
+          "label": "From the left"
+        }
+      ],
+      "default": "center",
+      "info": "For dropdowns with fewer columns than fit across the screen, e.g. Gifting. Centred leaves no empty space on one side."
+    },
+    {
+      "type": "range",
+      "id": "dropdown_space_below",
+      "min": 16,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "label": "Space under the links and pictures",
+      "default": 32
     },
     {
       "type": "checkbox",

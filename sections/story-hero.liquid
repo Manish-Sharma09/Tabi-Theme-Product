@@ -94,6 +94,7 @@
     --story-hero-mx-m: {{ mx_m }};
     --story-hero-rule: {{ section.settings.rule_color }};
     --story-hero-eyebrow-weight: {{ section.settings.eyebrow_weight }};
+    {%- render 'story-palette', palette: section.settings.palette %}
   }
 
   {%- if image_mobile != blank %}
@@ -397,6 +398,31 @@
       "label": "Shade behind the title",
       "default": 35,
       "info": "Darkens the picture under the title so it stays readable."
+    },
+    {
+      "type": "select",
+      "id": "palette",
+      "label": "Colour set",
+      "options": [
+        {
+          "value": "light",
+          "label": "Off-white"
+        },
+        {
+          "value": "sand",
+          "label": "Sand"
+        },
+        {
+          "value": "green",
+          "label": "Tabi green"
+        },
+        {
+          "value": "custom",
+          "label": "Custom - the colours below"
+        }
+      ],
+      "default": "custom",
+      "info": "Sets the background and the title and line under the picture together. Custom uses the colours below. Words over the picture and the short line keep their own colours."
     },
     {
       "type": "color",
