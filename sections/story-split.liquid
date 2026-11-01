@@ -5,8 +5,11 @@
   first or picture first.
 
   On the About page this is "A lifetime in textiles" beside the artisan
-  at his block, with "Meet our artisans". Styles in
-  assets/story-sections.css, parts 2, 3 and 6.
+  at his block, with "Meet our artisans". On the Founder's Note it opens
+  the page (the heading becomes the page title when this is the page's
+  first section) and carries each part of the letter beside a photograph;
+  beside a long letter the picture can stay in view while the words
+  scroll. Styles in assets/story-sections.css, parts 2, 3 and 6.
 {%- endcomment -%}
 
 {{ 'story-sections.css' | asset_url | stylesheet_tag }}
@@ -35,8 +38,10 @@
   endif
 
   assign loading = 'lazy'
+  assign heading_tag = 'h2'
   if section.index == 1
     assign loading = 'eager'
+    assign heading_tag = 'h1'
   endif
 
   comment
@@ -49,6 +54,10 @@
 -%}
 
 {%- style -%}
+  {%- if section.settings.text_style == 'lead' or section.settings.text_font == 'heading' -%}
+    {% render 'story-heading-italic' %}
+  {%- endif %}
+
   #shopify-section-{{ section.id }} .story-section {
     --story-bg: {{ section.settings.background }};
     --story-heading: {{ section.settings.heading_color }};
@@ -67,6 +76,8 @@
     --story-heading-size-m: {{ section.settings.heading_size_mobile }};
     --story-text-size: {{ section.settings.text_size }};
     --story-text-size-m: {{ section.settings.text_size_mobile }};
+    --story-lead-size: {{ section.settings.lead_size }};
+    --story-lead-size-m: {{ section.settings.lead_size_mobile }};
     --story-pt: {{ section.settings.padding_top }};
     --story-pb: {{ section.settings.padding_bottom }};
     --story-pt-m: {{ section.settings.padding_top_mobile }};
@@ -81,7 +92,7 @@
   {% if anchor != blank %}
     id="{{ anchor }}"
   {% endif %}
-  class="story-section story-split{% if section.settings.image_position == 'right' %} story-split--reverse{% endif %}{% if section.settings.mobile_order == 'text_first' %} story-split--text-first{% endif %}{% if section.settings.text_font == 'heading' %} story-section--serif{% endif %}"
+  class="story-section story-split{% if section.settings.image_position == 'right' %} story-split--reverse{% endif %}{% if section.settings.mobile_order == 'text_first' %} story-split--text-first{% endif %} story-split--media-{{ section.settings.media_align | default: 'center' }}{% if section.settings.text_font == 'heading' %} story-section--serif{% endif %}"
   {% if section.settings.motion %}
     data-motion
   {% endif %}
@@ -113,14 +124,24 @@
       {%- endif -%}
 
       {%- if heading != blank -%}
-        <h2 class="story-heading" data-reveal="rise" style="--reveal-order: 1;">
+        <{{ heading_tag }} class="story-heading" data-reveal="rise" style="--reveal-order: 1;">
           {{- heading | escape | newline_to_br -}}
-        </h2>
+        </{{ heading_tag }}>
       {%- endif -%}
 
       {%- if section.settings.text != blank -%}
-        <div class="story-text" data-reveal="rise" style="--reveal-order: 2;">
+        <div
+          class="story-text{% if section.settings.text_style == 'lead' %} story-text--lead{% endif %}"
+          data-reveal="rise"
+          style="--reveal-order: 2;"
+        >
           {{- section.settings.text -}}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.show_rule -%}
+        <div class="story-rule-row" aria-hidden="true" data-reveal="fade" style="--reveal-order: 3;">
+          <span class="story-rule"></span>
         </div>
       {%- endif -%}
 
@@ -267,6 +288,26 @@
     },
     {
       "type": "select",
+      "id": "media_align",
+      "label": "Picture beside the text on desktop",
+      "options": [
+        {
+          "value": "center",
+          "label": "Centred on the text"
+        },
+        {
+          "value": "top",
+          "label": "Level with the top of the text"
+        },
+        {
+          "value": "sticky",
+          "label": "Stays in view while long text scrolls"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
       "id": "shape",
       "label": "Corners on desktop",
       "options": [
@@ -359,6 +400,29 @@
       ],
       "default": "body",
       "info": "The heading font is smaller on its body: set its text sizes about 4px larger."
+    },
+    {
+      "type": "select",
+      "id": "text_style",
+      "label": "Text style",
+      "options": [
+        {
+          "value": "body",
+          "label": "Regular"
+        },
+        {
+          "value": "lead",
+          "label": "Lead (heading font, larger)"
+        }
+      ],
+      "default": "body",
+      "info": "\"Lead\" suits an opening line or a quote. Use italics in the text for a quote."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rule",
+      "label": "Short line under the text",
+      "default": false
     },
     {
       "type": "text",
@@ -557,6 +621,26 @@
       "unit": "px",
       "label": "Text size on phones",
       "default": 16
+    },
+    {
+      "type": "range",
+      "id": "lead_size",
+      "min": 20,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Lead text size on desktop",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "lead_size_mobile",
+      "min": 18,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "Lead text size on phones",
+      "default": 24
     },
     {
       "type": "header",

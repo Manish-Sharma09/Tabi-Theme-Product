@@ -12,6 +12,8 @@
      sections/story-pillars.liquid  an introduction, then three columns
                                     joined by one line (Product, Process,
                                     People)
+     sections/story-timeline.liquid the stops of a journey joined by one
+                                    line (the Founder's Note)
 
    Snippet: story-icon, the highlights' line icons.
 
@@ -34,6 +36,8 @@
      8. Pillars
      9. Highlights: icon, title and a line, side by side
     10. Reduced motion
+    11. Signature: the close of a letter (Text section)
+    12. Timeline
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -730,6 +734,29 @@
   margin-top: 32px;
 }
 
+.story-split__copy > .story-rule-row {
+  margin-top: 32px;
+}
+
+/* An opening line or a quote under the heading ("Lead"). */
+.story-split__copy > .story-heading + .story-text--lead {
+  margin-top: 28px;
+}
+
+/* Beside a long text the picture can sit level with its top, or stay in
+   view while the words scroll past it (desktop only: phones stack). */
+.story-split--media-top .story-split__inner,
+.story-split--media-sticky .story-split__inner {
+  align-items: start;
+}
+
+@media screen and (min-width: 750px) {
+  .story-split--media-sticky .story-split__media {
+    position: sticky;
+    top: calc(var(--tabi-header-h, 0px) + 40px);
+  }
+}
+
 @media screen and (max-width: 749px) {
   .story-split__inner,
   .story-split--reverse .story-split__inner {
@@ -762,6 +789,14 @@
   .story-split__copy > .story-actions {
     justify-content: var(--story-justify-m, flex-start);
     margin-top: 28px;
+  }
+
+  .story-split__copy > .story-rule-row {
+    margin-top: 24px;
+  }
+
+  .story-split__copy > .story-heading + .story-text--lead {
+    margin-top: 18px;
   }
 }
 
@@ -1247,5 +1282,289 @@ story-swipe {
 
   .story-gallery--m-swipe .story-gallery__list {
     scroll-behavior: auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   11. SIGNATURE
+   The close of a letter in a Text section: a sign-off line in the text
+   style, a scan of the signature, the name in the heading font and a role
+   in small capitals. Each part is optional; all of it follows the
+   column's alignment.
+   -------------------------------------------------------------------------- */
+
+.story-column > .story-signature {
+  margin-top: 40px;
+}
+
+.story-signature__image {
+  display: inline-block;
+  width: calc(var(--story-signature-w, 200) * 1px);
+  max-width: 100%;
+  margin-top: 8px;
+  vertical-align: top;
+}
+
+.story-signature__image img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.story-signature__who {
+  margin: 14px 0 0;
+}
+
+.story-signature__signoff + .story-signature__who {
+  margin-top: 10px;
+}
+
+.story-signature__name {
+  display: block;
+  color: var(--story-heading);
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-weight: var(--font-heading-weight);
+  font-size: calc(var(--story-signature-name, 30) * 1px);
+  line-height: 1.2;
+}
+
+.story-signature__role {
+  display: block;
+  margin-top: 8px;
+  color: var(--story-accent);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--font-body-weight);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.story-column > .story-actions--link {
+  margin-top: 36px;
+}
+
+@media screen and (max-width: 749px) {
+  .story-column > .story-signature {
+    margin-top: 32px;
+  }
+
+  .story-signature__image {
+    width: calc(var(--story-signature-w, 200) * 0.8px);
+  }
+
+  .story-signature__name {
+    font-size: calc(var(--story-signature-name-m, 26) * 1px);
+  }
+
+  .story-signature__role {
+    letter-spacing: 0.2em;
+  }
+
+  .story-column > .story-actions--link {
+    margin-top: 28px;
+  }
+
+  /* A text link keeps its own width rather than stretching like a button. */
+  .story-actions--link .story-link {
+    flex: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   12. TIMELINE
+   Desktop: the stops side by side, one column each. A stop opens with its
+   dot; a fine line runs on from the dot across the gap to the next one,
+   stopping just short of it, and draws itself left to right as the row
+   scrolls into view. Under the dot: a small label, the title in the
+   heading font, a line of text. "Centred" stops put the dot over the
+   middle of the words.
+   Phones: the stops one under another, the dots down the left with the
+   line running down between them, the words beside.
+   -------------------------------------------------------------------------- */
+
+.story-timeline {
+  --story-stop-gap: clamp(24px, 3.4vw, 48px);
+  --story-dot: 13px;
+  --story-dot-space: 10px;
+}
+
+.story-timeline__header + .story-timeline__list {
+  margin-top: calc(var(--story-header-gap, 56) * 1px);
+}
+
+.story-timeline__list {
+  display: grid;
+  grid-template-columns: repeat(var(--story-cols, 4), minmax(0, 1fr));
+  column-gap: var(--story-stop-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-stop {
+  position: relative;
+  min-width: 0;
+}
+
+.story-stop__mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--story-dot);
+  margin-bottom: 28px;
+}
+
+.story-stop__dot {
+  flex: none;
+  width: var(--story-dot);
+  height: var(--story-dot);
+  border-radius: 50%;
+  background-color: var(--story-accent);
+}
+
+.story-stop__line {
+  flex: 1 1 auto;
+  height: 1px;
+  margin-left: var(--story-dot-space);
+  margin-right: calc(var(--story-dot-space) - var(--story-stop-gap));
+  background-color: color-mix(in srgb, var(--story-accent) 50%, transparent);
+}
+
+.story-stop__label {
+  margin-bottom: 10px;
+}
+
+.story-stop__title {
+  margin: 0;
+  color: var(--story-heading);
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-weight: var(--font-heading-weight);
+  font-size: max(20px, min(calc(var(--story-stop-title) * 1px), calc(var(--story-stop-title) * 100vw / 1280)));
+  line-height: 1.15;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.story-stop__text {
+  max-width: 17em;
+  margin: 12px 0 0;
+  color: color-mix(in srgb, var(--story-text) 90%, var(--story-bg));
+  font-family: var(--story-copy-family, var(--font-body-family));
+  font-style: var(--story-copy-style, var(--font-body-style));
+  font-weight: var(--story-copy-weight, var(--font-body-weight));
+  font-size: calc(var(--story-stop-text) * 1px);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+@media screen and (min-width: 750px) {
+  .story-timeline--center .story-stop {
+    text-align: center;
+  }
+
+  .story-timeline--center .story-stop__mark {
+    justify-content: center;
+  }
+
+  /* From just past this dot (the middle of its column) to just short of the
+     next dot (the middle of the next column). */
+  .story-timeline--center .story-stop__line {
+    position: absolute;
+    top: calc(var(--story-dot) / 2);
+    left: calc(50% + var(--story-dot) / 2 + var(--story-dot-space));
+    width: calc(100% + var(--story-stop-gap) - var(--story-dot) - 2 * var(--story-dot-space));
+    margin: 0;
+  }
+
+  .story-timeline--center .story-stop__text {
+    margin-inline: auto;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .story-timeline__header + .story-timeline__list {
+    margin-top: 32px;
+  }
+
+  .story-timeline__list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .story-stop {
+    display: grid;
+    grid-template-columns: var(--story-dot) minmax(0, 1fr);
+    column-gap: 20px;
+    align-content: start;
+    padding-bottom: 32px;
+  }
+
+  .story-stop:last-child {
+    padding-bottom: 0;
+  }
+
+  .story-stop > :not(.story-stop__mark) {
+    grid-column: 2;
+  }
+
+  /* The dot sits level with the middle of the title's first line, or of
+     the small label when there is one. */
+  .story-stop__mark {
+    position: static;
+    display: block;
+    grid-row: 1 / span 3;
+    grid-column: 1;
+    height: auto;
+    margin: 0;
+    padding-top: calc((var(--story-stop-title-m) * 1.15px - var(--story-dot)) / 2);
+  }
+
+  .story-stop--labelled .story-stop__mark {
+    padding-top: calc((15px - var(--story-dot)) / 2);
+  }
+
+  .story-stop__dot {
+    display: block;
+  }
+
+  /* Down from under this dot to just above the next one. */
+  .story-stop__line {
+    position: absolute;
+    top: calc((var(--story-stop-title-m) * 1.15px + var(--story-dot)) / 2 + var(--story-dot-space));
+    bottom: calc(var(--story-dot-space) - (var(--story-stop-title-m) * 1.15px - var(--story-dot)) / 2);
+    left: calc(var(--story-dot) / 2);
+    width: 1px;
+    height: auto;
+    margin: 0;
+  }
+
+  .story-stop--labelled .story-stop__line {
+    top: calc((15px + var(--story-dot)) / 2 + var(--story-dot-space));
+  }
+
+  .story-stop__title {
+    font-size: calc(var(--story-stop-title-m) * 1px);
+  }
+
+  .story-stop__label {
+    margin-bottom: 6px;
+  }
+
+  .story-stop__label--blank {
+    display: none;
+  }
+
+  .story-stop__text {
+    max-width: none;
+    margin-top: 8px;
+    font-size: calc(var(--story-stop-text-m) * 1px);
+  }
+
+  /* Upright, the line draws downwards. */
+  .tabi-motion [data-motion] .story-stop__line[data-reveal='unroll']:not(.is-revealed) {
+    clip-path: inset(0 0 100% 0);
   }
 }

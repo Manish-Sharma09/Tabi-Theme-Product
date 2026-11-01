@@ -1,0 +1,523 @@
+{%- comment -%}
+  STORY TIMELINE - the stops of a journey, joined by one line: a dot for
+  each stop, then an optional small label (a year), a title and a line of
+  text. Desktop shows the stops side by side, the line running from each
+  dot to the next and drawing itself across as it scrolls into view.
+  Phones turn it upright: the dots down the left, the words beside them.
+  An optional label, heading and text sit above.
+
+  On the Founder's Note this is the strip the brief asks for between
+  "A life spent around cloth" and "Finding my own way": home / study /
+  international work / Tabi. Styles in assets/story-sections.css, part 12.
+{%- endcomment -%}
+
+{{ 'story-sections.css' | asset_url | stylesheet_tag }}
+{{ 'tabi-motion.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'tabi-motion.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign eyebrow = section.settings.eyebrow | strip
+  assign heading = section.settings.heading | strip
+  assign anchor = section.settings.anchor | strip | handleize
+
+  assign heading_tag = 'h2'
+  if section.index == 1
+    assign heading_tag = 'h1'
+  endif
+
+  assign justify_m = 'flex-start'
+  if section.settings.text_align_mobile == 'center'
+    assign justify_m = 'center'
+  endif
+
+  assign has_header = false
+  if eyebrow != blank or heading != blank or section.settings.text != blank
+    assign has_header = true
+  endif
+
+  assign reveal_order = 0
+
+  comment
+    When any stop has a small label, the others keep a blank line in its
+    place on desktop, so every title sits on one level.
+  endcomment
+  assign any_label = false
+  for block in section.blocks
+    assign block_label = block.settings.label | strip
+    if block_label != blank
+      assign any_label = true
+    endif
+  endfor
+-%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} .story-section {
+    --story-bg: {{ section.settings.background }};
+    --story-heading: {{ section.settings.heading_color }};
+    --story-text: {{ section.settings.text_color }};
+    --story-accent: {{ section.settings.accent_color }};
+    --story-measure: 680px;
+    --story-align: {{ section.settings.text_align }};
+    --story-align-m: {{ section.settings.text_align_mobile }};
+    --story-justify-m: {{ justify_m }};
+    --story-heading-size: {{ section.settings.heading_size }};
+    --story-heading-size-m: {{ section.settings.heading_size_mobile }};
+    --story-text-size: {{ section.settings.text_size }};
+    --story-text-size-m: {{ section.settings.text_size_mobile }};
+    --story-stop-title: {{ section.settings.title_size }};
+    --story-stop-title-m: {{ section.settings.title_size_mobile }};
+    --story-stop-text: {{ section.settings.stop_text_size }};
+    --story-stop-text-m: {{ section.settings.stop_text_size_mobile }};
+    --story-header-gap: {{ section.settings.header_gap }};
+    --story-cols: {{ section.blocks.size | at_least: 1 }};
+    --story-pt: {{ section.settings.padding_top }};
+    --story-pb: {{ section.settings.padding_bottom }};
+    --story-pt-m: {{ section.settings.padding_top_mobile }};
+    --story-pb-m: {{ section.settings.padding_bottom_mobile }};
+    {%- render 'story-palette', palette: section.settings.palette %}
+  }
+{%- endstyle -%}
+
+<div
+  {% if anchor != blank %}
+    id="{{ anchor }}"
+  {% endif %}
+  class="story-section story-timeline story-timeline--{{ section.settings.stop_align }}{% if section.settings.text_font == 'heading' %} story-section--serif{% endif %}"
+  {% if section.settings.motion %}
+    data-motion
+  {% endif %}
+>
+  <div class="story-section__inner">
+    {%- if has_header -%}
+      <div class="story-column story-timeline__header">
+        {%- if eyebrow != blank -%}
+          {%- assign reveal_order = reveal_order | plus: 1 -%}
+          <p class="story-eyebrow" data-reveal="rise" style="--reveal-order: {{ reveal_order }};">
+            {{- eyebrow | escape -}}
+          </p>
+        {%- endif -%}
+        {%- if heading != blank -%}
+          {%- assign reveal_order = reveal_order | plus: 1 -%}
+          <{{ heading_tag }} class="story-heading" data-reveal="rise" style="--reveal-order: {{ reveal_order }};">
+            {{- heading | escape | newline_to_br -}}
+          </{{ heading_tag }}>
+        {%- endif -%}
+        {%- if section.settings.text != blank -%}
+          {%- assign reveal_order = reveal_order | plus: 1 -%}
+          <div class="story-text" data-reveal="rise" style="--reveal-order: {{ reveal_order }};">
+            {{- section.settings.text -}}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <ol class="story-timeline__list" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign stop_label = block.settings.label | strip
+            assign stop_title = block.settings.title | strip
+            assign stop_text = block.settings.text | strip
+            assign stop_order = reveal_order | plus: forloop.index
+          -%}
+          <li
+            class="story-stop{% if stop_label != blank %} story-stop--labelled{% endif %}"
+            data-reveal="rise"
+            style="--reveal-order: {{ stop_order }};"
+            {{ block.shopify_attributes }}
+          >
+            <span class="story-stop__mark" aria-hidden="true">
+              <span class="story-stop__dot"></span>
+              {%- unless forloop.last -%}
+                <span class="story-stop__line" data-reveal="unroll" style="--reveal-order: {{ stop_order | plus: 1 }};"></span>
+              {%- endunless -%}
+            </span>
+            {%- if stop_label != blank -%}
+              <p class="story-eyebrow story-stop__label">{{ stop_label | escape }}</p>
+            {%- elsif any_label -%}
+              <p class="story-eyebrow story-stop__label story-stop__label--blank" aria-hidden="true">&nbsp;</p>
+            {%- endif -%}
+            {%- if stop_title != blank -%}
+              <h3 class="story-stop__title">{{ stop_title | escape }}</h3>
+            {%- endif -%}
+            {%- if stop_text != blank -%}
+              <p class="story-stop__text">{{ stop_text | escape | newline_to_br }}</p>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ol>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Story: Timeline",
+  "tag": "section",
+  "class": "story-timeline-section",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Add a Stop block for each step of the journey. Up to six sit side by side on desktop; phones list them one under another."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Small label above the heading",
+      "info": "Optional. Shown in small capitals."
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Optional. Each new line starts a new line on the page."
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text above the stops",
+      "info": "Optional."
+    },
+    {
+      "type": "select",
+      "id": "text_font",
+      "label": "Text font",
+      "options": [
+        {
+          "value": "body",
+          "label": "Body font (Jost)"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font (Cormorant)"
+        }
+      ],
+      "default": "heading",
+      "info": "For the text above and under the stops. The heading font is smaller on its body: set its text sizes about 4px larger."
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Heading and text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "text_align_mobile",
+      "label": "Heading and text alignment on phones",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "stop_align",
+      "label": "Stops on desktop",
+      "options": [
+        {
+          "value": "left",
+          "label": "Words start under each dot"
+        },
+        {
+          "value": "center",
+          "label": "Words centred under each dot"
+        }
+      ],
+      "default": "left",
+      "info": "Phones always list the stops down the left."
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "checkbox",
+      "id": "motion",
+      "label": "Animate on scroll",
+      "default": true,
+      "info": "The stops rise into place one after another and the line draws itself between them. Off for visitors who ask their device for less motion, and in the theme editor."
+    },
+    {
+      "type": "header",
+      "content": "Colours"
+    },
+    {
+      "type": "select",
+      "id": "palette",
+      "label": "Colour set",
+      "options": [
+        {
+          "value": "light",
+          "label": "Off-white"
+        },
+        {
+          "value": "sand",
+          "label": "Sand"
+        },
+        {
+          "value": "green",
+          "label": "Tabi green"
+        },
+        {
+          "value": "custom",
+          "label": "Custom - the colours below"
+        }
+      ],
+      "default": "green",
+      "info": "Off-white, sand and Tabi green (as on the home page) set the background, headings, text, dots and line together, in colours that read on it. Custom uses the colours below."
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#253c30"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading and stop titles",
+      "default": "#e2d1a6"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Dots, line and small labels",
+      "default": "#e2d1a6"
+    },
+    {
+      "type": "header",
+      "content": "Sizes"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 28,
+      "max": 72,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size on desktop",
+      "default": 44
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 22,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Heading size on phones",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Text above the stops on desktop",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "text_size_mobile",
+      "min": 13,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "label": "Text above the stops on phones",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 18,
+      "max": 44,
+      "step": 1,
+      "unit": "px",
+      "label": "Stop title size on desktop",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "title_size_mobile",
+      "min": 16,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "Stop title size on phones",
+      "default": 26
+    },
+    {
+      "type": "range",
+      "id": "stop_text_size",
+      "min": 13,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Stop text size on desktop",
+      "default": 19
+    },
+    {
+      "type": "range",
+      "id": "stop_text_size_mobile",
+      "min": 13,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "label": "Stop text size on phones",
+      "default": 17
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "header_gap",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Space between the heading and the stops on desktop",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Space above",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "label": "Space below",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Space above on phones",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Space below on phones",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Links"
+    },
+    {
+      "type": "text",
+      "id": "anchor",
+      "label": "Name for links to this section",
+      "info": "Optional. A name such as journey lets a button jump here: link it to /pages/founders-note#journey."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stop",
+      "name": "Stop",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Small label",
+          "info": "Optional, above the title: a year, a place or a number."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Home"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "info": "A line or two."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story: Timeline",
+      "blocks": [
+        {
+          "type": "stop",
+          "settings": {
+            "title": "Home",
+            "text": "I learnt to sew on my mother's old Usha foot-pedal machine."
+          }
+        },
+        {
+          "type": "stop",
+          "settings": {
+            "title": "Study",
+            "text": "Textiles and fashion felt like a natural continuation."
+          }
+        },
+        {
+          "type": "stop",
+          "settings": {
+            "title": "International work",
+            "text": "I designed and produced for international clients."
+          }
+        },
+        {
+          "type": "stop",
+          "settings": {
+            "title": "Tabi",
+            "text": "Tabi is the Japanese word for journey."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

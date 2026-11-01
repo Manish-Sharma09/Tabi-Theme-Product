@@ -7,7 +7,9 @@
 
   On the About page this is "A little more meaning in every thread" with
   its three highlights, and the closing "The journey continues" with its
-  two buttons. Styles in assets/story-sections.css, parts 2, 5 and 9.
+  two buttons. On the Founder's Note it closes the letter with a
+  signature: a sign-off line, a scan of the signature, the name and a
+  role. Styles in assets/story-sections.css, parts 2, 5, 9 and 11.
 {%- endcomment -%}
 
 {{ 'story-sections.css' | asset_url | stylesheet_tag }}
@@ -45,6 +47,28 @@
   endif
 
   assign reveal_order = 0
+
+  assign heading_tag = 'h2'
+  if section.index == 1
+    assign heading_tag = 'h1'
+  endif
+
+  assign signoff = section.settings.signoff | strip
+  assign signature_name = section.settings.signature_name | strip
+  assign signature_role = section.settings.signature_role | strip
+  assign has_signature = false
+  if signoff != blank or signature_name != blank or signature_role != blank or section.settings.signature_image != blank
+    assign has_signature = true
+  endif
+
+  case section.settings.button_style_1
+    when 'outline'
+      assign button_1_class = 'story-button story-button--outline'
+    when 'link'
+      assign button_1_class = 'story-link'
+    else
+      assign button_1_class = 'story-button'
+  endcase
 -%}
 
 {%- style -%}
@@ -82,6 +106,9 @@
     --story-icon-size: {{ section.settings.icon_size }};
     --story-hl-size: {{ section.settings.highlight_text_size }};
     --story-hl-size-m: {{ section.settings.highlight_text_size_mobile }};
+    --story-signature-w: {{ section.settings.signature_width }};
+    --story-signature-name: {{ section.settings.signature_name_size }};
+    --story-signature-name-m: {{ section.settings.signature_name_size_mobile }};
     {%- render 'story-palette', palette: section.settings.palette %}
   }
 {%- endstyle -%}
@@ -106,9 +133,9 @@
 
       {%- if heading != blank -%}
         {%- assign reveal_order = reveal_order | plus: 1 -%}
-        <h2 class="story-heading" data-reveal="rise" style="--reveal-order: {{ reveal_order }};">
+        <{{ heading_tag }} class="story-heading" data-reveal="rise" style="--reveal-order: {{ reveal_order }};">
           {{- heading | escape | newline_to_br -}}
-        </h2>
+        </{{ heading_tag }}>
       {%- endif -%}
 
       {%- if section.settings.text != blank -%}
@@ -122,6 +149,41 @@
         </div>
       {%- endif -%}
 
+      {%- if has_signature -%}
+        {%- assign reveal_order = reveal_order | plus: 1 -%}
+        <div class="story-signature" data-reveal="rise" style="--reveal-order: {{ reveal_order }};">
+          {%- if signoff != blank -%}
+            <p class="story-text story-signature__signoff">{{ signoff | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.signature_image != blank -%}
+            {%- liquid
+              assign signature_alt = section.settings.signature_image.alt | strip
+              if signature_alt == blank and signature_name != blank
+                assign signature_alt = 'Signature of ' | append: signature_name
+              endif
+              assign signature_px = section.settings.signature_width | append: 'px'
+            -%}
+            <span class="story-signature__image">
+              {{-
+                section.settings.signature_image
+                | image_url: width: 800
+                | image_tag: widths: '200, 400, 600, 800', sizes: signature_px, loading: 'lazy', alt: signature_alt
+              -}}
+            </span>
+          {%- endif -%}
+          {%- if signature_name != blank or signature_role != blank -%}
+            <p class="story-signature__who">
+              {%- if signature_name != blank -%}
+                <span class="story-signature__name">{{ signature_name | escape }}</span>
+              {%- endif -%}
+              {%- if signature_role != blank -%}
+                <span class="story-signature__role">{{ signature_role | escape }}</span>
+              {%- endif -%}
+            </p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
       {%- if section.settings.show_rule -%}
         {%- assign reveal_order = reveal_order | plus: 1 -%}
         <div class="story-rule-row" aria-hidden="true" data-reveal="fade" style="--reveal-order: {{ reveal_order }};">
@@ -131,7 +193,11 @@
 
       {%- if label_1 != blank or label_2 != blank -%}
         {%- assign reveal_order = reveal_order | plus: 1 -%}
-        <p class="story-actions" data-reveal="rise" style="--reveal-order: {{ reveal_order }};">
+        <p
+          class="story-actions{% if section.settings.button_style_1 == 'link' %} story-actions--link{% endif %}"
+          data-reveal="rise"
+          style="--reveal-order: {{ reveal_order }};"
+        >
           {%- if label_1 != blank -%}
             <a
               {% if section.settings.button_link_1 != blank %}
@@ -139,9 +205,12 @@
               {% else %}
                 role="link" aria-disabled="true"
               {% endif %}
-              class="story-button"
+              class="{{ button_1_class }}"
             >
               {{- label_1 | escape -}}
+              {%- if section.settings.button_style_1 == 'link' -%}
+                <svg viewBox="0 0 16 10" aria-hidden="true" focusable="false"><path d="M0 5h15M11 1l4 4-4 4"/></svg>
+              {%- endif -%}
             </a>
           {%- endif -%}
           {%- if label_2 != blank -%}
@@ -418,12 +487,32 @@
       "type": "text",
       "id": "button_label_1",
       "label": "First button",
-      "info": "Filled. Leave empty for no button."
+      "info": "Leave empty for no button."
     },
     {
       "type": "url",
       "id": "button_link_1",
       "label": "First button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style_1",
+      "label": "First button style",
+      "options": [
+        {
+          "value": "filled",
+          "label": "Filled button"
+        },
+        {
+          "value": "outline",
+          "label": "Outlined button"
+        },
+        {
+          "value": "link",
+          "label": "Text link with an arrow"
+        }
+      ],
+      "default": "filled"
     },
     {
       "type": "text",
@@ -477,6 +566,68 @@
       "unit": "px",
       "label": "Space either side of the button text",
       "default": 28
+    },
+    {
+      "type": "header",
+      "content": "Signature"
+    },
+    {
+      "type": "paragraph",
+      "content": "Closes a letter under the text. Leave all of these empty for no signature."
+    },
+    {
+      "type": "text",
+      "id": "signoff",
+      "label": "Sign-off line",
+      "info": "For example: With warmth,"
+    },
+    {
+      "type": "image_picker",
+      "id": "signature_image",
+      "label": "Signature",
+      "info": "A scan of the signature. A PNG with a see-through background sits best on any colour."
+    },
+    {
+      "type": "range",
+      "id": "signature_width",
+      "min": 80,
+      "max": 360,
+      "step": 10,
+      "unit": "px",
+      "label": "Signature width",
+      "default": 200,
+      "info": "Phones show it a little smaller."
+    },
+    {
+      "type": "text",
+      "id": "signature_name",
+      "label": "Name"
+    },
+    {
+      "type": "text",
+      "id": "signature_role",
+      "label": "Role",
+      "info": "Shown in small capitals under the name."
+    },
+    {
+      "type": "range",
+      "id": "signature_name_size",
+      "min": 18,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Name size on desktop",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "signature_name_size_mobile",
+      "min": 16,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Name size on phones",
+      "default": 26
     },
     {
       "type": "header",
