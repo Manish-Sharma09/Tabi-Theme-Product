@@ -1,0 +1,59 @@
+{%- comment -%}
+  Currency converter: config, the before-paint guard, and the assets.
+  Rendered in <head> by layout/theme.liquid. See assets/tabi-currency.js.
+
+  The list starts with the store's own currency (INR), then the codes from
+  Theme settings > Currency converter. A shopper who picked another currency
+  on an earlier page gets html.tabi-cc-pending before first paint, which hides
+  prices (<lomoney>, the store's money format) and the picker label until the
+  script has converted them - no flash of INR. It lifts after 2.5s regardless.
+{%- endcomment -%}
+{%- if settings.currency_converter_enable -%}
+  {%- liquid
+    assign cc_base = cart.currency.iso_code
+    assign cc_codes = cc_base
+    assign cc_raw = settings.currency_converter_list | upcase | replace: ' ', '' | split: ','
+    for cc_code in cc_raw
+      if cc_code.size == 3 and cc_code != cc_base
+        assign cc_codes = cc_codes | append: ',' | append: cc_code
+      endif
+    endfor
+    assign cc_list = cc_codes | split: ',' | uniq
+    assign cc_notice_bg = settings.currency_converter_notice_bg | default: '#000000'
+    assign cc_notice_text = settings.currency_converter_notice_text | default: '#ffffff'
+  -%}
+  <script>
+    window.tabiCurrency = {
+      base: {{ cc_base | json }},
+      baseSymbol: {{ cart.currency.symbol | json }},
+      list: {{ cc_list | json }},
+      decimals: {{ settings.currency_converter_decimals | json }},
+      showNotice: {{ settings.currency_converter_notice_show | json }},
+      notice: {{ settings.currency_converter_notice | json }},
+      noticeSeconds: {{ settings.currency_converter_notice_seconds | json }},
+      closeLabel: {{ 'accessibility.close' | t | json }}
+    };
+    (function () {
+      try {
+        var saved = localStorage.getItem('tabi-currency');
+        if (saved && saved !== window.tabiCurrency.base && window.tabiCurrency.list.indexOf(saved) > 0) {
+          var root = document.documentElement;
+          root.classList.add('tabi-cc-pending');
+          setTimeout(function () { root.classList.remove('tabi-cc-pending'); }, 2500);
+        }
+      } catch (error) {}
+    })();
+  </script>
+  <style>
+    html.tabi-cc-pending lomoney,
+    html.tabi-cc-pending [data-tabi-currency-label] {
+      visibility: hidden;
+    }
+    :root {
+      --tabi-cc-notice-bg: {{ cc_notice_bg | color_modify: 'alpha', 0.78 }};
+      --tabi-cc-notice-text: {{ cc_notice_text }};
+    }
+  </style>
+  {{ 'tabi-currency.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'tabi-currency.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}

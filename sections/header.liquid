@@ -422,7 +422,39 @@
       <div class="tabi-header__icons">
         {% render 'header-search', input_id: 'Search-In-Modal-Desktop', tabi_icons: true, tabi_label: section.settings.show_search_label %}
 
-        {%- if section.settings.show_country_selector and localization.available_countries.size > 1 -%}
+        {%- if section.settings.show_country_selector and settings.currency_converter_enable -%}
+          {%- comment -%}
+            Currency converter (Theme settings > Currency converter): a short
+            list of currencies; assets/tabi-currency.js fills it and converts
+            the prices on the page.
+          {%- endcomment -%}
+          <div class="tabi-header__country">
+            <div class="tabi-currency" data-tabi-currency-picker>
+              <button
+                type="button"
+                class="tabi-currency__toggle"
+                aria-expanded="false"
+                aria-controls="TabiCurrencyList-{{ section.id }}"
+                data-tabi-currency-toggle
+              >
+                <span class="visually-hidden">{{ section.settings.drawer_currency_label | escape }}:</span>
+                <span data-tabi-currency-label>
+                  {{- cart.currency.iso_code }}
+                  {{ cart.currency.symbol -}}
+                </span>
+                {{- 'icon-caret.svg' | inline_asset_content -}}
+              </button>
+              <ul
+                class="tabi-currency__list"
+                id="TabiCurrencyList-{{ section.id }}"
+                role="list"
+                data-tabi-currency-panel
+                data-tabi-currency-options
+                hidden
+              ></ul>
+            </div>
+          </div>
+        {%- elsif section.settings.show_country_selector and localization.available_countries.size > 1 -%}
           <div class="tabi-header__country header-localization">
             <localization-form data-prevent-hide>
               {%- form 'localization', id: 'HeaderCountryForm', class: 'localization-form' -%}
@@ -477,8 +509,10 @@
         assign show_account = true
       endif
       assign show_currency = false
-      if section.settings.drawer_show_localization and localization.available_countries.size > 1
-        assign show_currency = true
+      if section.settings.drawer_show_localization
+        if settings.currency_converter_enable or localization.available_countries.size > 1
+          assign show_currency = true
+        endif
       endif
       comment
         Extra links (Track order, Contact) are "Mobile menu link" blocks, not a
@@ -562,7 +596,34 @@
                   </li>
                 {%- endfor -%}
 
-                {%- if show_currency -%}
+                {%- if show_currency and settings.currency_converter_enable -%}
+                  {%- comment -%}
+                    Currency converter: the same + row; tabi-currency.js fills
+                    the list, converts the prices and closes the menu on a pick.
+                  {%- endcomment -%}
+                  <li class="tabi-drawer__currency" data-tabi-currency-picker>
+                    <button
+                      type="button"
+                      class="tabi-drawer__lower-link tabi-drawer__trigger"
+                      aria-expanded="false"
+                      aria-controls="TabiDrawerCurrency-{{ section.id }}"
+                    >
+                      <span>
+                        {{- section.settings.drawer_currency_label | escape }}:
+                        <span data-tabi-currency-label="paren">
+                          {{- cart.currency.iso_code }}
+                          ({{ cart.currency.symbol }})
+                        </span>
+                      </span>
+                      {% render 'tabi-icon', icon: 'plus' %}
+                    </button>
+                    <div class="tabi-drawer__sub" id="TabiDrawerCurrency-{{ section.id }}">
+                      <div class="tabi-drawer__sub-inner">
+                        <ul class="tabi-drawer__countries" role="list" data-tabi-currency-options="drawer"></ul>
+                      </div>
+                    </div>
+                  </li>
+                {%- elsif show_currency -%}
                   <li class="tabi-drawer__currency">
                     {%- comment -%}
                       A plain localization form: each country is a submit button
@@ -1072,7 +1133,7 @@
       "id": "show_country_selector",
       "default": true,
       "label": "Show currency selector",
-      "info": "The currency, e.g. INR ₹, beside the search. Only appears when the store sells to more than one country."
+      "info": "The currency, e.g. INR ₹, beside the search. Its list of currencies and the notice are in Theme settings > Currency converter."
     },
     {
       "type": "checkbox",
@@ -1281,7 +1342,7 @@
       "id": "drawer_show_localization",
       "label": "Show currency selector",
       "default": true,
-      "info": "Only appears when the store sells to more than one country."
+      "info": "The list of currencies and the notice are in Theme settings > Currency converter."
     },
     {
       "type": "text",

@@ -1,0 +1,200 @@
+/*
+  Currency converter: the header's currency dropdown (desktop) and the notice
+  shown after a switch. The mobile menu's list reuses the drawer's country-row
+  styles in tabi-header-v2.css. Behaviour: assets/tabi-currency.js.
+
+  Measured on goodearth.in (1440 wide): a 100px cream list centred under
+  "USD $", 41px rows with hairlines, the current currency in gold; the notice
+  is a 340px box, 70% black, 10px corners, 12/20 white text, 15px padding, a
+  faint rule before the close X, 12px below the header at the right.
+*/
+
+/* ----------------------------------------------------------- header dropdown */
+
+.tabi-currency {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tabi-currency__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: 4.4rem;
+  margin: 0;
+  padding: 0 0.6rem 0 0.8rem;
+  border: 0;
+  background: none;
+  color: var(--tabi-soft, #4c4c4c);
+  font-family: var(--tabi-sans, var(--font-body-family));
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tabi-currency__toggle:hover,
+.tabi-currency__toggle[aria-expanded='true'] {
+  color: var(--tabi-ink, #191919);
+}
+
+.tabi-currency__toggle .icon-caret {
+  flex: none;
+  width: 1rem;
+  height: 0.6rem;
+  transition: transform 0.2s ease;
+}
+
+.tabi-currency__toggle[aria-expanded='true'] .icon-caret {
+  transform: rotate(180deg);
+}
+
+.tabi-currency__toggle:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: -0.4rem;
+  box-shadow: none;
+}
+
+.tabi-currency__list {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  z-index: 5;
+  min-width: 10rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--tabi-cream, #f9f8f5);
+  box-shadow: 0 0.5rem 1.2rem rgb(0 0 0 / 0.1);
+  transform: translateX(-50%);
+}
+
+.tabi-currency__list[hidden] {
+  display: none;
+}
+
+.tabi-currency__list > li + li {
+  border-top: 1px solid color-mix(in srgb, var(--tabi-divider, #d8d8d8) 60%, transparent);
+}
+
+.tabi-currency__option {
+  display: block;
+  width: 100%;
+  height: 4.1rem;
+  margin: 0;
+  padding: 0 1.4rem;
+  border: 0;
+  background: none;
+  color: var(--tabi-ink, #191919);
+  font-family: var(--tabi-sans, var(--font-body-family));
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tabi-currency__option:hover,
+.tabi-currency__option[aria-current='true'] {
+  color: var(--tabi-accent, #9c7d50);
+}
+
+.tabi-currency__option:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: -0.4rem;
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------------- notice */
+
+.tabi-cc-notice {
+  position: fixed;
+  top: 7rem;
+  right: 3rem;
+  z-index: 60;
+  display: flex;
+  align-items: stretch;
+  gap: 1.2rem;
+  width: min(34rem, calc(100vw - 3.2rem));
+  margin: 0;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: var(--tabi-cc-notice-bg, rgb(0 0 0 / 0.78));
+  color: var(--tabi-cc-notice-text, #fff);
+  font-family: var(--font-body-family);
+  font-size: 1.2rem;
+  line-height: 2rem;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-0.8rem);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    visibility 0s linear 0.3s;
+}
+
+.tabi-cc-notice.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.tabi-cc-notice__text {
+  flex: 1;
+  margin: 0;
+  white-space: pre-line;
+}
+
+.tabi-cc-notice__rule {
+  flex: none;
+  width: 1px;
+  background: currentColor;
+  opacity: 0.25;
+}
+
+.tabi-cc-notice__close {
+  flex: none;
+  align-self: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin: 0;
+  padding: 0.5rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tabi-cc-notice__close svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+@media screen and (max-width: 749px) {
+  .tabi-cc-notice {
+    right: 1.6rem;
+    left: 1.6rem;
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabi-cc-notice,
+  .tabi-cc-notice.is-visible,
+  .tabi-currency__toggle .icon-caret {
+    transition: none;
+    transform: none;
+  }
+}

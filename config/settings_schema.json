@@ -1501,5 +1501,83 @@
         "default": "We couldn't open checkout. Please check your connection and try again."
       }
     ]
+  },
+  {
+    "name": "Currency converter",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Shoppers can see prices in another currency, converted from INR at Shopify's daily exchange rate. The cart and Magic Checkout still charge in INR, so the notice tells shoppers that. The picker is in the header and the mobile menu (Header section > Show currency selector)."
+      },
+      {
+        "type": "checkbox",
+        "id": "currency_converter_enable",
+        "label": "Show prices in the shopper's currency",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "currency_converter_list",
+        "label": "Currencies",
+        "default": "USD, GBP, SGD",
+        "info": "Three-letter codes, separated by commas, e.g. USD, GBP, EUR, AED, SGD, AUD, CAD. INR is always first."
+      },
+      {
+        "type": "select",
+        "id": "currency_converter_decimals",
+        "label": "Converted prices",
+        "options": [
+          {
+            "value": "0",
+            "label": "Whole numbers ($13)"
+          },
+          {
+            "value": "2",
+            "label": "With cents ($13.17)"
+          }
+        ],
+        "default": "0"
+      },
+      {
+        "type": "header",
+        "content": "Notice after a change"
+      },
+      {
+        "type": "checkbox",
+        "id": "currency_converter_notice_show",
+        "label": "Show notice",
+        "default": true
+      },
+      {
+        "type": "textarea",
+        "id": "currency_converter_notice",
+        "label": "Notice text",
+        "default": "Prices in [currency] are converted from INR at today's exchange rate and are shown as a guide. You will be charged in INR (₹) at checkout, and your bank may apply its own conversion rate.",
+        "info": "[currency] becomes the chosen currency, e.g. USD."
+      },
+      {
+        "type": "range",
+        "id": "currency_converter_notice_seconds",
+        "label": "Hide notice after",
+        "min": 3,
+        "max": 30,
+        "step": 1,
+        "unit": "s",
+        "default": 10
+      },
+      {
+        "type": "color",
+        "id": "currency_converter_notice_bg",
+        "label": "Notice background",
+        "default": "#000000",
+        "info": "Shown slightly see-through, as on Good Earth."
+      },
+      {
+        "type": "color",
+        "id": "currency_converter_notice_text",
+        "label": "Notice text colour",
+        "default": "#ffffff"
+      }
+    ]
   }
 ]

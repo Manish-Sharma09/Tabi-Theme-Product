@@ -316,7 +316,7 @@
                     >
                       <div class="{% if filter_type == 'horizontal' %}facets__header{% else %}facets__header-vertical{% endif %}">
                         {%- assign max_price_amount = filter.range_max | money | strip_html | escape -%}
-                        <span class="facets__selected">
+                        <span class="facets__selected" data-tabi-currency-skip>
                           {{- 'products.facets.max_price' | t: price: max_price_amount -}}
                         </span>
                         {%- if filter_type != 'vertical' -%}
@@ -689,7 +689,7 @@
                           </button>
 
                           {%- assign max_price_amount = filter.range_max | money | strip_html | escape -%}
-                          <p class="mobile-facets__info">
+                          <p class="mobile-facets__info" data-tabi-currency-skip>
                             {{ 'products.facets.max_price' | t: price: max_price_amount }}
                           </p>
 
