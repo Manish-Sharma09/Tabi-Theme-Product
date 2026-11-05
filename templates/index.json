@@ -159,6 +159,7 @@
         "card_home_6",
         "card_home_7"
       ],
+      "disabled": true,
       "settings": {
         "layout": "carousel",
         "source": "blocks",
