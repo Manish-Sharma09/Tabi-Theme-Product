@@ -519,5 +519,70 @@ src="https://www.facebook.com/tr?id=1206956518215158&ev=PageView&noscript=1"/>
   
 {% render 'razorpay-magic-checkout' %}
 {% render 'magicSidecartScript', email: customer.email, phone: customer.phone %}
+
+
+
+<script>
+(function () {
+  const CART_URL = '/cart';
+
+  function redirectToCart() {
+    if (window.location.pathname !== CART_URL) {
+      window.location.replace(CART_URL);
+    }
+  }
+
+  // Intercept checkout links and buttons
+  document.addEventListener('click', function (event) {
+    const element = event.target.closest(
+      'a, button, input[type="submit"], input[type="button"]'
+    );
+
+    if (!element) return;
+
+    const href = element.getAttribute('href') || '';
+
+    const isCheckoutLink =
+      href.includes('/checkout');
+
+    const isCheckoutButton =
+      element.name === 'checkout' ||
+      element.value === 'checkout' ||
+      element.getAttribute('formaction')?.includes('/checkout') ||
+      element.closest('form')?.querySelector(
+        '[name="checkout"]'
+      );
+
+    if (isCheckoutLink || isCheckoutButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      redirectToCart();
+    }
+  }, true);
+
+  // Intercept checkout form submissions
+  document.addEventListener('submit', function (event) {
+    const form = event.target;
+    const submitter = event.submitter;
+
+    const isCheckout =
+      form.action.includes('/checkout') ||
+      submitter?.name === 'checkout' ||
+      submitter?.value === 'checkout';
+
+    if (isCheckout) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      redirectToCart();
+    }
+  }, true);
+
+})();
+</script>
+
 </body>
 </html>
