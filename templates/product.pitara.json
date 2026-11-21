@@ -385,7 +385,7 @@
     "pdp-band-tabi-way": {
       "type": "pdp-feature-band",
       "settings": {
-        "image": "shopify://shop_images/8101595.webp",
+        "image": "shopify://shop_images/Pitara_Collection.webp",
         "image_position": "right",
         "split": "even",
         "mobile_text_first": false,
