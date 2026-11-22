@@ -71,6 +71,113 @@
         "button_text": "#f9f7f4"
       }
     },
+    "home_cards_women": {
+      "type": "home-cards",
+      "blocks": {
+        "card_women_1": {
+          "type": "card",
+          "settings": {
+            "collection": "bottoms",
+            "image": "shopify://shop_images/DSC_6348.jpg",
+            "caption": "BOTTOMS",
+            "link": ""
+          }
+        },
+        "card_women_2": {
+          "type": "card",
+          "settings": {
+            "collection": "vests-jackets",
+            "image": "shopify://shop_images/DSC_4881.webp",
+            "caption": "Jackets & shrugs",
+            "link": ""
+          }
+        },
+        "card_women_3": {
+          "type": "card",
+          "settings": {
+            "collection": "shirts-tops",
+            "image": "shopify://shop_images/DSC_4043.webp",
+            "caption": "Shirts & tops",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "card_women_1",
+        "card_women_2",
+        "card_women_3"
+      ],
+      "settings": {
+        "layout": "grid",
+        "source": "blocks",
+        "source_collection": "",
+        "product_limit": 8,
+        "show_price": false,
+        "source_collections": [],
+        "columns_desktop": 3,
+        "columns_mobile": "2",
+        "carousel_mobile": "2.5",
+        "mobile_controls": "both",
+        "ratio": "portrait_tall",
+        "fit": "cover",
+        "shape": "rounded",
+        "shape_mobile": "square",
+        "feature_middle": true,
+        "feature_shape": "rounded",
+        "feature_shape_mobile": "arch",
+        "corner_radius": 32,
+        "heading": "Dressed for the Season",
+        "text": "<p>Easy silhouettes in cotton, printed by hand and made in small batches.</p>",
+        "background": "#ffffff",
+        "pattern": false,
+        "pattern_color": "#ffffff",
+        "pattern_opacity": 8,
+        "heading_color": "#253c30",
+        "text_color": "#4d4d4f",
+        "link_color": "#4d4d4f",
+        "link_weight": "400",
+        "motion": true,
+        "heading_size": 50,
+        "padding_top": 40,
+        "padding_bottom": 42,
+        "padding_top_mobile": 32,
+        "padding_bottom_mobile": 32
+      }
+    },
+    "home_band_kids": {
+      "type": "home-band",
+      "settings": {
+        "left_image": "shopify://shop_images/8101381_1_2_cropped.jpg",
+        "left_caption": "Shop girls",
+        "left_link": "shopify://collections/girls-clothing",
+        "right_image": "shopify://shop_images/8101659_5_2_cropped.jpg",
+        "right_caption": "Shop boys",
+        "right_link": "shopify://collections/boys-clothing",
+        "arch": "right",
+        "shape_desktop": "rounded",
+        "shape_mobile": "arch",
+        "corner_radius": 32,
+        "shade": 30,
+        "heading": "Little Wonders",
+        "text": "<p>Soft cottons and hand block prints, made for climbing, twirling and growing into.</p>",
+        "link_label": "Explore kids",
+        "link": "shopify://collections/kids",
+        "link_weight": "400",
+        "background": "#253c30",
+        "pattern": true,
+        "pattern_color": "#ffffff",
+        "pattern_opacity": 6,
+        "heading_color": "#e2d1a6",
+        "text_color": "#ffffff",
+        "link_color": "#ffffff",
+        "motion": true,
+        "heading_size": 50,
+        "padding_top": 26,
+        "padding_bottom": 38,
+        "padding_top_mobile": 32,
+        "padding_bottom_mobile": 32
+      }
+    },
     "home_feature_gift": {
       "type": "home-feature",
       "settings": {
@@ -196,113 +303,6 @@
         "padding_bottom_mobile": 8
       }
     },
-    "home_band_kids": {
-      "type": "home-band",
-      "settings": {
-        "left_image": "shopify://shop_images/8101381_1_2_cropped.jpg",
-        "left_caption": "Shop girls",
-        "left_link": "shopify://collections/girls-clothing",
-        "right_image": "shopify://shop_images/8101659_5_2_cropped.jpg",
-        "right_caption": "Shop boys",
-        "right_link": "shopify://collections/boys-clothing",
-        "arch": "right",
-        "shape_desktop": "rounded",
-        "shape_mobile": "arch",
-        "corner_radius": 32,
-        "shade": 30,
-        "heading": "Little Wonders",
-        "text": "<p>Soft cottons and hand block prints, made for climbing, twirling and growing into.</p>",
-        "link_label": "Explore kids",
-        "link": "shopify://collections/kids",
-        "link_weight": "400",
-        "background": "#253c30",
-        "pattern": true,
-        "pattern_color": "#ffffff",
-        "pattern_opacity": 6,
-        "heading_color": "#e2d1a6",
-        "text_color": "#ffffff",
-        "link_color": "#ffffff",
-        "motion": true,
-        "heading_size": 50,
-        "padding_top": 26,
-        "padding_bottom": 38,
-        "padding_top_mobile": 32,
-        "padding_bottom_mobile": 32
-      }
-    },
-    "home_cards_women": {
-      "type": "home-cards",
-      "blocks": {
-        "card_women_1": {
-          "type": "card",
-          "settings": {
-            "collection": "bottoms",
-            "image": "shopify://shop_images/DSC_6348.jpg",
-            "caption": "BOTTOMS",
-            "link": ""
-          }
-        },
-        "card_women_2": {
-          "type": "card",
-          "settings": {
-            "collection": "vests-jackets",
-            "image": "shopify://shop_images/DSC_4881.webp",
-            "caption": "Jackets & shrugs",
-            "link": ""
-          }
-        },
-        "card_women_3": {
-          "type": "card",
-          "settings": {
-            "collection": "shirts-tops",
-            "image": "shopify://shop_images/DSC_4043.webp",
-            "caption": "Shirts & tops",
-            "link": ""
-          }
-        }
-      },
-      "block_order": [
-        "card_women_1",
-        "card_women_2",
-        "card_women_3"
-      ],
-      "settings": {
-        "layout": "grid",
-        "source": "blocks",
-        "source_collection": "",
-        "product_limit": 8,
-        "show_price": false,
-        "source_collections": [],
-        "columns_desktop": 3,
-        "columns_mobile": "2",
-        "carousel_mobile": "2.5",
-        "mobile_controls": "both",
-        "ratio": "portrait_tall",
-        "fit": "cover",
-        "shape": "rounded",
-        "shape_mobile": "square",
-        "feature_middle": true,
-        "feature_shape": "rounded",
-        "feature_shape_mobile": "arch",
-        "corner_radius": 32,
-        "heading": "Dressed for the Season",
-        "text": "<p>Easy silhouettes in cotton, printed by hand and made in small batches.</p>",
-        "background": "#ffffff",
-        "pattern": false,
-        "pattern_color": "#ffffff",
-        "pattern_opacity": 8,
-        "heading_color": "#253c30",
-        "text_color": "#4d4d4f",
-        "link_color": "#4d4d4f",
-        "link_weight": "400",
-        "motion": true,
-        "heading_size": 50,
-        "padding_top": 40,
-        "padding_bottom": 42,
-        "padding_top_mobile": 32,
-        "padding_bottom_mobile": 32
-      }
-    },
     "home_cards_joys": {
       "type": "home-cards",
       "blocks": {
@@ -414,7 +414,7 @@
         "heading_size": 50,
         "padding_top": 14,
         "padding_bottom": 78,
-        "padding_top_mobile": 10,
+        "padding_top_mobile": 12,
         "padding_bottom_mobile": 58
       }
     },
