@@ -159,7 +159,6 @@
         "card_home_6",
         "card_home_7"
       ],
-      "disabled": true,
       "settings": {
         "layout": "carousel",
         "source": "blocks",
@@ -1106,10 +1105,10 @@
   },
   "order": [
     "home_hero",
+    "home_cards_women",
+    "home_band_kids",
     "home_feature_gift",
     "home_cards_home",
-    "home_band_kids",
-    "home_cards_women",
     "home_cards_joys",
     "home_spotlight_story",
     "slideshow_dorec_z7XCH3",
