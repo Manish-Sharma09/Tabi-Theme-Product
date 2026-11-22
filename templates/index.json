@@ -320,7 +320,7 @@
           "type": "card",
           "settings": {
             "collection": "babies-collection",
-            "image": "shopify://shop_images/Kalaa_cotton_set.webp",
+            "image": "{{ block.settings.collection.image }}",
             "caption": "Babies",
             "link": ""
           }
