@@ -311,7 +311,7 @@
           "type": "card",
           "settings": {
             "collection": "christmas-gifting",
-            "image": "shopify://shop_images/8105494.jpg",
+            "image": "{{ block.settings.collection.image }}",
             "caption": "Charms",
             "link": ""
           }
