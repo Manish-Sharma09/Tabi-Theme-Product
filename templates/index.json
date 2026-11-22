@@ -159,6 +159,7 @@
         "card_home_6",
         "card_home_7"
       ],
+      "disabled": true,
       "settings": {
         "layout": "carousel",
         "source": "blocks",
@@ -309,9 +310,9 @@
         "card_joys_1": {
           "type": "card",
           "settings": {
-            "collection": "peetal",
+            "collection": "christmas-gifting",
             "image": "shopify://shop_images/8105494.jpg",
-            "caption": "Peetal brass",
+            "caption": "Charms",
             "link": ""
           }
         },
