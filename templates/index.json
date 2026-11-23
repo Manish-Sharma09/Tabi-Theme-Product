@@ -25,19 +25,6 @@
             "overlay_opacity": 15
           }
         },
-        "slide_craft": {
-          "type": "slide",
-          "settings": {
-            "image": "shopify://shop_images/DSC_6545.webp",
-            "image_mobile": "shopify://shop_images/DSC_8077.webp",
-            "video_link": "",
-            "heading": "",
-            "link_label": "KIDS",
-            "link": "shopify://collections/kids",
-            "whole_slide_link": true,
-            "overlay_opacity": 20
-          }
-        },
         "slide_batches": {
           "type": "slide",
           "settings": {
@@ -50,12 +37,25 @@
             "whole_slide_link": true,
             "overlay_opacity": 15
           }
+        },
+        "slide_craft": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/DSC_6545.webp",
+            "image_mobile": "shopify://shop_images/DSC_8077.webp",
+            "video_link": "",
+            "heading": "",
+            "link_label": "KIDS",
+            "link": "shopify://collections/kids",
+            "whole_slide_link": true,
+            "overlay_opacity": 20
+          }
         }
       },
       "block_order": [
         "slide_story",
-        "slide_craft",
-        "slide_batches"
+        "slide_batches",
+        "slide_craft"
       ],
       "settings": {
         "label": "Featured stories",
