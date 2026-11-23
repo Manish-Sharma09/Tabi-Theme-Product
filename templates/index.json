@@ -15,8 +15,8 @@
         "slide_story": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/DSC_6587_cropped.webp",
-            "image_mobile": "shopify://shop_images/DSC_4005-2_ea22be4f-ffe6-48ba-bcd1-6e35bd9b6bb4.webp",
+            "image": "shopify://shop_images/DSC_6904.webp",
+            "image_mobile": "shopify://shop_images/c.webp",
             "video_link": "",
             "heading": "",
             "link_label": "SHOP NEW ARRIVALS",
@@ -29,7 +29,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/Final_Website_Banner.jpg",
-            "image_mobile": "shopify://shop_images/Ira.jpg",
+            "image_mobile": "shopify://shop_images/DSC_8077.webp",
             "video_link": "",
             "heading": "",
             "link_label": "KIDS",
@@ -147,10 +147,10 @@
     "home_band_kids": {
       "type": "home-band",
       "settings": {
-        "left_image": "shopify://shop_images/8101381_1_2_cropped.jpg",
+        "left_image": "shopify://shop_images/DSC_6461.webp",
         "left_caption": "Shop girls",
         "left_link": "shopify://collections/girls-clothing",
-        "right_image": "shopify://shop_images/8101659_5_2_cropped.jpg",
+        "right_image": "shopify://shop_images/DSC_6531_1.webp",
         "right_caption": "Shop boys",
         "right_link": "shopify://collections/boys-clothing",
         "arch": "right",
