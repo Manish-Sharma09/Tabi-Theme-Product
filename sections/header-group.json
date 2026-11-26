@@ -83,6 +83,7 @@
         },
         "message_aMTDRU": {
           "type": "message",
+          "disabled": true,
           "settings": {
             "text": "Please Allow a Little Extra Time for Black Friday Order Deliveries",
             "link_label": "",
