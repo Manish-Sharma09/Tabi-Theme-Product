@@ -22,7 +22,7 @@
             "heading": "",
             "link_label": "",
             "link": "shopify://collections/new-arrivals",
-            "whole_slide_link": true,
+            "whole_slide_link": false,
             "overlay_opacity": 15
           }
         },
