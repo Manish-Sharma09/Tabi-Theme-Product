@@ -60,13 +60,30 @@
         "message_first10": {
           "type": "message",
           "settings": {
-            "text": "New here? Get 10% off with code FIRST10",
-            "link_label": "Shop Now",
+            "text": "Our Black Friday Sale is Now Live",
+            "link_label": "",
             "link": "shopify://collections/all"
+          }
+        },
+        "message_C47bqf": {
+          "type": "message",
+          "settings": {
+            "text": "Flat 20% Off on Orders Above Rs 5000",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "message_aMTDRU": {
+          "type": "message",
+          "settings": {
+            "text": "Please Allow a Little Extra Time for Black Friday Order Deliveries",
+            "link_label": "",
+            "link": ""
           }
         },
         "message_handcrafted": {
           "type": "message",
+          "disabled": true,
           "settings": {
             "text": "Sustainable. Natural. Handcrafted.",
             "link_label": "Explore Now",
@@ -76,9 +93,10 @@
       },
       "block_order": [
         "message_first10",
+        "message_C47bqf",
+        "message_aMTDRU",
         "message_handcrafted"
       ],
-      "disabled": true,
       "settings": {
         "autoplay": true,
         "speed": 5,
@@ -124,6 +142,9 @@
         "dropdown_link_spacing": 13,
         "dropdown_large_links": "Apparel",
         "dropdown_featured_label": "Featured",
+        "dropdown_featured_style": "list",
+        "dropdown_align": "center",
+        "dropdown_space_below": 32,
         "show_nav_arrows": false,
         "dropdown_divider": true,
         "menu_images_limit": 4,
