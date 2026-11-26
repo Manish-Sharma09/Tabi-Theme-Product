@@ -65,6 +65,14 @@
             "link": "shopify://collections/all"
           }
         },
+        "message_mTHNAD": {
+          "type": "message",
+          "settings": {
+            "text": "26th To 29th Nov Or Until Stocks Last",
+            "link_label": "",
+            "link": ""
+          }
+        },
         "message_C47bqf": {
           "type": "message",
           "settings": {
@@ -93,6 +101,7 @@
       },
       "block_order": [
         "message_first10",
+        "message_mTHNAD",
         "message_C47bqf",
         "message_aMTDRU",
         "message_handcrafted"
