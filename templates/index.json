@@ -12,20 +12,6 @@
     "home_hero": {
       "type": "home-hero",
       "blocks": {
-        "slide_z3eVWG": {
-          "type": "slide",
-          "name": "Kids BF",
-          "settings": {
-            "image": "shopify://shop_images/Banner.webp",
-            "image_mobile": "shopify://shop_images/2_da61135b-3078-4896-97a4-9624bd437cb2.webp",
-            "video_link": "",
-            "heading": "",
-            "link_label": "",
-            "link": "shopify://collections/kids",
-            "whole_slide_link": true,
-            "overlay_opacity": 15
-          }
-        },
         "slide_gPTijh": {
           "type": "slide",
           "name": "Girls BF",
@@ -50,6 +36,20 @@
             "heading": "",
             "link_label": "",
             "link": "shopify://collections/womens-clothing",
+            "whole_slide_link": true,
+            "overlay_opacity": 15
+          }
+        },
+        "slide_z3eVWG": {
+          "type": "slide",
+          "name": "Kids BF",
+          "settings": {
+            "image": "shopify://shop_images/Banner.webp",
+            "image_mobile": "shopify://shop_images/2_da61135b-3078-4896-97a4-9624bd437cb2.webp",
+            "video_link": "",
+            "heading": "",
+            "link_label": "",
+            "link": "shopify://collections/kids",
             "whole_slide_link": true,
             "overlay_opacity": 15
           }
@@ -98,9 +98,9 @@
         }
       },
       "block_order": [
-        "slide_z3eVWG",
         "slide_gPTijh",
         "slide_mEHCRb",
+        "slide_z3eVWG",
         "slide_story",
         "slide_batches",
         "slide_craft"
