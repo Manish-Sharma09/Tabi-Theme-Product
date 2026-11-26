@@ -12,8 +12,51 @@
     "home_hero": {
       "type": "home-hero",
       "blocks": {
+        "slide_z3eVWG": {
+          "type": "slide",
+          "name": "Kids BF",
+          "settings": {
+            "image": "shopify://shop_images/Banner.webp",
+            "image_mobile": "shopify://shop_images/2_da61135b-3078-4896-97a4-9624bd437cb2.webp",
+            "video_link": "",
+            "heading": "",
+            "link_label": "",
+            "link": "shopify://collections/kids",
+            "whole_slide_link": true,
+            "overlay_opacity": 15
+          }
+        },
+        "slide_gPTijh": {
+          "type": "slide",
+          "name": "Girls BF",
+          "settings": {
+            "image": "shopify://shop_images/Website_Banner_2.webp",
+            "image_mobile": "shopify://shop_images/1.webp",
+            "video_link": "",
+            "heading": "",
+            "link_label": "",
+            "link": "shopify://collections/girls-clothing",
+            "whole_slide_link": true,
+            "overlay_opacity": 15
+          }
+        },
+        "slide_mEHCRb": {
+          "type": "slide",
+          "name": "Women BF",
+          "settings": {
+            "image": "shopify://shop_images/Website_Banner.webp",
+            "image_mobile": "shopify://shop_images/3.webp",
+            "video_link": "",
+            "heading": "",
+            "link_label": "",
+            "link": "shopify://collections/womens-clothing",
+            "whole_slide_link": true,
+            "overlay_opacity": 15
+          }
+        },
         "slide_story": {
           "type": "slide",
+          "disabled": true,
           "settings": {
             "image": "shopify://shop_images/DSC_6904.webp",
             "image_mobile": "shopify://shop_images/c.webp",
@@ -27,6 +70,7 @@
         },
         "slide_batches": {
           "type": "slide",
+          "disabled": true,
           "settings": {
             "image": "shopify://shop_images/DSC_4005-2.webp",
             "image_mobile": "shopify://shop_images/DSC_4881.webp",
@@ -40,6 +84,7 @@
         },
         "slide_craft": {
           "type": "slide",
+          "disabled": true,
           "settings": {
             "image": "shopify://shop_images/DSC_6545.webp",
             "image_mobile": "shopify://shop_images/DSC_8077.webp",
@@ -53,6 +98,9 @@
         }
       },
       "block_order": [
+        "slide_z3eVWG",
+        "slide_gPTijh",
+        "slide_mEHCRb",
         "slide_story",
         "slide_batches",
         "slide_craft"
