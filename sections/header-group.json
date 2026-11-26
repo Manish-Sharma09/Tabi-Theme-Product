@@ -60,7 +60,7 @@
         "message_first10": {
           "type": "message",
           "settings": {
-            "text": "Our Black Friday Sale is Now Live",
+            "text": "Black Friday Sale is Now Live",
             "link_label": "",
             "link": "shopify://collections/all"
           }
@@ -76,7 +76,7 @@
         "message_C47bqf": {
           "type": "message",
           "settings": {
-            "text": "Flat 20% Off On Orders Above Rs 2,999",
+            "text": "Flat 20% Off On All Prepaid Orders",
             "link_label": "",
             "link": ""
           }
