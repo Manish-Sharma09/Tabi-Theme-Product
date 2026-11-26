@@ -204,24 +204,33 @@
 
         <span class="home-hero__overlay" aria-hidden="true"></span>
 
+        {%- comment -%}
+          Whole-slide link: its own element spanning the slide, not a
+          pseudo-element of the button. The button's box moves with "Lower
+          third" and its rise animation, and either one shrank a stretched
+          ::after down to a strip or to the button itself. With a button
+          showing, this copy is skipped by keyboards and screen readers,
+          which reach the button; without one, it is the slide's link.
+        {%- endcomment -%}
+        {%- if block.settings.link != blank and block.settings.whole_slide_link -%}
+          {%- if block.settings.link_label != blank -%}
+            <a href="{{ block.settings.link }}" class="home-hero__cover" tabindex="-1" aria-hidden="true"></a>
+          {%- else -%}
+            <a href="{{ block.settings.link }}" class="home-hero__cover">
+              <span class="visually-hidden">{{ cover_name | escape }}</span>
+            </a>
+          {%- endif -%}
+        {%- endif -%}
+
         <div class="home-hero__content">
           {%- if heading != blank -%}
             <h2 class="home-hero__heading">{{ heading | escape | newline_to_br }}</h2>
           {%- endif -%}
 
-          {%- if block.settings.link != blank -%}
-            {%- if block.settings.link_label != blank -%}
-              <a
-                href="{{ block.settings.link }}"
-                class="home-hero__link{% if block.settings.whole_slide_link %} home-hero__link--cover{% endif %}"
-              >
-                <span class="home-hero__link-text">{{ block.settings.link_label | escape }}</span>
-              </a>
-            {%- elsif block.settings.whole_slide_link -%}
-              <a href="{{ block.settings.link }}" class="home-hero__cover">
-                <span class="visually-hidden">{{ cover_name | escape }}</span>
-              </a>
-            {%- endif -%}
+          {%- if block.settings.link != blank and block.settings.link_label != blank -%}
+            <a href="{{ block.settings.link }}" class="home-hero__link">
+              <span class="home-hero__link-text">{{ block.settings.link_label | escape }}</span>
+            </a>
           {%- endif -%}
         </div>
       </div>

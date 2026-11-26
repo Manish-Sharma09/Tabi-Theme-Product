@@ -197,9 +197,8 @@
   text-shadow: 0 0.1rem 2.4rem rgb(0 0 0 / 0.22);
 }
 
-/* The link itself is left unpositioned so its ::after (below) can stretch over
-   the whole slide; the underline lives on the inner span for the same reason,
-   and so its hover animation never replaces the link's entrance animation. */
+/* The underline lives on the inner span so its hover animation never replaces
+   the link's entrance animation. */
 .home-hero__link {
   display: inline-block;
   color: inherit;
@@ -253,18 +252,42 @@
   box-shadow: none;
 }
 
-/* The whole slide is the link's hit area. The arrows, dots and pause button
-   sit above it, so they stay clickable. */
-.home-hero__link--cover::after,
+/* The whole-slide link: a sibling of the copy that spans the slide however the
+   copy is placed. The copy box lets clicks through to it, except on the
+   button, which keeps its own hover. The arrows, dots and pause button sit
+   above the slide, so they stay clickable. */
 .home-hero__cover {
-  content: '';
   position: absolute;
   inset: 0;
   z-index: 0;
+  display: block;
+  -webkit-tap-highlight-color: transparent;
 }
 
+.home-hero__cover:focus-visible {
+  outline: 1px solid var(--hero-ink, #fff);
+  outline-offset: -0.6rem;
+  box-shadow: none;
+}
+
+.home-hero__content,
 .home-hero__heading {
   pointer-events: none;
+}
+
+.home-hero__link {
+  pointer-events: auto;
+}
+
+/* Hovering anywhere on a clickable slide lights the button too, as before. */
+@media (hover: hover) {
+  .home-hero__slide:has(.home-hero__cover:hover) .home-hero__link-text {
+    animation: hero-underline 0.9s var(--hero-ease-out);
+  }
+
+  .home-hero--button .home-hero__slide:has(.home-hero__cover:hover) .home-hero__link {
+    background-color: color-mix(in srgb, var(--hero-button-bg, #253c30) 86%, #000000);
+  }
 }
 
 /* Copy rises in after its photograph has started to arrive, and leaves
