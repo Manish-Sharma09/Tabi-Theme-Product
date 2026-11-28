@@ -60,7 +60,7 @@
         "message_first10": {
           "type": "message",
           "settings": {
-            "text": "Black Friday Sale • Limited Units Per Design",
+            "text": "Black Friday Sale | Limited Units Per Design",
             "link_label": "",
             "link": "shopify://collections/all"
           }
