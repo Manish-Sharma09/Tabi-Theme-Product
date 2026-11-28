@@ -60,7 +60,7 @@
         "message_first10": {
           "type": "message",
           "settings": {
-            "text": "Black Friday Sale Until 29th Nov 11:59 PM",
+            "text": "Black Friday Sale Ending Soon",
             "link_label": "",
             "link": "shopify://collections/all"
           }
@@ -84,7 +84,7 @@
         "message_mTHNAD": {
           "type": "message",
           "settings": {
-            "text": "26th To 29th Nov Or Until Stocks Last",
+            "text": "27-29 Nov 11:59 PM or Until Stocks Last",
             "link_label": "",
             "link": ""
           }
