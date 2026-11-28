@@ -60,7 +60,7 @@
         "message_first10": {
           "type": "message",
           "settings": {
-            "text": "Black Friday Sale Ending Soon",
+            "text": "Black Friday Sale Until 11:59 PM",
             "link_label": "",
             "link": "shopify://collections/all"
           }
