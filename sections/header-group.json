@@ -60,7 +60,7 @@
         "message_first10": {
           "type": "message",
           "settings": {
-            "text": "Black Friday Sale | Limited Pieces Per Design",
+            "text": "Black Friday Sale Is Live Now",
             "link_label": "",
             "link": "shopify://collections/all"
           }
@@ -73,18 +73,18 @@
             "link": ""
           }
         },
-        "message_aMTDRU": {
+        "message_mTHNAD": {
           "type": "message",
           "settings": {
-            "text": "Use Code BF20 At Checkout",
+            "text": "27th to 29th Nov or Until Stocks Last",
             "link_label": "",
             "link": ""
           }
         },
-        "message_mTHNAD": {
+        "message_aMTDRU": {
           "type": "message",
           "settings": {
-            "text": "Valid Until 29th Nov 11:59 PM",
+            "text": "Use Code BF20 At Checkout",
             "link_label": "",
             "link": ""
           }
@@ -102,8 +102,8 @@
       "block_order": [
         "message_first10",
         "message_C47bqf",
-        "message_aMTDRU",
         "message_mTHNAD",
+        "message_aMTDRU",
         "message_handcrafted"
       ],
       "settings": {
